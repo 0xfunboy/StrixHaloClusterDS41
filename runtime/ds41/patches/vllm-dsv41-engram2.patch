@@ -31,6 +31,63 @@ index 71f2186..87400ee 100644
  
          self._local_num_experts += self.num_fused_shared_experts
  
+diff --git a/vllm/models/deepseek_v4_1/amd/vl_model.py b/vllm/models/deepseek_v4_1/amd/vl_model.py
+index 91a13bd..62bd1a5 100644
+--- a/vllm/models/deepseek_v4_1/amd/vl_model.py
++++ b/vllm/models/deepseek_v4_1/amd/vl_model.py
+@@ -17,6 +17,7 @@ Thin multimodal wrapper around the text-only ``DeepseekV41LLMForCausalLM``:
+ """
+ 
+ from collections.abc import Iterable
++import os
+ from typing import Annotated
+ 
+ import torch
+@@ -336,14 +337,36 @@ class DeepseekV41ForCausalLM(nn.Module, SupportsMultiModal, SupportsPP, Supports
+         return self.language_model.get_mtp_target_hidden_states()
+ 
+     def load_weights(self, weights: Iterable[tuple[str, torch.Tensor]]) -> set[str]:
+-        # Map HF names into this wrapper's namespace up front and sort, so
+-        # the "language_model." group reaches the child loader as one
+-        # contiguous block (AutoWeightsLoader delegates per contiguous group,
+-        # and the child's load_weights finalizes fused expert weights, which
+-        # must not run on a partially loaded model).
+-        mapped = sorted(self.hf_to_vllm_mapper.apply(weights), key=lambda x: x[0])
+-        loader = AutoWeightsLoader(self)
+-        loaded_params = loader.load_weights(mapped)
++        mapped = self.hf_to_vllm_mapper.apply(weights)
++
++        if os.environ.get("DS41_STREAM_TEXT_WEIGHTS", "0") == "1":
++            # DS41 serves a language-only GGUF.  The outer mapper re-roots every
++            # supported checkpoint tensor under one `language_model.*` group.
++            # Delegate that group to the child exactly once, as a stream, so
++            # its fused-expert finalization still runs only after the complete
++            # text checkpoint has been consumed.  Do not globally sort here:
++            # sorting exhausts the mmap-backed iterator before the first copy
++            # into final parameters and pins the whole source checkpoint in RAM.
++            def language_weights():
++                for name, data in mapped:
++                    prefix, sep, rest = name.partition(".")
++                    if prefix != "language_model" or not sep or not rest:
++                        raise ValueError(
++                            "DS41 streaming loader only accepts the single "
++                            f"language_model group, got {name!r}"
++                        )
++                    yield rest, data
++
++            loaded_child = self.language_model.load_weights(language_weights())
++            loaded_params = {f"language_model.{name}" for name in loaded_child}
++        else:
++            # Generic VL checkpoints can interleave top-level groups.  Preserve
++            # upstream behavior outside the DS41 language-only runtime: sorting
++            # makes each AutoWeightsLoader group contiguous before delegation.
++            sorted_mapped = sorted(mapped, key=lambda x: x[0])
++            loader = AutoWeightsLoader(self)
++            loaded_params = loader.load_weights(sorted_mapped)
++
+         # The child's load_weights already ran its post-load finalization.
+         self._weights_finalized = True
+         return loaded_params
 diff --git a/vllm/models/deepseek_v4_1/common/disk_engram.py b/vllm/models/deepseek_v4_1/common/disk_engram.py
 new file mode 100644
 index 0000000..0ca6b5e

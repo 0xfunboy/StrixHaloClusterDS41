@@ -1,3 +1,71 @@
+diff --git a/vllm_gguf_plugin/quantization/fused_moe.py b/vllm_gguf_plugin/quantization/fused_moe.py
+index 758429b..088e736 100644
+--- a/vllm_gguf_plugin/quantization/fused_moe.py
++++ b/vllm_gguf_plugin/quantization/fused_moe.py
+@@ -266,6 +266,21 @@ class GGUFMoEMethod(FusedMoEMethodBase):
+ 
+         from . import fused_moe_gguf as fused_moe_gguf_op
+ 
++        # Under TP+expert-parallel vLLM stores complete experts locally and
++        # exposes a global->local map (-1 for experts owned by the peer).
++        # Keep the router's globally-normalized weights unchanged: each rank
++        # computes only its local contribution, remote routes are zero-weighted,
++        # and the normal TP all-reduce reconstructs the exact routed sum.
++        expert_map = layer.expert_map
++        if expert_map is not None:
++            local_ids = expert_map[topk_ids.to(torch.long)].to(topk_ids.dtype)
++            remote = local_ids < 0
++            topk_weights = topk_weights.masked_fill(remote, 0)
++            # GGUF kernels require in-range expert ids. Remote routes still run
++            # a harmless dummy expert with zero weight; this is deliberately a
++            # correctness-first baseline and can be optimized after qualification.
++            topk_ids = local_ids.clamp_min(0)
++
+         return fused_moe_gguf_op(
+             x,
+             layer.w13_weight,
+diff --git a/vllm_gguf_plugin/weight_utils.py b/vllm_gguf_plugin/weight_utils.py
+index 681e06d..4b5a644 100644
+--- a/vllm_gguf_plugin/weight_utils.py
++++ b/vllm_gguf_plugin/weight_utils.py
+@@ -17,6 +17,20 @@ from vllm.transformers_utils.repo_utils import list_filtered_repo_files
+ logger = init_logger(__name__)
+ 
+ 
++def _torch_from_numpy_view(array: np.ndarray) -> torch.Tensor:
++    """Create a CPU tensor view without copying GGUF mmap-backed data.
++
++    GGUF tensors can be tens of GiB.  ``torch.tensor(array)`` eagerly clones
++    those bytes into anonymous RAM before the actual vLLM shard loader runs,
++    doubling the load peak.  The loader consumes each yielded tensor
++    synchronously and copies only its local shard to the target device, so a
++    read-only NumPy-backed view is the correct ownership boundary here.
++    """
++    if not array.flags.c_contiguous:
++        raise ValueError(f"GGUF tensor must be C-contiguous for zero-copy load: {array.shape}")
++    return torch.from_numpy(array)
++
++
+ def download_gguf(
+     repo_id: str,
+     quant_type: str,
+@@ -194,10 +208,14 @@ def gguf_quant_weights_iterator_multi(
+             if weight_type.name == "BF16" and weight.dtype == np.uint8:
+                 weight = weight.view(np.uint16)
+                 if reader.byte_order == "S":
++                    # Byte-swapped GGUF cannot be represented as a native-endian
++                    # zero-copy torch view; this uncommon path deliberately copies.
+                     weight = weight.byteswap()
+-                param = torch.tensor(weight).view(torch.bfloat16)
++                    param = torch.tensor(weight).view(torch.bfloat16)
++                else:
++                    param = _torch_from_numpy_view(weight).view(torch.bfloat16)
+             else:
+-                param = torch.tensor(weight)
++                param = _torch_from_numpy_view(weight)
+             yield name, param
+ 
+ 
 diff --git a/vllm_gguf_plugin/weights_adapter/__init__.py b/vllm_gguf_plugin/weights_adapter/__init__.py
 index be2c1d7..a34d864 100644
 --- a/vllm_gguf_plugin/weights_adapter/__init__.py

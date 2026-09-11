@@ -53,6 +53,7 @@ exec "$VENV/bin/python" -m torch.distributed.run \
   --served-model-name DeepSeek-V4.1-Flash-MixedQ2-Engram2 \
   --host "$host_ip" --port "$api_port" --api-server-count 1 \
   --tensor-parallel-size 2 --pipeline-parallel-size 1 \
+  --enable-expert-parallel \
   --distributed-executor-backend external_launcher --language-model-only \
   --config-format gguf --load-format gguf --quantization gguf --dtype bfloat16 \
   --attention-backend ROCM_FLASHMLA_SPARSE_DSV4 \

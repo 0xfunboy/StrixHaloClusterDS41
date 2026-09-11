@@ -58,3 +58,20 @@ Weights are deliberately outside Git. Canonical paths used by the experiment:
 `fetch-v41-engram2.sh` resumes only incomplete pinned files and verifies the
 published SHA-256 before publication. `partition-ds41-engram2.py` creates
 rank-local SafeTensors with explicit source SHA and row-range metadata.
+
+## Target-only two-node launcher
+
+`runtime/ds41/launch-node.sh` reuses the qualified ROCm 10 / PyTorch 2.13
+runtime read-only and the proven external-launcher topology over `thunderbolt0`.
+It is intentionally target-only: no speculative config is passed. Initial
+qualification is fixed to 4K context, 1024-token prefill chunks, block size 128,
+1 GiB explicit KV cache and eager execution. `DS41_ENGRAM2_DIR` selects the
+rank-local compact affine2 Engram sidecar.
+
+The orchestration helper is `runtime/ds41/pair.sh`; it never stops or starts the
+GLM product. The experiment operator must stop/start GLM through its own
+whole-pair lifecycle separately and record the restore receipt.
+
+`preflight-ds41-config.py` constructs `EngineArgs/VllmConfig` without loading the
+model and fails unless the runtime resolves DeepSeek V4.1, GGUF, TP2, block 128,
+Engram layers 1/14 and no speculative config.

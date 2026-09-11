@@ -28,10 +28,10 @@ index be2c1d7..a34d864 100644
      "GGUFModelFiles",
 diff --git a/vllm_gguf_plugin/weights_adapter/deepseek_v41.py b/vllm_gguf_plugin/weights_adapter/deepseek_v41.py
 new file mode 100644
-index 0000000..5b399fa
+index 0000000..638bddc
 --- /dev/null
 +++ b/vllm_gguf_plugin/weights_adapter/deepseek_v41.py
-@@ -0,0 +1,109 @@
+@@ -0,0 +1,115 @@
 +# SPDX-License-Identifier: Apache-2.0
 +"""GGUF weight adapter for DeepSeek V4.1 text-backbone artifacts.
 +
@@ -117,6 +117,12 @@ index 0000000..5b399fa
 +    @classmethod
 +    def matches(cls, config) -> bool:
 +        return getattr(config, "model_type", None) == "deepseek_v41"
++
++    @classmethod
++    def architecture(cls, config) -> str | None:
++        if not cls.matches(config):
++            return None
++        return "DeepseekV41ForCausalLM"
 +
 +    def build_name_map(self, files: GGUFModelFiles, model_config) -> dict[str, str]:
 +        del model_config

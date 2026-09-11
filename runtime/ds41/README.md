@@ -78,8 +78,20 @@ instead of splitting the Q2_K 2304-wide intermediate at an invalid 1152 boundary
 `DS41_ENGRAM2_DIR` selects the rank-local compact affine2 Engram sidecar.
 
 The orchestration helper is `runtime/ds41/pair.sh`; it never stops or starts the
-GLM product. The experiment operator must stop/start GLM through its own
-whole-pair lifecycle separately and record the restore receipt.
+GLM product. Cluster exclusion is control-plane state, not a lock kept alive by
+a model process: `/home/funboy/.local/state/strix-cluster/compute.lock` only
+serializes lifecycle mutations, while `owner.json` persists owner/state/epoch,
+per-rank nonce and InvocationID. `ACTIVE`, `OFF_VERIFIED` and `UNKNOWN` are
+distinct; SSH/systemd/probe failure is always `UNKNOWN`. A stale or
+`UNRECONCILED` receipt blocks new starts until an explicit `reconcile` proves
+both DS41 units/cgroups OFF.
+
+Each experimental transient rank is bounded locally by systemd
+`RuntimeMaxSec=5400`, `TimeoutStopSec=30` and `KillMode=control-group`; this
+limits an orphan even when NODE01 later loses SSH, but expiry by itself never
+changes the persistent owner receipt to OFF. Stop is peer-first and verified;
+NODE01 is not stopped/released while NODE02 is `UNKNOWN`. The experiment
+operator controls GLM through its separate lifecycle.
 
 `preflight-ds41-config.py` constructs `EngineArgs/VllmConfig` without loading the
 model and fails unless the runtime resolves DeepSeek V4.1, GGUF, TP2+EP, block

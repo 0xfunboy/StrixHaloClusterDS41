@@ -209,6 +209,11 @@ cmd_start() {
   local nonce0 nonce1 logdir log0 log1 p0 p1 inv0 inv1
   nonce0=$(new_nonce); nonce1=$(new_nonce)
   logdir="$ROOT/reports/DS41-Q2-001/attempt004"; mkdir -p "$logdir"
+  peer mkdir -p "$logdir" || {
+    persist_unreconciled 'NODE02 attempt log directory could not be prepared'
+    echo 'NODE02 log directory unavailable; refusing start' >&2
+    exit 5
+  }
   log0="$logdir/rank0.log"; log1="$logdir/rank1.log"
   atomic_owner DS41 STARTING "$epoch" 'rank0 launch reserved; peer not started yet' '' "$nonce0" '' "$nonce1"
 

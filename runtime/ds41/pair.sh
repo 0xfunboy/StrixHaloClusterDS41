@@ -206,9 +206,11 @@ cmd_start() {
   }
   ensure_startable_receipt
 
-  local nonce0 nonce1 logdir log0 log1 p0 p1 inv0 inv1
+  local nonce0 nonce1 logdir log0 log1 p0 p1 inv0 inv1 attempt_name
   nonce0=$(new_nonce); nonce1=$(new_nonce)
-  logdir="$ROOT/reports/DS41-Q2-001/attempt004"; mkdir -p "$logdir"
+  attempt_name=${DS41_ATTEMPT_NAME:-epoch-$epoch}
+  [[ "$attempt_name" =~ ^[a-zA-Z0-9._-]{1,80}$ ]] || { echo 'invalid DS41_ATTEMPT_NAME' >&2; exit 2; }
+  logdir="$ROOT/reports/DS41-Q2-001/$attempt_name"; mkdir -p "$logdir"
   peer mkdir -p "$logdir" || {
     persist_unreconciled 'NODE02 attempt log directory could not be prepared'
     echo 'NODE02 log directory unavailable; refusing start' >&2

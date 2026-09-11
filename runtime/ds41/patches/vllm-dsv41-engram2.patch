@@ -133,6 +133,122 @@ index 91a13bd..62bd1a5 100644
          # The child's load_weights already ran its post-load finalization.
          self._weights_finalized = True
          return loaded_params
+diff --git a/vllm/models/deepseek_v4_1/attention.py b/vllm/models/deepseek_v4_1/attention.py
+index 9bb5352..8d9eb7c 100644
+--- a/vllm/models/deepseek_v4_1/attention.py
++++ b/vllm/models/deepseek_v4_1/attention.py
+@@ -7,6 +7,7 @@ DeepseekV4 MLA Attention Layer
+ from abc import ABC, abstractmethod
+ from collections.abc import Callable
+ from functools import cached_property
++import os
+ from typing import TYPE_CHECKING, Any, ClassVar, cast
+ 
+ import regex as re
+@@ -16,6 +17,7 @@ import torch.nn.functional as F
+ from transformers import DeepseekV2Config, DeepseekV3Config
+ 
+ import vllm.envs as envs
++from vllm import _custom_ops as ops
+ from vllm.compilation.breakable_cudagraph import eager_break_during_capture
+ from vllm.model_executor.layers.fusion.quant_activation import QuantizedActivation
+ from vllm.model_executor.layers.linear import (
+@@ -30,6 +32,7 @@ from vllm.models.deepseek_v4_1.common.ops import (
+     MXFP4_BLOCK_SIZE,
+     fused_indexer_q_rope_quant,
+     indexer_k_norm_rope_store,
++    quantize_and_insert_k_cache,
+ )
+ 
+ if TYPE_CHECKING:
+@@ -72,6 +75,60 @@ from vllm.v1.kv_cache_interface import (
+ logger = init_logger(__name__)
+ 
+ 
++def _ds41_decomposed_q_rope_kv_insert(
++    q: torch.Tensor,
++    kv: torch.Tensor,
++    k_cache: torch.Tensor,
++    slot_mapping: torch.Tensor,
++    positions: torch.Tensor,
++    cos_sin_cache: torch.Tensor,
++    padded_heads: int,
++    block_size: int,
++) -> torch.Tensor:
++    """V4.1 apply_q_norm=False semantics using already-qualified primitives.
++
++    The reused ROCm `_C` predates the fused op's `apply_q_norm` argument and
++    therefore cannot represent the V4.1 call-site's explicit False value.  Q is
++    already normalized before its projection in V4.1, so applying the legacy
++    kernel's second RMSNorm would be numerically wrong.  Preserve the exact new
++    semantics by splitting the epilogue into: zero-pad Q, GPT-J RoPE on the
++    64-dim tail for Q+KV, then the existing UE8M0 paged-cache insert for KV.
++    """
++    if q.dtype != torch.bfloat16 or kv.dtype != torch.bfloat16:
++        raise RuntimeError("DS41 decomposed Q/KV insert requires bf16 Q and KV")
++    if q.shape[-1] != 512 or kv.shape[-1] != 512:
++        raise RuntimeError("DS41 decomposed Q/KV insert requires head_dim=512")
++    if padded_heads < q.shape[1]:
++        raise RuntimeError("DS41 padded head count is smaller than live Q heads")
++
++    q_out = torch.zeros(
++        (q.shape[0], padded_heads, q.shape[-1]),
++        dtype=q.dtype,
++        device=q.device,
++    )
++    q_out[:, : q.shape[1]].copy_(q)
++    kv_rope = kv.clone()
++    ops.rotary_embedding(
++        positions,
++        q_out,
++        kv_rope,
++        512,
++        cos_sin_cache,
++        False,
++        rope_dim_offset=448,
++        inverse=False,
++    )
++    quantize_and_insert_k_cache(
++        kv_rope,
++        k_cache,
++        slot_mapping,
++        block_size=block_size,
++        is_ue8m0=True,
++        use_fnuz=False,
++    )
++    return q_out
++
++
+ def _replace_layer_index(prefix: str, layer_id: int) -> str:
+     """Swap the layer index inside a ``...layers.<idx>...`` prefix."""
+     new_prefix, n = re.subn(r"\.layers\.\d+\.", f".layers.{layer_id}.", prefix)
+@@ -863,11 +920,22 @@ class DeepseekV4Attention(nn.Module, AttentionLayerBase, ABC):
+ 
+         # kv is unchanged; attention reads kv solely via swa_kv_cache.
+         if cache_dtype == torch.uint8:
+-            # fp8_ds_mla UE8M0 paged path. Horizontally fused:
+-            #   Q side: GPT-J RoPE, zero-filling the padding head slots; the
+-            #           kernel allocates and returns the padded q tensor.
+-            #   KV side: GPT-J RoPE + UE8M0 FP8 quant + paged cache insert.
++            # fp8_ds_mla UE8M0 paged path. Horizontally fused in current V4.1,
++            # but the reused production ROCm `_C` predates `apply_q_norm=False`.
++            # Use a DS41-only decomposition with the same numerical semantics;
++            # never fall back to the legacy fused kernel's unconditional Q norm.
+             swa_kv_cache_2d = swa_kv_cache.view(swa_kv_cache.shape[0], -1)
++            if os.environ.get("DS41_DECOMPOSED_QKV_INSERT", "0") == "1":
++                return _ds41_decomposed_q_rope_kv_insert(
++                    q,
++                    kv,
++                    swa_kv_cache_2d,
++                    swa_metadata.slot_mapping,
++                    positions,
++                    cos_sin_cache,
++                    self.padded_heads,
++                    swa_metadata.block_size,
++                )
+             return torch.ops._C.fused_deepseek_v4_qnorm_rope_kv_rope_quant_insert(
+                 q,
+                 kv,
 diff --git a/vllm/models/deepseek_v4_1/common/disk_engram.py b/vllm/models/deepseek_v4_1/common/disk_engram.py
 new file mode 100644
 index 0000000..0ca6b5e

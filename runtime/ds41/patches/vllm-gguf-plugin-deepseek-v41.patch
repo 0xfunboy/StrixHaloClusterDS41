@@ -1,5 +1,5 @@
 diff --git a/vllm_gguf_plugin/loader.py b/vllm_gguf_plugin/loader.py
-index ddea77f..142dbd7 100644
+index ddea77f..611259a 100644
 --- a/vllm_gguf_plugin/loader.py
 +++ b/vllm_gguf_plugin/loader.py
 @@ -3,6 +3,7 @@
@@ -10,42 +10,57 @@ index ddea77f..142dbd7 100644
  from typing import TYPE_CHECKING, NamedTuple, cast
  
  import torch
-@@ -214,6 +215,10 @@ class GGUFModelLoader(BaseModelLoader):
+@@ -204,7 +205,16 @@ class GGUFModelLoader(BaseModelLoader):
+         self, vllm_config: VllmConfig, model_config: ModelConfig, prefix: str = ""
+     ) -> nn.Module:
+         device_config = vllm_config.device_config
++        phase_log = os.environ.get("DS41_LOAD_PHASE_LOG", "0") == "1"
++        prepare_started = time.monotonic()
++        if phase_log:
++            print("DS41_LOAD phase=prepare_adapter begin", flush=True)
+         adapter, plan = self._prepare_adapter(model_config)
++        if phase_log:
++            print(
++                f"DS41_LOAD phase=prepare_adapter end elapsed_s={time.monotonic() - prepare_started:.3f}",
++                flush=True,
++            )
+         logger.debug("GGUF unquantized modules: %s", plan.unquantized_modules)
+         vllm_config.quant_config = cast(GGUFConfig, vllm_config.quant_config)
+         vllm_config.quant_config.unquantized_modules.extend(plan.unquantized_modules)
+@@ -214,6 +224,9 @@ class GGUFModelLoader(BaseModelLoader):
          )
  
          target_device = torch.device(device_config.device)
-+        phase_log = os.environ.get("DS41_LOAD_PHASE_LOG", "0") == "1"
 +        t0 = time.monotonic()
 +        if phase_log:
-+            logger.info("DS41_LOAD phase=initialize_model begin")
++            print("DS41_LOAD phase=initialize_model begin", flush=True)
          with set_default_torch_dtype(model_config.dtype):
              with target_device:
                  model = initialize_model(
-@@ -226,8 +231,26 @@ class GGUFModelLoader(BaseModelLoader):
+@@ -226,8 +239,25 @@ class GGUFModelLoader(BaseModelLoader):
                      vllm_config.quant_config,
                      prefix=prefix,
                  )
 +            if phase_log:
-+                logger.info(
-+                    "DS41_LOAD phase=initialize_model end elapsed_s=%.3f; phase=load_weights begin",
-+                    time.monotonic() - t0,
++                print(
++                    f"DS41_LOAD phase=initialize_model end elapsed_s={time.monotonic() - t0:.3f}; phase=load_weights begin",
++                    flush=True,
 +                )
 +            t1 = time.monotonic()
              model.load_weights(
                  self._iter_weights(adapter, plan, model_config),
              )
 +            if phase_log:
-+                logger.info(
-+                    "DS41_LOAD phase=load_weights end elapsed_s=%.3f; phase=process_weights begin",
-+                    time.monotonic() - t1,
++                print(
++                    f"DS41_LOAD phase=load_weights end elapsed_s={time.monotonic() - t1:.3f}; phase=process_weights begin",
++                    flush=True,
 +                )
 +            t2 = time.monotonic()
              process_weights_after_loading(model, model_config, target_device)
 +            if phase_log:
-+                logger.info(
-+                    "DS41_LOAD phase=process_weights end elapsed_s=%.3f total_s=%.3f",
-+                    time.monotonic() - t2,
-+                    time.monotonic() - t0,
++                print(
++                    f"DS41_LOAD phase=process_weights end elapsed_s={time.monotonic() - t2:.3f} total_s={time.monotonic() - t0:.3f}",
++                    flush=True,
 +                )
          return model
 diff --git a/vllm_gguf_plugin/quantization/fused_moe.py b/vllm_gguf_plugin/quantization/fused_moe.py
@@ -75,10 +90,18 @@ index 758429b..088e736 100644
              x,
              layer.w13_weight,
 diff --git a/vllm_gguf_plugin/weight_utils.py b/vllm_gguf_plugin/weight_utils.py
-index 681e06d..4b5a644 100644
+index 681e06d..231eadb 100644
 --- a/vllm_gguf_plugin/weight_utils.py
 +++ b/vllm_gguf_plugin/weight_utils.py
-@@ -17,6 +17,20 @@ from vllm.transformers_utils.repo_utils import list_filtered_repo_files
+@@ -2,6 +2,7 @@
+ 
+ import glob
+ import itertools
++import mmap
+ import os
+ import re
+ from collections.abc import Generator, Iterable
+@@ -17,6 +18,20 @@ from vllm.transformers_utils.repo_utils import list_filtered_repo_files
  logger = init_logger(__name__)
  
  
@@ -99,23 +122,91 @@ index 681e06d..4b5a644 100644
  def download_gguf(
      repo_id: str,
      quant_type: str,
-@@ -194,10 +208,14 @@ def gguf_quant_weights_iterator_multi(
-             if weight_type.name == "BF16" and weight.dtype == np.uint8:
-                 weight = weight.view(np.uint16)
-                 if reader.byte_order == "S":
-+                    # Byte-swapped GGUF cannot be represented as a native-endian
-+                    # zero-copy torch view; this uncommon path deliberately copies.
-                     weight = weight.byteswap()
+@@ -176,29 +191,63 @@ def gguf_quant_weights_iterator_multi(
+     """
+     _QUANT_TYPES = ("F32", "BF16", "F16")
+ 
++    drop_shard_cache = os.environ.get("DS41_DROP_SHARD_CACHE", "0") == "1"
++    phase_log = os.environ.get("DS41_LOAD_PHASE_LOG", "0") == "1"
++
+     for gguf_file in gguf_files:
++        if phase_log:
++            print(f"DS41_LOAD shard=begin path={gguf_file}", flush=True)
+         reader = gguf.GGUFReader(gguf_file)
+-        for tensor in reader.tensors:
+-            if gguf_to_hf_name_map is not None:
+-                if tensor.name not in gguf_to_hf_name_map:
+-                    continue
+-                name = gguf_to_hf_name_map[tensor.name]
+-            else:
+-                name = tensor.name
+-
+-            weight_type = tensor.tensor_type
+-            if weight_type.name not in _QUANT_TYPES:
+-                yield name.replace("weight", "weight_type"), torch.tensor(weight_type)
+-
+-            weight = tensor.data
+-            if weight_type.name == "BF16" and weight.dtype == np.uint8:
+-                weight = weight.view(np.uint16)
+-                if reader.byte_order == "S":
+-                    weight = weight.byteswap()
 -                param = torch.tensor(weight).view(torch.bfloat16)
-+                    param = torch.tensor(weight).view(torch.bfloat16)
-+                else:
-+                    param = _torch_from_numpy_view(weight).view(torch.bfloat16)
-             else:
+-            else:
 -                param = torch.tensor(weight)
-+                param = _torch_from_numpy_view(weight)
-             yield name, param
+-            yield name, param
++        try:
++            for tensor in reader.tensors:
++                if gguf_to_hf_name_map is not None:
++                    if tensor.name not in gguf_to_hf_name_map:
++                        continue
++                    name = gguf_to_hf_name_map[tensor.name]
++                else:
++                    name = tensor.name
++
++                weight_type = tensor.tensor_type
++                if weight_type.name not in _QUANT_TYPES:
++                    yield name.replace("weight", "weight_type"), torch.tensor(weight_type)
++
++                weight = tensor.data
++                if weight_type.name == "BF16" and weight.dtype == np.uint8:
++                    weight = weight.view(np.uint16)
++                    if reader.byte_order == "S":
++                        # Byte-swapped GGUF cannot be represented as a native-endian
++                        # zero-copy torch view; this uncommon path deliberately copies.
++                        weight = weight.byteswap()
++                        param = torch.tensor(weight).view(torch.bfloat16)
++                    else:
++                        param = _torch_from_numpy_view(weight).view(torch.bfloat16)
++                else:
++                    param = _torch_from_numpy_view(weight)
++                yield name, param
++        finally:
++            # On Strix Halo, GPU/GTT allocations and file-backed GGUF pages use
++            # the same physical UMA.  Once every tensor in this shard has been
++            # consumed by model.load_weights(), retaining its clean mmap pages
++            # can block later device allocations even though the checkpoint is
++            # immutable and fully recoverable from disk.  Drop only this shard's
++            # clean pages; never use global drop_caches/swapoff.
++            if drop_shard_cache:
++                mm = getattr(reader.data, "_mmap", None)
++                if mm is None or not hasattr(mm, "madvise") or not hasattr(mmap, "MADV_DONTNEED"):
++                    raise RuntimeError("DS41 shard cache discard requires mmap MADV_DONTNEED")
++                mm.madvise(mmap.MADV_DONTNEED)
++                if not hasattr(os, "posix_fadvise") or not hasattr(os, "POSIX_FADV_DONTNEED"):
++                    raise RuntimeError("DS41 shard cache discard requires POSIX_FADV_DONTNEED")
++                fd = os.open(gguf_file, os.O_RDONLY)
++                try:
++                    os.posix_fadvise(fd, 0, 0, os.POSIX_FADV_DONTNEED)
++                finally:
++                    os.close(fd)
++            if phase_log:
++                print(
++                    f"DS41_LOAD shard=end path={gguf_file} cache_drop={int(drop_shard_cache)}",
++                    flush=True,
++                )
  
  
+ def split_stacked_experts(
 diff --git a/vllm_gguf_plugin/weights_adapter/__init__.py b/vllm_gguf_plugin/weights_adapter/__init__.py
 index be2c1d7..a34d864 100644
 --- a/vllm_gguf_plugin/weights_adapter/__init__.py

@@ -1,0 +1,15 @@
+# DS41-Q2-001 exact source pins. No package-manager resolution is implied.
+GLM_PRODUCT_BASE=64815ff0677224981e8bbae76169e5956ca5431c
+VLLM_REPO=https://github.com/vllm-project/vllm.git
+VLLM_REV=0bfb653d3b5161660db9ada0d84c2cdd60961de7
+GGUF_PLUGIN_REPO=https://github.com/vllm-project/vllm-gguf-plugin.git
+GGUF_PLUGIN_REV=d4c1f0d082fc7cd4350da56689109a01c1f29d6c
+LLAMA_CPP_REPO=https://github.com/ggml-org/llama.cpp.git
+LLAMA_CPP_REV=cd628010bc3fc0a787d156c969d52a0789451c96
+Q2_REPO=apetersson/DeepSeek-V4.1-Flash-MixedQ2-GGUF
+Q2_REV=af983b61ee7903f414e8152bf1ece8f6ef2a1020
+ENGRAM2_REPO=Vontra/DeepSeek-V4.1-Flash-MLX-2bit-MTP
+ENGRAM2_REV=802f1a00982705d81b79ad1c83aa0ccc0b863ebc
+ROCM_STACK=10.0.0-gfx1151
+PYTORCH=2.13.0+rocm10.0.0
+TRITON=3.8.0+git4cff872c.rocm10.0.0

@@ -1,0 +1,346 @@
+diff --git a/vllm/models/deepseek_v4_1/common/disk_engram.py b/vllm/models/deepseek_v4_1/common/disk_engram.py
+new file mode 100644
+index 0000000..0ca6b5e
+--- /dev/null
++++ b/vllm/models/deepseek_v4_1/common/disk_engram.py
+@@ -0,0 +1,249 @@
++# SPDX-License-Identifier: Apache-2.0
++"""DS41 experimental disk-backed 2-bit Engram provider.
++
++Opt-in only through DS41_ENGRAM2_DIR. The n-gram hash/gating remains upstream
++DeepSeek V4.1 code; only the enormous embedding table and its small q/k/wkv
++sidecar are sourced from the verified MLX affine-2bit artifact.
++"""
++from __future__ import annotations
++
++import os
++from pathlib import Path
++
++import numpy as np
++import torch
++from torch import nn
++
++from vllm.distributed import (
++    get_tensor_model_parallel_rank,
++    get_tensor_model_parallel_world_size,
++)
++from vllm.logger import init_logger
++from vllm.triton_utils import triton
++
++from runtime.ds41.affine_safetensors import AffineRowLRU, SafeTensorMMap
++
++logger = init_logger(__name__)
++
++_LAYER_FILE = {
++    1: "model-00047-of-00048.safetensors",
++    14: "model-00048-of-00048.safetensors",
++}
++
++
++def _sidecar_path(root: str | os.PathLike[str], layer_id: int) -> Path:
++    try:
++        name = _LAYER_FILE[layer_id]
++    except KeyError as exc:
++        raise ValueError(f"no DS41 2-bit Engram sidecar mapping for layer {layer_id}") from exc
++    path = Path(root) / name
++    if not path.is_file():
++        raise FileNotFoundError(f"DS41 Engram sidecar is missing: {path}")
++    return path
++
++
++class DiskAffineEngramEmbedding(nn.Module):
++    """TP head-sharded Engram table with affine2 rows read from mmap/SSD."""
++
++    def __init__(
++        self,
++        num_embeddings: int,
++        dim: int,
++        head_sizes: tuple[int, ...],
++        *,
++        layer_id: int,
++        root: str | os.PathLike[str],
++    ) -> None:
++        super().__init__()
++        tp_size = get_tensor_model_parallel_world_size()
++        tp_rank = get_tensor_model_parallel_rank()
++        if not head_sizes or any(size <= 0 for size in head_sizes):
++            raise ValueError("invalid Engram head sizes")
++        if sum(head_sizes) > num_embeddings:
++            raise ValueError("Engram head rows exceed table size")
++        self.num_embeddings = num_embeddings
++        self.dim = dim
++        self.n_hash_cols = len(head_sizes)
++        self.part_n_hash_cols = triton.cdiv(self.n_hash_cols, tp_size)
++        self.head_start = tp_rank * self.part_n_hash_cols
++        head_end = min(self.head_start + self.part_n_hash_cols, self.n_hash_cols)
++        self.local_heads = max(0, head_end - self.head_start)
++        self.vocab_start_idx = sum(head_sizes[: self.head_start])
++        self.vocab_end_idx = sum(head_sizes[:head_end])
++        self.part_num_embeddings = self.vocab_end_idx - self.vocab_start_idx
++        self.tp_size = tp_size
++        self.tp_rank = tp_rank
++        self.layer_id = layer_id
++        self.path = _sidecar_path(root, layer_id)
++        self.source = SafeTensorMMap(self.path)
++        self.base = f"layers.{layer_id}.engram.embed"
++        entry = self.source.entries[self.base + ".weight"]
++        full_shape = (num_embeddings, dim // 16)
++        compact_shape = (self.part_num_embeddings, dim // 16)
++        if entry.shape == full_shape:
++            self.source_row_base = 0
++        elif entry.shape == compact_shape:
++            self.source_row_base = self.vocab_start_idx
++        else:
++            raise ValueError(
++                f"Engram 2-bit shape mismatch for layer {layer_id}: {entry.shape}; "
++                f"expected full={full_shape} or rank-compact={compact_shape}"
++            )
++        max_rows = int(os.environ.get("DS41_ENGRAM_CACHE_ROWS", "65536"))
++        self.cache = AffineRowLRU(self.source, self.base, max_rows=max_rows)
++        self.register_buffer("_anchor", torch.empty(0), persistent=False)
++        logger.info(
++            "DS41 disk Engram layer=%d tp=%d/%d heads=%d..%d rows=%d..%d "
++            "cache_rows=%d path=%s",
++            layer_id,
++            tp_rank,
++            tp_size,
++            self.head_start,
++            head_end,
++            self.vocab_start_idx,
++            self.vocab_end_idx,
++            max_rows,
++            self.path,
++        )
++
++    def lookup(
++        self, indices: torch.Tensor, out: torch.Tensor, background: bool = False
++    ) -> None:
++        del background
++        if indices.ndim != 2 or indices.shape[1] != self.n_hash_cols:
++            raise ValueError(
++                f"Engram ids shape {tuple(indices.shape)} != [T,{self.n_hash_cols}]"
++            )
++        if out.shape != (indices.shape[0], self.part_n_hash_cols, self.dim):
++            raise ValueError(f"Engram output shape mismatch: {tuple(out.shape)}")
++        out.zero_()
++        if not indices.shape[0] or not self.local_heads:
++            return
++        # Hash ids are computed on GPU; one bounded synchronization per Engram
++        # layer turns only this rank's 12 columns into row ids for SSD lookup.
++        local_ids = (
++            indices[:, self.head_start : self.head_start + self.local_heads]
++            .detach()
++            .to("cpu", non_blocking=False)
++            .numpy()
++            .astype(np.int64, copy=False)
++        )
++        if local_ids.size:
++            lo, hi = int(local_ids.min()), int(local_ids.max())
++            if lo < self.vocab_start_idx or hi >= self.vocab_end_idx:
++                raise RuntimeError(
++                    f"Engram hash ownership violation rank={self.tp_rank}: "
++                    f"ids={lo}..{hi} owned={self.vocab_start_idx}..{self.vocab_end_idx}"
++                )
++        rows = self.cache.lookup(local_ids - self.source_row_base)
++        tensor = torch.from_numpy(rows).to(
++            device=out.device, dtype=torch.bfloat16, non_blocking=False
++        )
++        out[:, : self.local_heads].copy_(tensor)
++
++    def forward(self, indices: torch.Tensor) -> torch.Tensor:
++        out = torch.empty(
++            (indices.shape[0], self.part_n_hash_cols, self.dim),
++            dtype=torch.bfloat16,
++            device=indices.device,
++        )
++        self.lookup(indices, out)
++        return out
++
++    def stats(self) -> dict[str, int | str]:
++        return {
++            "layer": self.layer_id,
++            "rank": self.tp_rank,
++            "hits": self.cache.hits,
++            "misses": self.cache.misses,
++            "rows_read": self.cache.rows_read,
++            "path": str(self.path),
++        }
++
++
++class SidecarBF16Linear(nn.Module):
++    """Replicated BF16 linear materialized once from affine2 sidecar weights."""
++
++    def __init__(
++        self,
++        source: SafeTensorMMap,
++        base: str,
++        in_features: int,
++        out_features: int,
++        *,
++        device: torch.device,
++        chunk_rows: int = 256,
++    ) -> None:
++        super().__init__()
++        entry = source.entries[base + ".weight"]
++        if entry.shape[-1] * 16 != in_features or entry.shape[0] != out_features:
++            raise ValueError(
++                f"sidecar linear shape {entry.shape} incompatible with "
++                f"{out_features}x{in_features}"
++            )
++        self.in_features = in_features
++        self.out_features = out_features
++        self.weight = nn.Parameter(
++            torch.empty(
++                out_features,
++                in_features,
++                dtype=torch.bfloat16,
++                device=device,
++            ),
++            requires_grad=False,
++        )
++        with torch.no_grad():
++            for start, end, rows in (
++                (start, end, rows)
++                for start, end, rows in source.affine2_chunks(base, chunk_rows)
++            ):
++                self.weight[start:end].copy_(
++                    torch.from_numpy(rows).to(device=device, dtype=torch.bfloat16)
++                )
++
++    def forward(self, x: torch.Tensor) -> torch.Tensor:
++        return torch.nn.functional.linear(x, self.weight)
++
++
++def load_disk_engram_sidecar(
++    *,
++    root: str | os.PathLike[str],
++    layer_id: int,
++    num_embeddings: int,
++    dim: int,
++    hc_mult: int,
++    head_sizes: tuple[int, ...],
++    device: torch.device,
++):
++    """Create embedding + q/k + dequantized WKV for one V4.1 Engram layer."""
++    path = _sidecar_path(root, layer_id)
++    source = SafeTensorMMap(path)
++    embedding = DiskAffineEngramEmbedding(
++        num_embeddings,
++        256,
++        head_sizes,
++        layer_id=layer_id,
++        root=root,
++    )
++    prefix = f"layers.{layer_id}.engram"
++    q = torch.from_numpy(source.bf16(prefix + ".q_weight")).to(
++        device=device, dtype=torch.bfloat16
++    )
++    k = torch.from_numpy(source.bf16(prefix + ".k_weight")).to(
++        device=device, dtype=torch.bfloat16
++    )
++    expected_qk = (hc_mult, dim)
++    if tuple(q.shape) != expected_qk or tuple(k.shape) != expected_qk:
++        raise ValueError(
++            f"Engram q/k shape mismatch: q={tuple(q.shape)} k={tuple(k.shape)} "
++            f"expected={expected_qk}"
++        )
++    n_hash_cols = len(head_sizes)
++    wkv = SidecarBF16Linear(
++        source,
++        prefix + ".wkv",
++        n_hash_cols * 256,
++        dim * (hc_mult + 1),
++        device=device,
++    )
++    return source, embedding, q, k, wkv
+diff --git a/vllm/models/deepseek_v4_1/common/engram.py b/vllm/models/deepseek_v4_1/common/engram.py
+index f30c3a5..27d942d 100644
+--- a/vllm/models/deepseek_v4_1/common/engram.py
++++ b/vllm/models/deepseek_v4_1/common/engram.py
+@@ -34,6 +34,7 @@ chunk-by-chunk while an n-gram at position ``p`` needs the token ids at
+   cache for the rest.
+ """
+ 
++import os
+ import weakref
+ 
+ import numpy as np
+@@ -905,31 +906,55 @@ class Engram(nn.Module):
+ 
+         # Named ``embed_tokens`` so the checkpoint's ``engram.embed.weight``
+         # survives the mapper's ``embed.weight`` -> ``embed_tokens.weight``
+-        # suffix rule.
+-        engram_config = get_current_vllm_config().engram_config
+-        self.embed_tokens = ParallelEngramEmbedding(
+-            layout.num_embeddings[layer_hash_index],
+-            layout.head_dim,
+-            tuple(size for order in layout.primes[layer_hash_index] for size in order),
+-            cpu_offload=engram_config.cpu_offload if engram_config else True,
++        # suffix rule. DS41 can instead source the table + q/k/wkv from the
++        # verified affine-2bit sidecar without allocating the 203 GiB FP8 table.
++        disk_root = os.environ.get("DS41_ENGRAM2_DIR")
++        head_sizes = tuple(
++            size for order in layout.primes[layer_hash_index] for size in order
+         )
+         n_hash_cols = (layout.max_ngram_size - 1) * layout.n_heads
+-        self.wkv = ReplicatedLinear(
+-            n_hash_cols * layout.head_dim,
+-            self.dim * (self.hc_mult + 1),
+-            bias=False,
+-            quant_config=quant_config,
+-            return_bias=False,
+-            prefix=f"{prefix}.wkv",
+-        )
+-        self.q_weight = nn.Parameter(
+-            torch.empty(self.hc_mult, self.dim, dtype=torch.bfloat16),
+-            requires_grad=False,
+-        )
+-        self.k_weight = nn.Parameter(
+-            torch.empty(self.hc_mult, self.dim, dtype=torch.bfloat16),
+-            requires_grad=False,
+-        )
++        if disk_root:
++            from .disk_engram import load_disk_engram_sidecar
++
++            layer_id = layout.layer_ids[layer_hash_index]
++            sidecar_source, embed_tokens, q, k, wkv = load_disk_engram_sidecar(
++                root=disk_root,
++                layer_id=layer_id,
++                num_embeddings=layout.num_embeddings[layer_hash_index],
++                dim=self.dim,
++                hc_mult=self.hc_mult,
++                head_sizes=head_sizes,
++                device=torch.accelerator.current_accelerator(),
++            )
++            self._ds41_sidecar_source = sidecar_source
++            self.embed_tokens = embed_tokens
++            self.wkv = wkv
++            self.q_weight = nn.Parameter(q, requires_grad=False)
++            self.k_weight = nn.Parameter(k, requires_grad=False)
++        else:
++            engram_config = get_current_vllm_config().engram_config
++            self.embed_tokens = ParallelEngramEmbedding(
++                layout.num_embeddings[layer_hash_index],
++                layout.head_dim,
++                head_sizes,
++                cpu_offload=engram_config.cpu_offload if engram_config else True,
++            )
++            self.wkv = ReplicatedLinear(
++                n_hash_cols * layout.head_dim,
++                self.dim * (self.hc_mult + 1),
++                bias=False,
++                quant_config=quant_config,
++                return_bias=False,
++                prefix=f"{prefix}.wkv",
++            )
++            self.q_weight = nn.Parameter(
++                torch.empty(self.hc_mult, self.dim, dtype=torch.bfloat16),
++                requires_grad=False,
++            )
++            self.k_weight = nn.Parameter(
++                torch.empty(self.hc_mult, self.dim, dtype=torch.bfloat16),
++                requires_grad=False,
++            )
+ 
+         max_tokens = get_current_vllm_config().scheduler_config.max_num_batched_tokens
+         # Keep lookup results alive across breakable graph segments.

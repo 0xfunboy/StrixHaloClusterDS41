@@ -1,0 +1,143 @@
+diff --git a/vllm_gguf_plugin/weights_adapter/__init__.py b/vllm_gguf_plugin/weights_adapter/__init__.py
+index be2c1d7..a34d864 100644
+--- a/vllm_gguf_plugin/weights_adapter/__init__.py
++++ b/vllm_gguf_plugin/weights_adapter/__init__.py
+@@ -3,6 +3,7 @@
+ 
+ from ..gguf_files import GGUFModelFiles
+ from .base import BaseGGUFWeightsAdapter
++from .deepseek_v41 import DeepseekV41GGUFAdapter
+ from .diffusion import (
+     DiffusionGGUFAdapter,
+     Flux2KleinDiffusionGGUFAdapter,
+@@ -17,6 +18,7 @@ from .qwen3_5 import Qwen35GGUFAdapter, Qwen35MtpGGUFAdapter
+ from .transformers import TransformersGGUFWeightsAdapter
+ 
+ _ADAPTER_REGISTRY: list[type[BaseGGUFWeightsAdapter]] = [
++    DeepseekV41GGUFAdapter,
+     Gemma3GGUFAdapter,
+     Gemma4GGUFAdapter,
+     OLMoEGGUFAdapter,
+@@ -43,6 +45,7 @@ def get_adapter_architecture(config) -> str | None:
+ 
+ __all__ = [
+     "BaseGGUFWeightsAdapter",
++    "DeepseekV41GGUFAdapter",
+     "DiffusionGGUFAdapter",
+     "Flux2KleinDiffusionGGUFAdapter",
+     "GGUFModelFiles",
+diff --git a/vllm_gguf_plugin/weights_adapter/deepseek_v41.py b/vllm_gguf_plugin/weights_adapter/deepseek_v41.py
+new file mode 100644
+index 0000000..5b399fa
+--- /dev/null
++++ b/vllm_gguf_plugin/weights_adapter/deepseek_v41.py
+@@ -0,0 +1,109 @@
++# SPDX-License-Identifier: Apache-2.0
++"""GGUF weight adapter for DeepSeek V4.1 text-backbone artifacts.
++
++The current V4.1 GGUF converter emits compact llama.cpp tensor names while the
++vLLM ROCm model loader consumes the native DeepSeek checkpoint namespace.  Keep
++this translation explicit and fail closed: the quantized artifact intentionally
++omits Engram/MTP, which are supplied by separate DS41 runtime components.
++"""
++
++from __future__ import annotations
++
++import re
++from collections.abc import Iterable
++
++from vllm.logger import init_logger
++
++from ..gguf_files import GGUFModelFiles
++from ..weight_utils import get_gguf_tensor_names, split_stacked_experts
++from .base import BaseGGUFWeightsAdapter, GGUFWeight
++
++logger = init_logger(__name__)
++
++_TOP = {
++    "token_embd": "embed.weight",
++    "output_norm": "norm.weight",
++    "output": "head.weight",
++}
++
++_LAYER = {
++    "attn_kv": "attn.wkv.weight",
++    "attn_kv_a_norm": "attn.kv_norm.weight",
++    "attn_norm": "attn_norm.weight",
++    "attn_output_a": "attn.wo_a.weight",
++    "attn_output_b": "attn.wo_b.weight",
++    "attn_q_a": "attn.wq_a.weight",
++    "attn_q_a_norm": "attn.q_norm.weight",
++    "attn_q_b": "attn.wq_b.weight",
++    "attn_sinks": "attn.attn_sink",
++    "attn_compressor_gate": "attn.compressor.wgate.weight",
++    "attn_compressor_kv": "attn.compressor.wkv.weight",
++    "attn_compressor_norm": "attn.compressor.norm.weight",
++    "indexer.attn_k": "attn.indexer.wk.weight",
++    "indexer.attn_q_b": "attn.indexer.wq_b.weight",
++    "indexer.k_norm": "attn.indexer.k_norm.weight",
++    "indexer.proj": "attn.indexer.weights_proj.weight",
++    "ffn_down_exps": "ffn.experts.0.w2.weight",
++    "ffn_gate_exps": "ffn.experts.0.w1.weight",
++    "ffn_up_exps": "ffn.experts.0.w3.weight",
++    "ffn_down_shexp": "ffn.shared_experts.w2.weight",
++    "ffn_gate_shexp": "ffn.shared_experts.w1.weight",
++    "ffn_up_shexp": "ffn.shared_experts.w3.weight",
++    "ffn_gate_inp": "ffn.gate.weight",
++    "exp_probs_b": "ffn.gate.bias",
++    "exp_probs_b_vl": "ffn.gate.bias_vl",
++    "ffn_norm": "ffn_norm.weight",
++    "hc_attn_base": "hc_attn_base",
++    "hc_attn_fn": "hc_attn_fn",
++    "hc_attn_scale": "hc_attn_scale",
++    "hc_ffn_base": "hc_ffn_base",
++    "hc_ffn_fn": "hc_ffn_fn",
++    "hc_ffn_scale": "hc_ffn_scale",
++}
++
++_BLOCK_RE = re.compile(r"^blk\.(\d+)\.(.+)$")
++
++
++def map_deepseek_v41_gguf_name(name: str) -> str | None:
++    if name in _TOP:
++        return _TOP[name]
++    match = _BLOCK_RE.fullmatch(name)
++    if match is None:
++        return None
++    layer, leaf = match.groups()
++    target = _LAYER.get(leaf)
++    if target is None:
++        return None
++    return f"layers.{layer}.{target}"
++
++
++class DeepseekV41GGUFAdapter(BaseGGUFWeightsAdapter):
++    """Map llama.cpp DeepSeek4/V4.1 GGUF tensors to native V4.1 names."""
++
++    @classmethod
++    def matches(cls, config) -> bool:
++        return getattr(config, "model_type", None) == "deepseek_v41"
++
++    def build_name_map(self, files: GGUFModelFiles, model_config) -> dict[str, str]:
++        del model_config
++        names = sorted(get_gguf_tensor_names(files.backbone))
++        mapped: dict[str, str] = {}
++        unmapped: list[str] = []
++        for name in names:
++            target = map_deepseek_v41_gguf_name(name)
++            if target is None:
++                unmapped.append(name)
++            else:
++                mapped[name] = target
++        if unmapped:
++            raise RuntimeError(
++                f"Failed to map {len(unmapped)} DeepSeek V4.1 GGUF tensors: {unmapped}"
++            )
++        logger.info("Mapped all %d DeepSeek V4.1 GGUF tensors", len(mapped))
++        return mapped
++
++    def transform_weights(
++        self, weights: Iterable[GGUFWeight], model_config
++    ) -> Iterable[GGUFWeight]:
++        del model_config
++        yield from split_stacked_experts(weights)

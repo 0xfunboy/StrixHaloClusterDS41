@@ -22,3 +22,8 @@
 /models/
 api-token
 hosts.yml
+
+# DS41 local generated caches
+.cache/
+__pycache__/
+*.pyc

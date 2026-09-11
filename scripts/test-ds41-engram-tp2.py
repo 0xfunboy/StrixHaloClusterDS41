@@ -9,7 +9,7 @@ from runtime.ds41.affine_safetensors import SafeTensorMMap
 
 ROOT=Path('/home/funboy/models/ds41')
 SRC=ROOT/'engram2-source'; TP=ROOT/'engram2-tp2'
-CFG=Path('/home/funboy/StrixHaloClusterDS41/reports/DS41-Q2-001/sources/vontra-config.json')
+CFG=Path('/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2/config.json')
 LAYER_FILE={1:'model-00047-of-00048.safetensors',14:'model-00048-of-00048.safetensors'}
 spec=importlib.util.spec_from_file_location('partition',Path(__file__).with_name('partition-ds41-engram2.py')); mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
 cfg=json.load(open(CFG))['text_config']; layouts=mod.layouts(cfg); receipt=json.load(open(TP/'partition-receipt.json'))

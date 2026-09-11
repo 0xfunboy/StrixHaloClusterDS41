@@ -42,7 +42,7 @@ def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--layer',type=int,choices=(1,14),required=True); ap.add_argument('--rank',type=int,choices=(0,1),default=0); ap.add_argument('--tokens',type=int,default=1024); a=ap.parse_args()
     name={1:'model-00047-of-00048.safetensors',14:'model-00048-of-00048.safetensors'}[a.layer]
     p=Path(f'/home/funboy/models/ds41/engram2-tp2/rank{a.rank}')/name
-    config=json.load(open('/home/funboy/StrixHaloClusterDS41/reports/DS41-Q2-001/sources/vontra-config.json'))['text_config']
+    config=json.load(open('/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2/config.json'))['text_config']
     spec=importlib.util.spec_from_file_location('part',Path(__file__).with_name('partition-ds41-engram2.py')); mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
     all_sizes=mod.layouts(config)[a.layer]; sizes=all_sizes[a.rank*12:(a.rank+1)*12]; offsets=np.cumsum([0,*sizes[:-1]],dtype=np.int64)
     # rank0 compact sidecar local row space starts at zero; generate valid row id per owned head/token.

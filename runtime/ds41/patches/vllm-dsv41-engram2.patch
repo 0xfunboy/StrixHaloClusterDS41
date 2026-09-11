@@ -1,3 +1,36 @@
+diff --git a/vllm/model_executor/layers/fused_moe/expert_map_manager.py b/vllm/model_executor/layers/fused_moe/expert_map_manager.py
+index 71f2186..87400ee 100644
+--- a/vllm/model_executor/layers/fused_moe/expert_map_manager.py
++++ b/vllm/model_executor/layers/fused_moe/expert_map_manager.py
+@@ -349,7 +349,11 @@ class ExpertMapManager:
+         if self._expert_map is None:
+             return global_id
+ 
+-        return self._expert_map[global_id].item()
++        # Scalar mapping is a host-side weight-loading operation. Never call
++        # .item() on the device routing map here: that would synchronize the
++        # accelerator once per expert checkpoint record.
++        assert self._expert_map_cpu is not None
++        return int(self._expert_map_cpu[global_id])
+ 
+     def is_local_expert(self, global_id: int) -> bool:
+         """Check if expert is assigned to this rank."""
+@@ -451,6 +455,15 @@ class ExpertMapManager:
+             num_fused_shared_experts=self.num_fused_shared_experts,
+             return_expert_mask=self.rocm_aiter_enabled,
+         )
++        # Weight loading asks for one scalar global->local mapping per expert.
++        # When model construction happens under a GPU default-device context,
++        # _expert_map lives on that device; calling .item() for tens of thousands
++        # of checkpoint records serializes the loader on GPU->CPU synchronizations.
++        # Keep a tiny immutable CPU mirror for scalar loader lookups only. Runtime
++        # routing and kernels continue to use the original device map unchanged.
++        self._expert_map_cpu = (
++            None if self._expert_map is None else self._expert_map.detach().cpu()
++        )
+ 
+         self._local_num_experts += self.num_fused_shared_experts
+ 
 diff --git a/vllm/models/deepseek_v4_1/common/disk_engram.py b/vllm/models/deepseek_v4_1/common/disk_engram.py
 new file mode 100644
 index 0000000..0ca6b5e

@@ -8,6 +8,21 @@ rank=$1 host_ip=$2 epoch=$3 api_port=$4
 [[ "$(hostname)" == "0$((rank+1))-EVO-X3" ]] || { echo 'host/rank mismatch' >&2; exit 2; }
 [[ "$epoch" =~ ^[0-9]{10,20}$ && "$api_port" =~ ^[0-9]{4,5}$ ]] || exit 2
 ROOT=/home/funboy/StrixHaloClusterDS41
+SHARED_STATE=/home/funboy/.local/state/strix-cluster
+if [[ "$rank" == 0 ]]; then
+  mkdir -p "$SHARED_STATE"
+  exec 9>"$SHARED_STATE/compute.lock"
+  if ! flock -n 9; then
+    echo 'cluster compute lock is owned by another runtime' >&2
+    [[ ! -r "$SHARED_STATE/owner.json" ]] || cat "$SHARED_STATE/owner.json" >&2
+    exit 75
+  fi
+  tmp="$SHARED_STATE/.owner.$$.tmp"
+  printf '{"owner":"DS41","state":"STARTING","epoch":"%s","pid":%s,"updated":"%s"}\n' \
+    "$epoch" "$$" "$(date -u +%FT%TZ)" >"$tmp"
+  chmod 600 "$tmp"
+  mv -f "$tmp" "$SHARED_STATE/owner.json"
+fi
 ENGINE=/home/funboy/StrixHaloClusterGLM/.engine
 VENV="$ENGINE/venv"
 VLLM_SOURCE="$ROOT/.vendor/vllm-dsv41"
@@ -39,12 +54,20 @@ unset CUDA_VISIBLE_DEVICES
 export VLLM_HOST_IP="$host_ip" VLLM_USE_V2_MODEL_RUNNER=1 VLLM_ENABLE_V1_MULTIPROCESSING=0
 export VLLM_ROCM_USE_AITER=1 VLLM_ROCM_USE_AITER_MOE=0 VLLM_ROCM_USE_SKINNY_GEMM=0
 export FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE VLLM_GGUF_USE_CUDA=0
+export DS41_LOAD_PHASE_LOG=1
 export DS41_ENGRAM2_DIR="$ENGRAM_DIR" DS41_ENGRAM_CACHE_ROWS="${DS41_ENGRAM_CACHE_ROWS:-65536}"
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 VLLM_NO_USAGE_STATS=1 DO_NOT_TRACK=1 PYTHONHASHSEED=1 OMP_NUM_THREADS=1
 export NCCL_SOCKET_IFNAME='=thunderbolt0' GLOO_SOCKET_IFNAME=thunderbolt0 NCCL_NET=Socket NCCL_IB_DISABLE=1 NCCL_SOCKET_FAMILY=AF_INET
 export NCCL_MIN_NCHANNELS=1 NCCL_MAX_NCHANNELS=1 NCCL_SOCKET_NTHREADS=1 NCCL_NSOCKS_PERTHREAD=1 NCCL_DEBUG=WARN
 export MASTER_ADDR=10.55.0.1 MASTER_PORT="${DS41_MASTER_PORT:-29741}"
 cd "$ROOT"
+if [[ "$rank" == 0 ]]; then
+  tmp="$SHARED_STATE/.owner.$$.tmp"
+  printf '{"owner":"DS41","state":"LOADING","epoch":"%s","pid":%s,"updated":"%s"}\n' \
+    "$epoch" "$$" "$(date -u +%FT%TZ)" >"$tmp"
+  chmod 600 "$tmp"
+  mv -f "$tmp" "$SHARED_STATE/owner.json"
+fi
 exec "$VENV/bin/python" -m torch.distributed.run \
   --nnodes=2 --nproc-per-node=1 --node-rank="$rank" \
   --master-addr="$MASTER_ADDR" --master-port="$MASTER_PORT" \

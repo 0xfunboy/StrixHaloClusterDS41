@@ -97,3 +97,30 @@ clone. The second compares a four-expert full reference against the sum of two
 expert-parallel shards on the same real quantized bytes. EP mapping never renormalizes
 router weights: remote routes are zeroed on each rank and the normal TP all-reduce
 reconstructs the global routed contribution.
+
+## Shared cluster ownership
+
+`rank0` holds `/home/funboy/.local/state/strix-cluster/compute.lock` for its
+entire model-bearing lifetime. DS41 starts rank0 first and only starts rank1
+after the lock owner is proven active. Stop is deliberately peer-first: an
+unverifiable NODE02 leaves rank0 alive so the shared lock cannot be released
+while a remote DS41 rank may still own cluster memory. `owner.json` is status
+metadata only; the advisory lock plus fixed-unit verification is authoritative.
+GLM uses the same lock contract, so the two models cannot intentionally load at
+the same time.
+
+## Attempt004 loader diagnosis
+
+Attempt003 proved the zero-copy/EP memory fix but remained before API readiness
+for more than three hours with no new I/O/fault progress and three CPU-bound
+threads. The root cause was then isolated in upstream V4.1 EP weight loading:
+`ExpertMapManager.map_global_to_local()` called `.item()` on a device-resident
+384-entry expert map once per expert checkpoint record. About 46k records turned
+that scalar GPU->CPU synchronization into hours of serialized loading.
+
+The DS41 vLLM overlay now keeps a tiny CPU mirror used only by scalar checkpoint
+mapping. Runtime routing/kernels retain the original device map. The gfx1151 test
+`test-ds41-expert-map-cpu.py` verifies both maps and performs 46,080 rank-local
+lookups in well under two seconds. `DS41_LOAD_PHASE_LOG=1` also adds bounded
+phase/tensor markers so future load stalls can be localized without ptrace,
+signals, or kernel-policy changes.

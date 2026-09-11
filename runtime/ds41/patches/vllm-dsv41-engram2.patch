@@ -1,3 +1,48 @@
+diff --git a/vllm/_custom_ops.py b/vllm/_custom_ops.py
+index db20adb..9c6f458 100644
+--- a/vllm/_custom_ops.py
++++ b/vllm/_custom_ops.py
+@@ -2,6 +2,7 @@
+ # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+ 
+ from enum import IntEnum
++import os
+ from typing import TYPE_CHECKING, Literal
+ 
+ import torch
+@@ -2431,6 +2432,32 @@ def topk_hash_softplus_sqrt(
+     bias_vl: torch.Tensor | None = None,
+     image_sentinel_lo: int = 0,
+ ) -> None:
++    if os.environ.get("DS41_MOE_C_LEGACY_TEXT_ABI", "0") == "1":
++        # The qualified ROCm extension reused by DS41 predates V4.1's two
++        # vision-routing arguments.  Its first ten arguments implement the
++        # same hash/text route.  Fail closed if an actual image-sentinel token
++        # reaches this language-only runtime instead of silently ignoring VL
++        # bias semantics.
++        if bias_vl is not None and image_sentinel_lo > 0 and input_tokens is not None:
++            has_image = ((input_tokens >= image_sentinel_lo) & (input_tokens < image_sentinel_lo + 5)).any()
++            if bool(has_image.item()):
++                raise RuntimeError(
++                    "DS41 legacy MoE ABI cannot route image-sentinel tokens"
++                )
++        torch.ops._moe_C.topk_softplus_sqrt(
++            topk_weights,
++            topk_indices,
++            token_expert_indices,
++            gating_output,
++            renormalize,
++            routed_scaling_factor,
++            e_score_correction_bias,
++            input_tokens,
++            hash_indices_table,
++            is_padding,
++        )
++        return
++
+     torch.ops._moe_C.topk_softplus_sqrt(
+         topk_weights,
+         topk_indices,
 diff --git a/vllm/model_executor/layers/fused_moe/expert_map_manager.py b/vllm/model_executor/layers/fused_moe/expert_map_manager.py
 index 71f2186..87400ee 100644
 --- a/vllm/model_executor/layers/fused_moe/expert_map_manager.py

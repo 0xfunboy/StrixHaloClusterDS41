@@ -6,7 +6,7 @@ fi
 rank=$1 host_ip=$2 epoch=$3 api_port=$4
 [[ "$rank" == 0 || "$rank" == 1 ]] || exit 2
 [[ "$(hostname)" == "0$((rank+1))-EVO-X3" ]] || { echo 'host/rank mismatch' >&2; exit 2; }
-[[ "$epoch" =~ ^[0-9]{10,16}$ && "$api_port" =~ ^[0-9]{4,5}$ ]] || exit 2
+[[ "$epoch" =~ ^[0-9]{10,20}$ && "$api_port" =~ ^[0-9]{4,5}$ ]] || exit 2
 ROOT=/home/funboy/StrixHaloClusterDS41
 ENGINE=/home/funboy/StrixHaloClusterGLM/.engine
 VENV="$ENGINE/venv"

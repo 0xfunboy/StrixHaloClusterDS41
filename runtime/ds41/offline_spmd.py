@@ -236,12 +236,14 @@ def main() -> int:
         tmp.write_text(json.dumps(checkpoint, indent=2, ensure_ascii=False) + "\n")
         os.replace(tmp, RESULT_PATH)
 
-    if os.environ.get("DS41_PROFILE_MODE") == "1":
+    profile_cfg = token_spec.get("profile_mode")
+    if os.environ.get("DS41_PROFILE_MODE") == "1" or isinstance(profile_cfg, dict):
         # Performance continuation: one short warmup, one uninstrumented decode
         # window, the identical instrumented window, then one independent
         # reasoning-effort=high check.  No full qualification suite is replayed.
-        profile_tokens = int(os.environ.get("DS41_PROFILE_TOKENS", "32"))
-        warmup_tokens = int(os.environ.get("DS41_PROFILE_WARMUP_TOKENS", "16"))
+        profile_cfg = profile_cfg if isinstance(profile_cfg, dict) else {}
+        profile_tokens = int(profile_cfg.get("speed_tokens", os.environ.get("DS41_PROFILE_TOKENS", "32")))
+        warmup_tokens = int(profile_cfg.get("warmup_tokens", os.environ.get("DS41_PROFILE_WARMUP_TOKENS", "16")))
         results.append(run_generation(
             llm, prompts["speed"]["token_ids"], label="profile-warmup-excluded",
             max_tokens=warmup_tokens, ignore_eos=True))
@@ -288,7 +290,7 @@ def main() -> int:
             raise RuntimeError("profile prompt fixture is missing reasoning_high")
         reasoning = run_generation(
             llm, prompts[reasoning_key]["token_ids"], label="reasoning-high-once",
-            max_tokens=int(os.environ.get("DS41_REASONING_HIGH_MAX_TOKENS", "128")),
+            max_tokens=int(profile_cfg.get("reasoning_high_max_tokens", os.environ.get("DS41_REASONING_HIGH_MAX_TOKENS", "128"))),
             ignore_eos=False)
         results.append(reasoning)
         save_checkpoint("REASONING_HIGH_COMPLETE")

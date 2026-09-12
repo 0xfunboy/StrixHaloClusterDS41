@@ -1,0 +1,3618 @@
+{
+  "entries": [
+    {
+      "gguf": "blk.17.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.17.ffn.shared_experts.w1.scale",
+      "source": "layers.17.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00020-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.17.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.17.ffn.shared_experts.w3.scale",
+      "source": "layers.17.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00020-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.18.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.18.attn.wkv.scale",
+      "source": "layers.18.attn.wkv.weight",
+      "source_shard": "model-00021-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.18.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.18.attn.wo_a.scale",
+      "source": "layers.18.attn.wo_a.weight",
+      "source_shard": "model-00021-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.18.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.18.attn.wo_b.scale",
+      "source": "layers.18.attn.wo_b.weight",
+      "source_shard": "model-00021-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.18.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.18.attn.wq_a.scale",
+      "source": "layers.18.attn.wq_a.weight",
+      "source_shard": "model-00021-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.18.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.18.attn.wq_b.scale",
+      "source": "layers.18.attn.wq_b.weight",
+      "source_shard": "model-00021-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.18.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.18.ffn.shared_experts.w2.scale",
+      "source": "layers.18.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00021-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.18.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.18.ffn.shared_experts.w1.scale",
+      "source": "layers.18.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00021-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.18.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.18.ffn.shared_experts.w3.scale",
+      "source": "layers.18.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00021-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.19.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.19.attn.wkv.scale",
+      "source": "layers.19.attn.wkv.weight",
+      "source_shard": "model-00022-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.19.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.19.attn.wo_a.scale",
+      "source": "layers.19.attn.wo_a.weight",
+      "source_shard": "model-00022-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.19.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.19.attn.wo_b.scale",
+      "source": "layers.19.attn.wo_b.weight",
+      "source_shard": "model-00022-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.19.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.19.attn.wq_a.scale",
+      "source": "layers.19.attn.wq_a.weight",
+      "source_shard": "model-00022-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.19.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.19.attn.wq_b.scale",
+      "source": "layers.19.attn.wq_b.weight",
+      "source_shard": "model-00022-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.19.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.19.ffn.shared_experts.w2.scale",
+      "source": "layers.19.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00022-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.19.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.19.ffn.shared_experts.w1.scale",
+      "source": "layers.19.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00022-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.19.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.19.ffn.shared_experts.w3.scale",
+      "source": "layers.19.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00022-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.2.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.2.attn.wkv.scale",
+      "source": "layers.2.attn.wkv.weight",
+      "source_shard": "model-00005-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.2.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.2.attn.wo_a.scale",
+      "source": "layers.2.attn.wo_a.weight",
+      "source_shard": "model-00005-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.2.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.2.attn.wo_b.scale",
+      "source": "layers.2.attn.wo_b.weight",
+      "source_shard": "model-00005-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.2.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.2.attn.wq_a.scale",
+      "source": "layers.2.attn.wq_a.weight",
+      "source_shard": "model-00005-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.2.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.2.attn.wq_b.scale",
+      "source": "layers.2.attn.wq_b.weight",
+      "source_shard": "model-00005-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.2.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.2.ffn.shared_experts.w2.scale",
+      "source": "layers.2.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00005-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.2.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.2.ffn.shared_experts.w1.scale",
+      "source": "layers.2.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00005-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.2.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.2.ffn.shared_experts.w3.scale",
+      "source": "layers.2.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00005-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.2.indexer.attn_q_b",
+      "gguf_bytes": 10485760,
+      "logical_shape": [
+        4096,
+        1280
+      ],
+      "scale": "layers.2.attn.indexer.wq_b.scale",
+      "source": "layers.2.attn.indexer.wq_b.weight",
+      "source_shard": "model-00005-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.20.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.20.attn.wkv.scale",
+      "source": "layers.20.attn.wkv.weight",
+      "source_shard": "model-00023-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.20.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.20.attn.wo_a.scale",
+      "source": "layers.20.attn.wo_a.weight",
+      "source_shard": "model-00023-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.20.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.20.attn.wo_b.scale",
+      "source": "layers.20.attn.wo_b.weight",
+      "source_shard": "model-00023-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.20.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.20.attn.wq_a.scale",
+      "source": "layers.20.attn.wq_a.weight",
+      "source_shard": "model-00023-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.20.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.20.attn.wq_b.scale",
+      "source": "layers.20.attn.wq_b.weight",
+      "source_shard": "model-00023-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.20.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.20.ffn.shared_experts.w2.scale",
+      "source": "layers.20.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00023-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.20.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.20.ffn.shared_experts.w1.scale",
+      "source": "layers.20.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00023-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.20.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.20.ffn.shared_experts.w3.scale",
+      "source": "layers.20.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00023-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.20.indexer.attn_q_b",
+      "gguf_bytes": 10485760,
+      "logical_shape": [
+        4096,
+        1280
+      ],
+      "scale": "layers.20.attn.indexer.wq_b.scale",
+      "source": "layers.20.attn.indexer.wq_b.weight",
+      "source_shard": "model-00023-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.21.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.21.attn.wkv.scale",
+      "source": "layers.21.attn.wkv.weight",
+      "source_shard": "model-00024-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.21.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.21.attn.wo_a.scale",
+      "source": "layers.21.attn.wo_a.weight",
+      "source_shard": "model-00024-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.21.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.21.attn.wo_b.scale",
+      "source": "layers.21.attn.wo_b.weight",
+      "source_shard": "model-00024-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.21.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.21.attn.wq_a.scale",
+      "source": "layers.21.attn.wq_a.weight",
+      "source_shard": "model-00024-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.21.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.21.attn.wq_b.scale",
+      "source": "layers.21.attn.wq_b.weight",
+      "source_shard": "model-00024-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.21.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.21.ffn.shared_experts.w2.scale",
+      "source": "layers.21.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00024-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.21.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.21.ffn.shared_experts.w1.scale",
+      "source": "layers.21.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00024-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.21.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.21.ffn.shared_experts.w3.scale",
+      "source": "layers.21.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00024-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.22.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.22.attn.wkv.scale",
+      "source": "layers.22.attn.wkv.weight",
+      "source_shard": "model-00025-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.22.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.22.attn.wo_a.scale",
+      "source": "layers.22.attn.wo_a.weight",
+      "source_shard": "model-00025-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.22.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.22.attn.wo_b.scale",
+      "source": "layers.22.attn.wo_b.weight",
+      "source_shard": "model-00025-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.22.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.22.attn.wq_a.scale",
+      "source": "layers.22.attn.wq_a.weight",
+      "source_shard": "model-00025-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.22.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.22.attn.wq_b.scale",
+      "source": "layers.22.attn.wq_b.weight",
+      "source_shard": "model-00025-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.22.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.22.ffn.shared_experts.w2.scale",
+      "source": "layers.22.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00025-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.22.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.22.ffn.shared_experts.w1.scale",
+      "source": "layers.22.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00025-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.22.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.22.ffn.shared_experts.w3.scale",
+      "source": "layers.22.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00025-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.23.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.23.attn.wkv.scale",
+      "source": "layers.23.attn.wkv.weight",
+      "source_shard": "model-00026-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.23.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.23.attn.wo_a.scale",
+      "source": "layers.23.attn.wo_a.weight",
+      "source_shard": "model-00026-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.23.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.23.attn.wo_b.scale",
+      "source": "layers.23.attn.wo_b.weight",
+      "source_shard": "model-00026-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.23.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.23.attn.wq_a.scale",
+      "source": "layers.23.attn.wq_a.weight",
+      "source_shard": "model-00026-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.23.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.23.attn.wq_b.scale",
+      "source": "layers.23.attn.wq_b.weight",
+      "source_shard": "model-00026-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.23.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.23.ffn.shared_experts.w2.scale",
+      "source": "layers.23.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00026-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.23.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.23.ffn.shared_experts.w1.scale",
+      "source": "layers.23.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00026-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.23.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.23.ffn.shared_experts.w3.scale",
+      "source": "layers.23.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00026-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.24.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.24.attn.wkv.scale",
+      "source": "layers.24.attn.wkv.weight",
+      "source_shard": "model-00027-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.24.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.24.attn.wo_a.scale",
+      "source": "layers.24.attn.wo_a.weight",
+      "source_shard": "model-00027-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.24.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.24.attn.wo_b.scale",
+      "source": "layers.24.attn.wo_b.weight",
+      "source_shard": "model-00027-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.24.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.24.attn.wq_a.scale",
+      "source": "layers.24.attn.wq_a.weight",
+      "source_shard": "model-00027-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.24.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.24.attn.wq_b.scale",
+      "source": "layers.24.attn.wq_b.weight",
+      "source_shard": "model-00027-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.24.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.24.ffn.shared_experts.w2.scale",
+      "source": "layers.24.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00027-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.24.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.24.ffn.shared_experts.w1.scale",
+      "source": "layers.24.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00027-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.24.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.24.ffn.shared_experts.w3.scale",
+      "source": "layers.24.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00027-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.24.indexer.attn_q_b",
+      "gguf_bytes": 10485760,
+      "logical_shape": [
+        4096,
+        1280
+      ],
+      "scale": "layers.24.attn.indexer.wq_b.scale",
+      "source": "layers.24.attn.indexer.wq_b.weight",
+      "source_shard": "model-00027-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.25.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.25.attn.wkv.scale",
+      "source": "layers.25.attn.wkv.weight",
+      "source_shard": "model-00028-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.25.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.25.attn.wo_a.scale",
+      "source": "layers.25.attn.wo_a.weight",
+      "source_shard": "model-00028-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.25.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.25.attn.wo_b.scale",
+      "source": "layers.25.attn.wo_b.weight",
+      "source_shard": "model-00028-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.25.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.25.attn.wq_a.scale",
+      "source": "layers.25.attn.wq_a.weight",
+      "source_shard": "model-00028-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.25.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.25.attn.wq_b.scale",
+      "source": "layers.25.attn.wq_b.weight",
+      "source_shard": "model-00028-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.25.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.25.ffn.shared_experts.w2.scale",
+      "source": "layers.25.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00028-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.25.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.25.ffn.shared_experts.w1.scale",
+      "source": "layers.25.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00028-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.25.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.25.ffn.shared_experts.w3.scale",
+      "source": "layers.25.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00028-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.26.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.26.attn.wkv.scale",
+      "source": "layers.26.attn.wkv.weight",
+      "source_shard": "model-00029-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.26.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.26.attn.wo_a.scale",
+      "source": "layers.26.attn.wo_a.weight",
+      "source_shard": "model-00029-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.26.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.26.attn.wo_b.scale",
+      "source": "layers.26.attn.wo_b.weight",
+      "source_shard": "model-00029-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.26.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.26.attn.wq_a.scale",
+      "source": "layers.26.attn.wq_a.weight",
+      "source_shard": "model-00029-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.34.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.34.ffn.shared_experts.w1.scale",
+      "source": "layers.34.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00037-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.34.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.34.ffn.shared_experts.w3.scale",
+      "source": "layers.34.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00037-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.35.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.35.attn.wkv.scale",
+      "source": "layers.35.attn.wkv.weight",
+      "source_shard": "model-00038-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.35.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.35.attn.wo_a.scale",
+      "source": "layers.35.attn.wo_a.weight",
+      "source_shard": "model-00038-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.35.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.35.attn.wo_b.scale",
+      "source": "layers.35.attn.wo_b.weight",
+      "source_shard": "model-00038-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.35.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.35.attn.wq_a.scale",
+      "source": "layers.35.attn.wq_a.weight",
+      "source_shard": "model-00038-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.35.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.35.attn.wq_b.scale",
+      "source": "layers.35.attn.wq_b.weight",
+      "source_shard": "model-00038-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.35.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.35.ffn.shared_experts.w2.scale",
+      "source": "layers.35.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00038-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.35.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.35.ffn.shared_experts.w1.scale",
+      "source": "layers.35.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00038-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.35.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.35.ffn.shared_experts.w3.scale",
+      "source": "layers.35.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00038-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.36.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.36.attn.wkv.scale",
+      "source": "layers.36.attn.wkv.weight",
+      "source_shard": "model-00039-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.36.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.36.attn.wo_a.scale",
+      "source": "layers.36.attn.wo_a.weight",
+      "source_shard": "model-00039-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.36.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.36.attn.wo_b.scale",
+      "source": "layers.36.attn.wo_b.weight",
+      "source_shard": "model-00039-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.36.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.36.attn.wq_a.scale",
+      "source": "layers.36.attn.wq_a.weight",
+      "source_shard": "model-00039-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.36.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.36.attn.wq_b.scale",
+      "source": "layers.36.attn.wq_b.weight",
+      "source_shard": "model-00039-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.36.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.36.ffn.shared_experts.w2.scale",
+      "source": "layers.36.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00039-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.36.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.36.ffn.shared_experts.w1.scale",
+      "source": "layers.36.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00039-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.36.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.36.ffn.shared_experts.w3.scale",
+      "source": "layers.36.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00039-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.36.indexer.attn_q_b",
+      "gguf_bytes": 10485760,
+      "logical_shape": [
+        4096,
+        1280
+      ],
+      "scale": "layers.36.attn.indexer.wq_b.scale",
+      "source": "layers.36.attn.indexer.wq_b.weight",
+      "source_shard": "model-00039-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.37.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.37.attn.wkv.scale",
+      "source": "layers.37.attn.wkv.weight",
+      "source_shard": "model-00040-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.37.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.37.attn.wo_a.scale",
+      "source": "layers.37.attn.wo_a.weight",
+      "source_shard": "model-00040-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.37.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.37.attn.wo_b.scale",
+      "source": "layers.37.attn.wo_b.weight",
+      "source_shard": "model-00040-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.37.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.37.attn.wq_a.scale",
+      "source": "layers.37.attn.wq_a.weight",
+      "source_shard": "model-00040-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.37.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.37.attn.wq_b.scale",
+      "source": "layers.37.attn.wq_b.weight",
+      "source_shard": "model-00040-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.37.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.37.ffn.shared_experts.w2.scale",
+      "source": "layers.37.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00040-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.37.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.37.ffn.shared_experts.w1.scale",
+      "source": "layers.37.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00040-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.37.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.37.ffn.shared_experts.w3.scale",
+      "source": "layers.37.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00040-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.38.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.38.attn.wkv.scale",
+      "source": "layers.38.attn.wkv.weight",
+      "source_shard": "model-00041-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.38.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.38.attn.wo_a.scale",
+      "source": "layers.38.attn.wo_a.weight",
+      "source_shard": "model-00041-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.38.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.38.attn.wo_b.scale",
+      "source": "layers.38.attn.wo_b.weight",
+      "source_shard": "model-00041-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.38.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.38.attn.wq_a.scale",
+      "source": "layers.38.attn.wq_a.weight",
+      "source_shard": "model-00041-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.38.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.38.attn.wq_b.scale",
+      "source": "layers.38.attn.wq_b.weight",
+      "source_shard": "model-00041-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.38.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.38.ffn.shared_experts.w2.scale",
+      "source": "layers.38.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00041-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.38.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.38.ffn.shared_experts.w1.scale",
+      "source": "layers.38.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00041-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.38.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.38.ffn.shared_experts.w3.scale",
+      "source": "layers.38.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00041-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.39.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.39.attn.wkv.scale",
+      "source": "layers.39.attn.wkv.weight",
+      "source_shard": "model-00042-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.39.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.39.attn.wo_a.scale",
+      "source": "layers.39.attn.wo_a.weight",
+      "source_shard": "model-00042-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.39.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.39.attn.wo_b.scale",
+      "source": "layers.39.attn.wo_b.weight",
+      "source_shard": "model-00042-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.39.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.39.attn.wq_a.scale",
+      "source": "layers.39.attn.wq_a.weight",
+      "source_shard": "model-00042-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.39.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.39.attn.wq_b.scale",
+      "source": "layers.39.attn.wq_b.weight",
+      "source_shard": "model-00042-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.39.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.39.ffn.shared_experts.w2.scale",
+      "source": "layers.39.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00042-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.39.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.39.ffn.shared_experts.w1.scale",
+      "source": "layers.39.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00042-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.39.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.39.ffn.shared_experts.w3.scale",
+      "source": "layers.39.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00042-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.4.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.4.attn.wkv.scale",
+      "source": "layers.4.attn.wkv.weight",
+      "source_shard": "model-00007-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.4.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.4.attn.wo_a.scale",
+      "source": "layers.4.attn.wo_a.weight",
+      "source_shard": "model-00007-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.4.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.4.attn.wo_b.scale",
+      "source": "layers.4.attn.wo_b.weight",
+      "source_shard": "model-00007-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.4.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.4.attn.wq_a.scale",
+      "source": "layers.4.attn.wq_a.weight",
+      "source_shard": "model-00007-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.4.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.4.attn.wq_b.scale",
+      "source": "layers.4.attn.wq_b.weight",
+      "source_shard": "model-00007-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.4.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.4.ffn.shared_experts.w2.scale",
+      "source": "layers.4.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00007-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.4.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.4.ffn.shared_experts.w1.scale",
+      "source": "layers.4.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00007-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.4.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.4.ffn.shared_experts.w3.scale",
+      "source": "layers.4.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00007-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.5.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.5.attn.wkv.scale",
+      "source": "layers.5.attn.wkv.weight",
+      "source_shard": "model-00008-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.5.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.5.attn.wo_a.scale",
+      "source": "layers.5.attn.wo_a.weight",
+      "source_shard": "model-00008-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.5.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.5.attn.wo_b.scale",
+      "source": "layers.5.attn.wo_b.weight",
+      "source_shard": "model-00008-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.5.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.5.attn.wq_a.scale",
+      "source": "layers.5.attn.wq_a.weight",
+      "source_shard": "model-00008-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.5.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.5.attn.wq_b.scale",
+      "source": "layers.5.attn.wq_b.weight",
+      "source_shard": "model-00008-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.5.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.5.ffn.shared_experts.w2.scale",
+      "source": "layers.5.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00008-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.5.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.5.ffn.shared_experts.w1.scale",
+      "source": "layers.5.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00008-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.5.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.5.ffn.shared_experts.w3.scale",
+      "source": "layers.5.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00008-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.6.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.6.attn.wkv.scale",
+      "source": "layers.6.attn.wkv.weight",
+      "source_shard": "model-00009-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.6.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.6.attn.wo_a.scale",
+      "source": "layers.6.attn.wo_a.weight",
+      "source_shard": "model-00009-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.6.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.6.attn.wo_b.scale",
+      "source": "layers.6.attn.wo_b.weight",
+      "source_shard": "model-00009-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.6.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.6.attn.wq_a.scale",
+      "source": "layers.6.attn.wq_a.weight",
+      "source_shard": "model-00009-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.6.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.6.attn.wq_b.scale",
+      "source": "layers.6.attn.wq_b.weight",
+      "source_shard": "model-00009-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.6.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.6.ffn.shared_experts.w2.scale",
+      "source": "layers.6.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00009-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.6.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.6.ffn.shared_experts.w1.scale",
+      "source": "layers.6.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00009-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.6.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.6.ffn.shared_experts.w3.scale",
+      "source": "layers.6.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00009-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.7.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.7.attn.wkv.scale",
+      "source": "layers.7.attn.wkv.weight",
+      "source_shard": "model-00010-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.7.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.7.attn.wo_a.scale",
+      "source": "layers.7.attn.wo_a.weight",
+      "source_shard": "model-00010-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.7.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.7.attn.wo_b.scale",
+      "source": "layers.7.attn.wo_b.weight",
+      "source_shard": "model-00010-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.7.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.7.attn.wq_a.scale",
+      "source": "layers.7.attn.wq_a.weight",
+      "source_shard": "model-00010-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.7.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.7.attn.wq_b.scale",
+      "source": "layers.7.attn.wq_b.weight",
+      "source_shard": "model-00010-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.7.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.7.ffn.shared_experts.w2.scale",
+      "source": "layers.7.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00010-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.7.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.7.ffn.shared_experts.w1.scale",
+      "source": "layers.7.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00010-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.7.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.7.ffn.shared_experts.w3.scale",
+      "source": "layers.7.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00010-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.8.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.8.attn.wkv.scale",
+      "source": "layers.8.attn.wkv.weight",
+      "source_shard": "model-00011-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.8.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.8.attn.wo_a.scale",
+      "source": "layers.8.attn.wo_a.weight",
+      "source_shard": "model-00011-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.8.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.8.attn.wo_b.scale",
+      "source": "layers.8.attn.wo_b.weight",
+      "source_shard": "model-00011-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.8.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.8.attn.wq_a.scale",
+      "source": "layers.8.attn.wq_a.weight",
+      "source_shard": "model-00011-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.8.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.8.attn.wq_b.scale",
+      "source": "layers.8.attn.wq_b.weight",
+      "source_shard": "model-00011-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.8.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.8.ffn.shared_experts.w2.scale",
+      "source": "layers.8.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00011-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.8.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.8.ffn.shared_experts.w1.scale",
+      "source": "layers.8.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00011-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.8.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.8.ffn.shared_experts.w3.scale",
+      "source": "layers.8.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00011-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.8.indexer.attn_q_b",
+      "gguf_bytes": 10485760,
+      "logical_shape": [
+        4096,
+        1280
+      ],
+      "scale": "layers.8.attn.indexer.wq_b.scale",
+      "source": "layers.8.attn.indexer.wq_b.weight",
+      "source_shard": "model-00011-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.9.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.9.attn.wkv.scale",
+      "source": "layers.9.attn.wkv.weight",
+      "source_shard": "model-00012-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.9.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.9.attn.wo_a.scale",
+      "source": "layers.9.attn.wo_a.weight",
+      "source_shard": "model-00012-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.9.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.9.attn.wo_b.scale",
+      "source": "layers.9.attn.wo_b.weight",
+      "source_shard": "model-00012-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.9.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.9.attn.wq_a.scale",
+      "source": "layers.9.attn.wq_a.weight",
+      "source_shard": "model-00012-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.9.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.9.attn.wq_b.scale",
+      "source": "layers.9.attn.wq_b.weight",
+      "source_shard": "model-00012-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.9.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.9.ffn.shared_experts.w2.scale",
+      "source": "layers.9.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00012-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.9.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.9.ffn.shared_experts.w1.scale",
+      "source": "layers.9.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00012-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.9.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.9.ffn.shared_experts.w3.scale",
+      "source": "layers.9.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00012-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.0.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.0.attn.wkv.scale",
+      "source": "layers.0.attn.wkv.weight",
+      "source_shard": "model-00003-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.0.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.0.attn.wo_a.scale",
+      "source": "layers.0.attn.wo_a.weight",
+      "source_shard": "model-00003-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.0.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.0.attn.wo_b.scale",
+      "source": "layers.0.attn.wo_b.weight",
+      "source_shard": "model-00003-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.0.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.0.attn.wq_a.scale",
+      "source": "layers.0.attn.wq_a.weight",
+      "source_shard": "model-00003-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.0.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.0.attn.wq_b.scale",
+      "source": "layers.0.attn.wq_b.weight",
+      "source_shard": "model-00003-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.0.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.0.ffn.shared_experts.w2.scale",
+      "source": "layers.0.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00003-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.0.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.0.ffn.shared_experts.w1.scale",
+      "source": "layers.0.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00003-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.0.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.0.ffn.shared_experts.w3.scale",
+      "source": "layers.0.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00003-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.1.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.1.attn.wkv.scale",
+      "source": "layers.1.attn.wkv.weight",
+      "source_shard": "model-00004-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.1.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.1.attn.wo_a.scale",
+      "source": "layers.1.attn.wo_a.weight",
+      "source_shard": "model-00004-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.1.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.1.attn.wo_b.scale",
+      "source": "layers.1.attn.wo_b.weight",
+      "source_shard": "model-00004-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.1.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.1.attn.wq_a.scale",
+      "source": "layers.1.attn.wq_a.weight",
+      "source_shard": "model-00004-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.1.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.1.attn.wq_b.scale",
+      "source": "layers.1.attn.wq_b.weight",
+      "source_shard": "model-00004-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.1.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.1.ffn.shared_experts.w2.scale",
+      "source": "layers.1.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00004-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.1.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.1.ffn.shared_experts.w1.scale",
+      "source": "layers.1.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00004-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.1.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.1.ffn.shared_experts.w3.scale",
+      "source": "layers.1.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00004-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.10.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.10.attn.wkv.scale",
+      "source": "layers.10.attn.wkv.weight",
+      "source_shard": "model-00013-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.10.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.10.attn.wo_a.scale",
+      "source": "layers.10.attn.wo_a.weight",
+      "source_shard": "model-00013-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.10.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.10.attn.wo_b.scale",
+      "source": "layers.10.attn.wo_b.weight",
+      "source_shard": "model-00013-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.10.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.10.attn.wq_a.scale",
+      "source": "layers.10.attn.wq_a.weight",
+      "source_shard": "model-00013-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.10.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.10.attn.wq_b.scale",
+      "source": "layers.10.attn.wq_b.weight",
+      "source_shard": "model-00013-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.10.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.10.ffn.shared_experts.w2.scale",
+      "source": "layers.10.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00013-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.10.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.10.ffn.shared_experts.w1.scale",
+      "source": "layers.10.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00013-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.10.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.10.ffn.shared_experts.w3.scale",
+      "source": "layers.10.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00013-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.11.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.11.attn.wkv.scale",
+      "source": "layers.11.attn.wkv.weight",
+      "source_shard": "model-00014-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.11.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.11.attn.wo_a.scale",
+      "source": "layers.11.attn.wo_a.weight",
+      "source_shard": "model-00014-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.11.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.11.attn.wo_b.scale",
+      "source": "layers.11.attn.wo_b.weight",
+      "source_shard": "model-00014-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.11.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.11.attn.wq_a.scale",
+      "source": "layers.11.attn.wq_a.weight",
+      "source_shard": "model-00014-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.11.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.11.attn.wq_b.scale",
+      "source": "layers.11.attn.wq_b.weight",
+      "source_shard": "model-00014-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.11.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.11.ffn.shared_experts.w2.scale",
+      "source": "layers.11.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00014-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.11.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.11.ffn.shared_experts.w1.scale",
+      "source": "layers.11.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00014-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.11.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.11.ffn.shared_experts.w3.scale",
+      "source": "layers.11.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00014-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.12.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.12.attn.wkv.scale",
+      "source": "layers.12.attn.wkv.weight",
+      "source_shard": "model-00015-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.12.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.12.attn.wo_a.scale",
+      "source": "layers.12.attn.wo_a.weight",
+      "source_shard": "model-00015-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.12.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.12.attn.wo_b.scale",
+      "source": "layers.12.attn.wo_b.weight",
+      "source_shard": "model-00015-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.12.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.12.attn.wq_a.scale",
+      "source": "layers.12.attn.wq_a.weight",
+      "source_shard": "model-00015-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.12.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.12.attn.wq_b.scale",
+      "source": "layers.12.attn.wq_b.weight",
+      "source_shard": "model-00015-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.12.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.12.ffn.shared_experts.w2.scale",
+      "source": "layers.12.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00015-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.12.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.12.ffn.shared_experts.w1.scale",
+      "source": "layers.12.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00015-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.12.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.12.ffn.shared_experts.w3.scale",
+      "source": "layers.12.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00015-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.13.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.13.attn.wkv.scale",
+      "source": "layers.13.attn.wkv.weight",
+      "source_shard": "model-00016-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.13.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.13.attn.wo_a.scale",
+      "source": "layers.13.attn.wo_a.weight",
+      "source_shard": "model-00016-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.13.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.13.attn.wo_b.scale",
+      "source": "layers.13.attn.wo_b.weight",
+      "source_shard": "model-00016-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.13.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.13.attn.wq_a.scale",
+      "source": "layers.13.attn.wq_a.weight",
+      "source_shard": "model-00016-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.13.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.13.attn.wq_b.scale",
+      "source": "layers.13.attn.wq_b.weight",
+      "source_shard": "model-00016-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.13.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.13.ffn.shared_experts.w2.scale",
+      "source": "layers.13.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00016-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.13.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.13.ffn.shared_experts.w1.scale",
+      "source": "layers.13.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00016-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.13.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.13.ffn.shared_experts.w3.scale",
+      "source": "layers.13.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00016-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.14.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.14.attn.wkv.scale",
+      "source": "layers.14.attn.wkv.weight",
+      "source_shard": "model-00017-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.14.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.14.attn.wo_a.scale",
+      "source": "layers.14.attn.wo_a.weight",
+      "source_shard": "model-00017-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.14.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.14.attn.wo_b.scale",
+      "source": "layers.14.attn.wo_b.weight",
+      "source_shard": "model-00017-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.14.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.14.attn.wq_a.scale",
+      "source": "layers.14.attn.wq_a.weight",
+      "source_shard": "model-00017-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.14.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.14.attn.wq_b.scale",
+      "source": "layers.14.attn.wq_b.weight",
+      "source_shard": "model-00017-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.14.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.14.ffn.shared_experts.w2.scale",
+      "source": "layers.14.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00017-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.14.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.14.ffn.shared_experts.w1.scale",
+      "source": "layers.14.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00017-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.14.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.14.ffn.shared_experts.w3.scale",
+      "source": "layers.14.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00017-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.14.indexer.attn_q_b",
+      "gguf_bytes": 10485760,
+      "logical_shape": [
+        4096,
+        1280
+      ],
+      "scale": "layers.14.attn.indexer.wq_b.scale",
+      "source": "layers.14.attn.indexer.wq_b.weight",
+      "source_shard": "model-00017-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.15.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.15.attn.wkv.scale",
+      "source": "layers.15.attn.wkv.weight",
+      "source_shard": "model-00018-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.15.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.15.attn.wo_a.scale",
+      "source": "layers.15.attn.wo_a.weight",
+      "source_shard": "model-00018-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.15.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.15.attn.wo_b.scale",
+      "source": "layers.15.attn.wo_b.weight",
+      "source_shard": "model-00018-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.15.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.15.attn.wq_a.scale",
+      "source": "layers.15.attn.wq_a.weight",
+      "source_shard": "model-00018-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.15.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.15.attn.wq_b.scale",
+      "source": "layers.15.attn.wq_b.weight",
+      "source_shard": "model-00018-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.15.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.15.ffn.shared_experts.w2.scale",
+      "source": "layers.15.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00018-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.15.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.15.ffn.shared_experts.w1.scale",
+      "source": "layers.15.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00018-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.15.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.15.ffn.shared_experts.w3.scale",
+      "source": "layers.15.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00018-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.16.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.16.attn.wkv.scale",
+      "source": "layers.16.attn.wkv.weight",
+      "source_shard": "model-00019-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.16.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.16.attn.wo_a.scale",
+      "source": "layers.16.attn.wo_a.weight",
+      "source_shard": "model-00019-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.16.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.16.attn.wo_b.scale",
+      "source": "layers.16.attn.wo_b.weight",
+      "source_shard": "model-00019-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.16.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.16.attn.wq_a.scale",
+      "source": "layers.16.attn.wq_a.weight",
+      "source_shard": "model-00019-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.16.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.16.attn.wq_b.scale",
+      "source": "layers.16.attn.wq_b.weight",
+      "source_shard": "model-00019-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.16.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.16.ffn.shared_experts.w2.scale",
+      "source": "layers.16.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00019-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.16.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.16.ffn.shared_experts.w1.scale",
+      "source": "layers.16.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00019-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.16.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.16.ffn.shared_experts.w3.scale",
+      "source": "layers.16.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00019-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.17.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.17.attn.wkv.scale",
+      "source": "layers.17.attn.wkv.weight",
+      "source_shard": "model-00020-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.17.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.17.attn.wo_a.scale",
+      "source": "layers.17.attn.wo_a.weight",
+      "source_shard": "model-00020-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.17.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.17.attn.wo_b.scale",
+      "source": "layers.17.attn.wo_b.weight",
+      "source_shard": "model-00020-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.17.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.17.attn.wq_a.scale",
+      "source": "layers.17.attn.wq_a.weight",
+      "source_shard": "model-00020-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.17.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.17.attn.wq_b.scale",
+      "source": "layers.17.attn.wq_b.weight",
+      "source_shard": "model-00020-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.17.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.17.ffn.shared_experts.w2.scale",
+      "source": "layers.17.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00020-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.26.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.26.attn.wq_b.scale",
+      "source": "layers.26.attn.wq_b.weight",
+      "source_shard": "model-00029-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.26.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.26.ffn.shared_experts.w2.scale",
+      "source": "layers.26.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00029-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.26.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.26.ffn.shared_experts.w1.scale",
+      "source": "layers.26.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00029-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.26.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.26.ffn.shared_experts.w3.scale",
+      "source": "layers.26.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00029-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.27.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.27.attn.wkv.scale",
+      "source": "layers.27.attn.wkv.weight",
+      "source_shard": "model-00030-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.27.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.27.attn.wo_a.scale",
+      "source": "layers.27.attn.wo_a.weight",
+      "source_shard": "model-00030-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.27.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.27.attn.wo_b.scale",
+      "source": "layers.27.attn.wo_b.weight",
+      "source_shard": "model-00030-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.27.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.27.attn.wq_a.scale",
+      "source": "layers.27.attn.wq_a.weight",
+      "source_shard": "model-00030-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.27.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.27.attn.wq_b.scale",
+      "source": "layers.27.attn.wq_b.weight",
+      "source_shard": "model-00030-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.27.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.27.ffn.shared_experts.w2.scale",
+      "source": "layers.27.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00030-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.27.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.27.ffn.shared_experts.w1.scale",
+      "source": "layers.27.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00030-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.27.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.27.ffn.shared_experts.w3.scale",
+      "source": "layers.27.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00030-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.28.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.28.attn.wkv.scale",
+      "source": "layers.28.attn.wkv.weight",
+      "source_shard": "model-00031-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.28.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.28.attn.wo_a.scale",
+      "source": "layers.28.attn.wo_a.weight",
+      "source_shard": "model-00031-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.28.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.28.attn.wo_b.scale",
+      "source": "layers.28.attn.wo_b.weight",
+      "source_shard": "model-00031-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.28.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.28.attn.wq_a.scale",
+      "source": "layers.28.attn.wq_a.weight",
+      "source_shard": "model-00031-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.28.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.28.attn.wq_b.scale",
+      "source": "layers.28.attn.wq_b.weight",
+      "source_shard": "model-00031-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.28.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.28.ffn.shared_experts.w2.scale",
+      "source": "layers.28.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00031-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.28.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.28.ffn.shared_experts.w1.scale",
+      "source": "layers.28.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00031-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.28.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.28.ffn.shared_experts.w3.scale",
+      "source": "layers.28.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00031-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.28.indexer.attn_q_b",
+      "gguf_bytes": 10485760,
+      "logical_shape": [
+        4096,
+        1280
+      ],
+      "scale": "layers.28.attn.indexer.wq_b.scale",
+      "source": "layers.28.attn.indexer.wq_b.weight",
+      "source_shard": "model-00031-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.29.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.29.attn.wkv.scale",
+      "source": "layers.29.attn.wkv.weight",
+      "source_shard": "model-00032-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.29.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.29.attn.wo_a.scale",
+      "source": "layers.29.attn.wo_a.weight",
+      "source_shard": "model-00032-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.29.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.29.attn.wo_b.scale",
+      "source": "layers.29.attn.wo_b.weight",
+      "source_shard": "model-00032-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.29.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.29.attn.wq_a.scale",
+      "source": "layers.29.attn.wq_a.weight",
+      "source_shard": "model-00032-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.29.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.29.attn.wq_b.scale",
+      "source": "layers.29.attn.wq_b.weight",
+      "source_shard": "model-00032-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.29.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.29.ffn.shared_experts.w2.scale",
+      "source": "layers.29.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00032-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.29.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.29.ffn.shared_experts.w1.scale",
+      "source": "layers.29.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00032-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.29.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.29.ffn.shared_experts.w3.scale",
+      "source": "layers.29.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00032-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.3.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.3.attn.wkv.scale",
+      "source": "layers.3.attn.wkv.weight",
+      "source_shard": "model-00006-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.3.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.3.attn.wo_a.scale",
+      "source": "layers.3.attn.wo_a.weight",
+      "source_shard": "model-00006-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.3.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.3.attn.wo_b.scale",
+      "source": "layers.3.attn.wo_b.weight",
+      "source_shard": "model-00006-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.3.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.3.attn.wq_a.scale",
+      "source": "layers.3.attn.wq_a.weight",
+      "source_shard": "model-00006-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.3.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.3.attn.wq_b.scale",
+      "source": "layers.3.attn.wq_b.weight",
+      "source_shard": "model-00006-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.3.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.3.ffn.shared_experts.w2.scale",
+      "source": "layers.3.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00006-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.3.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.3.ffn.shared_experts.w1.scale",
+      "source": "layers.3.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00006-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.3.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.3.ffn.shared_experts.w3.scale",
+      "source": "layers.3.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00006-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.30.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.30.attn.wkv.scale",
+      "source": "layers.30.attn.wkv.weight",
+      "source_shard": "model-00033-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.30.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.30.attn.wo_a.scale",
+      "source": "layers.30.attn.wo_a.weight",
+      "source_shard": "model-00033-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.30.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.30.attn.wo_b.scale",
+      "source": "layers.30.attn.wo_b.weight",
+      "source_shard": "model-00033-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.30.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.30.attn.wq_a.scale",
+      "source": "layers.30.attn.wq_a.weight",
+      "source_shard": "model-00033-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.30.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.30.attn.wq_b.scale",
+      "source": "layers.30.attn.wq_b.weight",
+      "source_shard": "model-00033-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.30.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.30.ffn.shared_experts.w2.scale",
+      "source": "layers.30.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00033-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.30.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.30.ffn.shared_experts.w1.scale",
+      "source": "layers.30.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00033-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.30.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.30.ffn.shared_experts.w3.scale",
+      "source": "layers.30.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00033-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.31.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.31.attn.wkv.scale",
+      "source": "layers.31.attn.wkv.weight",
+      "source_shard": "model-00034-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.31.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.31.attn.wo_a.scale",
+      "source": "layers.31.attn.wo_a.weight",
+      "source_shard": "model-00034-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.31.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.31.attn.wo_b.scale",
+      "source": "layers.31.attn.wo_b.weight",
+      "source_shard": "model-00034-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.31.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.31.attn.wq_a.scale",
+      "source": "layers.31.attn.wq_a.weight",
+      "source_shard": "model-00034-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.31.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.31.attn.wq_b.scale",
+      "source": "layers.31.attn.wq_b.weight",
+      "source_shard": "model-00034-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.31.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.31.ffn.shared_experts.w2.scale",
+      "source": "layers.31.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00034-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.31.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.31.ffn.shared_experts.w1.scale",
+      "source": "layers.31.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00034-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.31.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.31.ffn.shared_experts.w3.scale",
+      "source": "layers.31.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00034-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.32.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.32.attn.wkv.scale",
+      "source": "layers.32.attn.wkv.weight",
+      "source_shard": "model-00035-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.32.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.32.attn.wo_a.scale",
+      "source": "layers.32.attn.wo_a.weight",
+      "source_shard": "model-00035-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.32.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.32.attn.wo_b.scale",
+      "source": "layers.32.attn.wo_b.weight",
+      "source_shard": "model-00035-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.32.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.32.attn.wq_a.scale",
+      "source": "layers.32.attn.wq_a.weight",
+      "source_shard": "model-00035-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.32.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.32.attn.wq_b.scale",
+      "source": "layers.32.attn.wq_b.weight",
+      "source_shard": "model-00035-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.32.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.32.ffn.shared_experts.w2.scale",
+      "source": "layers.32.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00035-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.32.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.32.ffn.shared_experts.w1.scale",
+      "source": "layers.32.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00035-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.32.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.32.ffn.shared_experts.w3.scale",
+      "source": "layers.32.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00035-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.32.indexer.attn_q_b",
+      "gguf_bytes": 10485760,
+      "logical_shape": [
+        4096,
+        1280
+      ],
+      "scale": "layers.32.attn.indexer.wq_b.scale",
+      "source": "layers.32.attn.indexer.wq_b.weight",
+      "source_shard": "model-00035-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.33.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.33.attn.wkv.scale",
+      "source": "layers.33.attn.wkv.weight",
+      "source_shard": "model-00036-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.33.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.33.attn.wo_a.scale",
+      "source": "layers.33.attn.wo_a.weight",
+      "source_shard": "model-00036-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.33.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.33.attn.wo_b.scale",
+      "source": "layers.33.attn.wo_b.weight",
+      "source_shard": "model-00036-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.33.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.33.attn.wq_a.scale",
+      "source": "layers.33.attn.wq_a.weight",
+      "source_shard": "model-00036-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.33.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.33.attn.wq_b.scale",
+      "source": "layers.33.attn.wq_b.weight",
+      "source_shard": "model-00036-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.33.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.33.ffn.shared_experts.w2.scale",
+      "source": "layers.33.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00036-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.33.ffn_gate_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.33.ffn.shared_experts.w1.scale",
+      "source": "layers.33.ffn.shared_experts.w1.weight",
+      "source_shard": "model-00036-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.33.ffn_up_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        2304,
+        5120
+      ],
+      "scale": "layers.33.ffn.shared_experts.w3.scale",
+      "source": "layers.33.ffn.shared_experts.w3.weight",
+      "source_shard": "model-00036-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.34.attn_kv",
+      "gguf_bytes": 5242880,
+      "logical_shape": [
+        512,
+        5120
+      ],
+      "scale": "layers.34.attn.wkv.scale",
+      "source": "layers.34.attn.wkv.weight",
+      "source_shard": "model-00037-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.34.attn_output_a",
+      "gguf_bytes": 67108864,
+      "logical_shape": [
+        8192,
+        4096
+      ],
+      "scale": "layers.34.attn.wo_a.scale",
+      "source": "layers.34.attn.wo_a.weight",
+      "source_shard": "model-00037-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.34.attn_output_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        5120,
+        8192
+      ],
+      "scale": "layers.34.attn.wo_b.scale",
+      "source": "layers.34.attn.wo_b.weight",
+      "source_shard": "model-00037-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.34.attn_q_a",
+      "gguf_bytes": 13107200,
+      "logical_shape": [
+        1280,
+        5120
+      ],
+      "scale": "layers.34.attn.wq_a.scale",
+      "source": "layers.34.attn.wq_a.weight",
+      "source_shard": "model-00037-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.34.attn_q_b",
+      "gguf_bytes": 83886080,
+      "logical_shape": [
+        32768,
+        1280
+      ],
+      "scale": "layers.34.attn.wq_b.scale",
+      "source": "layers.34.attn.wq_b.weight",
+      "source_shard": "model-00037-of-00048.safetensors"
+    },
+    {
+      "gguf": "blk.34.ffn_down_shexp",
+      "gguf_bytes": 23592960,
+      "logical_shape": [
+        5120,
+        2304
+      ],
+      "scale": "layers.34.ffn.shared_experts.w2.scale",
+      "source": "layers.34.ffn.shared_experts.w2.weight",
+      "source_shard": "model-00037-of-00048.safetensors"
+    }
+  ],
+  "original_repo": "apetersson/DeepSeek-V4.1-Flash-MixedQ2-GGUF",
+  "original_revision": "af983b61ee7903f414e8152bf1ece8f6ef2a1020",
+  "quantization": "source F8_E4M3 weight * F8_E8M0 32x32 scale -> BF16 RNE",
+  "schema": "ds41-densefix-v1-map",
+  "source_repo": "deepseek-ai/DeepSeek-V4.1-Flash",
+  "source_revision": "2bc89ac599031fa673cab993f1df02fc4a98c673"
+}

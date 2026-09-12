@@ -284,7 +284,7 @@ def download_one(sess: requests.Session, url: str, start: int, end_exclusive: in
     if path.exists() and path.stat().st_size > expected:
         raise RuntimeError(f"oversized partial range file {path}")
     attempts = 0
-    while path.stat().st_size if path.exists() else 0 < expected:
+    while (path.stat().st_size if path.exists() else 0) < expected:
         cur = path.stat().st_size if path.exists() else 0
         if cur == expected:
             break

@@ -236,6 +236,85 @@ def main() -> int:
         tmp.write_text(json.dumps(checkpoint, indent=2, ensure_ascii=False) + "\n")
         os.replace(tmp, RESULT_PATH)
 
+    optimization_cfg = token_spec.get("optimization_ab")
+    if isinstance(optimization_cfg, dict):
+        # Same-load causal A/B for the measured EP remote-route candidate.
+        # The plugin reads DS41_EP_SKIP_REMOTE at each routed call, so both
+        # ranks can switch between the qualified fallback and candidate without
+        # reloading weights or changing sampling.
+        speed_tokens = int(optimization_cfg.get("speed_tokens", 64))
+        warmup_tokens = int(optimization_cfg.get("warmup_tokens", 16))
+
+        def set_candidate(enabled: bool) -> None:
+            if enabled:
+                os.environ["DS41_EP_SKIP_REMOTE"] = "1"
+            else:
+                os.environ.pop("DS41_EP_SKIP_REMOTE", None)
+            emit("optimization_mode", candidate=enabled)
+
+        set_candidate(False)
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="ab-baseline-warmup-excluded",
+            max_tokens=warmup_tokens, ignore_eos=True))
+        save_checkpoint("AB_BASELINE_WARMUP_COMPLETE")
+
+        set_candidate(False)
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="ab-baseline-1",
+            max_tokens=speed_tokens, ignore_eos=True))
+        save_checkpoint("AB_BASELINE_1_COMPLETE")
+
+        set_candidate(True)
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="ab-candidate-warmup-excluded",
+            max_tokens=warmup_tokens, ignore_eos=True))
+        save_checkpoint("AB_CANDIDATE_WARMUP_COMPLETE")
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="ab-candidate-1",
+            max_tokens=speed_tokens, ignore_eos=True))
+        save_checkpoint("AB_CANDIDATE_1_COMPLETE")
+
+        set_candidate(False)
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="ab-baseline-2",
+            max_tokens=speed_tokens, ignore_eos=True))
+        save_checkpoint("AB_BASELINE_2_COMPLETE")
+
+        set_candidate(True)
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="ab-candidate-2",
+            max_tokens=speed_tokens, ignore_eos=True))
+        save_checkpoint("AB_CANDIDATE_2_COMPLETE")
+
+        # Candidate correctness gates on the same loaded model.
+        results.append(run_generation(
+            llm, prompts["arithmetic"]["token_ids"], label="ab-candidate-smoke",
+            max_tokens=128, ignore_eos=False))
+        save_checkpoint("AB_CANDIDATE_SMOKE_COMPLETE")
+        results.append(run_generation(
+            llm, prompts["coding"]["token_ids"], label="ab-candidate-coding",
+            max_tokens=512, ignore_eos=False))
+        save_checkpoint("AB_CANDIDATE_CODING_COMPLETE")
+        results.append(run_generation(
+            llm, prompts["json"]["token_ids"], label="ab-candidate-json",
+            max_tokens=256, ignore_eos=False))
+        save_checkpoint("AB_CANDIDATE_JSON_COMPLETE")
+
+        summary = {
+            "status": "OPTIMIZATION_AB_COMPLETE",
+            "rank": RANK, "world_size": WORLD_SIZE, "attempt": ATTEMPT,
+            "epoch": os.environ.get("DS41_OWNER_EPOCH"), "init_s": init_s,
+            "artifact_identity": artifact_identity,
+            "prompt_tokens_file": str(TOKENS_PATH),
+            "optimization": "EP_SKIP_REMOTE",
+            "results": results,
+        }
+        tmp = RESULT_PATH.with_suffix(RESULT_PATH.suffix + ".tmp")
+        tmp.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
+        os.replace(tmp, RESULT_PATH)
+        emit("run_complete", status=summary["status"], result=str(RESULT_PATH))
+        return 0
+
     profile_cfg = token_spec.get("profile_mode")
     if os.environ.get("DS41_PROFILE_MODE") == "1" or isinstance(profile_cfg, dict):
         # Performance continuation: one short warmup, one uninstrumented decode

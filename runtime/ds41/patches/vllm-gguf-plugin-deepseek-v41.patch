@@ -63,11 +63,59 @@ index ddea77f..611259a 100644
 +                    flush=True,
 +                )
          return model
+diff --git a/vllm_gguf_plugin/ops.py b/vllm_gguf_plugin/ops.py
+index cc3a0d3..0c20438 100644
+--- a/vllm_gguf_plugin/ops.py
++++ b/vllm_gguf_plugin/ops.py
+@@ -252,17 +252,31 @@ def ggml_moe_a8_vec(
+     quant_type: int,
+     row: int,
+     tokens: int,
++    expert_map: torch.Tensor | None = None,
+ ) -> torch.Tensor:
+-    if _cuda_kernel_available("ggml_moe_a8_vec", quant_type):
++    # The compiled extension accepts only local expert ids.  The EP skip path
++    # instead keeps global router ids and lets moe_align_block_size discard
++    # remote routes on GPU before the generic Triton kernels read any weights.
++    if expert_map is None and _cuda_kernel_available("ggml_moe_a8_vec", quant_type):
+         return torch.ops._C_gguf.ggml_moe_a8_vec(
+             X, W, topk_ids, top_k, quant_type, row, tokens
+         )
+     from vllm.model_executor.layers.fused_moe.fused_moe import moe_align_block_size
+ 
+-    E = W.shape[0]
+-    sorted_token_ids, expert_ids, num_tokens_post_padded = moe_align_block_size(
+-        topk_ids, get_triton_moe_block_m(quant_type), E
+-    )
++    if expert_map is None:
++        num_experts = W.shape[0]
++        sorted_token_ids, expert_ids, num_tokens_post_padded = moe_align_block_size(
++            topk_ids, get_triton_moe_block_m(quant_type), num_experts
++        )
++    else:
++        num_experts = expert_map.numel()
++        sorted_token_ids, expert_ids, num_tokens_post_padded = moe_align_block_size(
++            topk_ids,
++            get_triton_moe_block_m(quant_type),
++            num_experts,
++            expert_map=expert_map,
++            ignore_invalid_experts=True,
++        )
+     return ggml_moe_a8_triton(
+         X,
+         W,
 diff --git a/vllm_gguf_plugin/quantization/fused_moe.py b/vllm_gguf_plugin/quantization/fused_moe.py
-index 758429b..2171db6 100644
+index 758429b..a5d88f0 100644
 --- a/vllm_gguf_plugin/quantization/fused_moe.py
 +++ b/vllm_gguf_plugin/quantization/fused_moe.py
-@@ -8,6 +8,7 @@ from vllm.model_executor.layers.fused_moe import (
+@@ -2,12 +2,14 @@
+ # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+ 
+ from functools import partial
++import os
+ 
+ import torch
+ from vllm.model_executor.layers.fused_moe import (
      RoutedExperts,
  )
  from vllm.model_executor.layers.fused_moe.activation import (
@@ -75,11 +123,21 @@ index 758429b..2171db6 100644
      MoEActivation,
      apply_moe_activation,
  )
-@@ -40,14 +41,20 @@ def _fused_moe_gguf(
+@@ -31,7 +33,7 @@ from .params import (
+ from .utils import MMQ_QUANT_TYPES, MMVQ_QUANT_TYPES, logger
+ 
+ 
+-def _fused_moe_gguf(
++def _fused_moe_gguf_impl(
+     x: torch.Tensor,
+     w1: torch.Tensor,
+     w2: torch.Tensor,
+@@ -40,14 +42,21 @@ def _fused_moe_gguf(
      weight_type: int,
      weight_type2: int,
      activation: str,
 +    swiglu_limit: float,
++    expert_map: torch.Tensor | None = None,
  ) -> torch.Tensor:
      activation_enum = MoEActivation.from_str(activation)
 +    activation_config = ApplyMoEActivationConfig(
@@ -97,7 +155,62 @@ index 758429b..2171db6 100644
          return out
  
      from vllm.model_executor.layers.fused_moe.fused_moe import moe_align_block_size
-@@ -142,8 +149,9 @@ def _fused_moe_gguf_fake(
+@@ -98,11 +107,20 @@ def _fused_moe_gguf(
+         E, N, _ = w1.shape
+         top_k = topk_ids.shape[1]
+ 
+-        out = ops.ggml_moe_a8_vec(x, w1, topk_ids, top_k, weight_type, N, num_tokens)
++        out = ops.ggml_moe_a8_vec(
++            x, w1, topk_ids, top_k, weight_type, N, num_tokens, expert_map=expert_map
++        )
+         out = act(out)
+ 
+         out = ops.ggml_moe_a8_vec(
+-            out, w2, topk_ids, 1, weight_type2, w2.shape[1], num_tokens * top_k
++            out,
++            w2,
++            topk_ids,
++            1,
++            weight_type2,
++            w2.shape[1],
++            num_tokens * top_k,
++            expert_map=expert_map,
+         )
+         out = out.reshape(num_tokens, top_k, w2.shape[1]).mul_(
+             topk_weights.view(num_tokens, top_k, 1)
+@@ -133,6 +151,31 @@ def _fused_moe_gguf(
+     return out_hidden_states
+ 
+ 
++def _fused_moe_gguf(
++    x: torch.Tensor,
++    w1: torch.Tensor,
++    w2: torch.Tensor,
++    topk_weights: torch.Tensor,
++    topk_ids: torch.Tensor,
++    weight_type: int,
++    weight_type2: int,
++    activation: str,
++    swiglu_limit: float,
++) -> torch.Tensor:
++    return _fused_moe_gguf_impl(
++        x,
++        w1,
++        w2,
++        topk_weights,
++        topk_ids,
++        weight_type,
++        weight_type2,
++        activation,
++        swiglu_limit,
++        None,
++    )
++
++
+ def _fused_moe_gguf_fake(
+     x: torch.Tensor,
+     w1: torch.Tensor,
+@@ -142,8 +185,9 @@ def _fused_moe_gguf_fake(
      weight_type: int,
      weight_type2: int,
      activation: str,
@@ -108,7 +221,7 @@ index 758429b..2171db6 100644
      return torch.empty_like(x)
  
  
-@@ -266,6 +274,21 @@ class GGUFMoEMethod(FusedMoEMethodBase):
+@@ -266,6 +310,45 @@ class GGUFMoEMethod(FusedMoEMethodBase):
  
          from . import fused_moe_gguf as fused_moe_gguf_op
  
@@ -118,19 +231,43 @@ index 758429b..2171db6 100644
 +        # computes only its local contribution, remote routes are zero-weighted,
 +        # and the normal TP all-reduce reconstructs the exact routed sum.
 +        expert_map = layer.expert_map
++        ep_skip_remote = (
++            expert_map is not None
++            and os.environ.get("DS41_EP_SKIP_REMOTE", "0") == "1"
++            and x.shape[0] <= 64
++            and layer.w13_weight_type.weight_type in MMVQ_QUANT_TYPES
++            and layer.w2_weight_type.weight_type in MMVQ_QUANT_TYPES
++        )
++        if ep_skip_remote:
++            # Keep global router ids and globally-normalized weights unchanged.
++            # The pinned vLLM aligner uses expert_map on GPU to omit remote
++            # routes, maps owned experts to local ids, and emits expert=-1 for
++            # unused blocks.  GGUF Triton kernels return before weight reads for
++            # those blocks, including the zero-local-route case.
++            return _fused_moe_gguf_impl(
++                x,
++                layer.w13_weight,
++                layer.w2_weight,
++                topk_weights,
++                topk_ids,
++                layer.w13_weight_type.weight_type,
++                layer.w2_weight_type.weight_type,
++                layer.activation.value,
++                float(self.moe.swiglu_limit or 0.0),
++                expert_map,
++            )
 +        if expert_map is not None:
 +            local_ids = expert_map[topk_ids.to(torch.long)].to(topk_ids.dtype)
 +            remote = local_ids < 0
 +            topk_weights = topk_weights.masked_fill(remote, 0)
-+            # GGUF kernels require in-range expert ids. Remote routes still run
-+            # a harmless dummy expert with zero weight; this is deliberately a
-+            # correctness-first baseline and can be optimized after qualification.
++            # Correctness-first fallback: remote routes run local expert0 and
++            # are zero-weighted after the down projection.
 +            topk_ids = local_ids.clamp_min(0)
 +
          return fused_moe_gguf_op(
              x,
              layer.w13_weight,
-@@ -275,4 +298,5 @@ class GGUFMoEMethod(FusedMoEMethodBase):
+@@ -275,4 +358,5 @@ class GGUFMoEMethod(FusedMoEMethodBase):
              layer.w13_weight_type.weight_type,
              layer.w2_weight_type.weight_type,
              layer.activation.value,
@@ -282,3 +419,142 @@ index be2c1d7..a34d864 100644
      "DiffusionGGUFAdapter",
      "Flux2KleinDiffusionGGUFAdapter",
      "GGUFModelFiles",
+diff --git a/vllm_gguf_plugin/weights_adapter/deepseek_v41.py b/vllm_gguf_plugin/weights_adapter/deepseek_v41.py
+new file mode 100644
+index 0000000..5a14847
+--- /dev/null
++++ b/vllm_gguf_plugin/weights_adapter/deepseek_v41.py
+@@ -0,0 +1,133 @@
++# SPDX-License-Identifier: Apache-2.0
++"""GGUF weight adapter for DeepSeek V4.1 text-backbone artifacts.
++
++The current V4.1 GGUF converter emits compact llama.cpp tensor names while the
++vLLM ROCm model loader consumes the native DeepSeek checkpoint namespace.  Keep
++this translation explicit and fail closed: the quantized artifact intentionally
++omits Engram/MTP, which are supplied by separate DS41 runtime components.
++"""
++
++from __future__ import annotations
++
++import os
++import re
++from collections.abc import Iterable
++
++from vllm.logger import init_logger
++
++from ..gguf_files import GGUFModelFiles
++from ..weight_utils import get_gguf_tensor_names
++from .base import BaseGGUFWeightsAdapter, GGUFWeight
++
++logger = init_logger(__name__)
++
++_TOP = {
++    "token_embd": "embed.weight",
++    "output_norm": "norm.weight",
++    "output": "head.weight",
++}
++
++_LAYER = {
++    "attn_kv": "attn.wkv.weight",
++    "attn_kv_a_norm": "attn.kv_norm.weight",
++    "attn_norm": "attn_norm.weight",
++    "attn_output_a": "attn.wo_a.weight",
++    "attn_output_b": "attn.wo_b.weight",
++    "attn_q_a": "attn.wq_a.weight",
++    "attn_q_a_norm": "attn.q_norm.weight",
++    "attn_q_b": "attn.wq_b.weight",
++    "attn_sinks": "attn.attn_sink",
++    "attn_compressor_gate": "attn.compressor.wgate.weight",
++    "attn_compressor_kv": "attn.compressor.wkv.weight",
++    "attn_compressor_norm": "attn.compressor.norm.weight",
++    "indexer.attn_k": "attn.indexer.wk.weight",
++    "indexer.attn_q_b": "attn.indexer.wq_b.weight",
++    "indexer.k_norm": "attn.indexer.k_norm.weight",
++    "indexer.proj": "attn.indexer.weights_proj.weight",
++    "ffn_down_exps": "ffn.experts.0.w2.weight",
++    "ffn_gate_exps": "ffn.experts.0.w1.weight",
++    "ffn_up_exps": "ffn.experts.0.w3.weight",
++    "ffn_down_shexp": "ffn.shared_experts.w2.weight",
++    "ffn_gate_shexp": "ffn.shared_experts.w1.weight",
++    "ffn_up_shexp": "ffn.shared_experts.w3.weight",
++    "ffn_gate_inp": "ffn.gate.weight",
++    "exp_probs_b": "ffn.gate.bias",
++    "exp_probs_b_vl": "ffn.gate.bias_vl",
++    "ffn_norm": "ffn_norm.weight",
++    "hc_attn_base": "hc_attn_base",
++    "hc_attn_fn": "hc_attn_fn",
++    "hc_attn_scale": "hc_attn_scale",
++    "hc_ffn_base": "hc_ffn_base",
++    "hc_ffn_fn": "hc_ffn_fn",
++    "hc_ffn_scale": "hc_ffn_scale",
++}
++
++_BLOCK_RE = re.compile(r"^blk\.(\d+)\.(.+)$")
++
++
++def map_deepseek_v41_gguf_name(name: str) -> str | None:
++    if name in _TOP:
++        return _TOP[name]
++    match = _BLOCK_RE.fullmatch(name)
++    if match is None:
++        return None
++    layer, leaf = match.groups()
++    target = _LAYER.get(leaf)
++    if target is None:
++        return None
++    return f"layers.{layer}.{target}"
++
++
++class DeepseekV41GGUFAdapter(BaseGGUFWeightsAdapter):
++    """Map llama.cpp DeepSeek4/V4.1 GGUF tensors to native V4.1 names."""
++
++    @classmethod
++    def matches(cls, config) -> bool:
++        return getattr(config, "model_type", None) == "deepseek_v41"
++
++    @classmethod
++    def architecture(cls, config) -> str | None:
++        if not cls.matches(config):
++            return None
++        return "DeepseekV41ForCausalLM"
++
++    def build_name_map(self, files: GGUFModelFiles, model_config) -> dict[str, str]:
++        del model_config
++        names = sorted(get_gguf_tensor_names(files.backbone))
++        mapped: dict[str, str] = {}
++        unmapped: list[str] = []
++        for name in names:
++            target = map_deepseek_v41_gguf_name(name)
++            if target is None:
++                unmapped.append(name)
++            else:
++                mapped[name] = target
++        if unmapped:
++            raise RuntimeError(
++                f"Failed to map {len(unmapped)} DeepSeek V4.1 GGUF tensors: {unmapped}"
++            )
++        logger.info("Mapped all %d DeepSeek V4.1 GGUF tensors", len(mapped))
++        return mapped
++
++    def transform_weights(
++        self, weights: Iterable[GGUFWeight], model_config
++    ) -> Iterable[GGUFWeight]:
++        del model_config
++        phase_log = os.environ.get("DS41_LOAD_PHASE_LOG", "0") == "1"
++        for name, weight in weights:
++            if weight.ndim == 3 and ".experts.0." in name:
++                if phase_log:
++                    logger.info(
++                        "DS41_LOAD expert_tensor begin name=%s shape=%s",
++                        name,
++                        tuple(weight.shape),
++                    )
++                for expert_id, expert_weight in enumerate(weight.unbind()):
++                    expert_name = name.replace(
++                        ".experts.0.", f".experts.{expert_id}."
++                    )
++                    yield expert_name, expert_weight
++                if phase_log:
++                    logger.info("DS41_LOAD expert_tensor end name=%s", name)
++            else:
++                yield name, weight

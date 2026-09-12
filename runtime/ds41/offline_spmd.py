@@ -236,6 +236,78 @@ def main() -> int:
         tmp.write_text(json.dumps(checkpoint, indent=2, ensure_ascii=False) + "\n")
         os.replace(tmp, RESULT_PATH)
 
+    if os.environ.get("DS41_PROFILE_MODE") == "1":
+        # Performance continuation: one short warmup, one uninstrumented decode
+        # window, the identical instrumented window, then one independent
+        # reasoning-effort=high check.  No full qualification suite is replayed.
+        profile_tokens = int(os.environ.get("DS41_PROFILE_TOKENS", "32"))
+        warmup_tokens = int(os.environ.get("DS41_PROFILE_WARMUP_TOKENS", "16"))
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="profile-warmup-excluded",
+            max_tokens=warmup_tokens, ignore_eos=True))
+        save_checkpoint("PROFILE_WARMUP_COMPLETE")
+        baseline = run_generation(
+            llm, prompts["speed"]["token_ids"], label="profile-uninstrumented",
+            max_tokens=profile_tokens, ignore_eos=True)
+        results.append(baseline)
+        save_checkpoint("PROFILE_UNINSTRUMENTED_COMPLETE")
+
+        from runtime.ds41.perf_profile import DS41PerfCollector
+        profiler = DS41PerfCollector()
+        profiler.install()
+        profiler.enable()
+        instrumented = run_generation(
+            llm, prompts["speed"]["token_ids"], label="profile-instrumented",
+            max_tokens=profile_tokens, ignore_eos=True)
+        profiler.disable()
+        results.append(instrumented)
+        profile_path = RAW / f"perf-profile-rank{RANK}.json"
+        perf = profiler.summarize(
+            instrumented["completion_token_count"],
+            instrumented["derived"]["decode_span_s"],
+            output=profile_path,
+        )
+        base_tps = baseline["derived"]["decode_tps_first_to_last"]
+        inst_tps = instrumented["derived"]["decode_tps_first_to_last"]
+        perf["uninstrumented_decode_tps"] = base_tps
+        perf["instrumented_decode_tps"] = inst_tps
+        perf["instrumentation_overhead_pct_by_decode_tps"] = (
+            (base_tps / inst_tps - 1.0) * 100.0 if base_tps and inst_tps else None
+        )
+        profile_path.write_text(json.dumps(perf, indent=2, sort_keys=True) + "\n")
+        emit("perf_profile_complete", path=str(profile_path), **{
+            "baseline_tps": base_tps,
+            "instrumented_tps": inst_tps,
+            "overhead_pct": perf["instrumentation_overhead_pct_by_decode_tps"],
+            "remote_route_fraction": perf["remote_route_fraction"],
+        })
+        save_checkpoint("PROFILE_INSTRUMENTED_COMPLETE")
+
+        reasoning_key = "reasoning_high"
+        if reasoning_key not in prompts:
+            raise RuntimeError("profile prompt fixture is missing reasoning_high")
+        reasoning = run_generation(
+            llm, prompts[reasoning_key]["token_ids"], label="reasoning-high-once",
+            max_tokens=int(os.environ.get("DS41_REASONING_HIGH_MAX_TOKENS", "128")),
+            ignore_eos=False)
+        results.append(reasoning)
+        save_checkpoint("REASONING_HIGH_COMPLETE")
+
+        summary = {
+            "status": "PROFILE_COMPLETE",
+            "rank": RANK, "world_size": WORLD_SIZE, "attempt": ATTEMPT,
+            "epoch": os.environ.get("DS41_OWNER_EPOCH"), "init_s": init_s,
+            "artifact_identity": artifact_identity,
+            "prompt_tokens_file": str(TOKENS_PATH),
+            "profile_file": str(profile_path),
+            "results": results,
+        }
+        tmp = RESULT_PATH.with_suffix(RESULT_PATH.suffix + ".tmp")
+        tmp.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
+        os.replace(tmp, RESULT_PATH)
+        emit("run_complete", status=summary["status"], result=str(RESULT_PATH))
+        return 0
+
     # 1 token proves both SPMD ranks enter the same first forward/collective.
     results.append(
         run_generation(

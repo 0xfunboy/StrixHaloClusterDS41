@@ -105,7 +105,7 @@ index cc3a0d3..0c20438 100644
          X,
          W,
 diff --git a/vllm_gguf_plugin/quantization/fused_moe.py b/vllm_gguf_plugin/quantization/fused_moe.py
-index 758429b..a5d88f0 100644
+index 758429b..1297538 100644
 --- a/vllm_gguf_plugin/quantization/fused_moe.py
 +++ b/vllm_gguf_plugin/quantization/fused_moe.py
 @@ -2,12 +2,14 @@
@@ -123,16 +123,138 @@ index 758429b..a5d88f0 100644
      MoEActivation,
      apply_moe_activation,
  )
-@@ -31,7 +33,7 @@ from .params import (
- from .utils import MMQ_QUANT_TYPES, MMVQ_QUANT_TYPES, logger
+@@ -28,10 +30,128 @@ from .params import (
+     _gguf_moe_weight_loader,
+     _gguf_moe_weight_type_loader,
+ )
+-from .utils import MMQ_QUANT_TYPES, MMVQ_QUANT_TYPES, logger
++from .utils import MMQ_QUANT_TYPES, MMVQ_QUANT_TYPES, WeightType, logger
  
  
 -def _fused_moe_gguf(
++_DS41_NATIVE_HIP_STATS = {
++    "native_calls": 0,
++    "native_tokens": 0,
++    "triton_fallback_calls": 0,
++    "fallback_reasons": {},
++}
++_DS41_NATIVE_HIP_FIRST_LOGGED = False
++
++
++def ds41_native_hip_stats() -> dict:
++    return {
++        "native_calls": int(_DS41_NATIVE_HIP_STATS["native_calls"]),
++        "native_tokens": int(_DS41_NATIVE_HIP_STATS["native_tokens"]),
++        "triton_fallback_calls": int(_DS41_NATIVE_HIP_STATS["triton_fallback_calls"]),
++        "fallback_reasons": dict(_DS41_NATIVE_HIP_STATS["fallback_reasons"]),
++    }
++
++
++def _ds41_native_hip_contract(
++    x: torch.Tensor,
++    w1: torch.Tensor,
++    w2: torch.Tensor,
++    topk_weights: torch.Tensor,
++    topk_ids: torch.Tensor,
++    weight_type: int,
++    weight_type2: int,
++    activation: str,
++    expert_map: torch.Tensor | None,
++) -> tuple[bool, str]:
++    if expert_map is None:
++        return False, "no_expert_map"
++    if x.shape[0] != 1:
++        return False, "tokens_not_1"
++    if x.dtype != torch.bfloat16:
++        return False, "activation_not_bfloat16"
++    if activation != "silu":
++        return False, "activation_not_silu"
++    if int(weight_type) != int(WeightType.IQ2_XXS):
++        return False, "gate_up_not_iq2_xxs"
++    if int(weight_type2) != int(WeightType.Q2_K):
++        return False, "down_not_q2_k"
++    if topk_ids.ndim != 2 or tuple(topk_ids.shape) != (1, 6):
++        return False, "topk_shape_not_1x6"
++    if tuple(topk_weights.shape) != tuple(topk_ids.shape):
++        return False, "topk_weight_shape_mismatch"
++    if not x.is_contiguous():
++        return False, "activation_not_contiguous"
++    if not w1.is_contiguous() or not w2.is_contiguous():
++        return False, "weights_not_contiguous"
++    if w1.ndim != 3 or w2.ndim != 3 or w1.shape[0] != w2.shape[0]:
++        return False, "expert_weight_layout"
++    return True, "qualified"
++
++
++def _fused_moe_gguf_native_hip(
++    x: torch.Tensor,
++    w1: torch.Tensor,
++    w2: torch.Tensor,
++    topk_weights: torch.Tensor,
++    topk_ids: torch.Tensor,
++    weight_type: int,
++    weight_type2: int,
++    activation: str,
++    swiglu_limit: float,
++    expert_map: torch.Tensor,
++) -> torch.Tensor:
++    global _DS41_NATIVE_HIP_FIRST_LOGGED
++    namespace = getattr(torch.ops, "_C_gguf", None)
++    if namespace is None or not hasattr(namespace, "ggml_moe_a8_vec"):
++        raise RuntimeError(
++            "DS41 native HIP M=1 requested but verified _C_gguf is not loaded"
++        )
++    activation_enum = MoEActivation.from_str(activation)
++    activation_config = ApplyMoEActivationConfig(
++        clamp_limit=swiglu_limit if swiglu_limit > 0 else None
++    )
++
++    def act(inp: torch.Tensor):
++        d = inp.shape[-1] // 2
++        out = torch.empty(inp.shape[:-1] + (d,), dtype=inp.dtype, device=inp.device)
++        apply_moe_activation(
++            activation_enum, out, inp, activation_config=activation_config
++        )
++        return out
++
++    local_ids = expert_map[topk_ids.to(torch.long)].to(torch.int32).contiguous()
++    top_k = topk_ids.shape[1]
++    gate_up = torch.ops._C_gguf.ggml_moe_a8_vec(
++        x, w1, local_ids, top_k, int(weight_type), w1.shape[1], 1
++    )
++    activated = act(gate_up)
++    down = torch.ops._C_gguf.ggml_moe_a8_vec(
++        activated,
++        w2,
++        local_ids,
++        1,
++        int(weight_type2),
++        w2.shape[1],
++        top_k,
++    )
++    weighted = down.reshape(1, top_k, w2.shape[1]).mul_(
++        topk_weights.view(1, top_k, 1)
++    )
++    out = torch.empty_like(x)
++    ops.moe_sum(weighted, out)
++    _DS41_NATIVE_HIP_STATS["native_calls"] += 1
++    _DS41_NATIVE_HIP_STATS["native_tokens"] += 1
++    if not _DS41_NATIVE_HIP_FIRST_LOGGED:
++        _DS41_NATIVE_HIP_FIRST_LOGGED = True
++        print(
++            "DS41_NATIVE_HIP_MOE_EXECUTE "
++            f"shape={tuple(x.shape)} dtype={x.dtype} topk={top_k} "
++            f"qtypes={int(weight_type)}/{int(weight_type2)}",
++            flush=True,
++        )
++    return out
++
++
 +def _fused_moe_gguf_impl(
      x: torch.Tensor,
      w1: torch.Tensor,
      w2: torch.Tensor,
-@@ -40,14 +42,21 @@ def _fused_moe_gguf(
+@@ -40,14 +160,21 @@ def _fused_moe_gguf(
      weight_type: int,
      weight_type2: int,
      activation: str,
@@ -155,7 +277,7 @@ index 758429b..a5d88f0 100644
          return out
  
      from vllm.model_executor.layers.fused_moe.fused_moe import moe_align_block_size
-@@ -98,11 +107,20 @@ def _fused_moe_gguf(
+@@ -98,11 +225,20 @@ def _fused_moe_gguf(
          E, N, _ = w1.shape
          top_k = topk_ids.shape[1]
  
@@ -178,7 +300,7 @@ index 758429b..a5d88f0 100644
          )
          out = out.reshape(num_tokens, top_k, w2.shape[1]).mul_(
              topk_weights.view(num_tokens, top_k, 1)
-@@ -133,6 +151,31 @@ def _fused_moe_gguf(
+@@ -133,6 +269,31 @@ def _fused_moe_gguf(
      return out_hidden_states
  
  
@@ -210,7 +332,7 @@ index 758429b..a5d88f0 100644
  def _fused_moe_gguf_fake(
      x: torch.Tensor,
      w1: torch.Tensor,
-@@ -142,8 +185,9 @@ def _fused_moe_gguf_fake(
+@@ -142,8 +303,9 @@ def _fused_moe_gguf_fake(
      weight_type: int,
      weight_type2: int,
      activation: str,
@@ -221,7 +343,7 @@ index 758429b..a5d88f0 100644
      return torch.empty_like(x)
  
  
-@@ -266,6 +310,45 @@ class GGUFMoEMethod(FusedMoEMethodBase):
+@@ -266,6 +428,75 @@ class GGUFMoEMethod(FusedMoEMethodBase):
  
          from . import fused_moe_gguf as fused_moe_gguf_op
  
@@ -239,6 +361,36 @@ index 758429b..a5d88f0 100644
 +            and layer.w2_weight_type.weight_type in MMVQ_QUANT_TYPES
 +        )
 +        if ep_skip_remote:
++            native_requested = os.environ.get("DS41_NATIVE_HIP_MOE", "0") == "1"
++            if native_requested:
++                native_ok, reason = _ds41_native_hip_contract(
++                    x,
++                    layer.w13_weight,
++                    layer.w2_weight,
++                    topk_weights,
++                    topk_ids,
++                    layer.w13_weight_type.weight_type,
++                    layer.w2_weight_type.weight_type,
++                    layer.activation.value,
++                    expert_map,
++                )
++                if native_ok:
++                    return _fused_moe_gguf_native_hip(
++                        x,
++                        layer.w13_weight,
++                        layer.w2_weight,
++                        topk_weights,
++                        topk_ids,
++                        layer.w13_weight_type.weight_type,
++                        layer.w2_weight_type.weight_type,
++                        layer.activation.value,
++                        float(self.moe.swiglu_limit or 0.0),
++                        expert_map,
++                    )
++                _DS41_NATIVE_HIP_STATS["triton_fallback_calls"] += 1
++                reasons = _DS41_NATIVE_HIP_STATS["fallback_reasons"]
++                reasons[reason] = int(reasons.get(reason, 0)) + 1
++
 +            # Keep global router ids and globally-normalized weights unchanged.
 +            # The pinned vLLM aligner uses expert_map on GPU to omit remote
 +            # routes, maps owned experts to local ids, and emits expert=-1 for
@@ -267,7 +419,7 @@ index 758429b..a5d88f0 100644
          return fused_moe_gguf_op(
              x,
              layer.w13_weight,
-@@ -275,4 +358,5 @@ class GGUFMoEMethod(FusedMoEMethodBase):
+@@ -275,4 +506,5 @@ class GGUFMoEMethod(FusedMoEMethodBase):
              layer.w13_weight_type.weight_type,
              layer.w2_weight_type.weight_type,
              layer.activation.value,

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -44,9 +45,9 @@ ROOT = Path('/home/funboy/StrixHaloClusterDS41')
 ART = json.loads((ROOT / 'runtime/ds41/artifact.json').read_text())
 MODEL = Path(ART['model_dir'])
 PROMPT = ROOT / 'reports/DS41-Q2-001/attempt011/prompt-tokens.json'
-OUT = ROOT / 'reports/DS41-Q2-001/densefix/layer0-complete-node01.json'
-CAND_NPY = ROOT / 'reports/DS41-Q2-001/densefix/layer0-final-candidate.npy'
-REF_NPY = ROOT / 'reports/DS41-Q2-001/densefix/layer0-final-reference.npy'
+OUT = Path(os.environ.get('DS41_LAYER0_OUT', str(ROOT / 'reports/DS41-Q2-001/densefix/layer0-complete-node01.json')))
+CAND_NPY = Path(os.environ.get('DS41_LAYER0_CAND_NPY', str(ROOT / 'reports/DS41-Q2-001/densefix/layer0-final-candidate.npy')))
+REF_NPY = Path(os.environ.get('DS41_LAYER0_REF_NPY', str(ROOT / 'reports/DS41-Q2-001/densefix/layer0-final-reference.npy')))
 CFG = json.loads((MODEL / 'config.json').read_text())['text_config']
 
 H = int(CFG['hidden_size']); HC = int(CFG['hc_mult'])

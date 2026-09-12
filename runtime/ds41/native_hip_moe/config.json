@@ -1,0 +1,29 @@
+{
+  "schema": "ds41-native-hip-moe-v1",
+  "library_path": "/home/funboy/models/ds41/native-hip-moe/runtime/_C_gguf.abi3.so",
+  "library_sha256": "a860f50f3c52535c6fbde6dcbb6e6fa5f8b699fae5301ba77f56f02400eaa07d",
+  "plugin_pin": "d4c1f0d082fc7cd4350da56689109a01c1f29d6c",
+  "patch_sha256": "f59eeb76e4224b8ca4952a555c6acfe31bcdb1395b67d98428753e910957cedc",
+  "build_script_sha256": "990d7163e3cb087b1a5401be4df2039e5a11d23d7f4acae2f61b012a5ca848d5",
+  "patched_source_sha256": "d2efaa70a37360b8e9f3aa2484827103e64ac1d4dc16223780b55f06c76bad4f",
+  "hipified_source_sha256": "ebd25e1e3a08e64035897692bdda69cc5ebe21bd606490933b7f96bdab3c23cc",
+  "source_provenance": "vllm-gguf-plugin moe_vec.cuh copied/adapted from llama.cpp b2899 ggml-cuda/mmvq.cu; plugin pin d4c1f0d082fc7cd4350da56689109a01c1f29d6c",
+  "arch": "gfx1151",
+  "torch": "2.13.0+rocm10.0.0",
+  "hip": "7.15.26333",
+  "qualified_dispatch": {
+    "tokens": 1,
+    "activation_dtype": "bfloat16",
+    "gate_up_quant": "IQ2_XXS",
+    "down_quant": "Q2_K",
+    "top_k": 6,
+    "requires_contiguous": true,
+    "expert_parallel": true,
+    "remote_id": -1
+  },
+  "numeric_gate": {
+    "native_vs_independent_reference_rel_l2_max": 0.035,
+    "all_remote_output": "exact_zero",
+    "routing_weights": "unchanged_no_local_renormalization"
+  }
+}

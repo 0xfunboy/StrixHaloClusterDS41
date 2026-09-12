@@ -175,6 +175,17 @@ def main() -> int:
     RAW.mkdir(parents=True, exist_ok=True)
     token_spec = json.loads(TOKENS_PATH.read_text(encoding="utf-8"))
     prompts = token_spec["prompts"]
+    native_hip_ab_cfg = token_spec.get("native_hip_ab")
+    native_hip_identity = None
+    if isinstance(native_hip_ab_cfg, dict):
+        from runtime.ds41.native_hip_moe_runtime import ensure_loaded
+
+        native_hip_identity = ensure_loaded()
+        # The extension is resident before LLM construction, but baseline A
+        # remains Triton until both ranks explicitly toggle between requests.
+        os.environ["DS41_NATIVE_HIP_MOE"] = "0"
+        os.environ["DS41_EP_SKIP_REMOTE"] = "1"
+        emit("native_hip_library_loaded", **native_hip_identity)
 
     from runtime.ds41.artifact_identity import verify_fast
 
@@ -235,6 +246,105 @@ def main() -> int:
         tmp = RESULT_PATH.with_suffix(RESULT_PATH.suffix + ".tmp")
         tmp.write_text(json.dumps(checkpoint, indent=2, ensure_ascii=False) + "\n")
         os.replace(tmp, RESULT_PATH)
+
+    if isinstance(native_hip_ab_cfg, dict):
+        speed_tokens = int(native_hip_ab_cfg.get("speed_tokens", 64))
+        warmup_tokens = int(native_hip_ab_cfg.get("warmup_tokens", 16))
+
+        from vllm_gguf_plugin.quantization.fused_moe import ds41_native_hip_stats
+
+        def native_stats_event(label: str) -> dict[str, Any]:
+            stats = ds41_native_hip_stats()
+            emit("native_hip_stats", label=label, **stats)
+            return stats
+
+        def set_native(enabled: bool) -> None:
+            os.environ["DS41_NATIVE_HIP_MOE"] = "1" if enabled else "0"
+            emit(
+                "native_hip_mode",
+                enabled=enabled,
+                library_sha256=(native_hip_identity or {}).get("sha256"),
+            )
+
+        # Contemporary baseline A is the already-promoted Triton skip-remote
+        # path. Candidate B changes only M=1 routed IQ2_XXS->Q2_K execution.
+        set_native(False)
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="hip-ab-baseline-warmup-excluded",
+            max_tokens=warmup_tokens, ignore_eos=True))
+        save_checkpoint("HIP_AB_BASELINE_WARMUP_COMPLETE")
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="hip-ab-baseline-1",
+            max_tokens=speed_tokens, ignore_eos=True))
+        save_checkpoint("HIP_AB_BASELINE_1_COMPLETE")
+
+        set_native(True)
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="hip-ab-candidate-warmup-excluded",
+            max_tokens=warmup_tokens, ignore_eos=True))
+        native_stats_event("after_candidate_warmup")
+        save_checkpoint("HIP_AB_CANDIDATE_WARMUP_COMPLETE")
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="hip-ab-candidate-1",
+            max_tokens=speed_tokens, ignore_eos=True))
+        native_stats_event("after_candidate_1")
+        save_checkpoint("HIP_AB_CANDIDATE_1_COMPLETE")
+
+        set_native(False)
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="hip-ab-baseline-2",
+            max_tokens=speed_tokens, ignore_eos=True))
+        save_checkpoint("HIP_AB_BASELINE_2_COMPLETE")
+
+        set_native(True)
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="hip-ab-candidate-2",
+            max_tokens=speed_tokens, ignore_eos=True))
+        native_stats = native_stats_event("after_candidate_2")
+        save_checkpoint("HIP_AB_CANDIDATE_2_COMPLETE")
+
+        # Quality gates remain true generation on the same loaded candidate.
+        results.append(run_generation(
+            llm, prompts["arithmetic"]["token_ids"], label="hip-ab-candidate-smoke",
+            max_tokens=128, ignore_eos=False))
+        save_checkpoint("HIP_AB_CANDIDATE_SMOKE_COMPLETE")
+        results.append(run_generation(
+            llm, prompts["coding"]["token_ids"], label="hip-ab-candidate-coding",
+            max_tokens=512, ignore_eos=False))
+        save_checkpoint("HIP_AB_CANDIDATE_CODING_COMPLETE")
+        results.append(run_generation(
+            llm, prompts["json"]["token_ids"], label="hip-ab-candidate-json",
+            max_tokens=256, ignore_eos=False))
+        save_checkpoint("HIP_AB_CANDIDATE_JSON_COMPLETE")
+        if "reasoning_high" not in prompts:
+            raise RuntimeError("native HIP A/B fixture is missing reasoning_high")
+        results.append(run_generation(
+            llm, prompts["reasoning_high"]["token_ids"],
+            label="hip-ab-candidate-reasoning-high",
+            max_tokens=int(native_hip_ab_cfg.get("reasoning_high_max_tokens", 128)),
+            ignore_eos=False))
+        save_checkpoint("HIP_AB_CANDIDATE_REASONING_HIGH_COMPLETE")
+        native_stats = native_stats_event("after_quality")
+
+        summary = {
+            "status": "NATIVE_HIP_AB_COMPLETE",
+            "rank": RANK,
+            "world_size": WORLD_SIZE,
+            "attempt": ATTEMPT,
+            "epoch": os.environ.get("DS41_OWNER_EPOCH"),
+            "init_s": init_s,
+            "artifact_identity": artifact_identity,
+            "native_hip_identity": native_hip_identity,
+            "native_hip_stats": native_stats,
+            "prompt_tokens_file": str(TOKENS_PATH),
+            "optimization": "NATIVE_HIP_M1_IQ2_XXS_Q2_K",
+            "results": results,
+        }
+        tmp = RESULT_PATH.with_suffix(RESULT_PATH.suffix + ".tmp")
+        tmp.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
+        os.replace(tmp, RESULT_PATH)
+        emit("run_complete", status=summary["status"], result=str(RESULT_PATH))
+        return 0
 
     optimization_cfg = token_spec.get("optimization_ab")
     if isinstance(optimization_cfg, dict):

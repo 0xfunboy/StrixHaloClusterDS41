@@ -1,0 +1,6 @@
+diff --git a/vllm_gguf_plugin/csrc/gguf/moe_vec.cuh b/vllm_gguf_plugin/csrc/gguf/moe_vec.cuh
+--- a/vllm_gguf_plugin/csrc/gguf/moe_vec.cuh
++++ b/vllm_gguf_plugin/csrc/gguf/moe_vec.cuh
+@@ -16 +16 @@
+-  if (row >= nrows) {
++  if (expert < 0 || row >= nrows) {

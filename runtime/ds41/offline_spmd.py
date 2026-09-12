@@ -220,6 +220,22 @@ def main() -> int:
 
     results: list[dict[str, Any]] = []
 
+    def save_checkpoint(status: str) -> None:
+        checkpoint = {
+            "status": status,
+            "rank": RANK,
+            "world_size": WORLD_SIZE,
+            "attempt": ATTEMPT,
+            "epoch": os.environ.get("DS41_OWNER_EPOCH"),
+            "init_s": init_s,
+            "artifact_identity": artifact_identity,
+            "prompt_tokens_file": str(TOKENS_PATH),
+            "results": results,
+        }
+        tmp = RESULT_PATH.with_suffix(RESULT_PATH.suffix + ".tmp")
+        tmp.write_text(json.dumps(checkpoint, indent=2, ensure_ascii=False) + "\n")
+        os.replace(tmp, RESULT_PATH)
+
     # 1 token proves both SPMD ranks enter the same first forward/collective.
     results.append(
         run_generation(
@@ -230,6 +246,7 @@ def main() -> int:
             ignore_eos=True,
         )
     )
+    save_checkpoint("FORWARD_1TOKEN_COMPLETE")
 
     # Full arithmetic smoke. Do not run speed/quality suite if this is wrong or incomplete.
     smoke = run_generation(
@@ -241,6 +258,7 @@ def main() -> int:
     )
     results.append(smoke)
     smoke_pass = smoke["finished"] and smoke["text"].strip() == "323"
+    save_checkpoint("SMOKE_PASS" if smoke_pass else "SMOKE_FAIL")
     emit("smoke_gate", passed=smoke_pass, text=smoke["text"][:400])
 
     if smoke_pass:
@@ -254,6 +272,7 @@ def main() -> int:
                 ignore_eos=True,
             )
         )
+        save_checkpoint("SPEED_WARMUP_COMPLETE")
         for idx in range(1, 4):
             results.append(
                 run_generation(
@@ -264,6 +283,7 @@ def main() -> int:
                     ignore_eos=True,
                 )
             )
+            save_checkpoint(f"SPEED_MEASURED_{idx}_COMPLETE")
         results.append(
             run_generation(
                 llm,
@@ -272,6 +292,7 @@ def main() -> int:
                 max_tokens=512,
             )
         )
+        save_checkpoint("CODING_COMPLETE")
         results.append(
             run_generation(
                 llm,
@@ -280,6 +301,7 @@ def main() -> int:
                 max_tokens=256,
             )
         )
+        save_checkpoint("REASONING_COMPLETE")
         results.append(
             run_generation(
                 llm,
@@ -288,6 +310,7 @@ def main() -> int:
                 max_tokens=256,
             )
         )
+        save_checkpoint("JSON_COMPLETE")
 
     summary = {
         "status": "PASS" if smoke_pass else "SMOKE_FAIL",
@@ -296,10 +319,13 @@ def main() -> int:
         "attempt": ATTEMPT,
         "epoch": os.environ.get("DS41_OWNER_EPOCH"),
         "init_s": init_s,
+        "artifact_identity": artifact_identity,
         "prompt_tokens_file": str(TOKENS_PATH),
         "results": results,
     }
-    RESULT_PATH.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
+    tmp = RESULT_PATH.with_suffix(RESULT_PATH.suffix + ".tmp")
+    tmp.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
+    os.replace(tmp, RESULT_PATH)
     emit("run_complete", status=summary["status"], result=str(RESULT_PATH))
     return 0 if smoke_pass else 20
 

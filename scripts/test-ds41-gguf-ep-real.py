@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 from pathlib import Path
+from _ds41_artifact import MODEL_FILE
 
 import gguf
 import numpy as np
@@ -11,7 +12,7 @@ import torch
 
 from vllm_gguf_plugin.quantization.fused_moe import GGUFMoEMethod
 
-MODEL = Path('/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2/DSV41-mixedq2-00001-of-00005.gguf')
+MODEL = MODEL_FILE
 IQ2_XXS = int(gguf.GGMLQuantizationType.IQ2_XXS)
 Q2_K = int(gguf.GGMLQuantizationType.Q2_K)
 

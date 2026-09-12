@@ -1,0 +1,29 @@
+{
+  "schema": "ds41-artifact-v1",
+  "name": "DeepSeek-V4.1-Flash-MixedQ2-Engram2-densefix",
+  "model_dir": "/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2-densefix",
+  "model_file": "DSV41-mixedq2-00001-of-00005.gguf",
+  "original_model_dir": "/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2",
+  "source_repo": "deepseek-ai/DeepSeek-V4.1-Flash",
+  "source_revision": "2bc89ac599031fa673cab993f1df02fc4a98c673",
+  "mixedq2_revision": "af983b61ee7903f414e8152bf1ece8f6ef2a1020",
+  "repair_tool_commit": "24945da5a68cb2f2c6636ffe36db1b7daae47f0f",
+  "densefix_manifest_sha256": "c22f0b8211e6f703c04ce5bb8746c6b412d60fe0b7d0311ddc004974c66f0284",
+  "validation": {
+    "file": "densefix-validation.json",
+    "status": "PASS",
+    "tensors": 328,
+    "values_checked": 6522142720,
+    "mismatch_values": 0,
+    "unpatched_bytes": "BYTE_IDENTICAL_BY_STREAM_HASH"
+  },
+  "shards": [
+    {"name": "DSV41-mixedq2-00001-of-00005.gguf", "size": 39170298360, "sha256": "a4013e40becdfce02b6adf05e74f4769d1c6cebfce03ac497f05033e32796cf3"},
+    {"name": "DSV41-mixedq2-00002-of-00005.gguf", "size": 39994226192, "sha256": "4e7f2ff1516e0747a2ce3ad3540b15ffd88d9c01cf12c7e6520ba16f277ba06a"},
+    {"name": "DSV41-mixedq2-00003-of-00005.gguf", "size": 39001134296, "sha256": "0735df238fe1a5a69205e2144fc9c18c87314b5ff669d31c8c1b424ed6de7481"},
+    {"name": "DSV41-mixedq2-00004-of-00005.gguf", "size": 39967092080, "sha256": "d3faf5ff2a3080c4148e54338bcefb9b7b41c59e767c484e97a9277cc6022340"},
+    {"name": "DSV41-mixedq2-00005-of-00005.gguf", "size": 10797178736, "sha256": "715ed88897564a79bd9316398a0f13fba007846d416735d3dd8ed4489ff9f032"}
+  ],
+  "engram_root": "/home/funboy/models/ds41/engram2-tp2",
+  "engram_files": ["model-00047-of-00048.safetensors", "model-00048-of-00048.safetensors"]
+}

@@ -13,7 +13,8 @@ VENV="$ENGINE/venv"
 VLLM_SOURCE="$ROOT/.vendor/vllm-dsv41"
 PLUGIN_SOURCE="$ROOT/.vendor/gguf-plugin"
 GGUF_PY="$ROOT/.vendor/llama-v41/gguf-py"
-MODEL_DIR=/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2
+ARTIFACT_CONFIG="$ROOT/runtime/ds41/artifact.json"
+MODEL_DIR=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["model_dir"])' "$ARTIFACT_CONFIG")
 MODEL_FILE="$MODEL_DIR/DSV41-mixedq2-00001-of-00005.gguf"
 ENGRAM_DIR="/home/funboy/models/ds41/engram2-tp2/rank$rank"
 for p in "$VENV/bin/python" "$VLLM_SOURCE/vllm/__init__.py" "$PLUGIN_SOURCE/vllm_gguf_plugin/__init__.py" "$GGUF_PY/gguf/__init__.py" "$MODEL_FILE" "$MODEL_DIR/config.json" "$MODEL_DIR/tokenizer.json" "$ENGRAM_DIR/model-00047-of-00048.safetensors" "$ENGRAM_DIR/model-00048-of-00048.safetensors"; do
@@ -46,6 +47,7 @@ export NCCL_SOCKET_IFNAME='=thunderbolt0' GLOO_SOCKET_IFNAME=thunderbolt0 NCCL_N
 export NCCL_MIN_NCHANNELS=1 NCCL_MAX_NCHANNELS=1 NCCL_SOCKET_NTHREADS=1 NCCL_NSOCKS_PERTHREAD=1 NCCL_DEBUG=WARN
 export MASTER_ADDR=10.55.0.1 MASTER_PORT="${DS41_MASTER_PORT:-29741}"
 cd "$ROOT"
+"$VENV/bin/python" -m runtime.ds41.artifact_identity verify-fast --rank "$rank"
 run_mode=${DS41_RUN_MODE:-api}
 case "$run_mode" in
   offline)

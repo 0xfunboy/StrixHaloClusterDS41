@@ -21,8 +21,9 @@ from vllm import LLM, SamplingParams  # noqa: E402
 from vllm.v1.executor.uniproc_executor import ExecutorWithExternalLauncher  # noqa: E402
 
 ROOT = Path("/home/funboy/StrixHaloClusterDS41")
-MODEL_DIR = Path("/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2")
-MODEL_FILE = MODEL_DIR / "DSV41-mixedq2-00001-of-00005.gguf"
+ARTIFACT_CONFIG = json.loads((ROOT / "runtime/ds41/artifact.json").read_text())
+MODEL_DIR = Path(ARTIFACT_CONFIG["model_dir"])
+MODEL_FILE = MODEL_DIR / ARTIFACT_CONFIG["model_file"]
 ATTEMPT = os.environ.get("DS41_ATTEMPT_NAME", "attempt009")
 RAW = ROOT / "reports/DS41-Q2-001" / ATTEMPT
 RANK = int(os.environ.get("RANK", "-1"))
@@ -175,6 +176,10 @@ def main() -> int:
     token_spec = json.loads(TOKENS_PATH.read_text(encoding="utf-8"))
     prompts = token_spec["prompts"]
 
+    from runtime.ds41.artifact_identity import verify_fast
+
+    artifact_identity = verify_fast(RANK)
+    emit("artifact_identity", **artifact_identity)
     emit(
         "llm_init_begin",
         model=str(MODEL_FILE),

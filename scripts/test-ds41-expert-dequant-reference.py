@@ -4,13 +4,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import numpy as np
+from _ds41_artifact import MODEL_FILE
 import torch
 import gguf
 from gguf.quants import dequantize
 from vllm_gguf_plugin.quantization import fused_mul_mat_gguf
 from vllm.model_executor.layers.fused_moe.activation import MoEActivation, apply_moe_activation, ApplyMoEActivationConfig
 
-MODEL=Path('/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2/DSV41-mixedq2-00001-of-00005.gguf')
+MODEL=MODEL_FILE
 ROOT=Path('/home/funboy/StrixHaloClusterDS41')
 EXPERT=0; LIMIT=10.0
 

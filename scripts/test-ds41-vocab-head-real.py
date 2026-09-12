@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 from types import SimpleNamespace
+from _ds41_artifact import MODEL_DIR
 
 import torch
 from torch.nn.parameter import UninitializedParameter
@@ -15,7 +16,7 @@ from vllm_gguf_plugin.quantization.params import _gguf_embedding_weight_loader
 from vllm_gguf_plugin.weight_utils import gguf_quant_weights_iterator_multi
 
 ROOT = Path('/home/funboy/StrixHaloClusterDS41')
-MODEL = Path('/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2')
+MODEL = MODEL_DIR
 SHARD = MODEL / 'DSV41-mixedq2-00005-of-00005.gguf'
 ATTEMPT = ROOT / 'reports/DS41-Q2-001/attempt010'
 VOCAB = 129280

@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import gc
 from pathlib import Path
+from _ds41_artifact import MODEL_FILE
 
 from vllm_gguf_plugin.weight_utils import gguf_quant_weights_iterator_multi
 
-MODEL = Path('/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2/DSV41-mixedq2-00001-of-00005.gguf')
+MODEL = MODEL_FILE
 RAW = 'blk.0.ffn_gate_exps'
 MAPPED = 'layers.0.ffn.experts.0.w1.weight'
 

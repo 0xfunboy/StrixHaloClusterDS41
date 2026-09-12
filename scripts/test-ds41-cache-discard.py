@@ -12,14 +12,12 @@ import hashlib
 import mmap
 import os
 from pathlib import Path
+from _ds41_artifact import MODEL_FILE
 
 import gguf
 import torch
 
-MODEL = Path(
-    "/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2/"
-    "DSV41-mixedq2-00001-of-00005.gguf"
-)
+MODEL = MODEL_FILE
 
 
 def rss_bytes() -> int:

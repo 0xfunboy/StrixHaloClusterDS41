@@ -24,10 +24,11 @@ from vllm.model_executor.layers.linear import UnquantizedLinearMethod
 from vllm.model_executor.kernels.mhc.torch import mhc_pre_delayed_torch
 
 ROOT = Path('/home/funboy/StrixHaloClusterDS41')
-MODEL = Path('/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2')
+ART = json.loads((ROOT / 'runtime/ds41/artifact.json').read_text())
+MODEL = Path(ART['model_dir'])
 PROMPT = ROOT / 'reports/DS41-Q2-001/attempt011/prompt-tokens.json'
 SAMPLE = ROOT / 'reports/DS41-Q2-001/stage0/source-shard3-sample'
-OUT = ROOT / 'reports/DS41-Q2-001/stage0/layer0-attention-real-node01.json'
+OUT = ROOT / 'reports/DS41-Q2-001/densefix/layer0-pre-attention-node01.json'
 H, HC, QRA, HD, HEADS = 5120, 4, 1280, 512, 64
 EPS = 1e-20
 

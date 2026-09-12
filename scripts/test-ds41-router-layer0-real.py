@@ -5,11 +5,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import numpy as np
+from _ds41_artifact import MODEL_FILE
 import torch
 from gguf import GGUFReader
 from vllm.model_executor.layers.fused_moe.router.fused_topk_bias_router import fused_topk_bias
 
-MODEL=Path('/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2/DSV41-mixedq2-00001-of-00005.gguf')
+MODEL=MODEL_FILE
 ROOT=Path('/home/funboy/StrixHaloClusterDS41')
 TOPK=6
 SCALE=1.5

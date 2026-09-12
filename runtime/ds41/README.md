@@ -58,7 +58,8 @@ expert bytes must match for both M=1 decode and M=65 MMQ/prefill paths.
 
 Weights are deliberately outside Git. Canonical paths used by the experiment:
 
-- backbone: `/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2`
+- runtime backbone (verified DenseFix): `/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2-densefix`
+- immutable original/recovery source: `/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2`
 - source Engram2: `/home/funboy/models/ds41/engram2-source`
 - rank-local Engram2: `/home/funboy/models/ds41/engram2-tp2/rank{0,1}`
 

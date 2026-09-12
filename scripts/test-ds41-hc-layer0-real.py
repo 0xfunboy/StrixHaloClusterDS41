@@ -4,12 +4,13 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import numpy as np
+from _ds41_artifact import MODEL_DIR
 import torch
 from gguf import GGUFReader
 from vllm.model_executor.kernels.mhc.torch import mhc_pre_delayed_torch, mhc_post_torch
 
 ROOT=Path('/home/funboy/StrixHaloClusterDS41')
-MODEL=Path('/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2')
+MODEL=MODEL_DIR
 H=5120; HC=4; MIX=(2+HC)*HC; RMS_EPS=1e-20; HC_EPS=1e-6; ITERS=20; POST_ALPHA=2.0
 TOKEN_IDS=[0,128803,128804,128822,66851]
 

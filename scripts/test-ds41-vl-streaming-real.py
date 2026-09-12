@@ -7,6 +7,7 @@ import re
 import time
 from pathlib import Path
 from types import SimpleNamespace
+from _ds41_artifact import MODEL_DIR
 
 import torch
 
@@ -22,10 +23,7 @@ from vllm_gguf_plugin.weights_adapter.deepseek_v41 import (
 import gguf
 
 ROOT = Path("/home/funboy/StrixHaloClusterDS41")
-SHARD = Path(
-    "/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2/"
-    "DSV41-mixedq2-00005-of-00005.gguf"
-)
+SHARD = MODEL_DIR / "DSV41-mixedq2-00005-of-00005.gguf"
 EXPERT_RE = re.compile(r"\.experts\.(\d+)\.")
 
 

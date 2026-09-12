@@ -160,6 +160,7 @@ start_unit_local() {
   systemctl --user reset-failed ds41-rank0.service 2>/dev/null || true
   systemd-run --user --unit=ds41-rank0 --collect \
     --setenv="DS41_OWNER_EPOCH=$epoch" --setenv="DS41_OWNER_NONCE=$nonce" \
+    --setenv="DS41_RUN_MODE=${DS41_RUN_MODE:-api}" --setenv="DS41_ATTEMPT_NAME=${DS41_ATTEMPT_NAME:-}" \
     --property="RuntimeMaxSec=$RUNTIME_MAX_SEC" --property="TimeoutStopSec=$STOP_TIMEOUT_SEC" --property=KillMode=control-group --property=Restart=no \
     --property="StandardOutput=append:$log" --property="StandardError=append:$log" \
     bash "$ROOT/runtime/ds41/launch-node.sh" 0 10.55.0.1 "$epoch" "$port"
@@ -169,14 +170,16 @@ start_unit_peer() {
   peer systemctl --user reset-failed ds41-rank1.service 2>/dev/null || true
   peer systemd-run --user --unit=ds41-rank1 --collect \
     --setenv="DS41_OWNER_EPOCH=$epoch" --setenv="DS41_OWNER_NONCE=$nonce" \
+    --setenv="DS41_RUN_MODE=${DS41_RUN_MODE:-api}" --setenv="DS41_ATTEMPT_NAME=${DS41_ATTEMPT_NAME:-}" \
     --property="RuntimeMaxSec=$RUNTIME_MAX_SEC" --property="TimeoutStopSec=$STOP_TIMEOUT_SEC" --property=KillMode=control-group --property=Restart=no \
     --property="StandardOutput=append:$log" --property="StandardError=append:$log" \
     bash "$ROOT/runtime/ds41/launch-node.sh" 1 10.55.0.2 "$epoch" "$port"
 }
 
 cmd_start() {
-  local epoch=${1:?epoch} port=${2:-18210}
+  local epoch=${1:?epoch} port=${2:-18210} run_mode=${DS41_RUN_MODE:-api}
   [[ "$epoch" =~ ^[0-9]{10,20}$ && "$port" =~ ^[0-9]{4,5}$ ]] || { echo 'invalid epoch/port' >&2; exit 2; }
+  [[ "$run_mode" == api || "$run_mode" == offline ]] || { echo 'invalid DS41_RUN_MODE' >&2; exit 2; }
   acquire_control
   peer_identity || { persist_unreconciled 'NODE02 identity unavailable before start'; echo 'NODE02 UNKNOWN; refusing start' >&2; exit 3; }
 

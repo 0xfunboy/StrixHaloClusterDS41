@@ -46,19 +46,34 @@ export NCCL_SOCKET_IFNAME='=thunderbolt0' GLOO_SOCKET_IFNAME=thunderbolt0 NCCL_N
 export NCCL_MIN_NCHANNELS=1 NCCL_MAX_NCHANNELS=1 NCCL_SOCKET_NTHREADS=1 NCCL_NSOCKS_PERTHREAD=1 NCCL_DEBUG=WARN
 export MASTER_ADDR=10.55.0.1 MASTER_PORT="${DS41_MASTER_PORT:-29741}"
 cd "$ROOT"
-exec "$VENV/bin/python" -m torch.distributed.run \
-  --nnodes=2 --nproc-per-node=1 --node-rank="$rank" \
-  --master-addr="$MASTER_ADDR" --master-port="$MASTER_PORT" \
-  -m runtime.ds41.api_server \
-  --model "$MODEL_FILE" --hf-config-path "$MODEL_DIR" --tokenizer "$MODEL_DIR" \
-  --served-model-name DeepSeek-V4.1-Flash-MixedQ2-Engram2 \
-  --host "$host_ip" --port "$api_port" --api-server-count 1 \
-  --tensor-parallel-size 2 --pipeline-parallel-size 1 \
-  --enable-expert-parallel \
-  --distributed-executor-backend external_launcher --language-model-only \
-  --config-format gguf --load-format gguf --quantization gguf --dtype bfloat16 \
-  --attention-backend ROCM_FLASHMLA_SPARSE_DSV4 \
-  --max-model-len 4096 --block-size 128 --max-num-seqs 1 --max-num-batched-tokens 1024 \
-  --kv-cache-memory-bytes 1073741824 --kv-cache-dtype auto \
-  --no-enable-prefix-caching --enable-chunked-prefill --no-async-scheduling \
-  --enforce-eager --seed 1 --generation-config vllm --enable-per-request-metrics
+run_mode=${DS41_RUN_MODE:-api}
+case "$run_mode" in
+  offline)
+    exec "$VENV/bin/python" -m torch.distributed.run \
+      --nnodes=2 --nproc-per-node=1 --node-rank="$rank" \
+      --master-addr="$MASTER_ADDR" --master-port="$MASTER_PORT" \
+      -m runtime.ds41.offline_spmd
+    ;;
+  api)
+    exec "$VENV/bin/python" -m torch.distributed.run \
+      --nnodes=2 --nproc-per-node=1 --node-rank="$rank" \
+      --master-addr="$MASTER_ADDR" --master-port="$MASTER_PORT" \
+      -m runtime.ds41.api_server \
+      --model "$MODEL_FILE" --hf-config-path "$MODEL_DIR" --tokenizer "$MODEL_DIR" \
+      --served-model-name DeepSeek-V4.1-Flash-MixedQ2-Engram2 \
+      --host "$host_ip" --port "$api_port" --api-server-count 1 \
+      --tensor-parallel-size 2 --pipeline-parallel-size 1 \
+      --enable-expert-parallel \
+      --distributed-executor-backend external_launcher --language-model-only \
+      --config-format gguf --load-format gguf --quantization gguf --dtype bfloat16 \
+      --attention-backend ROCM_FLASHMLA_SPARSE_DSV4 \
+      --max-model-len 4096 --block-size 128 --max-num-seqs 1 --max-num-batched-tokens 1024 \
+      --kv-cache-memory-bytes 1073741824 --kv-cache-dtype auto \
+      --no-enable-prefix-caching --enable-chunked-prefill --no-async-scheduling \
+      --enforce-eager --seed 1 --generation-config vllm --enable-per-request-metrics
+    ;;
+  *)
+    echo "invalid DS41_RUN_MODE=$run_mode" >&2
+    exit 2
+    ;;
+esac

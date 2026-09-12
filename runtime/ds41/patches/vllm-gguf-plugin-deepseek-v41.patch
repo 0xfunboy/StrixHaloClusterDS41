@@ -64,10 +64,51 @@ index ddea77f..611259a 100644
 +                )
          return model
 diff --git a/vllm_gguf_plugin/quantization/fused_moe.py b/vllm_gguf_plugin/quantization/fused_moe.py
-index 758429b..088e736 100644
+index 758429b..2171db6 100644
 --- a/vllm_gguf_plugin/quantization/fused_moe.py
 +++ b/vllm_gguf_plugin/quantization/fused_moe.py
-@@ -266,6 +266,21 @@ class GGUFMoEMethod(FusedMoEMethodBase):
+@@ -8,6 +8,7 @@ from vllm.model_executor.layers.fused_moe import (
+     RoutedExperts,
+ )
+ from vllm.model_executor.layers.fused_moe.activation import (
++    ApplyMoEActivationConfig,
+     MoEActivation,
+     apply_moe_activation,
+ )
+@@ -40,14 +41,20 @@ def _fused_moe_gguf(
+     weight_type: int,
+     weight_type2: int,
+     activation: str,
++    swiglu_limit: float,
+ ) -> torch.Tensor:
+     activation_enum = MoEActivation.from_str(activation)
++    activation_config = ApplyMoEActivationConfig(
++        clamp_limit=swiglu_limit if swiglu_limit > 0 else None
++    )
+ 
+     def act(inp: torch.Tensor):
+         d = inp.shape[-1] // 2
+         output_shape = inp.shape[:-1] + (d,)
+         out = torch.empty(output_shape, dtype=inp.dtype, device=inp.device)
+-        apply_moe_activation(activation_enum, out, inp)
++        apply_moe_activation(
++            activation_enum, out, inp, activation_config=activation_config
++        )
+         return out
+ 
+     from vllm.model_executor.layers.fused_moe.fused_moe import moe_align_block_size
+@@ -142,8 +149,9 @@ def _fused_moe_gguf_fake(
+     weight_type: int,
+     weight_type2: int,
+     activation: str,
++    swiglu_limit: float,
+ ) -> torch.Tensor:
+-    del w1, w2, topk_weights, topk_ids, weight_type, weight_type2, activation
++    del w1, w2, topk_weights, topk_ids, weight_type, weight_type2, activation, swiglu_limit
+     return torch.empty_like(x)
+ 
+ 
+@@ -266,6 +274,21 @@ class GGUFMoEMethod(FusedMoEMethodBase):
  
          from . import fused_moe_gguf as fused_moe_gguf_op
  
@@ -89,6 +130,12 @@ index 758429b..088e736 100644
          return fused_moe_gguf_op(
              x,
              layer.w13_weight,
+@@ -275,4 +298,5 @@ class GGUFMoEMethod(FusedMoEMethodBase):
+             layer.w13_weight_type.weight_type,
+             layer.w2_weight_type.weight_type,
+             layer.activation.value,
++            float(self.moe.swiglu_limit or 0.0),
+         )
 diff --git a/vllm_gguf_plugin/weight_utils.py b/vllm_gguf_plugin/weight_utils.py
 index 681e06d..231eadb 100644
 --- a/vllm_gguf_plugin/weight_utils.py

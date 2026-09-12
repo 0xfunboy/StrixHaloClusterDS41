@@ -35,6 +35,12 @@ def layer(w13, w2, expert_map):
     )
 
 
+def method():
+    # Match the V4.1 FusedMoEConfig used by the real model: routed SwiGLU is
+    # clamped to +/-10 before the multiply.
+    return SimpleNamespace(moe=SimpleNamespace(swiglu_limit=10.0))
+
+
 def run_case(m: int) -> dict:
     reader = gguf.GGUFReader(str(MODEL))
     gate = raw(reader, 'blk.0.ffn_gate_exps', slice(0,4))
@@ -50,13 +56,13 @@ def run_case(m: int) -> dict:
     topk_weights = torch.tensor([0.625, 0.375], device='cuda', dtype=torch.float32).expand(m, 2).contiguous()
 
     # Full four-expert reference on one GPU.
-    full = GGUFMoEMethod.apply(None, layer(w13, down, None), x, topk_weights, topk_ids, None, None)
+    full = GGUFMoEMethod.apply(method(), layer(w13, down, None), x, topk_weights, topk_ids, None, None)
 
     # Two EP ranks: each owns complete experts; remote route weights become zero.
     map0 = torch.tensor([0, 1, -1, -1], device='cuda', dtype=torch.int32)
     map1 = torch.tensor([-1, -1, 0, 1], device='cuda', dtype=torch.int32)
-    r0 = GGUFMoEMethod.apply(None, layer(w13[:2], down[:2], map0), x, topk_weights, topk_ids, None, None)
-    r1 = GGUFMoEMethod.apply(None, layer(w13[2:], down[2:], map1), x, topk_weights, topk_ids, None, None)
+    r0 = GGUFMoEMethod.apply(method(), layer(w13[:2], down[:2], map0), x, topk_weights, topk_ids, None, None)
+    r1 = GGUFMoEMethod.apply(method(), layer(w13[2:], down[2:], map1), x, topk_weights, topk_ids, None, None)
     combined = r0 + r1
     diff = (combined.float() - full.float()).abs()
     result = {

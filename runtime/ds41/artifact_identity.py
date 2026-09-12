@@ -58,9 +58,20 @@ def model_dir(cfg: dict[str, Any]) -> Path:
 
 
 def runtime_commit() -> str:
-    return subprocess.check_output(
-        ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
-    ).strip()
+    try:
+        value = subprocess.check_output(
+            ["git", "-C", str(ROOT), "rev-parse", "HEAD"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        marker = ROOT / ".source-commit"
+        if not marker.is_file():
+            raise RuntimeError("DS41 source identity unavailable: no Git HEAD or .source-commit")
+        value = marker.read_text().strip()
+    if len(value) != 40 or any(ch not in "0123456789abcdef" for ch in value.lower()):
+        raise RuntimeError(f"invalid DS41 source identity: {value!r}")
+    return value.lower()
 
 
 def validate_densefix_receipt(cfg: dict[str, Any], d: Path) -> dict[str, Any]:

@@ -33,6 +33,12 @@ class DS41PerfCollector:
         # Decoder-local slot used only by the profile wrappers to distinguish
         # the two hidden-size RMSNorm calls without touching model instances.
         self._decoder_rms_slot: int | None = None
+        # Optional projection/RMS fixture capture.  We retain only four tiny
+        # BF16 inputs plus references to their static FP32 projection weights
+        # and copy them to CPU after the timed request has completed.
+        self._mhc_decode_call_count = 0
+        self._projection_fixture_refs: list[dict[str, Any]] = []
+        self.capture_projection_fixtures = False
 
     @staticmethod
     def phase_from_tensor(x: Any) -> str:
@@ -165,69 +171,140 @@ class DS41PerfCollector:
 
             def impl():
                 hc_mult = residual.shape[1]
+                source = residual.flatten(1) if x is None else x
 
-                def projection_rms():
-                    xf = (residual.flatten(1) if x is None else x).float()
-                    mixes = (xf @ fn.t()) * torch.rsqrt(
-                        xf.square().mean(-1, keepdim=True) + rms_eps
-                    )
-                    return mixes
-
+                xf = collector._recorded_call(
+                    "mhc_pre_input_cast",
+                    lambda: source.float(),
+                    phase=phase,
+                )
+                projected = collector._recorded_call(
+                    "mhc_pre_projection",
+                    lambda: xf @ fn.t(),
+                    phase=phase,
+                )
+                mean_sq = collector._recorded_call(
+                    "mhc_pre_square_mean",
+                    lambda: xf.square().mean(-1, keepdim=True),
+                    phase=phase,
+                )
+                rms_factor = collector._recorded_call(
+                    "mhc_pre_rsqrt",
+                    lambda: torch.rsqrt(mean_sq + rms_eps),
+                    phase=phase,
+                )
                 mixes = collector._recorded_call(
-                    "mhc_pre_projection_rms", projection_rms, phase=phase
+                    "mhc_pre_projection_scale",
+                    lambda: projected * rms_factor,
+                    phase=phase,
                 )
 
-                def prepost_coeff():
-                    pre = (
-                        torch.sigmoid(
-                            mixes[:, :hc_mult] * hc_scale[0]
-                            + hc_base[:hc_mult]
-                        )
-                        + hc_pre_eps
-                    )
-                    post = (
-                        torch.sigmoid(
-                            mixes[:, hc_mult : 2 * hc_mult] * hc_scale[1]
-                            + hc_base[hc_mult : 2 * hc_mult]
-                        )
-                        * hc_post_mult_value
-                    )
-                    return pre, post
+                # Preserve the historical aggregate for comparability with
+                # attempt017, but derive it from the direct sub-events below.
+                # The aggregate event is intentionally not nested around those
+                # events because that would add another pair of GPU markers.
+                if collector.active:
+                    collector.calls[f"{phase}.mhc_pre_projection_rms"] += 1
 
-                pre, post = collector._recorded_call(
-                    "mhc_pre_prepost_coeff", prepost_coeff, phase=phase
+                if collector.capture_projection_fixtures and phase == "decode":
+                    call_index = collector._mhc_decode_call_count
+                    labels = {
+                        0: "layer0_attn_broadcast",
+                        1: "layer0_ffn",
+                        2: "layer1_attn_post_engram",
+                        28: "layer14_attn_post_engram",
+                    }
+                    label = labels.get(call_index)
+                    if label is not None:
+                        collector._projection_fixture_refs.append(
+                            {
+                                "label": label,
+                                "call_index": call_index,
+                                "input_bf16": source.detach().clone(),
+                                "fn": fn.detach(),
+                                "mixes_ref": mixes.detach().clone(),
+                                "rms_factor_ref": rms_factor.detach().clone(),
+                                "rms_eps": float(rms_eps),
+                                "x_explicit": x is not None,
+                            }
+                        )
+                    collector._mhc_decode_call_count += 1
+
+                use_fused_coeff = (
+                    __import__("os").environ.get("DS41_MHC_COEFF_SINKHORN", "0") == "1"
+                    and residual.shape[0] == 1
+                    and hc_mult == 4
+                    and sinkhorn_repeat == 20
+                    and mixes.dtype == torch.float32
+                    and mixes.is_contiguous()
                 )
+                if use_fused_coeff:
+                    from runtime.ds41.mhc_coeff_sinkhorn import fused_coeff_sinkhorn
 
-                def softmax_seed():
-                    comb = (
-                        mixes[:, 2 * hc_mult :].view(-1, hc_mult, hc_mult)
-                        * hc_scale[2]
+                    pre, post, comb_out = collector._recorded_call(
+                        "mhc_pre_coeff_sinkhorn_fused",
+                        fused_coeff_sinkhorn,
+                        mixes,
+                        hc_scale,
+                        hc_base,
+                        hc_pre_eps,
+                        hc_sinkhorn_eps,
+                        hc_post_mult_value,
+                        sinkhorn_repeat,
+                        phase=phase,
                     )
-                    comb = comb + hc_base[2 * hc_mult :].view(
-                        1, hc_mult, hc_mult
-                    )
-                    return torch.softmax(comb, dim=-1) + hc_sinkhorn_eps
-
-                comb = collector._recorded_call(
-                    "mhc_pre_softmax", softmax_seed, phase=phase
-                )
-
-                def sinkhorn():
-                    out = comb / (
-                        comb.sum(dim=-2, keepdim=True) + hc_sinkhorn_eps
-                    )
-                    for _ in range(sinkhorn_repeat - 1):
-                        out = out / (
-                            out.sum(dim=-1, keepdim=True) + hc_sinkhorn_eps
+                else:
+                    def prepost_coeff():
+                        pre = (
+                            torch.sigmoid(
+                                mixes[:, :hc_mult] * hc_scale[0]
+                                + hc_base[:hc_mult]
+                            )
+                            + hc_pre_eps
                         )
-                        out = out / (
-                            out.sum(dim=-2, keepdim=True) + hc_sinkhorn_eps
+                        post = (
+                            torch.sigmoid(
+                                mixes[:, hc_mult : 2 * hc_mult] * hc_scale[1]
+                                + hc_base[hc_mult : 2 * hc_mult]
+                            )
+                            * hc_post_mult_value
                         )
-                    return out
+                        return pre, post
 
-                comb_out = collector._recorded_call(
-                    "mhc_pre_sinkhorn", sinkhorn, phase=phase
-                )
+                    pre, post = collector._recorded_call(
+                        "mhc_pre_prepost_coeff", prepost_coeff, phase=phase
+                    )
+
+                    def softmax_seed():
+                        comb = (
+                            mixes[:, 2 * hc_mult :].view(-1, hc_mult, hc_mult)
+                            * hc_scale[2]
+                        )
+                        comb = comb + hc_base[2 * hc_mult :].view(
+                            1, hc_mult, hc_mult
+                        )
+                        return torch.softmax(comb, dim=-1) + hc_sinkhorn_eps
+
+                    comb = collector._recorded_call(
+                        "mhc_pre_softmax", softmax_seed, phase=phase
+                    )
+
+                    def sinkhorn():
+                        out = comb / (
+                            comb.sum(dim=-2, keepdim=True) + hc_sinkhorn_eps
+                        )
+                        for _ in range(sinkhorn_repeat - 1):
+                            out = out / (
+                                out.sum(dim=-1, keepdim=True) + hc_sinkhorn_eps
+                            )
+                            out = out / (
+                                out.sum(dim=-2, keepdim=True) + hc_sinkhorn_eps
+                            )
+                        return out
+
+                    comb_out = collector._recorded_call(
+                        "mhc_pre_sinkhorn", sinkhorn, phase=phase
+                    )
 
                 def collapse():
                     return (
@@ -408,6 +485,31 @@ class DS41PerfCollector:
     def disable(self) -> None:
         self.active = False
 
+    def save_projection_fixtures(self, output: Path) -> dict[str, Any]:
+        """Persist a few real M=1 projection/RMS inputs after timed profiling."""
+        torch.cuda.synchronize()
+        rows = []
+        for row in self._projection_fixture_refs:
+            rows.append(
+                {
+                    "label": row["label"],
+                    "call_index": int(row["call_index"]),
+                    "input_bf16": row["input_bf16"].detach().cpu(),
+                    "fn": row["fn"].detach().cpu(),
+                    "mixes_ref": row["mixes_ref"].detach().cpu(),
+                    "rms_factor_ref": row["rms_factor_ref"].detach().cpu(),
+                    "rms_eps": float(row["rms_eps"]),
+                    "x_explicit": bool(row["x_explicit"]),
+                }
+            )
+        output.parent.mkdir(parents=True, exist_ok=True)
+        torch.save({"schema": "ds41-mhc-projection-fixtures-v1", "rows": rows}, output)
+        return {
+            "path": str(output),
+            "count": len(rows),
+            "labels": [x["label"] for x in rows],
+        }
+
     def summarize(self, completion_tokens: int, decode_span_s: float | None, *, output: Path | None = None) -> dict[str, Any]:
         # One synchronization for the whole profiled request; never inside an op.
         torch.cuda.synchronize()
@@ -440,8 +542,17 @@ class DS41PerfCollector:
         top_sum = sum(top.values())
         per_token = {k: (v / decode_steps if decode_steps else None) for k, v in top.items()}
 
+        mhc_projection_parts = {
+            "input_cast": g("mhc_pre_input_cast"),
+            "projection": g("mhc_pre_projection"),
+            "square_mean": g("mhc_pre_square_mean"),
+            "rsqrt": g("mhc_pre_rsqrt"),
+            "scale": g("mhc_pre_projection_scale"),
+        }
+        mhc_projection_rms = sum(mhc_projection_parts.values())
         mhc_pre_parts = {
-            "projection_rms": g("mhc_pre_projection_rms"),
+            "projection_rms": mhc_projection_rms,
+            "coeff_sinkhorn_fused": g("mhc_pre_coeff_sinkhorn_fused"),
             "prepost_coeff": g("mhc_pre_prepost_coeff"),
             "softmax": g("mhc_pre_softmax"),
             "sinkhorn": g("mhc_pre_sinkhorn"),
@@ -466,6 +577,7 @@ class DS41PerfCollector:
             "attn_norm": attn_norm,
             "ffn_norm": ffn_norm,
             "mhc_pre_subparts": mhc_pre_parts,
+            "mhc_projection_rms_subparts": mhc_projection_parts,
             "mhc_post_subparts": mhc_post_parts,
             "mhc_pre_internal_gap": mhc_pre_total - mhc_pre_sub_sum,
             "mhc_post_internal_gap": mhc_post_total - mhc_post_sub_sum,
@@ -508,6 +620,12 @@ class DS41PerfCollector:
                 "attn_norm": attn_norm / decode_steps if decode_steps else None,
                 "ffn_norm": ffn_norm / decode_steps if decode_steps else None,
                 "mhc_pre_projection_rms": mhc_pre_parts["projection_rms"] / decode_steps if decode_steps else None,
+                "mhc_pre_input_cast": mhc_projection_parts["input_cast"] / decode_steps if decode_steps else None,
+                "mhc_pre_projection": mhc_projection_parts["projection"] / decode_steps if decode_steps else None,
+                "mhc_pre_square_mean": mhc_projection_parts["square_mean"] / decode_steps if decode_steps else None,
+                "mhc_pre_rsqrt": mhc_projection_parts["rsqrt"] / decode_steps if decode_steps else None,
+                "mhc_pre_projection_scale": mhc_projection_parts["scale"] / decode_steps if decode_steps else None,
+                "mhc_pre_coeff_sinkhorn_fused": mhc_pre_parts["coeff_sinkhorn_fused"] / decode_steps if decode_steps else None,
                 "mhc_pre_prepost_coeff": mhc_pre_parts["prepost_coeff"] / decode_steps if decode_steps else None,
                 "mhc_pre_softmax": mhc_pre_parts["softmax"] / decode_steps if decode_steps else None,
                 "mhc_pre_sinkhorn": mhc_pre_parts["sinkhorn"] / decode_steps if decode_steps else None,

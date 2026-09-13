@@ -551,6 +551,9 @@ def main() -> int:
         from runtime.ds41.perf_profile import DS41PerfCollector
         profiler = DS41PerfCollector()
         profiler.install()
+        profiler.capture_projection_fixtures = bool(
+            profile_cfg.get("capture_projection_fixtures", False)
+        )
         profiler.enable()
         instrumented = run_generation(
             llm, prompts["speed"]["token_ids"], label="profile-instrumented",
@@ -570,6 +573,12 @@ def main() -> int:
         perf["instrumentation_overhead_pct_by_decode_tps"] = (
             (base_tps / inst_tps - 1.0) * 100.0 if base_tps and inst_tps else None
         )
+        fixture_meta = None
+        if profiler.capture_projection_fixtures:
+            fixture_meta = profiler.save_projection_fixtures(
+                RAW / f"mhc-projection-fixtures-rank{RANK}.pt"
+            )
+            perf["projection_fixture_capture"] = fixture_meta
         profile_path.write_text(json.dumps(perf, indent=2, sort_keys=True) + "\n")
         emit("perf_profile_complete", path=str(profile_path), **{
             "baseline_tps": base_tps,
@@ -579,15 +588,16 @@ def main() -> int:
         })
         save_checkpoint("PROFILE_INSTRUMENTED_COMPLETE")
 
-        reasoning_key = "reasoning_high"
-        if reasoning_key not in prompts:
-            raise RuntimeError("profile prompt fixture is missing reasoning_high")
-        reasoning = run_generation(
-            llm, prompts[reasoning_key]["token_ids"], label="reasoning-high-once",
-            max_tokens=int(profile_cfg.get("reasoning_high_max_tokens", os.environ.get("DS41_REASONING_HIGH_MAX_TOKENS", "128"))),
-            ignore_eos=False)
-        results.append(reasoning)
-        save_checkpoint("REASONING_HIGH_COMPLETE")
+        if not bool(profile_cfg.get("skip_reasoning_high", False)):
+            reasoning_key = "reasoning_high"
+            if reasoning_key not in prompts:
+                raise RuntimeError("profile prompt fixture is missing reasoning_high")
+            reasoning = run_generation(
+                llm, prompts[reasoning_key]["token_ids"], label="reasoning-high-once",
+                max_tokens=int(profile_cfg.get("reasoning_high_max_tokens", os.environ.get("DS41_REASONING_HIGH_MAX_TOKENS", "128"))),
+                ignore_eos=False)
+            results.append(reasoning)
+            save_checkpoint("REASONING_HIGH_COMPLETE")
 
         summary = {
             "status": "PROFILE_COMPLETE",

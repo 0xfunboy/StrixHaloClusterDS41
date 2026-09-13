@@ -6,16 +6,21 @@ not modify `/home/funboy/StrixHaloClusterGLM` or its `.engine`.
 Current qualified state: the repaired DenseFix artifact runs DeepSeek V4.1 with
 TP2 dense/attention, EP2 routed experts and rank-local Engram2 on the two EVO-X3.
 Attempt015 qualified the gfx1151 native HIP M=1 routed path (IQ2_XXS gate/up,
-Q2_K down, Q8_1 activations) at 7.63684 tok/s mean decode on the fixed 64-token
-same-load A/B workload versus 2.24430 tok/s for the contemporary Triton
-skip-remote arm. Arithmetic, coding (9/9 independent tests), JSON and the
-reasoning-high 100-doors check passed; rank0/rank1 token streams matched for every
-request. The native path is the DS41 default only for its qualified M=1 contract;
-all other shapes fall back to the existing Triton path. Set
-`DS41_NATIVE_HIP_MOE=0` to roll back to the previously qualified Triton
-skip-remote baseline without changing weights or topology. Raw attempt artifacts
-remain under `reports/DS41-Q2-001/attempt015/`; the tracked compact result is
-`runtime/ds41/results/attempt015-native-hip-ab.json`.
+Q2_K down, Q8_1 activations). Attempt018 then qualified a decode-only mHC
+coefficient/softmax/Sinkhorn fusion for the exact M=1, hc_mult=4, 20-iteration
+V4.1 delayed-pre-mix path while leaving projection/RMS, delayed collapse and all
+non-M1 shapes on the previous implementation. On the same-load attempt018 A/B,
+the native-HIP+mHC baseline arm averaged 7.33282 tok/s and the fused candidate
+averaged 9.72199 tok/s (+32.58% decode); the historical attempt015 promoted
+reference remains 7.63684 tok/s. Arithmetic, coding (9/9 independent tests), JSON
+and reasoning-high 100-doors all passed, and rank0/rank1 token streams matched for
+every request. Native HIP remains qualified only for M=1 routed IQ2_XXS/Q2_K;
+all other MoE shapes fall back to Triton. The mHC fusion is likewise restricted
+to M=1/hc4/Sinkhorn20 and falls back otherwise. Set `DS41_MHC_COEFF_SINKHORN=0`
+to roll back only the mHC fusion while retaining native HIP, or set
+`DS41_NATIVE_HIP_MOE=0` to roll back the routed MoE to Triton skip-remote. Raw
+attempt artifacts remain under `reports/DS41-Q2-001/attempt018/`; tracked compact
+results are under `runtime/ds41/results/`.
 
 ## Source pins
 

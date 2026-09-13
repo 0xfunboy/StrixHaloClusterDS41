@@ -192,6 +192,27 @@ index 71f2186..87400ee 100644
  
          self._local_num_experts += self.num_fused_shared_experts
  
+diff --git a/vllm/models/deepseek_v4_1/amd/rocm.py b/vllm/models/deepseek_v4_1/amd/rocm.py
+index 9271e7a..3aa88e1 100644
+--- a/vllm/models/deepseek_v4_1/amd/rocm.py
++++ b/vllm/models/deepseek_v4_1/amd/rocm.py
+@@ -651,7 +651,15 @@ class DeepseekV41ROCMAiterMLAAttention(DeepseekV4Attention):
+         if self._wo_b_scale is not None and zf.dim() == 2:
+             result = self._bpre_attn_gemm(self.wo_b.weight, self._wo_b_scale, zf, True)
+         else:
+-            result = self.wo_b(zf)
++            # DS41 M=1 candidate: replace only the local unquantized
++            # BF16 RowParallel WO_B matmul. The helper validates the exact M=1
++            # TP2 contract and immediately performs the same TP all-reduce;
++            # any contract miss returns None and preserves the original path.
++            from runtime.ds41.attn_wob_llmm1 import try_wob_llmm1
++
++            result = try_wob_llmm1(self.wo_b, zf)
++            if result is None:
++                result = self.wo_b(zf)
+         return result
+ 
+     def forward_mqa(
 diff --git a/vllm/models/deepseek_v4_1/amd/vl_model.py b/vllm/models/deepseek_v4_1/amd/vl_model.py
 index 91a13bd..62bd1a5 100644
 --- a/vllm/models/deepseek_v4_1/amd/vl_model.py

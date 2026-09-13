@@ -6,6 +6,7 @@ sequence. Only reporting is rank-specific; no HTTP server participates.
 from __future__ import annotations
 
 import dataclasses
+import hashlib
 import json
 import os
 import sys
@@ -31,6 +32,13 @@ WORLD_SIZE = int(os.environ.get("WORLD_SIZE", "-1"))
 RESULT_PATH = RAW / f"offline-rank{RANK}.json"
 EVENT_PATH = RAW / f"offline-rank{RANK}.events.jsonl"
 TOKENS_PATH = RAW / "prompt-tokens.json"
+WOB_PROMOTED_SWITCHES = (
+    "DS41_EP_SKIP_REMOTE",
+    "DS41_NATIVE_HIP_MOE",
+    "DS41_MHC_COEFF_SINKHORN",
+    "DS41_MHC_PROJECTION_RMS",
+    "DS41_DECOMPOSED_QKV_INSERT",
+)
 
 
 def emit(event: str, **data: Any) -> None:
@@ -178,6 +186,29 @@ def main() -> int:
     native_hip_ab_cfg = token_spec.get("native_hip_ab")
     mhc_ab_cfg = token_spec.get("mhc_ab")
     projection_rms_ab_cfg = token_spec.get("projection_rms_ab")
+    wob_llmm1_ab_cfg = token_spec.get("wob_llmm1_ab")
+    wob_ab = isinstance(wob_llmm1_ab_cfg, dict)
+    if wob_ab:
+        if any(isinstance(cfg, dict) for cfg in (
+            native_hip_ab_cfg, mhc_ab_cfg, projection_rms_ab_cfg,
+        )):
+            raise ValueError("wob_llmm1_ab cannot be combined with another A/B mode")
+        for key, expected in (("speed_tokens", 128), ("warmup_tokens", 32),
+                              ("reasoning_high_max_tokens", 128)):
+            if wob_llmm1_ab_cfg.get(key, expected) != expected:
+                raise ValueError(f"WO_B A/B requires {key}={expected}")
+        if wob_llmm1_ab_cfg.get("order", ["A1", "B1", "B2", "A2", "A3", "B3"]) != [
+            "A1", "B1", "B2", "A2", "A3", "B3",
+        ]:
+            raise ValueError("WO_B A/B requires frozen AB / BA / AB order")
+        for key in ("speed", "arithmetic", "coding", "json", "reasoning_high"):
+            if not prompts.get(key, {}).get("token_ids"):
+                raise ValueError(f"WO_B A/B fixture is missing {key}")
+        # Set these in the actual external-launcher process on every rank,
+        # before native extension loading and model construction.
+        for key in WOB_PROMOTED_SWITCHES:
+            os.environ[key] = "1"
+        os.environ["DS41_ATTN_WOB_LLMM1"] = "0"
     native_hip_identity = None
     native_hip_default = os.environ.get("DS41_NATIVE_HIP_MOE", "0") == "1"
     if isinstance(native_hip_ab_cfg, dict) or native_hip_default:
@@ -251,107 +282,109 @@ def main() -> int:
         tmp.write_text(json.dumps(checkpoint, indent=2, ensure_ascii=False) + "\n")
         os.replace(tmp, RESULT_PATH)
 
-    if isinstance(projection_rms_ab_cfg, dict):
-        speed_tokens = int(projection_rms_ab_cfg.get("speed_tokens", 128))
-        warmup_tokens = int(projection_rms_ab_cfg.get("warmup_tokens", 32))
+    if isinstance(projection_rms_ab_cfg, dict) or wob_ab:
+        ab_cfg = wob_llmm1_ab_cfg if wob_ab else projection_rms_ab_cfg
+        speed_tokens = int(ab_cfg.get("speed_tokens", 128))
+        warmup_tokens = int(ab_cfg.get("warmup_tokens", 32))
+        if wob_ab:
+            import resource
+            from runtime.ds41.attn_wob_llmm1 import reset_stats, stats as stats_snapshot
 
-        from runtime.ds41.mhc_projection_rms import reset_stats as reset_projection_stats
-        from runtime.ds41.mhc_projection_rms import stats as projection_stats_snapshot
+            prefix, checkpoint_prefix = "wob-ab", "ATTN_WOB_AB"
+            flag, event_prefix = "DS41_ATTN_WOB_LLMM1", "attn_wob_llmm1"
+        else:
+            from runtime.ds41.mhc_projection_rms import reset_stats, stats as stats_snapshot
 
-        projection_reset_done = False
+            prefix, checkpoint_prefix = "projection-ab", "PROJECTION_AB"
+            flag, event_prefix = "DS41_MHC_PROJECTION_RMS", "mhc_projection_rms"
 
-        def projection_stats_event(label: str) -> dict[str, Any]:
-            stats = projection_stats_snapshot()
-            emit("mhc_projection_rms_stats", label=label, **stats)
-            return stats
+        reset_done = False
 
-        def set_projection(enabled: bool) -> None:
-            nonlocal projection_reset_done
-            os.environ["DS41_MHC_PROJECTION_RMS"] = "1" if enabled else "0"
-            if enabled and not projection_reset_done:
-                reset_projection_stats()
-                projection_reset_done = True
-            emit("mhc_projection_rms_mode", enabled=enabled)
+        def stats_event(label: str) -> dict[str, Any]:
+            snapshot = stats_snapshot()
+            emit(f"{event_prefix}_stats", label=label, **snapshot)
+            return snapshot
 
-        # Warm each arm separately before the preregistered AB / BA / AB
-        # decision sequence.  All other promoted DS41 settings stay unchanged.
-        set_projection(False)
-        results.append(run_generation(
-            llm, prompts["speed"]["token_ids"], label="projection-ab-baseline-warmup-excluded",
-            max_tokens=warmup_tokens, ignore_eos=True))
-        save_checkpoint("PROJECTION_AB_BASELINE_WARMUP_COMPLETE")
+        def set_arm(enabled: bool) -> None:
+            nonlocal reset_done
+            os.environ[flag] = "1" if enabled else "0"
+            if wob_ab or (enabled and not reset_done):
+                reset_stats()
+                reset_done = True
+            emit(f"{event_prefix}_mode", enabled=enabled)
 
-        set_projection(True)
-        results.append(run_generation(
-            llm, prompts["speed"]["token_ids"], label="projection-ab-candidate-warmup-excluded",
-            max_tokens=warmup_tokens, ignore_eos=True))
-        projection_stats_event("after_candidate_warmup")
-        save_checkpoint("PROJECTION_AB_CANDIDATE_WARMUP_COMPLETE")
+        def resources() -> dict[str, int]:
+            usage = resource.getrusage(resource.RUSAGE_SELF)
+            return {"max_rss_kib": usage.ru_maxrss, "minor_faults": usage.ru_minflt,
+                    "major_faults": usage.ru_majflt}
 
-        # Pair 1: A -> B
-        set_projection(False)
-        results.append(run_generation(
-            llm, prompts["speed"]["token_ids"], label="projection-ab-baseline-1",
-            max_tokens=speed_tokens, ignore_eos=True))
-        save_checkpoint("PROJECTION_AB_BASELINE_1_COMPLETE")
-        set_projection(True)
-        results.append(run_generation(
-            llm, prompts["speed"]["token_ids"], label="projection-ab-candidate-1",
-            max_tokens=speed_tokens, ignore_eos=True))
-        projection_stats_event("after_candidate_1")
-        save_checkpoint("PROJECTION_AB_CANDIDATE_1_COMPLETE")
+        def generate_arm(arm: str, suffix: str, prompt: str, cap: int,
+                         ignore_eos: bool) -> None:
+            label = f"{prefix}-{arm}-{suffix}"
+            before = resources() if wob_ab else None
+            row = run_generation(llm, prompts[prompt]["token_ids"], label=label,
+                                 max_tokens=cap, ignore_eos=ignore_eos)
+            if wob_ab:
+                after = resources()
+                row["request_protocol"] = {
+                    "max_tokens": cap, "ignore_eos": ignore_eos,
+                    "prompt_tokens_sha256": hashlib.sha256(json.dumps(
+                        prompts[prompt]["token_ids"], separators=(",", ":")
+                    ).encode()).hexdigest(),
+                }
+                row["runtime_switches"] = {
+                    key: os.environ.get(key) for key in (*WOB_PROMOTED_SWITCHES, flag)
+                }
+                row["wob_stats"] = stats_event(label)
+                row["process_resources"] = {
+                    "before": before, "after": after,
+                    "delta": {key: after[key] - before[key] for key in before},
+                    "scope": "SPMD process; max_rss_kib is a high-water mark, not GPU memory",
+                }
+            results.append(row)
 
-        # Pair 2: B -> A
-        set_projection(True)
-        results.append(run_generation(
-            llm, prompts["speed"]["token_ids"], label="projection-ab-candidate-2",
-            max_tokens=speed_tokens, ignore_eos=True))
-        projection_stats_event("after_candidate_2")
-        save_checkpoint("PROJECTION_AB_CANDIDATE_2_COMPLETE")
-        set_projection(False)
-        results.append(run_generation(
-            llm, prompts["speed"]["token_ids"], label="projection-ab-baseline-2",
-            max_tokens=speed_tokens, ignore_eos=True))
-        save_checkpoint("PROJECTION_AB_BASELINE_2_COMPLETE")
+        # Shared attempt020 sequence: excluded warmups, then frozen AB / BA / AB.
+        for arm in ("baseline", "candidate"):
+            set_arm(arm == "candidate")
+            generate_arm(arm, "warmup-excluded", "speed", warmup_tokens, True)
+            if arm == "candidate" and not wob_ab:
+                stats_event("after_candidate_warmup")
+            save_checkpoint(f"{checkpoint_prefix}_{arm.upper()}_WARMUP_COMPLETE")
+        for arm, pair in (("baseline", 1), ("candidate", 1), ("candidate", 2),
+                          ("baseline", 2), ("baseline", 3), ("candidate", 3)):
+            set_arm(arm == "candidate")
+            generate_arm(arm, str(pair), "speed", speed_tokens, True)
+            if arm == "candidate" and not wob_ab:
+                stats_event(f"after_candidate_{pair}")
+            save_checkpoint(f"{checkpoint_prefix}_{arm.upper()}_{pair}_COMPLETE")
 
-        # Pair 3: A -> B
-        set_projection(False)
-        results.append(run_generation(
-            llm, prompts["speed"]["token_ids"], label="projection-ab-baseline-3",
-            max_tokens=speed_tokens, ignore_eos=True))
-        save_checkpoint("PROJECTION_AB_BASELINE_3_COMPLETE")
-        set_projection(True)
-        results.append(run_generation(
-            llm, prompts["speed"]["token_ids"], label="projection-ab-candidate-3",
-            max_tokens=speed_tokens, ignore_eos=True))
-        projection_stats = projection_stats_event("after_candidate_3")
-        save_checkpoint("PROJECTION_AB_CANDIDATE_3_COMPLETE")
-
-        # Candidate quality gates on the same loaded model.
-        results.append(run_generation(
-            llm, prompts["arithmetic"]["token_ids"], label="projection-ab-candidate-smoke",
-            max_tokens=128, ignore_eos=False))
-        save_checkpoint("PROJECTION_AB_CANDIDATE_SMOKE_COMPLETE")
-        results.append(run_generation(
-            llm, prompts["coding"]["token_ids"], label="projection-ab-candidate-coding",
-            max_tokens=512, ignore_eos=False))
-        save_checkpoint("PROJECTION_AB_CANDIDATE_CODING_COMPLETE")
-        results.append(run_generation(
-            llm, prompts["json"]["token_ids"], label="projection-ab-candidate-json",
-            max_tokens=256, ignore_eos=False))
-        save_checkpoint("PROJECTION_AB_CANDIDATE_JSON_COMPLETE")
-        if "reasoning_high" not in prompts:
-            raise RuntimeError("projection/RMS A/B fixture is missing reasoning_high")
-        results.append(run_generation(
-            llm, prompts["reasoning_high"]["token_ids"],
-            label="projection-ab-candidate-reasoning-high",
-            max_tokens=int(projection_rms_ab_cfg.get("reasoning_high_max_tokens", 128)),
-            ignore_eos=False))
-        save_checkpoint("PROJECTION_AB_CANDIDATE_REASONING_HIGH_COMPLETE")
-        projection_stats = projection_stats_event("after_quality")
+        for suffix, prompt, cap in (
+            ("smoke", "arithmetic", 128), ("coding", "coding", 512),
+            ("json", "json", 256),
+            ("reasoning-high", "reasoning_high", int(ab_cfg.get("reasoning_high_max_tokens", 128))),
+        ):
+            if prompt not in prompts:
+                raise RuntimeError(f"{prefix} fixture is missing {prompt}")
+            if wob_ab:
+                set_arm(True)
+            generate_arm("candidate", suffix, prompt, cap, False)
+            save_checkpoint(f"{checkpoint_prefix}_CANDIDATE_{suffix.upper().replace('-', '_')}_COMPLETE")
+        if wob_ab:
+            execution_stats = {"llmm1_calls": 0, "llmm1_tokens": 0,
+                               "fallback_calls": 0, "fallback_reasons": {}}
+            for row in results:
+                snapshot = row["wob_stats"]
+                for key in ("llmm1_calls", "llmm1_tokens", "fallback_calls"):
+                    execution_stats[key] += snapshot[key]
+                for reason, count in snapshot["fallback_reasons"].items():
+                    reasons = execution_stats["fallback_reasons"]
+                    reasons[reason] = reasons.get(reason, 0) + count
+            emit("attn_wob_llmm1_stats_total", **execution_stats)
+        else:
+            execution_stats = stats_event("after_quality")
 
         summary = {
-            "status": "MHC_PROJECTION_AB_COMPLETE",
+            "status": "ATTN_WOB_AB_COMPLETE" if wob_ab else "MHC_PROJECTION_AB_COMPLETE",
             "rank": RANK,
             "world_size": WORLD_SIZE,
             "attempt": ATTEMPT,
@@ -359,9 +392,9 @@ def main() -> int:
             "init_s": init_s,
             "artifact_identity": artifact_identity,
             "native_hip_identity": native_hip_identity,
-            "projection_stats": projection_stats,
+            "wob_stats" if wob_ab else "projection_stats": execution_stats,
             "prompt_tokens_file": str(TOKENS_PATH),
-            "optimization": "MHC_M1_FP32_PROJECTION_RMS_TILELANG",
+            "optimization": "ATTN_WOB_LLMM1" if wob_ab else "MHC_M1_FP32_PROJECTION_RMS_TILELANG",
             "order": ["A1", "B1", "B2", "A2", "A3", "B3"],
             "results": results,
         }

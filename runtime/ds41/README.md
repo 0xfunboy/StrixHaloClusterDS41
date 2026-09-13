@@ -22,6 +22,30 @@ fusion and TileLang projection/RMS remain independently rollbackable. Set
 attempt020 artifacts remain under `reports/DS41-Q2-001/attempt020/`; tracked
 compact results are under `runtime/ds41/results/`.
 
+### WO_B M=1 LLMM1 candidate (attempt022)
+
+`DS41_ATTN_WOB_LLMM1=1` opts into a local BF16 output-projection matmul
+for input `[1,4096]` and local weight `[5120,4096]` only. It is disabled by
+default and is not a promoted preset. The existing TP2 all-reduce still runs
+exactly once. All unqualified contracts fall back to the original layer.
+The shape guard can include one-token prefill, not just decode; larger prefill
+and verification matrices retain the original path. This does not change
+WO_A, RoPE, attention, MoE, Engram, weight formats or the Socket transport.
+
+Attempt022 reuses attempt020's tokenized prompts and same-load sequence:
+excluded warmup32 for each arm, then A1/B1/B2/A2/A3/B3 at128 output tokens.
+A retains all promoted numerical paths; B adds only WO_B LLMM1. Arithmetic,
+coding, JSON and reasoning-high tasks run afterward on the same load.
+Component tolerances remain rel-L2<=0.005 and max-abs<=0.125. Promotion also
+requires coherent ranks, naturally completed passing tasks, all three paired
+B>A, and at least5% mean decode gain. Microkernel timings are not model TPS.
+Raw evidence and reproducible commands: `reports/DS41-Q2-001/attempt022/`.
+
+The attempt021 attention fixture containers have zero samples. Component
+gates use canonical layer0 intermediates reconstructed from the verified
+DenseFix weights, as recorded in their raw provenance. These gates do not
+represent all layers or long-context model quality.
+
 ## Source pins
 
 See `DEPENDENCIES.lock`. The experiment intentionally reuses the already

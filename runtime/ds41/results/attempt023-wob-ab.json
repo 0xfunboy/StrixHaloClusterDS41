@@ -1,0 +1,450 @@
+{
+  "schema": "ds41-wob-ab-result-v1",
+  "attempt": "attempt023",
+  "setup_attempt": "attempt022",
+  "status": "CORRECTNESS_PASS_SPEED_GATE_FAIL_NO_PROMOTION",
+  "runtime_commit": "c2a9acecac2959ebfe28f0ee180251621218d545",
+  "candidate_commit": "b2ca80f213ff8d6cf830892e2f79dfd7167b1f1f",
+  "epoch": "1789321415202393918",
+  "preserved_baseline": {
+    "commit": "facf86486f7e78d8ea75b0fda21231c1981eaaae",
+    "historical_decode_tps": 12.086645570628823,
+    "wo_b_flag_default": 0
+  },
+  "promotion_eligible": false,
+  "correctness_status": "PASS",
+  "speed_status": "FAIL",
+  "baseline": {
+    "runs": [
+      {
+        "label": "wob-ab-baseline-1",
+        "completion_tokens": 128,
+        "finish_reason": "length",
+        "decode_tps": 9.8295810305051,
+        "ttft_s": 4.890822410583496,
+        "wall_s": 17.81111873401096
+      },
+      {
+        "label": "wob-ab-baseline-2",
+        "completion_tokens": 128,
+        "finish_reason": "length",
+        "decode_tps": 12.658697048846154,
+        "ttft_s": 4.883178234100342,
+        "wall_s": 14.916053099994315
+      },
+      {
+        "label": "wob-ab-baseline-3",
+        "completion_tokens": 128,
+        "finish_reason": "length",
+        "decode_tps": 12.624223809842242,
+        "ttft_s": 4.915764808654785,
+        "wall_s": 14.975892888003727
+      }
+    ],
+    "decode_tps_mean": 11.704167296397832,
+    "decode_tps_sample_sd": 1.6235308288594639,
+    "decode_tps_cv_pct": 13.871391169871048,
+    "decode_tps_min": 9.8295810305051,
+    "decode_tps_max": 12.658697048846154,
+    "ttft_s_mean": 4.896588484446208,
+    "wall_s_mean": 15.901021574003002,
+    "decode_tps_median": 12.624223809842242
+  },
+  "candidate": {
+    "runs": [
+      {
+        "label": "wob-ab-candidate-1",
+        "completion_tokens": 128,
+        "finish_reason": "length",
+        "decode_tps": 10.178368135554908,
+        "ttft_s": 4.904809951782227,
+        "wall_s": 17.382347524006036
+      },
+      {
+        "label": "wob-ab-candidate-2",
+        "completion_tokens": 128,
+        "finish_reason": "length",
+        "decode_tps": 12.730328464646963,
+        "ttft_s": 4.9115471839904785,
+        "wall_s": 14.887829059996875
+      },
+      {
+        "label": "wob-ab-candidate-3",
+        "completion_tokens": 128,
+        "finish_reason": "length",
+        "decode_tps": 12.790509140892498,
+        "ttft_s": 4.880078554153442,
+        "wall_s": 14.80941580000217
+      }
+    ],
+    "decode_tps_mean": 11.899735247031456,
+    "decode_tps_sample_sd": 1.4910512995209715,
+    "decode_tps_cv_pct": 12.530121625125515,
+    "decode_tps_min": 10.178368135554908,
+    "decode_tps_max": 12.790509140892498,
+    "ttft_s_mean": 4.898811896642049,
+    "wall_s_mean": 15.693197461335027,
+    "decode_tps_median": 12.730328464646963
+  },
+  "paired_gains": [
+    {
+      "pair": 1,
+      "a_tps": 9.8295810305051,
+      "b_tps": 10.178368135554908,
+      "gain_pct": 3.548341521041265,
+      "b_gt_a": true
+    },
+    {
+      "pair": 2,
+      "a_tps": 12.658697048846154,
+      "b_tps": 12.730328464646963,
+      "gain_pct": 0.56586720990639,
+      "b_gt_a": true
+    },
+    {
+      "pair": 3,
+      "a_tps": 12.624223809842242,
+      "b_tps": 12.790509140892498,
+      "gain_pct": 1.3171925146052477,
+      "b_gt_a": true
+    }
+  ],
+  "decode_tps_gain_pct": 1.670925796607614,
+  "offline_wall_throughput_gain_pct": 1.3242942566676685,
+  "offline_wall_reduction_pct": 1.30698591723033,
+  "ab_token_compare": [
+    {
+      "pair": 1,
+      "identical": false,
+      "first_diff_index": 28,
+      "a_tokens": 128,
+      "b_tokens": 128
+    },
+    {
+      "pair": 2,
+      "identical": false,
+      "first_diff_index": 28,
+      "a_tokens": 128,
+      "b_tokens": 128
+    },
+    {
+      "pair": 3,
+      "identical": false,
+      "first_diff_index": 28,
+      "a_tokens": 128,
+      "b_tokens": 128
+    }
+  ],
+  "rank_token_identity": {
+    "wob-ab-baseline-1": true,
+    "wob-ab-baseline-2": true,
+    "wob-ab-baseline-3": true,
+    "wob-ab-baseline-warmup-excluded": true,
+    "wob-ab-candidate-1": true,
+    "wob-ab-candidate-2": true,
+    "wob-ab-candidate-3": true,
+    "wob-ab-candidate-coding": true,
+    "wob-ab-candidate-json": true,
+    "wob-ab-candidate-reasoning-high": true,
+    "wob-ab-candidate-smoke": true,
+    "wob-ab-candidate-warmup-excluded": true
+  },
+  "execution": {
+    "rank0": {
+      "llmm1_calls": 24560,
+      "llmm1_tokens": 24560,
+      "fallback_calls": 320,
+      "fallback_reasons": {
+        "tokens_not_1": 320
+      }
+    },
+    "rank1": {
+      "llmm1_calls": 24560,
+      "llmm1_tokens": 24560,
+      "fallback_calls": 320,
+      "fallback_reasons": {
+        "tokens_not_1": 320
+      }
+    },
+    "native_library_sha": "a860f50f3c52535c6fbde6dcbb6e6fa5f8b699fae5301ba77f56f02400eaa07d"
+  },
+  "quality": {
+    "smoke": {
+      "status": "PASS",
+      "tokens": 2,
+      "finish_reason": "stop",
+      "test_count": null,
+      "final_answer": null
+    },
+    "coding": {
+      "status": "PASS",
+      "tokens": 101,
+      "finish_reason": "stop",
+      "test_count": 9,
+      "final_answer": null
+    },
+    "json": {
+      "status": "PASS",
+      "tokens": 15,
+      "finish_reason": "stop",
+      "test_count": null,
+      "final_answer": null
+    },
+    "reasoning-high": {
+      "status": "PASS",
+      "tokens": 88,
+      "finish_reason": "stop",
+      "test_count": null,
+      "final_answer": "10"
+    }
+  },
+  "protocol": {
+    "prompt_source": "reports/DS41-Q2-001/attempt020/prompt-tokens.json",
+    "prompt_tokens": {
+      "speed": 35,
+      "arithmetic": 15,
+      "coding": 47,
+      "json": 83,
+      "reasoning_high": 73
+    },
+    "sampling": {
+      "temperature": 0,
+      "seed": 1
+    },
+    "reasoning": "none on fixed historical speed/coding/arithmetic/JSON payload; high only on reasoning_high prompt",
+    "context": 4096,
+    "prefix_caching": false,
+    "max_num_seqs": 1,
+    "max_num_batched_tokens": 1024,
+    "warmup_tokens": 32,
+    "speed_tokens": 128,
+    "speed_ignore_eos": true,
+    "quality_ignore_eos": false,
+    "quality_caps": {
+      "arithmetic": 128,
+      "coding": 512,
+      "json": 256,
+      "reasoning_high": 128
+    },
+    "order": [
+      "A1",
+      "B1",
+      "B2",
+      "A2",
+      "A3",
+      "B3"
+    ],
+    "same_load": true,
+    "baseline": "DenseFix TP2/EP2 Engram2, EP skip-remote, native HIP MoE, fused mHC coeff/Sinkhorn, TileLang projection/RMS",
+    "candidate": "baseline plus DS41_ATTN_WOB_LLMM1=1, only local BF16 WO_B M1 matmul; TP reduction unchanged",
+    "promotion": {
+      "component_dispatch_rank_quality_pass": true,
+      "all_three_pairs_b_gt_a": true,
+      "mean_gain_pct_min": 5
+    },
+    "resource_counters": "Per-request process resource counters outside timing; peak RSS is not current physical GPU allocation",
+    "timing": "Offline SPMD, decode from actual first/last generated-token timestamps; HTTP and isolated prefill TPS unavailable"
+  },
+  "component": {
+    "status": "PASS_BOTH_NODES",
+    "rel_l2": 0.0029546645227512738,
+    "max_abs": 0.015625,
+    "thresholds": {
+      "rel_l2": 0.005,
+      "max_abs": 0.125
+    },
+    "live_collective_in_component": false,
+    "live_collective_in_model_ab": true
+  },
+  "resources": {
+    "model_load_report_gib_per_rank": 80.37,
+    "note": "Runtime reported GPU allocation and process peak RSS overlap on UMA; do not add them. Fault counters cover each entire request including prefill, not decode alone. File/swap origin not localized.",
+    "per_request": {
+      "rank0": [
+        {
+          "label": "wob-ab-baseline-warmup-excluded",
+          "major_faults": 4576,
+          "minor_faults": 219,
+          "peak_rss_kib": 41211464
+        },
+        {
+          "label": "wob-ab-candidate-warmup-excluded",
+          "major_faults": 215,
+          "minor_faults": 6895,
+          "peak_rss_kib": 41211464
+        },
+        {
+          "label": "wob-ab-baseline-1",
+          "major_faults": 5493,
+          "minor_faults": 343,
+          "peak_rss_kib": 41211464
+        },
+        {
+          "label": "wob-ab-candidate-1",
+          "major_faults": 3874,
+          "minor_faults": 331,
+          "peak_rss_kib": 41211464
+        },
+        {
+          "label": "wob-ab-candidate-2",
+          "major_faults": 2,
+          "minor_faults": 47,
+          "peak_rss_kib": 41211464
+        },
+        {
+          "label": "wob-ab-baseline-2",
+          "major_faults": 0,
+          "minor_faults": 1,
+          "peak_rss_kib": 41211464
+        },
+        {
+          "label": "wob-ab-baseline-3",
+          "major_faults": 0,
+          "minor_faults": 2,
+          "peak_rss_kib": 41211464
+        },
+        {
+          "label": "wob-ab-candidate-3",
+          "major_faults": 0,
+          "minor_faults": 1,
+          "peak_rss_kib": 41211464
+        },
+        {
+          "label": "wob-ab-candidate-smoke",
+          "major_faults": 789,
+          "minor_faults": 58,
+          "peak_rss_kib": 41211464
+        },
+        {
+          "label": "wob-ab-candidate-coding",
+          "major_faults": 6480,
+          "minor_faults": 698,
+          "peak_rss_kib": 41211464
+        },
+        {
+          "label": "wob-ab-candidate-json",
+          "major_faults": 4435,
+          "minor_faults": 664,
+          "peak_rss_kib": 41211464
+        },
+        {
+          "label": "wob-ab-candidate-reasoning-high",
+          "major_faults": 7298,
+          "minor_faults": 1539,
+          "peak_rss_kib": 41211464
+        }
+      ],
+      "rank1": [
+        {
+          "label": "wob-ab-baseline-warmup-excluded",
+          "major_faults": 4692,
+          "minor_faults": 213,
+          "peak_rss_kib": 41213776
+        },
+        {
+          "label": "wob-ab-candidate-warmup-excluded",
+          "major_faults": 225,
+          "minor_faults": 6903,
+          "peak_rss_kib": 41213776
+        },
+        {
+          "label": "wob-ab-baseline-1",
+          "major_faults": 6121,
+          "minor_faults": 365,
+          "peak_rss_kib": 41213776
+        },
+        {
+          "label": "wob-ab-candidate-1",
+          "major_faults": 4894,
+          "minor_faults": 448,
+          "peak_rss_kib": 41213776
+        },
+        {
+          "label": "wob-ab-candidate-2",
+          "major_faults": 1,
+          "minor_faults": 47,
+          "peak_rss_kib": 41213776
+        },
+        {
+          "label": "wob-ab-baseline-2",
+          "major_faults": 0,
+          "minor_faults": 1,
+          "peak_rss_kib": 41213776
+        },
+        {
+          "label": "wob-ab-baseline-3",
+          "major_faults": 1,
+          "minor_faults": 1,
+          "peak_rss_kib": 41213776
+        },
+        {
+          "label": "wob-ab-candidate-3",
+          "major_faults": 0,
+          "minor_faults": 1,
+          "peak_rss_kib": 41213776
+        },
+        {
+          "label": "wob-ab-candidate-smoke",
+          "major_faults": 835,
+          "minor_faults": 86,
+          "peak_rss_kib": 41213776
+        },
+        {
+          "label": "wob-ab-candidate-coding",
+          "major_faults": 7585,
+          "minor_faults": 982,
+          "peak_rss_kib": 41213776
+        },
+        {
+          "label": "wob-ab-candidate-json",
+          "major_faults": 4916,
+          "minor_faults": 815,
+          "peak_rss_kib": 41213776
+        },
+        {
+          "label": "wob-ab-candidate-reasoning-high",
+          "major_faults": 7799,
+          "minor_faults": 2219,
+          "peak_rss_kib": 41213776
+        }
+      ]
+    }
+  },
+  "setup_negative": {
+    "attempt": "attempt022",
+    "measurements": 0,
+    "error": "ROCPROFILER_REGISTER_LIBRARY core/devel path conflict in model registry subprocess",
+    "fix_commit": "c2a9acecac2959ebfe28f0ee180251621218d545",
+    "reproducer": "attempt022/reproduce-child-import.sh",
+    "fixed_import": "PASS_BOTH_NODES",
+    "new_dependencies": false
+  },
+  "cleanup": {
+    "rank0": "OFF_VERIFIED",
+    "rank1": "OFF_VERIFIED",
+    "owner": "NONE/OFF",
+    "utc": "2026-09-13T17:52:27Z",
+    "supervisor_exit": 0,
+    "glm_engine": "OFF",
+    "glm_gateway": "active"
+  },
+  "scope": "Offline SPMD, short fixed workload; no HTTP or long-context/general intelligence equivalence qualification. Small BF16 rounding differences change A/B trajectories at zero-based completion index28.",
+  "raw_root": "reports/DS41-Q2-001/attempt023/",
+  "raw_files": [
+    "preregister.json",
+    "prompt-tokens.json",
+    "start-receipt.json",
+    "offline-rank0.json",
+    "offline-rank0.events.jsonl",
+    "node02/offline-rank1.json",
+    "node02/offline-rank1.events.jsonl",
+    "rank0.log",
+    "node02/rank1.log",
+    "wob-ab-validation.json",
+    "validator.log",
+    "supervisor.log"
+  ],
+  "numerical_raw_root": "reports/DS41-Q2-001/attempt022/",
+  "log_note": "Inherited runner logs caught SystemExit(0) as fatal after run_complete; not a failed generation. Supervisor transition and terminal result confirm successful run/cleanup.",
+  "next": "No automatic second candidate. Keep WO_B LLMM1 opt-in off. Any future work must distinguish cold prompt/page-in cost from warm decode before larger changes."
+}

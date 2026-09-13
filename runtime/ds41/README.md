@@ -22,7 +22,28 @@ fusion and TileLang projection/RMS remain independently rollbackable. Set
 attempt020 artifacts remain under `reports/DS41-Q2-001/attempt020/`; tracked
 compact results are under `runtime/ds41/results/`.
 
-### WO_B M=1 LLMM1 candidate (attempt022)
+### WO_B M=1 LLMM1 result (attempt022/023)
+
+**Terminal: correctness PASS, speed gate FAIL, no promotion.** The frozen
+attempt023 A/B measured11.70417 tok/s for A and11.89974 tok/s for B (+1.67%).
+All three pairs favored B, but the preregistered5% threshold was not met.
+Arithmetic, coding (one function, nine independent cases), JSON and
+reasoning-high completed naturally and passed. All12 request token streams
+matched between ranks; A and B themselves differed from completion index28.
+The promoted attempt020 reference remains12.08665 tok/s. Full result:
+[`attempt023-wob-ab.json`](results/attempt023-wob-ab.json).
+
+Early measured requests had thousands of major faults on both hosts;
+later speed requests had0-2. These counters cover whole requests and do not
+localize the source to Engram, weights, swap or decode. All samples are retained.
+Neither this narrow test suite nor rank agreement establishes general quality
+equivalence. Both DS41 ranks were verified OFF after the run; GLM was unchanged.
+
+Attempt022 generated no tokens: model inspection aborted on conflicting
+ROCm profiler registration paths. The scoped launcher fix uses the core SDK
+library path before its devel hardlinks. Small import reproducers passed on
+both hosts, without driver, package or weight changes. Attempt023 then reused
+the original numerical gates and exact measurement protocol.
 
 `DS41_ATTN_WOB_LLMM1=1` opts into a local BF16 output-projection matmul
 for input `[1,4096]` and local weight `[5120,4096]` only. It is disabled by
@@ -32,14 +53,15 @@ The shape guard can include one-token prefill, not just decode; larger prefill
 and verification matrices retain the original path. This does not change
 WO_A, RoPE, attention, MoE, Engram, weight formats or the Socket transport.
 
-Attempt022 reuses attempt020's tokenized prompts and same-load sequence:
+Attempt023 reuses attempt020's tokenized prompts and same-load sequence:
 excluded warmup32 for each arm, then A1/B1/B2/A2/A3/B3 at128 output tokens.
 A retains all promoted numerical paths; B adds only WO_B LLMM1. Arithmetic,
 coding, JSON and reasoning-high tasks run afterward on the same load.
 Component tolerances remain rel-L2<=0.005 and max-abs<=0.125. Promotion also
 requires coherent ranks, naturally completed passing tasks, all three paired
 B>A, and at least5% mean decode gain. Microkernel timings are not model TPS.
-Raw evidence and reproducible commands: `reports/DS41-Q2-001/attempt022/`.
+Component and setup evidence: `reports/DS41-Q2-001/attempt022/`.
+Model A/B raw and final report: `reports/DS41-Q2-001/attempt023/`.
 
 The attempt021 attention fixture containers have zero samples. Component
 gates use canonical layer0 intermediates reconstructed from the verified

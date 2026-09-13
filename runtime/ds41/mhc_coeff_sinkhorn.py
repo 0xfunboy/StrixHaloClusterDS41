@@ -14,19 +14,37 @@ import torch
 from vllm.triton_utils import tl, triton
 
 
-_STATS = {"fused_calls": 0, "fused_tokens": 0}
+_STATS = {
+    "fused_calls": 0,
+    "fused_tokens": 0,
+    "fallback_calls": 0,
+    "fallback_reasons": {},
+}
 _FIRST_LOGGED = False
 
 
-def stats() -> dict[str, int]:
-    return {k: int(v) for k, v in _STATS.items()}
+def stats() -> dict[str, object]:
+    return {
+        "fused_calls": int(_STATS["fused_calls"]),
+        "fused_tokens": int(_STATS["fused_tokens"]),
+        "fallback_calls": int(_STATS["fallback_calls"]),
+        "fallback_reasons": dict(_STATS["fallback_reasons"]),
+    }
 
 
 def reset_stats() -> None:
     global _FIRST_LOGGED
     _STATS["fused_calls"] = 0
     _STATS["fused_tokens"] = 0
+    _STATS["fallback_calls"] = 0
+    _STATS["fallback_reasons"] = {}
     _FIRST_LOGGED = False
+
+
+def record_fallback(reason: str) -> None:
+    _STATS["fallback_calls"] += 1
+    reasons = _STATS["fallback_reasons"]
+    reasons[reason] = int(reasons.get(reason, 0)) + 1
 
 
 @triton.jit

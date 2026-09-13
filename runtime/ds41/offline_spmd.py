@@ -176,6 +176,7 @@ def main() -> int:
     token_spec = json.loads(TOKENS_PATH.read_text(encoding="utf-8"))
     prompts = token_spec["prompts"]
     native_hip_ab_cfg = token_spec.get("native_hip_ab")
+    mhc_ab_cfg = token_spec.get("mhc_ab")
     native_hip_identity = None
     native_hip_default = os.environ.get("DS41_NATIVE_HIP_MOE", "0") == "1"
     if isinstance(native_hip_ab_cfg, dict) or native_hip_default:
@@ -248,6 +249,108 @@ def main() -> int:
         tmp = RESULT_PATH.with_suffix(RESULT_PATH.suffix + ".tmp")
         tmp.write_text(json.dumps(checkpoint, indent=2, ensure_ascii=False) + "\n")
         os.replace(tmp, RESULT_PATH)
+
+    if isinstance(mhc_ab_cfg, dict):
+        speed_tokens = int(mhc_ab_cfg.get("speed_tokens", 64))
+        warmup_tokens = int(mhc_ab_cfg.get("warmup_tokens", 16))
+
+        from runtime.ds41.mhc_coeff_sinkhorn import reset_stats as reset_mhc_stats
+        from runtime.ds41.mhc_coeff_sinkhorn import stats as mhc_stats_snapshot
+
+        reset_done = False
+
+        def mhc_stats_event(label: str) -> dict[str, Any]:
+            stats = mhc_stats_snapshot()
+            emit("mhc_coeff_sinkhorn_stats", label=label, **stats)
+            return stats
+
+        def set_mhc(enabled: bool) -> None:
+            nonlocal reset_done
+            os.environ["DS41_MHC_COEFF_SINKHORN"] = "1" if enabled else "0"
+            if enabled and not reset_done:
+                reset_mhc_stats()
+                reset_done = True
+            emit("mhc_coeff_sinkhorn_mode", enabled=enabled)
+
+        # A is the promoted native-HIP baseline with eager Torch mHC.  B changes
+        # only the M=1 coefficient/softmax/Sinkhorn block; projection/RMS,
+        # delayed collapse, post, MoE, attention, Engram and collectives remain.
+        set_mhc(False)
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="mhc-ab-baseline-warmup-excluded",
+            max_tokens=warmup_tokens, ignore_eos=True))
+        save_checkpoint("MHC_AB_BASELINE_WARMUP_COMPLETE")
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="mhc-ab-baseline-1",
+            max_tokens=speed_tokens, ignore_eos=True))
+        save_checkpoint("MHC_AB_BASELINE_1_COMPLETE")
+
+        set_mhc(True)
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="mhc-ab-candidate-warmup-excluded",
+            max_tokens=warmup_tokens, ignore_eos=True))
+        mhc_stats_event("after_candidate_warmup")
+        save_checkpoint("MHC_AB_CANDIDATE_WARMUP_COMPLETE")
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="mhc-ab-candidate-1",
+            max_tokens=speed_tokens, ignore_eos=True))
+        mhc_stats_event("after_candidate_1")
+        save_checkpoint("MHC_AB_CANDIDATE_1_COMPLETE")
+
+        set_mhc(False)
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="mhc-ab-baseline-2",
+            max_tokens=speed_tokens, ignore_eos=True))
+        save_checkpoint("MHC_AB_BASELINE_2_COMPLETE")
+
+        set_mhc(True)
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="mhc-ab-candidate-2",
+            max_tokens=speed_tokens, ignore_eos=True))
+        mhc_stats = mhc_stats_event("after_candidate_2")
+        save_checkpoint("MHC_AB_CANDIDATE_2_COMPLETE")
+
+        results.append(run_generation(
+            llm, prompts["arithmetic"]["token_ids"], label="mhc-ab-candidate-smoke",
+            max_tokens=128, ignore_eos=False))
+        save_checkpoint("MHC_AB_CANDIDATE_SMOKE_COMPLETE")
+        results.append(run_generation(
+            llm, prompts["coding"]["token_ids"], label="mhc-ab-candidate-coding",
+            max_tokens=512, ignore_eos=False))
+        save_checkpoint("MHC_AB_CANDIDATE_CODING_COMPLETE")
+        results.append(run_generation(
+            llm, prompts["json"]["token_ids"], label="mhc-ab-candidate-json",
+            max_tokens=256, ignore_eos=False))
+        save_checkpoint("MHC_AB_CANDIDATE_JSON_COMPLETE")
+        if "reasoning_high" not in prompts:
+            raise RuntimeError("mHC A/B fixture is missing reasoning_high")
+        results.append(run_generation(
+            llm, prompts["reasoning_high"]["token_ids"],
+            label="mhc-ab-candidate-reasoning-high",
+            max_tokens=int(mhc_ab_cfg.get("reasoning_high_max_tokens", 128)),
+            ignore_eos=False))
+        save_checkpoint("MHC_AB_CANDIDATE_REASONING_HIGH_COMPLETE")
+        mhc_stats = mhc_stats_event("after_quality")
+
+        summary = {
+            "status": "MHC_AB_COMPLETE",
+            "rank": RANK,
+            "world_size": WORLD_SIZE,
+            "attempt": ATTEMPT,
+            "epoch": os.environ.get("DS41_OWNER_EPOCH"),
+            "init_s": init_s,
+            "artifact_identity": artifact_identity,
+            "native_hip_identity": native_hip_identity,
+            "mhc_stats": mhc_stats,
+            "prompt_tokens_file": str(TOKENS_PATH),
+            "optimization": "MHC_M1_COEFF_SOFTMAX_SINKHORN_TRITON",
+            "results": results,
+        }
+        tmp = RESULT_PATH.with_suffix(RESULT_PATH.suffix + ".tmp")
+        tmp.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
+        os.replace(tmp, RESULT_PATH)
+        emit("run_complete", status=summary["status"], result=str(RESULT_PATH))
+        return 0
 
     if isinstance(native_hip_ab_cfg, dict):
         speed_tokens = int(native_hip_ab_cfg.get("speed_tokens", 64))

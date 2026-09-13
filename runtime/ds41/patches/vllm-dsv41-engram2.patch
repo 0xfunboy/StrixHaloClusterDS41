@@ -44,7 +44,7 @@ index db20adb..9c6f458 100644
          topk_weights,
          topk_indices,
 diff --git a/vllm/model_executor/kernels/mhc/torch.py b/vllm/model_executor/kernels/mhc/torch.py
-index 9c57cc1..387c659 100644
+index 9c57cc1..e69ac8f 100644
 --- a/vllm/model_executor/kernels/mhc/torch.py
 +++ b/vllm/model_executor/kernels/mhc/torch.py
 @@ -1,5 +1,7 @@
@@ -55,12 +55,43 @@ index 9c57cc1..387c659 100644
  import torch
  
  
-@@ -20,23 +22,64 @@ def mhc_pre_delayed_torch(
+@@ -18,25 +20,87 @@ def mhc_pre_delayed_torch(
+ ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+     """Reference for mHC pre using coefficients from the previous sublayer."""
      hc_mult = residual.shape[1]
-     x = (residual.flatten(1) if x is None else x).float()
-     mixes = (x @ fn.t()) * torch.rsqrt(x.square().mean(-1, keepdim=True) + rms_eps)
+-    x = (residual.flatten(1) if x is None else x).float()
+-    mixes = (x @ fn.t()) * torch.rsqrt(x.square().mean(-1, keepdim=True) + rms_eps)
 -    pre = (
 -        torch.sigmoid(mixes[:, :hc_mult] * hc_scale[0] + hc_base[:hc_mult]) + hc_pre_eps
+-    )
+-    post = (
+-        torch.sigmoid(
+-            mixes[:, hc_mult : 2 * hc_mult] * hc_scale[1]
+-            + hc_base[hc_mult : 2 * hc_mult]
++    source = residual.flatten(1) if x is None else x
++    projection_requested = os.environ.get("DS41_MHC_PROJECTION_RMS", "0") == "1"
++    if projection_requested:
++        from runtime.ds41.mhc_projection_rms import (
++            contract as projection_contract,
++            projection_rms_tilelang,
++            record_fallback as projection_record_fallback,
++        )
++
++        projection_ok, projection_reason = projection_contract(source, fn)
++        if projection_ok:
++            mixes = projection_rms_tilelang(source, fn, rms_eps)
++        else:
++            projection_record_fallback(projection_reason)
++            xf = source.float()
++            mixes = (xf @ fn.t()) * torch.rsqrt(
++                xf.square().mean(-1, keepdim=True) + rms_eps
++            )
++    else:
++        xf = source.float()
++        mixes = (xf @ fn.t()) * torch.rsqrt(
++            xf.square().mean(-1, keepdim=True) + rms_eps
+         )
+-        * hc_post_mult_value
 +    ds41_requested = os.environ.get("DS41_MHC_COEFF_SINKHORN", "0") == "1"
 +    ds41_fused_coeff = (
 +        ds41_requested
@@ -72,10 +103,12 @@ index 9c57cc1..387c659 100644
 +        and hc_scale.dtype == torch.float32
 +        and hc_base.dtype == torch.float32
      )
--    post = (
--        torch.sigmoid(
--            mixes[:, hc_mult : 2 * hc_mult] * hc_scale[1]
--            + hc_base[hc_mult : 2 * hc_mult]
+-    comb = mixes[:, 2 * hc_mult :].view(-1, hc_mult, hc_mult) * hc_scale[2]
+-    comb = comb + hc_base[2 * hc_mult :].view(1, hc_mult, hc_mult)
+-    comb = torch.softmax(comb, dim=-1) + hc_sinkhorn_eps
+-    comb = comb / (comb.sum(dim=-2, keepdim=True) + hc_sinkhorn_eps)
+-    for _ in range(sinkhorn_repeat - 1):
+-        comb = comb / (comb.sum(dim=-1, keepdim=True) + hc_sinkhorn_eps)
 +    if ds41_fused_coeff:
 +        from runtime.ds41.mhc_coeff_sinkhorn import fused_coeff_sinkhorn
 +
@@ -87,15 +120,7 @@ index 9c57cc1..387c659 100644
 +            hc_sinkhorn_eps,
 +            hc_post_mult_value,
 +            sinkhorn_repeat,
-         )
--        * hc_post_mult_value
--    )
--    comb = mixes[:, 2 * hc_mult :].view(-1, hc_mult, hc_mult) * hc_scale[2]
--    comb = comb + hc_base[2 * hc_mult :].view(1, hc_mult, hc_mult)
--    comb = torch.softmax(comb, dim=-1) + hc_sinkhorn_eps
--    comb = comb / (comb.sum(dim=-2, keepdim=True) + hc_sinkhorn_eps)
--    for _ in range(sinkhorn_repeat - 1):
--        comb = comb / (comb.sum(dim=-1, keepdim=True) + hc_sinkhorn_eps)
++        )
 +    else:
 +        if ds41_requested:
 +            from runtime.ds41.mhc_coeff_sinkhorn import record_fallback

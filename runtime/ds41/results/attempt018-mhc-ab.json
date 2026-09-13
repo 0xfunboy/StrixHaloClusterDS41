@@ -1,0 +1,252 @@
+{
+  "schema": "ds41-mhc-ab-result-v1",
+  "attempt": "attempt018",
+  "status": "PASS",
+  "runtime_commit_under_test": "1d026a083b61f36d550c0f9e03e1ba26363dc7f0",
+  "candidate_component_commit": "e391e6d613dd7ac6fcb5a9739bdc0893567f188b",
+  "historical_promoted_native_hip_tps": 7.636839299234488,
+  "baseline": {
+    "runs": [
+      {
+        "label": "mhc-ab-baseline-1",
+        "completion_tokens": 64,
+        "finish_reason": "length",
+        "decode_tps": 6.504882395033082,
+        "ttft_s": 4.9794299602508545,
+        "wall_s": 14.664791446994059
+      },
+      {
+        "label": "mhc-ab-baseline-2",
+        "completion_tokens": 64,
+        "finish_reason": "length",
+        "decode_tps": 8.16075901463182,
+        "ttft_s": 4.974440574645996,
+        "wall_s": 12.694448681999347
+      }
+    ],
+    "decode_tps_mean": 7.332820704832451,
+    "ttft_s_mean": 4.976935267448425,
+    "wall_s_mean": 13.679620064496703,
+    "dispersion": {
+      "sample_sd_tps": 1.1708815865265247,
+      "cv_pct": 15.967683292118329,
+      "min_tps": 6.504882395033082,
+      "max_tps": 8.16075901463182
+    }
+  },
+  "candidate": {
+    "runs": [
+      {
+        "label": "mhc-ab-candidate-1",
+        "completion_tokens": 64,
+        "finish_reason": "length",
+        "decode_tps": 9.063450769110428,
+        "ttft_s": 4.94555139541626,
+        "wall_s": 11.905041556005017
+      },
+      {
+        "label": "mhc-ab-candidate-2",
+        "completion_tokens": 64,
+        "finish_reason": "length",
+        "decode_tps": 10.38053342009603,
+        "ttft_s": 4.935441970825195,
+        "wall_s": 11.004578780994052
+      }
+    ],
+    "decode_tps_mean": 9.72199209460323,
+    "ttft_s_mean": 4.9404966831207275,
+    "wall_s_mean": 11.454810168499534,
+    "dispersion": {
+      "sample_sd_tps": 0.9313180738950743,
+      "cv_pct": 9.57949836651336,
+      "min_tps": 9.063450769110428,
+      "max_tps": 10.38053342009603
+    }
+  },
+  "gain_vs_contemporary_baseline_pct": 32.58188746107314,
+  "gain_vs_historical_promoted_native_hip_pct": 27.30387158438383,
+  "offline_wall_throughput_gain_pct": 19.42249468363382,
+  "offline_wall_reduction_pct": 16.26368192616191,
+  "ab_token_compare": [
+    {
+      "run": 1,
+      "identical": false,
+      "first_diff_index": 40,
+      "baseline_tokens": 64,
+      "candidate_tokens": 64
+    },
+    {
+      "run": 2,
+      "identical": false,
+      "first_diff_index": 40,
+      "baseline_tokens": 64,
+      "candidate_tokens": 64
+    }
+  ],
+  "rank_token_identity": {
+    "mhc-ab-baseline-1": true,
+    "mhc-ab-baseline-2": true,
+    "mhc-ab-baseline-warmup-excluded": true,
+    "mhc-ab-candidate-1": true,
+    "mhc-ab-candidate-2": true,
+    "mhc-ab-candidate-coding": true,
+    "mhc-ab-candidate-json": true,
+    "mhc-ab-candidate-reasoning-high": true,
+    "mhc-ab-candidate-smoke": true,
+    "mhc-ab-candidate-warmup-excluded": true
+  },
+  "execution": {
+    "pass": true,
+    "rank0": {
+      "fused_calls": 27120,
+      "fused_tokens": 27120,
+      "fallback_calls": 560,
+      "fallback_reasons": {
+        "tokens_not_1": 560
+      }
+    },
+    "rank1": {
+      "fused_calls": 27120,
+      "fused_tokens": 27120,
+      "fallback_calls": 560,
+      "fallback_reasons": {
+        "tokens_not_1": 560
+      }
+    },
+    "same_library_sha": true,
+    "rank0_library": "a860f50f3c52535c6fbde6dcbb6e6fa5f8b699fae5301ba77f56f02400eaa07d",
+    "rank1_library": "a860f50f3c52535c6fbde6dcbb6e6fa5f8b699fae5301ba77f56f02400eaa07d"
+  },
+  "quality": {
+    "smoke": {
+      "pass": true,
+      "text": "323",
+      "tokens": 2,
+      "finish_reason": "stop",
+      "ttft_s": 2.894996166229248,
+      "wall_s": 3.0228340800094884
+    },
+    "coding": {
+      "status": "PASS",
+      "parse": true,
+      "function_found": true,
+      "tests": [
+        {
+          "input": [
+            1,
+            2,
+            0
+          ],
+          "expected": 3,
+          "got": 3,
+          "pass": true
+        },
+        {
+          "input": [
+            3,
+            4,
+            -1,
+            1
+          ],
+          "expected": 2,
+          "got": 2,
+          "pass": true
+        },
+        {
+          "input": [
+            7,
+            8,
+            9,
+            11,
+            12
+          ],
+          "expected": 1,
+          "got": 1,
+          "pass": true
+        },
+        {
+          "input": [
+            1
+          ],
+          "expected": 2,
+          "got": 2,
+          "pass": true
+        },
+        {
+          "input": [],
+          "expected": 1,
+          "got": 1,
+          "pass": true
+        },
+        {
+          "input": [
+            2,
+            1
+          ],
+          "expected": 3,
+          "got": 3,
+          "pass": true
+        },
+        {
+          "input": [
+            1,
+            1,
+            2,
+            2
+          ],
+          "expected": 3,
+          "got": 3,
+          "pass": true
+        },
+        {
+          "input": [
+            -5,
+            -1,
+            4,
+            2,
+            1
+          ],
+          "expected": 3,
+          "got": 3,
+          "pass": true
+        },
+        {
+          "input": [
+            2,
+            3,
+            4,
+            5,
+            1
+          ],
+          "expected": 6,
+          "got": 6,
+          "pass": true
+        }
+      ],
+      "reason": null
+    },
+    "json": {
+      "status": "PASS",
+      "parsed": {
+        "total": 17,
+        "valid_ids": [
+          "a",
+          "c"
+        ]
+      }
+    },
+    "reasoning_high": {
+      "pass": true,
+      "final_answer": "10",
+      "text": "We need answer only integer. Need solve classic 100 doors. Toggle every kth door on pass k. Door n toggled for each divisor k of n. Open if odd number divisors. Perfect squares have odd divisors. 1..100 perfect squares: 1,4,9,16,25,36,49,64,81,100 =10. Return only integer.</think>10",
+      "tokens": 84,
+      "finish_reason": "stop"
+    }
+  },
+  "raw": {
+    "rank0": "reports/DS41-Q2-001/attempt018/offline-rank0.json",
+    "rank1": "reports/DS41-Q2-001/attempt018/node02/offline-rank1.json",
+    "validation": "reports/DS41-Q2-001/attempt018/mhc-ab-validation.json",
+    "supervisor": "reports/DS41-Q2-001/attempt018/supervisor.log"
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "schema": "ds41-q2-001-attempt015-native-hip-ab-v1",
+  "attempt": "attempt015",
+  "runtime_commit": "74f034428bedf663b45085c5f67fac59264f9693",
+  "native_library_sha256": "a860f50f3c52535c6fbde6dcbb6e6fa5f8b699fae5301ba77f56f02400eaa07d",
+  "status": "PASS",
+  "baseline": {
+    "runs": [
+      {
+        "label": "hip-ab-baseline-1",
+        "completion_tokens": 64,
+        "finish_reason": "length",
+        "decode_tps": 2.1624322001644103,
+        "ttft_s": 4.933265209197998,
+        "wall_s": 34.06784990399319
+      },
+      {
+        "label": "hip-ab-baseline-2",
+        "completion_tokens": 64,
+        "finish_reason": "length",
+        "decode_tps": 2.3261712200609055,
+        "ttft_s": 4.966792106628418,
+        "wall_s": 32.05015072900278
+      }
+    ],
+    "decode_tps_mean": 2.2443017101126577,
+    "ttft_s_mean": 4.950028657913208,
+    "wall_s_mean": 33.059000316497986
+  },
+  "candidate": {
+    "runs": [
+      {
+        "label": "hip-ab-candidate-1",
+        "completion_tokens": 64,
+        "finish_reason": "length",
+        "decode_tps": 7.288170289278097,
+        "ttft_s": 4.920202970504761,
+        "wall_s": 13.56500073200732
+      },
+      {
+        "label": "hip-ab-candidate-2",
+        "completion_tokens": 64,
+        "finish_reason": "length",
+        "decode_tps": 7.985508309190879,
+        "ttft_s": 4.935027122497559,
+        "wall_s": 12.824446401995374
+      }
+    ],
+    "decode_tps_mean": 7.636839299234488,
+    "ttft_s_mean": 4.92761504650116,
+    "wall_s_mean": 13.194723567001347
+  },
+  "decode_tps_gain_pct": 240.27685604049825,
+  "offline_wall_throughput_gain_pct": 150.54712323928607,
+  "offline_wall_reduction_pct": 60.087348556584864,
+  "ab_token_compare": [
+    {
+      "run": 1,
+      "identical": false,
+      "first_diff_index": 40,
+      "baseline_tokens": 64,
+      "candidate_tokens": 64
+    },
+    {
+      "run": 2,
+      "identical": false,
+      "first_diff_index": 40,
+      "baseline_tokens": 64,
+      "candidate_tokens": 64
+    }
+  ],
+  "native_execution": {
+    "pass": true,
+    "rank0": {
+      "native_calls": 13600,
+      "native_tokens": 13600,
+      "triton_fallback_calls": 200,
+      "fallback_reasons": {
+        "tokens_not_1": 200
+      }
+    },
+    "rank1": {
+      "native_calls": 13600,
+      "native_tokens": 13600,
+      "triton_fallback_calls": 200,
+      "fallback_reasons": {
+        "tokens_not_1": 200
+      }
+    },
+    "same_library_sha": true,
+    "rank0_library": "a860f50f3c52535c6fbde6dcbb6e6fa5f8b699fae5301ba77f56f02400eaa07d",
+    "rank1_library": "a860f50f3c52535c6fbde6dcbb6e6fa5f8b699fae5301ba77f56f02400eaa07d"
+  },
+  "quality": {
+    "smoke": {
+      "pass": true,
+      "text": "323",
+      "tokens": 2,
+      "finish_reason": "stop",
+      "ttft_s": 2.9731247425079346,
+      "wall_s": 3.1240795869962312
+    },
+    "coding_status": "PASS",
+    "coding_tests_passed": 9,
+    "coding_tests_total": 9,
+    "json": {
+      "status": "PASS",
+      "parsed": {
+        "total": 17,
+        "valid_ids": [
+          "a",
+          "c"
+        ]
+      }
+    },
+    "reasoning_high": {
+      "pass": true,
+      "final_answer": "10",
+      "text": "We need answer only integer. Need solve classic 100 doors. Toggle every kth door on pass k. Door n toggled for each divisor k of n. Open if odd number divisors. Perfect squares have odd divisors. 1..100 perfect squares: 1,4,9,16,25,36,49,64,81,100 =10. Need return only integer.</think>10",
+      "tokens": 85,
+      "finish_reason": "stop"
+    }
+  },
+  "rank_token_identity": {
+    "hip-ab-baseline-1": true,
+    "hip-ab-baseline-2": true,
+    "hip-ab-baseline-warmup-excluded": true,
+    "hip-ab-candidate-1": true,
+    "hip-ab-candidate-2": true,
+    "hip-ab-candidate-coding": true,
+    "hip-ab-candidate-json": true,
+    "hip-ab-candidate-reasoning-high": true,
+    "hip-ab-candidate-smoke": true,
+    "hip-ab-candidate-warmup-excluded": true
+  },
+  "cleanup": {
+    "node01": "OFF_VERIFIED",
+    "node02": "OFF_VERIFIED",
+    "owner": "NONE/OFF",
+    "supervisor": "PASS"
+  },
+  "raw": [
+    "reports/DS41-Q2-001/attempt015/offline-rank0.json",
+    "reports/DS41-Q2-001/attempt015/node02/offline-rank1.json",
+    "reports/DS41-Q2-001/attempt015/native-hip-ab-validation.json",
+    "reports/DS41-Q2-001/attempt015/rank0.log",
+    "reports/DS41-Q2-001/attempt015/supervisor.log"
+  ]
+}

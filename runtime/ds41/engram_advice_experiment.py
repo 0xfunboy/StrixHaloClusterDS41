@@ -6,7 +6,6 @@ discard is test preparation, not the proposed production optimization.
 from __future__ import annotations
 
 import ctypes
-import gc
 import hashlib
 import json
 import mmap
@@ -46,7 +45,7 @@ def resident_pages(source, start, length):
     return {"pages": count, "resident_pages": resident, "vector_bytes": count}
 
 
-def prepare_embedding(embedding, policy):
+def prepare_embedding(embedding, policy, related_sources=()):
     started = time.monotonic()
     old = embedding.source
     cache = embedding.cache
@@ -78,7 +77,7 @@ def prepare_embedding(embedding, policy):
         # tensor boundaries. Drop PTEs on matching read-only source mappings,
         # then this one exact file's clean cache. This is TEST preparation only.
         # q/k/WKV are already independent, materialized GPU tensors.
-        matching = [obj for obj in gc.get_objects()
+        matching = [obj for obj in (fresh, *related_sources)
                     if isinstance(obj, SafeTensorMMap) and obj._fd >= 0
                     and (os.fstat(obj._fd).st_dev, os.fstat(obj._fd).st_ino)
                     == (fresh_stat.st_dev, fresh_stat.st_ino)]
@@ -110,16 +109,25 @@ def prepare_embedding(embedding, policy):
         raise
 
 
+def model_readers(llm, embedding_type):
+    # vLLM freezes its GC heap after initialization. Follow the executor's
+    # owned model graph instead of scanning gc.get_objects().
+    model = llm.llm_engine.model_executor.driver_worker.get_model()
+    modules = list(model.modules())
+    embeddings = sorted((obj for obj in modules if isinstance(obj, embedding_type)),
+                        key=lambda obj: obj.layer_id)
+    sources = [obj._ds41_sidecar_source for obj in modules
+               if isinstance(getattr(obj, "_ds41_sidecar_source", None), SafeTensorMMap)]
+    if [obj.layer_id for obj in embeddings] != [1, 14] or len(sources) != 2:
+        raise RuntimeError("expected exactly two owned embeddings and sidecar sources")
+    return embeddings, sources
+
+
 def run_experiment(llm, prompts, raw, rank, generate, results, checkpoint):
     import torch.distributed as dist
     from vllm.models.deepseek_v4_1.common.disk_engram import DiskAffineEngramEmbedding
 
-    embeddings = sorted(
-        (obj for obj in gc.get_objects() if isinstance(obj, DiskAffineEngramEmbedding)),
-        key=lambda obj: obj.layer_id,
-    )
-    if [obj.layer_id for obj in embeddings] != [1, 14]:
-        raise RuntimeError("expected exactly the two model Engram embeddings")
+    embeddings, sidecar_sources = model_readers(llm, DiskAffineEngramEmbedding)
     if any(obj.tp_rank != rank for obj in embeddings):
         raise RuntimeError("Engram rank ownership mismatch")
     collector = FaultDiagnostics(llm.llm_engine.output_processor, raw, rank=rank)
@@ -153,7 +161,8 @@ def run_experiment(llm, prompts, raw, rank, generate, results, checkpoint):
             policy = "normal" if arm[0] == "A" else "random"
             begin = time.monotonic()
             prep = {"arm": arm, "policy": policy, "before": process_snapshot(rank)}
-            prep["embeddings"] = [prepare_embedding(obj, policy) for obj in embeddings]
+            prep["embeddings"] = [prepare_embedding(obj, policy, sidecar_sources)
+                                  for obj in embeddings]
             # Both ranks must pass residency checks before either generates.
             dist.barrier()
             prep["after"] = process_snapshot(rank)

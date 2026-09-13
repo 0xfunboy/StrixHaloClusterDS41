@@ -3,12 +3,19 @@
 This directory is the reproducible, isolated work for **DS41-Q2-001**. It does
 not modify `/home/funboy/StrixHaloClusterGLM` or its `.engine`.
 
-State at this checkpoint: component loader/reader primitives verified. The first
-model-bearing load reached DeepSeek V4.1/TP2/Engram initialization but was OOM-killed
-before the API because the GGUF iterator cloned mmap-backed tensors and ordinary TP2
-would split Q2_K expert blocks. The current overlay removes that anonymous load copy
-and uses expert-parallel for complete routed experts; end-to-end inference is still
-unqualified until the next target-only run completes.
+Current qualified state: the repaired DenseFix artifact runs DeepSeek V4.1 with
+TP2 dense/attention, EP2 routed experts and rank-local Engram2 on the two EVO-X3.
+Attempt015 qualified the gfx1151 native HIP M=1 routed path (IQ2_XXS gate/up,
+Q2_K down, Q8_1 activations) at 7.63684 tok/s mean decode on the fixed 64-token
+same-load A/B workload versus 2.24430 tok/s for the contemporary Triton
+skip-remote arm. Arithmetic, coding (9/9 independent tests), JSON and the
+reasoning-high 100-doors check passed; rank0/rank1 token streams matched for every
+request. The native path is the DS41 default only for its qualified M=1 contract;
+all other shapes fall back to the existing Triton path. Set
+`DS41_NATIVE_HIP_MOE=0` to roll back to the previously qualified Triton
+skip-remote baseline without changing weights or topology. Raw attempt artifacts
+remain under `reports/DS41-Q2-001/attempt015/`; the tracked compact result is
+`runtime/ds41/results/attempt015-native-hip-ab.json`.
 
 ## Source pins
 

@@ -177,15 +177,17 @@ def main() -> int:
     prompts = token_spec["prompts"]
     native_hip_ab_cfg = token_spec.get("native_hip_ab")
     native_hip_identity = None
-    if isinstance(native_hip_ab_cfg, dict):
+    native_hip_default = os.environ.get("DS41_NATIVE_HIP_MOE", "0") == "1"
+    if isinstance(native_hip_ab_cfg, dict) or native_hip_default:
         from runtime.ds41.native_hip_moe_runtime import ensure_loaded
 
         native_hip_identity = ensure_loaded()
+        emit("native_hip_library_loaded", **native_hip_identity)
+    if isinstance(native_hip_ab_cfg, dict):
         # The extension is resident before LLM construction, but baseline A
         # remains Triton until both ranks explicitly toggle between requests.
         os.environ["DS41_NATIVE_HIP_MOE"] = "0"
         os.environ["DS41_EP_SKIP_REMOTE"] = "1"
-        emit("native_hip_library_loaded", **native_hip_identity)
 
     from runtime.ds41.artifact_identity import verify_fast
 

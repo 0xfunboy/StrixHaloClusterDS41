@@ -196,12 +196,12 @@ Attempt024 localized approximately99% of request major faults to the two
 sparse Engram table readers. The cost recurs on a new prompt and disappears
 on its identical repeat. See the [diagnosis](results/attempt024-fault-diagnosis.md).
 
-Attempt025 tests one opt-in `DS41_ENGRAM_RANDOM_ADVICE=1` hint. It applies
+Attempt026 qualifies `DS41_ENGRAM_RANDOM_ADVICE=1` as the launcher default. It applies
 `MADV_RANDOM` only to complete pages contained in each embedding's packed
 weight, scale and bias tensors. It adds no row storage, changes no model
 arithmetic, and preserves the existing65536-row caches. Unsupported advice
-falls back to the normal path with explicit status. The default remains off
-until the matched comparison passes.
+falls back to the normal path with explicit status. Initialization logs
+`DS41_ENGRAM_ADVICE` with the effective policy and affected ranges.
 
 The experiment reopens only embedding readers at each arm boundary, retains
 materialized linears, clears decoded LRUs, and discards clean cache only for
@@ -209,18 +209,40 @@ the two identified Engram files. A zero-residency check on full table pages is m
 test-only setup is not part of normal inference. AB/BA/AB compares new-request
 latency and physical I/O, with separate first-continuation and warm-decode
 metrics. Exact output/rank/task agreement is required. Raw and preregistration:
-`reports/DS41-Q2-001/attempt025/`.
+`reports/DS41-Q2-001/attempt026/`. Attempt025's frozen-GC discovery abort
+remains recorded separately; it produced no inference sample.
+
+[Attempt026 result](results/attempt026-engram-advice-result.md): new-Q request
+wall time falls8.91%, physical reads fall96.25%, and warm decode stays near
+12.66TPS. All38rank streams match, with exact A/B output and natural-stop task
+checks. These are offline measurements on the fixed35/37-input,128-output
+workloads, not HTTP or sustained warm-decode gains.
+
+The controller forwards the advice setting to both transient ranks. With the
+pair already running, stop the whole pair before changing the setting:
+
+```sh
+bash runtime/ds41/pair.sh stop
+# New numeric owner epoch; rollback changes advice only, not weights or kernels.
+DS41_ENGRAM_RANDOM_ADVICE=0 bash runtime/ds41/pair.sh start "$(date +%s)"
+```
+
+To restore the promoted setting, stop the whole pair and start a fresh epoch
+with `DS41_ENGRAM_RANDOM_ADVICE=1` (also the default). An already-running pair
+is not reconfigured by a duplicate start. Never restart one rank in isolation.
+The final experiment leaves DS41 and GLM OFF, with the existing gateway available.
 
 ## Shared cluster ownership
 
-`rank0` holds `/home/funboy/.local/state/strix-cluster/compute.lock` for its
-entire model-bearing lifetime. DS41 starts rank0 first and only starts rank1
-after the lock owner is proven active. Stop is deliberately peer-first: an
-unverifiable NODE02 leaves rank0 alive so the shared lock cannot be released
-while a remote DS41 rank may still own cluster memory. `owner.json` is status
-metadata only; the advisory lock plus fixed-unit verification is authoritative.
-GLM uses the same lock contract, so the two models cannot intentionally load at
-the same time.
+`/home/funboy/.local/state/strix-cluster/compute.lock` serializes lifecycle
+mutations, not the model's entire lifetime. The persistent v2 `owner.json`
+receipt records owner, epoch, per-rank nonces and systemd InvocationIDs. Starts
+require agreement between that receipt and both unit/cgroup probes; a stale
+receipt or an unknown peer blocks a new start even when the lock is free.
+DS41 starts rank0 first, verifies its identity, then starts rank1. Stop is
+peer-first: an unverifiable NODE02 leaves rank0 alive and marks the pair
+unreconciled. Only verified removal of both ranks permits `NONE/OFF`. GLM's
+existing ownership-aware lifecycle remains separate and unchanged.
 
 ## Attempt004 loader diagnosis
 

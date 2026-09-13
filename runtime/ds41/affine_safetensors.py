@@ -291,6 +291,7 @@ class AffineRowLRU:
         self._initial_advice_status = None
         if os.environ.get("DS41_ENGRAM_RANDOM_ADVICE", "0") == "1":
             self._initial_advice_status = self.source.set_engram_advice(self.base, "random")
+            print("DS41_ENGRAM_ADVICE " + json.dumps(self._initial_advice_status), flush=True)
 
     @property
     def advice_status(self) -> dict:

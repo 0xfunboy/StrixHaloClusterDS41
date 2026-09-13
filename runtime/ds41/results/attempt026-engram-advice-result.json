@@ -1,0 +1,1184 @@
+{
+  "status": "PASS",
+  "correctness_status": "PASS",
+  "speed_status": "PASS",
+  "promotion_eligible": true,
+  "frozen_thresholds": {
+    "qnew_wall_mean_reduction_pct_min": 5,
+    "qnew_read_bytes_b_over_a_max": 0.5,
+    "warm_tps_b_over_a_min": 0.98,
+    "direct_observer_overhead_fraction_max": 0.01,
+    "all_qnew_pairs_b_lt_a_each_rank": true
+  },
+  "rank_token_identity": {
+    "requests_per_rank": 38,
+    "exact_matches": 38
+  },
+  "stream_identity": {
+    "rank0": {
+      "all_p_streams_equal": true,
+      "all_q_streams_equal": true,
+      "warmups_equal_p_prefix": true,
+      "quality_ab_equal": {
+        "arithmetic": true,
+        "coding": true,
+        "json": true,
+        "reasoning_high": true
+      }
+    },
+    "rank1": {
+      "all_p_streams_equal": true,
+      "all_q_streams_equal": true,
+      "warmups_equal_p_prefix": true,
+      "quality_ab_equal": {
+        "arithmetic": true,
+        "coding": true,
+        "json": true,
+        "reasoning_high": true
+      }
+    }
+  },
+  "quality": {
+    "A-arithmetic": {
+      "pass": true,
+      "natural_stop_pass": true,
+      "tokens": 2
+    },
+    "A-coding": {
+      "pass": true,
+      "natural_stop_pass": true,
+      "tokens": 101,
+      "passed_cases": 9
+    },
+    "A-json": {
+      "pass": true,
+      "natural_stop_pass": true,
+      "tokens": 15
+    },
+    "A-reasoning_high": {
+      "pass": true,
+      "natural_stop_pass": true,
+      "tokens": 85
+    },
+    "B-arithmetic": {
+      "pass": true,
+      "natural_stop_pass": true,
+      "tokens": 2
+    },
+    "B-coding": {
+      "pass": true,
+      "natural_stop_pass": true,
+      "tokens": 101,
+      "passed_cases": 9
+    },
+    "B-json": {
+      "pass": true,
+      "natural_stop_pass": true,
+      "tokens": 15
+    },
+    "B-reasoning_high": {
+      "pass": true,
+      "natural_stop_pass": true,
+      "tokens": 85
+    }
+  },
+  "reference": {
+    "provided": true,
+    "pass": true,
+    "checks": {
+      "P": true,
+      "Q": true
+    },
+    "descriptive_metrics": {
+      "fault-P1": {
+        "decode_tps": 9.876548554947435,
+        "decode_span_s": 12.85874304099707,
+        "wall_s": 17.74420377300703,
+        "ttft_s": 4.883680105209351,
+        "physical_read_bytes": 699211776,
+        "observer_overhead_ns": 8892739,
+        "observer_overhead_fraction_of_client_wall": 0.0005011630340679404
+      },
+      "fault-Q1": {
+        "decode_tps": 9.241494565891141,
+        "decode_span_s": 13.742365923011675,
+        "wall_s": 19.196124593989225,
+        "ttft_s": 5.45242166519165,
+        "physical_read_bytes": 1057116160,
+        "observer_overhead_ns": 8877986,
+        "observer_overhead_fraction_of_client_wall": 0.00046248845471548537
+      }
+    }
+  },
+  "http_metrics": null,
+  "notes": [
+    "Offline timing only; no HTTP metrics or isolated prefill TPS.",
+    "Physical read_bytes are whole-request process I/O counters, including observation overhead; no fault-count conversion or causal attribution.",
+    "Observer overhead is reported, not subtracted. Its numerator also includes boundary work outside client wall.",
+    "Qnew gates are evaluated independently on both ranks. Warm Prepeat and Qrepeat each have a separate median TPS gate.",
+    "Fresh mappings, scoped cache discard and decoded-row clearing are experiment preparation, not the production candidate."
+  ],
+  "schema": "ds41-attempt026-result-v1",
+  "source_commit": "f6b4ba737f7eab26103a97b8e9e1fe00d53a0b16",
+  "numerical_baseline_commit": "facf86486f7e78d8ea75b0fda21231c1981eaaae",
+  "historical_decode_tps": 12.08665,
+  "raw_root": "reports/DS41-Q2-001/attempt026",
+  "performance": {
+    "rank0": {
+      "pass": true,
+      "gates": {
+        "qnew_all_pairs_b_faster": true,
+        "qnew_mean_wall_reduction_at_least_5pct": true,
+        "qnew_median_read_bytes_at_most_half": true,
+        "warm_prepeat_and_qrepeat_median_tps_at_least_98pct": true
+      },
+      "qnew_pairs": [
+        {
+          "pair": 1,
+          "a_wall_s": 19.593841344001703,
+          "b_wall_s": 17.789691509999102,
+          "b_lt_a": true
+        },
+        {
+          "pair": 2,
+          "a_wall_s": 19.651753895013826,
+          "b_wall_s": 17.62667650601361,
+          "b_lt_a": true
+        },
+        {
+          "pair": 3,
+          "a_wall_s": 19.018683169008,
+          "b_wall_s": 17.657697900023777,
+          "b_lt_a": true
+        }
+      ],
+      "qnew_mean_wall_reduction_pct": 8.908052470228988,
+      "qnew_median_read_bytes_b_over_a": 0.037513646605189195,
+      "warm": {
+        "Prepeat": {
+          "a_median_tps": 12.649445006741741,
+          "b_median_tps": 12.668567750521394,
+          "b_over_a": 1.0015117456749651,
+          "pass": true
+        },
+        "Qrepeat": {
+          "a_median_tps": 12.640994764090616,
+          "b_median_tps": 12.661912508824559,
+          "b_over_a": 1.0016547546395134,
+          "pass": true
+        }
+      },
+      "Pfirst_role": "descriptive only, no Pfirst promotion threshold",
+      "groups": {
+        "A": {
+          "Pfirst": {
+            "decode_tps": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                9.657587712865146,
+                9.6930490879952,
+                9.804840178598194
+              ],
+              "mean": 9.71849232648618,
+              "median": 9.6930490879952,
+              "sample_sd": 0.07685272249437432,
+              "min": 9.657587712865146,
+              "max": 9.804840178598194
+            },
+            "ttft_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                4.973249673843384,
+                4.9522480964660645,
+                4.95469069480896
+              ],
+              "mean": 4.960062821706136,
+              "median": 4.95469069480896,
+              "sample_sd": 0.011485267677917004,
+              "min": 4.9522480964660645,
+              "max": 4.973249673843384
+            },
+            "wall_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                18.124935268977424,
+                18.05574710899964,
+                17.908802760997787
+              ],
+              "mean": 18.029828379658284,
+              "median": 18.05574710899964,
+              "sample_sd": 0.11037278038264153,
+              "min": 17.908802760997787,
+              "max": 18.124935268977424
+            },
+            "physical_read_bytes": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                700665856,
+                700194816,
+                700194816
+              ],
+              "mean": 700351829.3333334,
+              "median": 700194816,
+              "sample_sd": 271955.0707990813,
+              "min": 700194816,
+              "max": 700665856
+            }
+          },
+          "Prepeat": {
+            "decode_tps": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                12.677562086814007,
+                12.649445006741741,
+                12.631356957109418
+              ],
+              "mean": 12.652788016888389,
+              "median": 12.649445006741741,
+              "sample_sd": 0.023283262021995765,
+              "min": 12.631356957109418,
+              "max": 12.677562086814007
+            },
+            "ttft_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                4.957150220870972,
+                4.95209813117981,
+                4.961412668228149
+              ],
+              "mean": 4.9568870067596436,
+              "median": 4.957150220870972,
+              "sample_sd": 0.004662843698594836,
+              "min": 4.95209813117981,
+              "max": 4.961412668228149
+            },
+            "wall_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                14.976201391982613,
+                14.993405304005137,
+                15.017142608994618
+              ],
+              "mean": 14.99558310166079,
+              "median": 14.993405304005137,
+              "sample_sd": 0.020557308057665157,
+              "min": 14.976201391982613,
+              "max": 15.017142608994618
+            },
+            "physical_read_bytes": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                12288,
+                0,
+                0
+              ],
+              "mean": 4096,
+              "median": 0,
+              "sample_sd": 7094.480107802121,
+              "min": 0,
+              "max": 12288
+            }
+          },
+          "Qnew": {
+            "decode_tps": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                9.071096383346948,
+                9.040127509609324,
+                9.424961210555466
+              ],
+              "mean": 9.178728367837246,
+              "median": 9.071096383346948,
+              "sample_sd": 0.21380534934834083,
+              "min": 9.040127509609324,
+              "max": 9.424961210555466
+            },
+            "ttft_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                5.591910123825073,
+                5.601827621459961,
+                5.542370080947876
+              ],
+              "mean": 5.578702608744304,
+              "median": 5.591910123825073,
+              "sample_sd": 0.03185323565814199,
+              "min": 5.542370080947876,
+              "max": 5.601827621459961
+            },
+            "wall_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                19.593841344001703,
+                19.651753895013826,
+                19.018683169008
+              ],
+              "mean": 19.42142613600784,
+              "median": 19.593841344001703,
+              "sample_sd": 0.34998555540487736,
+              "min": 19.018683169008,
+              "max": 19.651753895013826
+            },
+            "physical_read_bytes": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                1058603008,
+                1058021376,
+                1058021376
+              ],
+              "mean": 1058215253.3333334,
+              "median": 1058021376,
+              "sample_sd": 335805.3917693004,
+              "min": 1058021376,
+              "max": 1058603008
+            }
+          },
+          "Qrepeat": {
+            "decode_tps": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                12.506690651126595,
+                12.640994764090616,
+                12.664960950609757
+              ],
+              "mean": 12.604215455275655,
+              "median": 12.640994764090616,
+              "sample_sd": 0.08530480697066292,
+              "min": 12.506690651126595,
+              "max": 12.664960950609757
+            },
+            "ttft_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                5.1551902294158936,
+                5.161492586135864,
+                5.141517639160156
+              ],
+              "mean": 5.152733484903972,
+              "median": 5.1551902294158936,
+              "sample_sd": 0.010211577834410875,
+              "min": 5.141517639160156,
+              "max": 5.161492586135864
+            },
+            "wall_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                15.311094590026187,
+                15.209489540982759,
+                15.170548080001026
+              ],
+              "mean": 15.23037740366999,
+              "median": 15.209489540982759,
+              "sample_sd": 0.07256416109756676,
+              "min": 15.170548080001026,
+              "max": 15.311094590026187
+            },
+            "physical_read_bytes": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                0,
+                0,
+                0
+              ],
+              "mean": 0,
+              "median": 0,
+              "sample_sd": 0,
+              "min": 0,
+              "max": 0
+            }
+          }
+        },
+        "B": {
+          "Pfirst": {
+            "decode_tps": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                10.897261451440963,
+                10.80820121561021,
+                10.846160076531417
+              ],
+              "mean": 10.85054091452753,
+              "median": 10.846160076531417,
+              "sample_sd": 0.04469144445773169,
+              "min": 10.80820121561021,
+              "max": 10.897261451440963
+            },
+            "ttft_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                4.946432828903198,
+                4.943285942077637,
+                4.9643635749816895
+              ],
+              "mean": 4.951360781987508,
+              "median": 4.946432828903198,
+              "sample_sd": 0.011370144828029729,
+              "min": 4.943285942077637,
+              "max": 4.9643635749816895
+            },
+            "wall_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                16.602119564980967,
+                16.695075680006994,
+                16.674968963023275
+              ],
+              "mean": 16.657388069337077,
+              "median": 16.674968963023275,
+              "sample_sd": 0.048908339751897074,
+              "min": 16.602119564980967,
+              "max": 16.695075680006994
+            },
+            "physical_read_bytes": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                24125440,
+                24125440,
+                24125440
+              ],
+              "mean": 24125440,
+              "median": 24125440,
+              "sample_sd": 0,
+              "min": 24125440,
+              "max": 24125440
+            }
+          },
+          "Prepeat": {
+            "decode_tps": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                12.678758772108019,
+                12.668567750521394,
+                12.62621472686978
+              ],
+              "mean": 12.657847083166397,
+              "median": 12.668567750521394,
+              "sample_sd": 0.027864290837950546,
+              "min": 12.62621472686978,
+              "max": 12.678758772108019
+            },
+            "ttft_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                4.9537293910980225,
+                4.948857545852661,
+                4.941159009933472
+              ],
+              "mean": 4.947915315628052,
+              "median": 4.948857545852661,
+              "sample_sd": 0.006337938860753458,
+              "min": 4.941159009933472,
+              "max": 4.9537293910980225
+            },
+            "wall_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                14.971964783995645,
+                14.975131826999132,
+                15.001086914009647
+              ],
+              "mean": 14.982727841668142,
+              "median": 14.975131826999132,
+              "sample_sd": 0.015978084781255,
+              "min": 14.971964783995645,
+              "max": 15.001086914009647
+            },
+            "physical_read_bytes": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                0,
+                0,
+                0
+              ],
+              "mean": 0,
+              "median": 0,
+              "sample_sd": 0,
+              "min": 0,
+              "max": 0
+            }
+          },
+          "Qnew": {
+            "decode_tps": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                10.230858399814089,
+                10.37344066278586,
+                10.339681846312983
+              ],
+              "mean": 10.314660302970978,
+              "median": 10.339681846312983,
+              "sample_sd": 0.07451163433954286,
+              "min": 10.230858399814089,
+              "max": 10.37344066278586
+            },
+            "ttft_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                5.374879837036133,
+                5.382501125335693,
+                5.373366832733154
+              ],
+              "mean": 5.37691593170166,
+              "median": 5.374879837036133,
+              "sample_sd": 0.0048957212392498044,
+              "min": 5.373366832733154,
+              "max": 5.382501125335693
+            },
+            "wall_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                17.789691509999102,
+                17.62667650601361,
+                17.657697900023777
+              ],
+              "mean": 17.691355305345496,
+              "median": 17.657697900023777,
+              "sample_sd": 0.08656262808418191,
+              "min": 17.62667650601361,
+              "max": 17.789691509999102
+            },
+            "physical_read_bytes": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                39690240,
+                39690240,
+                39690240
+              ],
+              "mean": 39690240,
+              "median": 39690240,
+              "sample_sd": 0,
+              "min": 39690240,
+              "max": 39690240
+            }
+          },
+          "Qrepeat": {
+            "decode_tps": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                12.706846241607888,
+                12.661912508824559,
+                12.649645064574177
+              ],
+              "mean": 12.672801271668874,
+              "median": 12.661912508824559,
+              "sample_sd": 0.03011507148788312,
+              "min": 12.649645064574177,
+              "max": 12.706846241607888
+            },
+            "ttft_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                5.121421575546265,
+                5.12094259262085,
+                5.12096643447876
+              ],
+              "mean": 5.121110200881958,
+              "median": 5.12096643447876,
+              "sample_sd": 0.00026992173815053663,
+              "min": 5.12094259262085,
+              "max": 5.121421575546265
+            },
+            "wall_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                15.117375572008314,
+                15.152479628974106,
+                15.162242268008413
+              ],
+              "mean": 15.14403248966361,
+              "median": 15.152479628974106,
+              "sample_sd": 0.023595989582755696,
+              "min": 15.117375572008314,
+              "max": 15.162242268008413
+            },
+            "physical_read_bytes": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                0,
+                0,
+                0
+              ],
+              "mean": 0,
+              "median": 0,
+              "sample_sd": 0,
+              "min": 0,
+              "max": 0
+            }
+          }
+        }
+      }
+    },
+    "rank1": {
+      "pass": true,
+      "gates": {
+        "qnew_all_pairs_b_faster": true,
+        "qnew_mean_wall_reduction_at_least_5pct": true,
+        "qnew_median_read_bytes_at_most_half": true,
+        "warm_prepeat_and_qrepeat_median_tps_at_least_98pct": true
+      },
+      "qnew_pairs": [
+        {
+          "pair": 1,
+          "a_wall_s": 19.5721071799926,
+          "b_wall_s": 17.789657741988776,
+          "b_lt_a": true
+        },
+        {
+          "pair": 2,
+          "a_wall_s": 19.654607125994517,
+          "b_wall_s": 17.603634676983347,
+          "b_lt_a": true
+        },
+        {
+          "pair": 3,
+          "a_wall_s": 19.018609967984958,
+          "b_wall_s": 17.65786186902551,
+          "b_lt_a": true
+        }
+      ],
+      "qnew_mean_wall_reduction_pct": 8.917745846073943,
+      "qnew_median_read_bytes_b_over_a": 0.037831696232224016,
+      "warm": {
+        "Prepeat": {
+          "a_median_tps": 12.649397362192786,
+          "b_median_tps": 12.668417919187998,
+          "b_over_a": 1.0015036729775018,
+          "pass": true
+        },
+        "Qrepeat": {
+          "a_median_tps": 12.641060094045393,
+          "b_median_tps": 12.663100645309065,
+          "b_over_a": 1.0017435682687763,
+          "pass": true
+        }
+      },
+      "Pfirst_role": "descriptive only, no Pfirst promotion threshold",
+      "groups": {
+        "A": {
+          "Pfirst": {
+            "decode_tps": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                9.657534429375428,
+                9.692975193173206,
+                9.804819281814572
+              ],
+              "mean": 9.71844296812107,
+              "median": 9.692975193173206,
+              "sample_sd": 0.07687432998147917,
+              "min": 9.657534429375428,
+              "max": 9.804819281814572
+            },
+            "ttft_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                4.957403182983398,
+                4.9452385902404785,
+                4.951369762420654
+              ],
+              "mean": 4.951337178548177,
+              "median": 4.951369762420654,
+              "sample_sd": 0.006082361830065211,
+              "min": 4.9452385902404785,
+              "max": 4.957403182983398
+            },
+            "wall_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                18.109285648009973,
+                18.04887259300449,
+                17.905540665989975
+              ],
+              "mean": 18.021232969001478,
+              "median": 18.04887259300449,
+              "sample_sd": 0.10464686347833453,
+              "min": 17.905540665989975,
+              "max": 18.109285648009973
+            },
+            "physical_read_bytes": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                783081472,
+                782651392,
+                782651392
+              ],
+              "mean": 782794752,
+              "median": 782651392,
+              "sample_sd": 248306.80377307424,
+              "min": 782651392,
+              "max": 783081472
+            }
+          },
+          "Prepeat": {
+            "decode_tps": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                12.677507611640891,
+                12.649397362192786,
+                12.631376421111293
+              ],
+              "mean": 12.652760464981657,
+              "median": 12.649397362192786,
+              "sample_sd": 0.02324875330412159,
+              "min": 12.631376421111293,
+              "max": 12.677507611640891
+            },
+            "ttft_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                4.948220491409302,
+                4.952027797698975,
+                4.962204933166504
+              ],
+              "mean": 4.954151074091594,
+              "median": 4.952027797698975,
+              "sample_sd": 0.007229964024442587,
+              "min": 4.948220491409302,
+              "max": 4.962204933166504
+            },
+            "wall_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                14.967360359005397,
+                14.993423581006937,
+                15.017921204009326
+              ],
+              "mean": 14.992901714673886,
+              "median": 14.993423581006937,
+              "sample_sd": 0.0252844620316512,
+              "min": 14.967360359005397,
+              "max": 15.017921204009326
+            },
+            "physical_read_bytes": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                16384,
+                4096,
+                0
+              ],
+              "mean": 6826.666666666667,
+              "median": 4096,
+              "sample_sd": 8526.50393381328,
+              "min": 0,
+              "max": 16384
+            }
+          },
+          "Qnew": {
+            "decode_tps": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                9.070887599893037,
+                9.04011011725149,
+                9.424731919603522
+              ],
+              "mean": 9.178576545582683,
+              "median": 9.070887599893037,
+              "sample_sd": 0.21373152429845685,
+              "min": 9.04011011725149,
+              "max": 9.424731919603522
+            },
+            "ttft_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                5.569892883300781,
+                5.604718446731567,
+                5.542052268981934
+              ],
+              "mean": 5.572221199671428,
+              "median": 5.569892883300781,
+              "sample_sd": 0.03139790202033471,
+              "min": 5.542052268981934,
+              "max": 5.604718446731567
+            },
+            "wall_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                19.5721071799926,
+                19.654607125994517,
+                19.018609967984958
+              ],
+              "mean": 19.415108091324026,
+              "median": 19.5721071799926,
+              "sample_sd": 0.3458462543257209,
+              "min": 19.018609967984958,
+              "max": 19.654607125994517
+            },
+            "physical_read_bytes": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                1118060544,
+                1117552640,
+                1117552640
+              ],
+              "mean": 1117721941.3333333,
+              "median": 1117552640,
+              "sample_sd": 293238.51112248766,
+              "min": 1117552640,
+              "max": 1118060544
+            }
+          },
+          "Qrepeat": {
+            "decode_tps": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                12.50645408980457,
+                12.641060094045393,
+                12.664877142155943
+              ],
+              "mean": 12.604130442001969,
+              "median": 12.641060094045393,
+              "sample_sd": 0.08542432486778982,
+              "min": 12.50645408980457,
+              "max": 12.664877142155943
+            },
+            "ttft_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                5.150426149368286,
+                5.157630681991577,
+                5.1418137550354
+              ],
+              "mean": 5.149956862131755,
+              "median": 5.150426149368286,
+              "sample_sd": 0.007918899384828445,
+              "min": 5.1418137550354,
+              "max": 5.157630681991577
+            },
+            "wall_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                15.30657748199883,
+                15.205638471990824,
+                15.170942615019158
+              ],
+              "mean": 15.227719523002937,
+              "median": 15.205638471990824,
+              "sample_sd": 0.07046193224357362,
+              "min": 15.170942615019158,
+              "max": 15.30657748199883
+            },
+            "physical_read_bytes": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                0,
+                0,
+                0
+              ],
+              "mean": 0,
+              "median": 0,
+              "sample_sd": 0,
+              "min": 0,
+              "max": 0
+            }
+          }
+        },
+        "B": {
+          "Pfirst": {
+            "decode_tps": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                10.897238290497452,
+                10.80818874467933,
+                10.846581856298792
+              ],
+              "mean": 10.850669630491858,
+              "median": 10.846581856298792,
+              "sample_sd": 0.04466528658806063,
+              "min": 10.80818874467933,
+              "max": 10.897238290497452
+            },
+            "ttft_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                4.941570520401001,
+                4.944280385971069,
+                4.964160680770874
+              ],
+              "mean": 4.9500038623809814,
+              "median": 4.944280385971069,
+              "sample_sd": 0.012334807377712106,
+              "min": 4.941570520401001,
+              "max": 4.964160680770874
+            },
+            "wall_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                16.597262002003845,
+                16.69599996000761,
+                16.674332765018335
+              ],
+              "mean": 16.65586490900993,
+              "median": 16.674332765018335,
+              "sample_sd": 0.051895012928496034,
+              "min": 16.597262002003845,
+              "max": 16.69599996000761
+            },
+            "physical_read_bytes": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                26869760,
+                26869760,
+                26869760
+              ],
+              "mean": 26869760,
+              "median": 26869760,
+              "sample_sd": 0,
+              "min": 26869760,
+              "max": 26869760
+            }
+          },
+          "Prepeat": {
+            "decode_tps": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                12.67872219186451,
+                12.668417919187998,
+                12.626296942383666
+              ],
+              "mean": 12.657812351145392,
+              "median": 12.668417919187998,
+              "sample_sd": 0.02777517328320318,
+              "min": 12.626296942383666,
+              "max": 12.67872219186451
+            },
+            "ttft_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                4.953837871551514,
+                4.9500486850738525,
+                4.940720319747925
+              ],
+              "mean": 4.948202292124431,
+              "median": 4.9500486850738525,
+              "sample_sd": 0.006750882647677738,
+              "min": 4.940720319747925,
+              "max": 4.953837871551514
+            },
+            "wall_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                14.972122518985998,
+                14.976489963999484,
+                15.000604821019806
+              ],
+              "mean": 14.98307243466843,
+              "median": 14.976489963999484,
+              "sample_sd": 0.015339722043339393,
+              "min": 14.972122518985998,
+              "max": 15.000604821019806
+            },
+            "physical_read_bytes": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                0,
+                0,
+                0
+              ],
+              "mean": 0,
+              "median": 0,
+              "sample_sd": 0,
+              "min": 0,
+              "max": 0
+            }
+          },
+          "Qnew": {
+            "decode_tps": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                10.23089215986832,
+                10.373351609661995,
+                10.33927574605882
+              ],
+              "mean": 10.314506505196379,
+              "median": 10.33927574605882,
+              "sample_sd": 0.07438958380415496,
+              "min": 10.23089215986832,
+              "max": 10.373351609661995
+            },
+            "ttft_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                5.374915361404419,
+                5.359389066696167,
+                5.373239040374756
+              ],
+              "mean": 5.369181156158447,
+              "median": 5.373239040374756,
+              "sample_sd": 0.008521518355117118,
+              "min": 5.359389066696167,
+              "max": 5.374915361404419
+            },
+            "wall_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                17.789657741988776,
+                17.603634676983347,
+                17.65786186902551
+              ],
+              "mean": 17.68371809599921,
+              "median": 17.65786186902551,
+              "sample_sd": 0.09566897895080825,
+              "min": 17.603634676983347,
+              "max": 17.789657741988776
+            },
+            "physical_read_bytes": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                42283008,
+                42278912,
+                42278912
+              ],
+              "mean": 42280277.333333336,
+              "median": 42278912,
+              "sample_sd": 2364.826702600707,
+              "min": 42278912,
+              "max": 42283008
+            }
+          },
+          "Qrepeat": {
+            "decode_tps": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                12.706887689670253,
+                12.663100645309065,
+                12.648744514593277
+              ],
+              "mean": 12.672910949857531,
+              "median": 12.663100645309065,
+              "sample_sd": 0.030287600738721988,
+              "min": 12.648744514593277,
+              "max": 12.706887689670253
+            },
+            "ttft_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                5.120107889175415,
+                5.120602607727051,
+                5.12021017074585
+              ],
+              "mean": 5.120306889216105,
+              "median": 5.12021017074585,
+              "sample_sd": 0.0002611560035679241,
+              "min": 5.120107889175415,
+              "max": 5.120602607727051
+            },
+            "wall_s": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                15.116074390010908,
+                15.151249874004861,
+                15.162244767008815
+              ],
+              "mean": 15.143189677008195,
+              "median": 15.151249874004861,
+              "sample_sd": 0.024117442023378267,
+              "min": 15.116074390010908,
+              "max": 15.162244767008815
+            },
+            "physical_read_bytes": {
+              "n": 3,
+              "valid": true,
+              "values": [
+                0,
+                0,
+                0
+              ],
+              "mean": 0,
+              "median": 0,
+              "sample_sd": 0,
+              "min": 0,
+              "max": 0
+            }
+          }
+        }
+      }
+    }
+  },
+  "preparation": {
+    "rank0": {
+      "init_s": 328.58047178501147,
+      "arm_wall_s_including_barrier": [
+        0.1479159109876491,
+        0.245719,
+        0.155772,
+        0.159367,
+        0.25195754901506007,
+        0.25062049500411376
+      ]
+    },
+    "rank1": {
+      "init_s": 328.957
+    },
+    "note": "Rounded descriptive preparation values; exact observations remain in raw. No production cache flush or preload."
+  },
+  "memory_note": "No added row capacity. Host and process sampled memory ranges, global swap activity and accounting limits are in the accompanying report.",
+  "deployment": {
+    "default": "DS41_ENGRAM_RANDOM_ADVICE=1",
+    "rollback": "DS41_ENGRAM_RANDOM_ADVICE=0, whole-pair stop then fresh epoch start",
+    "post_run": "DS41 OFF_VERIFIED, owner NONE/OFF; GLM OFF; gateway available",
+    "additional_model_runs": 0
+  }
+}

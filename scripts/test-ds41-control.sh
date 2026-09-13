@@ -40,6 +40,7 @@ for a in "$@"; do
     --setenv=DS41_OWNER_NONCE=*) nonce=${a#*=DS41_OWNER_NONCE=} ;;
   esac
 done
+printf '%s\n' "$@" >"$base/local.args"
 [[ -n "$epoch" && -n "$nonce" ]]
 echo ACTIVE >"$base/local.state"
 printf '%032d\n' 11 >"$base/local.inv"
@@ -81,6 +82,7 @@ if [[ "${1:-}" == systemd-run ]]; then
       --setenv=DS41_OWNER_NONCE=*) nonce=${a#*=DS41_OWNER_NONCE=} ;;
     esac
   done
+  printf '%s\n' "$@" >"$base/peer.args"
   [[ -n "$epoch" && -n "$nonce" ]]
   echo ACTIVE >"$base/peer.state"
   printf '%032d\n' 22 >"$base/peer.inv"
@@ -123,16 +125,29 @@ expect_fail() {
 }
 
 # 1) Normal start, duplicate start, stop.
+unset DS41_ENGRAM_RANDOM_ADVICE
 reset_case
 set_unit local OFF; set_unit peer OFF
 write_owner NONE OFF '' '' '' '' ''
 "$PAIR" start 1789124001 18210 >/dev/null
 [[ $(jq -r .state "$DS41_SHARED_STATE/owner.json") == RUNNING ]]
 [[ $(cat "$TMP/state/local.starts") == 1 && $(cat "$TMP/state/peer.starts") == 1 ]]
+grep -qx -- '--setenv=DS41_ENGRAM_RANDOM_ADVICE=1' "$TMP/state/local.args"
+grep -qx -- '--setenv=DS41_ENGRAM_RANDOM_ADVICE=1' "$TMP/state/peer.args"
 "$PAIR" start 1789124999 18210 | grep -q DS41_ALREADY_RUNNING
 [[ $(cat "$TMP/state/local.starts") == 1 && $(cat "$TMP/state/peer.starts") == 1 ]]
 "$PAIR" stop | grep -q DS41_OFF_VERIFIED
 [[ $(jq -r '.owner+":"+.state' "$DS41_SHARED_STATE/owner.json") == NONE:OFF ]]
+
+# Explicit rollback must reach both ranks. Invalid input cannot change ownership.
+owner_before=$(sha256sum "$DS41_SHARED_STATE/owner.json")
+expect_fail env DS41_ENGRAM_RANDOM_ADVICE=invalid "$PAIR" start 1789124005 18210
+[[ $(sha256sum "$DS41_SHARED_STATE/owner.json") == "$owner_before" ]]
+[[ $(cat "$TMP/state/local.starts") == 1 && $(cat "$TMP/state/peer.starts") == 1 ]]
+DS41_ENGRAM_RANDOM_ADVICE=0 "$PAIR" start 1789124005 18210 >/dev/null
+grep -qx -- '--setenv=DS41_ENGRAM_RANDOM_ADVICE=0' "$TMP/state/local.args"
+grep -qx -- '--setenv=DS41_ENGRAM_RANDOM_ADVICE=0' "$TMP/state/peer.args"
+"$PAIR" stop | grep -q DS41_OFF_VERIFIED
 
 # 2) SSH loss after peer stop: peer becomes UNKNOWN and local rank must remain active.
 reset_case

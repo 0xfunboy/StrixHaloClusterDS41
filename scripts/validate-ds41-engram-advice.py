@@ -119,6 +119,8 @@ def policies_ok(records, arm):
 
 def preparations(document):
     records = document.get("engram_preparation", [])
+    files = ((document.get("artifact_identity") or {}).get("engram") or {}).get("files", [])
+    expected_files = {item.get("realpath"): item.get("size") for item in files}
     details, signatures = [], []
     order_ok = isinstance(records, list) and [record.get("arm") for record in records] == ORDER
     for record in records:
@@ -126,12 +128,21 @@ def preparations(document):
         policy = "normal" if arm.startswith("A") else "random"
         embeddings = record.get("embeddings", [])
         checks = {"arm_policy": record.get("policy") == policy,
-                  "two_embeddings": len(embeddings) == 2 and sorted(item.get("base", "") for item in embeddings) == BASES}
+                  "two_embeddings": len(embeddings) == 2 and sorted(item.get("base", "") for item in embeddings) == BASES,
+                  "exact_identified_files": len(files) == len(expected_files) == 2
+                  and {item.get("path") for item in embeddings} == set(expected_files)}
         signature = []
         for embedding in embeddings:
             base = embedding.get("base", "")
             advice = embedding.get("advice") or {}
             ranges = embedding.get("ranges", [])
+            identity = embedding.get("discard_file_identity") or {}
+            checks[base + "_discard_scope"] = embedding.get("discard_scope") == "whole_identified_engram_file_test_only"
+            checks[base + "_discard_mapping_count"] = type(embedding.get("discard_mapping_count")) is int and embedding["discard_mapping_count"] == 2
+            checks[base + "_discard_file_identity"] = (
+                isinstance(identity, dict) and set(identity) == {"st_dev", "st_ino", "st_size", "st_mtime_ns"}
+                and all(count(identity[field], field in ("st_ino", "st_size")) for field in identity)
+                and identity["st_size"] == expected_files.get(embedding.get("path")))
             expected = sorted((region[3], region[4]) for region in range_signature(advice))
             actual = sorted((region.get("start"), region.get("length")) for region in ranges)
             empty = bool(ranges) and all(
@@ -151,6 +162,7 @@ def preparations(document):
                 and advice.get("base") == base and advice_ok(advice, policy)
                 and expected == actual and len(actual) == 3 and empty)
             signature.append({"base": base, "path": embedding.get("path"),
+                              "discard_file_identity": identity,
                               "ranges": range_signature(advice),
                               "pages": [region["after"].get("pages") for region in ranges]})
         signatures.append(sorted(signature, key=lambda value: value["base"]))

@@ -169,6 +169,29 @@ expert-parallel shards on the same real quantized bytes. EP mapping never renorm
 router weights: remote routes are zeroed on each rank and the normal TP all-reduce
 reconstructs the global routed contribution.
 
+## Request fault diagnosis
+
+Attempt023 closes WO_B LLMM1 with `CORRECTNESS_PASS / SPEED_GATE_FAIL /
+NO_PROMOTION`. The qualified numerical baseline remains `facf864`, with native
+HIP MoE, mHC coefficient/Sinkhorn and projection/RMS enabled, WO_B disabled.
+The core-first ROCm library lookup fix is retained.
+
+[Existing raw audit](results/attempt024-existing-raw-audit.md) separates same-arm
+first-request timing from whole-request fault counters. Attempt024 adds an
+opt-in, CPU-only observer to the existing offline runner: excluded warmup32,
+P/P/Q/Q/P128, then one uninstrumented P128 overhead control. It observes model
+processes at request/first-token/final-token boundaries and tags mapped Engram
+reader work by source and phase. No cache resets, additional GPU synchronization
+or mathematical changes are involved. Reader elapsed time includes gather and
+dequantization, so it is not presented as pure disk wait.
+
+```sh
+/home/funboy/StrixHaloClusterGLM/.engine/venv/bin/python scripts/test-ds41-fault-diagnostics.py
+```
+
+Diagnostic raw and the frozen prompt file live under
+`reports/DS41-Q2-001/attempt024/` locally.
+
 ## Shared cluster ownership
 
 `rank0` holds `/home/funboy/.local/state/strix-cluster/compute.lock` for its

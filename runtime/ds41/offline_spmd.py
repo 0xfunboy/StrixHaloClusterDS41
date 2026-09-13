@@ -187,6 +187,20 @@ def main() -> int:
     mhc_ab_cfg = token_spec.get("mhc_ab")
     projection_rms_ab_cfg = token_spec.get("projection_rms_ab")
     wob_llmm1_ab_cfg = token_spec.get("wob_llmm1_ab")
+    fault_cfg = token_spec.get("fault_diagnostic")
+    if isinstance(fault_cfg, dict):
+        if any(isinstance(cfg, dict) for cfg in (
+            native_hip_ab_cfg, mhc_ab_cfg, projection_rms_ab_cfg, wob_llmm1_ab_cfg,
+        )):
+            raise ValueError("Fault diagnostic cannot run another candidate")
+        if fault_cfg.get("warmup_tokens") != 32 or fault_cfg.get("speed_tokens") != 128:
+            raise ValueError("Fault diagnostic requires frozen warmup32/speed128")
+        if not prompts.get("fault_q", {}).get("token_ids"):
+            raise ValueError("Fault diagnostic needs frozen comparable Q prompt")
+        for key in WOB_PROMOTED_SWITCHES:
+            if os.environ.get(key) != "1":
+                raise ValueError(f"Fault diagnostic requires promoted {key}=1")
+        os.environ["DS41_ATTN_WOB_LLMM1"] = "0"
     wob_ab = isinstance(wob_llmm1_ab_cfg, dict)
     if wob_ab:
         if any(isinstance(cfg, dict) for cfg in (
@@ -232,6 +246,11 @@ def main() -> int:
         attempt=ATTEMPT,
         epoch=os.environ.get("DS41_OWNER_EPOCH"),
     )
+    fault_load = None
+    if isinstance(fault_cfg, dict):
+        from runtime.ds41.fault_diagnostics import process_snapshot
+
+        fault_load = {"before_llm": process_snapshot(RANK)}
     init_start = time.monotonic()
     llm = LLM(
         model=str(MODEL_FILE),
@@ -262,6 +281,10 @@ def main() -> int:
         disable_log_stats=False,
     )
     init_s = time.monotonic() - init_start
+    if fault_load is not None:
+        fault_load["after_llm"] = process_snapshot(RANK)
+        fault_load["engine_core_type"] = type(llm.llm_engine.engine_core).__qualname__
+        fault_load["executor"] = "external_launcher, V1 multiprocessing disabled"
     emit("llm_init_end", init_s=init_s)
 
     results: list[dict[str, Any]] = []
@@ -278,9 +301,66 @@ def main() -> int:
             "prompt_tokens_file": str(TOKENS_PATH),
             "results": results,
         }
+        if fault_load is not None:
+            checkpoint["fault_load"] = fault_load
         tmp = RESULT_PATH.with_suffix(RESULT_PATH.suffix + ".tmp")
         tmp.write_text(json.dumps(checkpoint, indent=2, ensure_ascii=False) + "\n")
         os.replace(tmp, RESULT_PATH)
+
+    if isinstance(fault_cfg, dict):
+        from runtime.ds41.fault_diagnostics import FaultDiagnostics
+
+        collector = FaultDiagnostics(llm.llm_engine.output_processor, RAW, rank=RANK)
+        collector.install()
+        map_snapshots = [collector.snapshot_maps("after_init")]
+        try:
+            sequence = (
+                ("warmup-excluded", "speed", 32),
+                ("P1", "speed", 128), ("P2", "speed", 128),
+                ("Q1", "fault_q", 128), ("Q2", "fault_q", 128),
+                ("P3", "speed", 128),
+            )
+            for label, prompt, cap in sequence:
+                collector.begin_request(label)
+                row = run_generation(
+                    llm, prompts[prompt]["token_ids"], label=f"fault-{label}",
+                    max_tokens=cap, ignore_eos=True,
+                )
+                row["fault_diagnostic"] = collector.end_request()
+                row["prompt_sha256"] = hashlib.sha256(json.dumps(
+                    prompts[prompt]["token_ids"], separators=(",", ":")
+                ).encode()).hexdigest()
+                row["runtime_switches"] = {
+                    key: os.environ.get(key)
+                    for key in (*WOB_PROMOTED_SWITCHES, "DS41_ATTN_WOB_LLMM1")
+                }
+                results.append(row)
+                save_checkpoint(f"FAULT_DIAGNOSTIC_{label.upper()}_COMPLETE")
+                if label in ("warmup-excluded", "Q2", "P3"):
+                    map_snapshots.append(collector.snapshot_maps(f"after_{label}"))
+        finally:
+            collector.close()
+        # Single diagnostic-only overhead control, not another decision sample.
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"], label="fault-P-clean-control",
+            max_tokens=128, ignore_eos=True,
+        ))
+        summary = {
+            "status": "FAULT_DIAGNOSTIC_COMPLETE", "rank": RANK,
+            "world_size": WORLD_SIZE, "attempt": ATTEMPT,
+            "epoch": os.environ.get("DS41_OWNER_EPOCH"), "init_s": init_s,
+            "artifact_identity": artifact_identity,
+            "native_hip_identity": native_hip_identity,
+            "prompt_tokens_file": str(TOKENS_PATH),
+            "order": ["P1", "P2", "Q1", "Q2", "P3"],
+            "map_snapshots": map_snapshots, "results": results,
+            "fault_load": fault_load,
+        }
+        tmp = RESULT_PATH.with_suffix(RESULT_PATH.suffix + ".tmp")
+        tmp.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
+        os.replace(tmp, RESULT_PATH)
+        emit("run_complete", status=summary["status"], result=str(RESULT_PATH))
+        return 0
 
     if isinstance(projection_rms_ab_cfg, dict) or wob_ab:
         ab_cfg = wob_llmm1_ab_cfg if wob_ab else projection_rms_ab_cfg

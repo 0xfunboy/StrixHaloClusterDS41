@@ -669,12 +669,17 @@ def main() -> int:
         results.append(baseline)
         save_checkpoint("PROFILE_UNINSTRUMENTED_COMPLETE")
 
-        from runtime.ds41.perf_profile import DS41PerfCollector
-        profiler = DS41PerfCollector()
+        profile_kind = str(profile_cfg.get("profile_kind", "general"))
+        if profile_kind == "attention":
+            from runtime.ds41.attention_profile import DS41AttentionPerfCollector
+            profiler = DS41AttentionPerfCollector()
+        else:
+            from runtime.ds41.perf_profile import DS41PerfCollector
+            profiler = DS41PerfCollector()
+            profiler.capture_projection_fixtures = bool(
+                profile_cfg.get("capture_projection_fixtures", False)
+            )
         profiler.install()
-        profiler.capture_projection_fixtures = bool(
-            profile_cfg.get("capture_projection_fixtures", False)
-        )
         profiler.enable()
         instrumented = run_generation(
             llm, prompts["speed"]["token_ids"], label="profile-instrumented",
@@ -695,19 +700,38 @@ def main() -> int:
             (base_tps / inst_tps - 1.0) * 100.0 if base_tps and inst_tps else None
         )
         fixture_meta = None
-        if profiler.capture_projection_fixtures:
+        if profile_kind == "general" and getattr(profiler, "capture_projection_fixtures", False):
             fixture_meta = profiler.save_projection_fixtures(
                 RAW / f"mhc-projection-fixtures-rank{RANK}.pt"
             )
             perf["projection_fixture_capture"] = fixture_meta
         profile_path.write_text(json.dumps(perf, indent=2, sort_keys=True) + "\n")
-        emit("perf_profile_complete", path=str(profile_path), **{
+        event_fields = {
             "baseline_tps": base_tps,
             "instrumented_tps": inst_tps,
             "overhead_pct": perf["instrumentation_overhead_pct_by_decode_tps"],
-            "remote_route_fraction": perf["remote_route_fraction"],
-        })
+        }
+        if "remote_route_fraction" in perf:
+            event_fields["remote_route_fraction"] = perf["remote_route_fraction"]
+        if "attention_gpu_ms_per_decode_token" in perf:
+            event_fields["attention_ms_per_token"] = perf["attention_gpu_ms_per_decode_token"]
+        emit("perf_profile_complete", path=str(profile_path), **event_fields)
         save_checkpoint("PROFILE_INSTRUMENTED_COMPLETE")
+
+        if profile_kind == "attention" and bool(profile_cfg.get("capture_attention_fixtures", False)):
+            profiler.set_capture_mode(True)
+            capture_req = run_generation(
+                llm, prompts["speed"]["token_ids"], label="attention-fixture-capture-excluded",
+                max_tokens=1, ignore_eos=True)
+            profiler.set_capture_mode(False)
+            results.append(capture_req)
+            fixture_meta = profiler.save_fixtures(
+                RAW / f"attention-fixtures-rank{RANK}.pt"
+            )
+            perf["attention_fixture_capture"] = fixture_meta
+            profile_path.write_text(json.dumps(perf, indent=2, sort_keys=True) + "\n")
+            emit("attention_fixture_capture", **fixture_meta)
+            save_checkpoint("ATTENTION_FIXTURE_CAPTURE_COMPLETE")
 
         if not bool(profile_cfg.get("skip_reasoning_high", False)):
             reasoning_key = "reasoning_high"

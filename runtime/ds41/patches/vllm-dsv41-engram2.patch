@@ -43,6 +43,80 @@ index db20adb..9c6f458 100644
      torch.ops._moe_C.topk_softplus_sqrt(
          topk_weights,
          topk_indices,
+diff --git a/vllm/model_executor/kernels/mhc/torch.py b/vllm/model_executor/kernels/mhc/torch.py
+index 9c57cc1..62bf7b0 100644
+--- a/vllm/model_executor/kernels/mhc/torch.py
++++ b/vllm/model_executor/kernels/mhc/torch.py
+@@ -1,5 +1,7 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
++import os
++
+ import torch
+ 
+ 
+@@ -20,23 +22,47 @@ def mhc_pre_delayed_torch(
+     hc_mult = residual.shape[1]
+     x = (residual.flatten(1) if x is None else x).float()
+     mixes = (x @ fn.t()) * torch.rsqrt(x.square().mean(-1, keepdim=True) + rms_eps)
+-    pre = (
+-        torch.sigmoid(mixes[:, :hc_mult] * hc_scale[0] + hc_base[:hc_mult]) + hc_pre_eps
++    ds41_fused_coeff = (
++        os.environ.get("DS41_MHC_COEFF_SINKHORN", "0") == "1"
++        and residual.shape[0] == 1
++        and hc_mult == 4
++        and sinkhorn_repeat == 20
++        and mixes.dtype == torch.float32
++        and mixes.is_contiguous()
++        and hc_scale.dtype == torch.float32
++        and hc_base.dtype == torch.float32
+     )
+-    post = (
+-        torch.sigmoid(
+-            mixes[:, hc_mult : 2 * hc_mult] * hc_scale[1]
+-            + hc_base[hc_mult : 2 * hc_mult]
++    if ds41_fused_coeff:
++        from runtime.ds41.mhc_coeff_sinkhorn import fused_coeff_sinkhorn
++
++        pre, post, comb = fused_coeff_sinkhorn(
++            mixes,
++            hc_scale,
++            hc_base,
++            hc_pre_eps,
++            hc_sinkhorn_eps,
++            hc_post_mult_value,
++            sinkhorn_repeat,
+         )
+-        * hc_post_mult_value
+-    )
+-    comb = mixes[:, 2 * hc_mult :].view(-1, hc_mult, hc_mult) * hc_scale[2]
+-    comb = comb + hc_base[2 * hc_mult :].view(1, hc_mult, hc_mult)
+-    comb = torch.softmax(comb, dim=-1) + hc_sinkhorn_eps
+-    comb = comb / (comb.sum(dim=-2, keepdim=True) + hc_sinkhorn_eps)
+-    for _ in range(sinkhorn_repeat - 1):
+-        comb = comb / (comb.sum(dim=-1, keepdim=True) + hc_sinkhorn_eps)
++    else:
++        pre = (
++            torch.sigmoid(mixes[:, :hc_mult] * hc_scale[0] + hc_base[:hc_mult])
++            + hc_pre_eps
++        )
++        post = (
++            torch.sigmoid(
++                mixes[:, hc_mult : 2 * hc_mult] * hc_scale[1]
++                + hc_base[hc_mult : 2 * hc_mult]
++            )
++            * hc_post_mult_value
++        )
++        comb = mixes[:, 2 * hc_mult :].view(-1, hc_mult, hc_mult) * hc_scale[2]
++        comb = comb + hc_base[2 * hc_mult :].view(1, hc_mult, hc_mult)
++        comb = torch.softmax(comb, dim=-1) + hc_sinkhorn_eps
+         comb = comb / (comb.sum(dim=-2, keepdim=True) + hc_sinkhorn_eps)
++        for _ in range(sinkhorn_repeat - 1):
++            comb = comb / (comb.sum(dim=-1, keepdim=True) + hc_sinkhorn_eps)
++            comb = comb / (comb.sum(dim=-2, keepdim=True) + hc_sinkhorn_eps)
+     layer_input = (
+         residual[:, 0]
+         if pre_mix is None
 diff --git a/vllm/model_executor/layers/fused_moe/expert_map_manager.py b/vllm/model_executor/layers/fused_moe/expert_map_manager.py
 index 71f2186..87400ee 100644
 --- a/vllm/model_executor/layers/fused_moe/expert_map_manager.py

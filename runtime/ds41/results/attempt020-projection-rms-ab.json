@@ -1,0 +1,319 @@
+{
+  "schema": "ds41-projection-rms-ab-result-v1",
+  "attempt": "attempt020",
+  "status": "PASS",
+  "runtime_commit_under_test": "58e1ac734862828bf73ebbea58b4b6a396bb6437",
+  "candidate_commit": "23fec37ae8643bcba2a696aab8da16136e1f682e",
+  "historical_promoted_tps": 9.72199209460323,
+  "protocol": {
+    "warmup_tokens": 32,
+    "speed_tokens": 128,
+    "reasoning_high_max_tokens": 128,
+    "order": [
+      "A1",
+      "B1",
+      "B2",
+      "A2",
+      "A3",
+      "B3"
+    ],
+    "same_load": true,
+    "baseline": "native HIP M=1 + fused mHC coeff/Sinkhorn + Torch projection/RMS",
+    "candidate": "same + TileLang M=1 FP32 projection/RMS",
+    "promotion": {
+      "all_three_pairs_b_gt_a": true,
+      "mean_gain_pct_min": 5.0
+    }
+  },
+  "baseline": {
+    "runs": [
+      {
+        "label": "projection-ab-baseline-1",
+        "completion_tokens": 128,
+        "finish_reason": "length",
+        "decode_tps": 8.092414530282513,
+        "ttft_s": 4.836188793182373,
+        "wall_s": 20.530002533007064
+      },
+      {
+        "label": "projection-ab-baseline-2",
+        "completion_tokens": 128,
+        "finish_reason": "length",
+        "decode_tps": 10.264361018435384,
+        "ttft_s": 4.871213912963867,
+        "wall_s": 17.24423499200202
+      },
+      {
+        "label": "projection-ab-baseline-3",
+        "completion_tokens": 128,
+        "finish_reason": "length",
+        "decode_tps": 10.264245197435987,
+        "ttft_s": 4.830596208572388,
+        "wall_s": 17.203782329001115
+      }
+    ],
+    "decode_tps_mean": 9.54034024871796,
+    "decode_tps_sample_sd": 1.2539404562951675,
+    "decode_tps_cv_pct": 13.143561168729523,
+    "decode_tps_min": 8.092414530282513,
+    "decode_tps_max": 10.264361018435384,
+    "ttft_s_mean": 4.845999638239543,
+    "wall_s_mean": 18.3260066180034
+  },
+  "candidate": {
+    "runs": [
+      {
+        "label": "projection-ab-candidate-1",
+        "completion_tokens": 128,
+        "finish_reason": "length",
+        "decode_tps": 11.132265702052994,
+        "ttft_s": 4.876481294631958,
+        "wall_s": 16.28487764300371
+      },
+      {
+        "label": "projection-ab-candidate-2",
+        "completion_tokens": 128,
+        "finish_reason": "length",
+        "decode_tps": 12.57964873686835,
+        "ttft_s": 4.8377063274383545,
+        "wall_s": 14.933481009997195
+      },
+      {
+        "label": "projection-ab-candidate-3",
+        "completion_tokens": 128,
+        "finish_reason": "length",
+        "decode_tps": 12.548022272965122,
+        "ttft_s": 4.8272705078125,
+        "wall_s": 14.9484834689938
+      }
+    ],
+    "decode_tps_mean": 12.086645570628823,
+    "decode_tps_sample_sd": 0.8266684694978192,
+    "decode_tps_cv_pct": 6.839519407325607,
+    "decode_tps_min": 11.132265702052994,
+    "decode_tps_max": 12.57964873686835,
+    "ttft_s_mean": 4.8471527099609375,
+    "wall_s_mean": 15.388947373998235
+  },
+  "paired_gains": [
+    {
+      "pair": 1,
+      "a_tps": 8.092414530282513,
+      "b_tps": 11.132265702052994,
+      "gain_pct": 37.56420485375651
+    },
+    {
+      "pair": 2,
+      "a_tps": 10.264361018435384,
+      "b_tps": 12.57964873686835,
+      "gain_pct": 22.556569417955743
+    },
+    {
+      "pair": 3,
+      "a_tps": 10.264245197435987,
+      "b_tps": 12.548022272965122,
+      "gain_pct": 22.24982969132132
+    }
+  ],
+  "decode_tps_gain_pct": 26.68987955909683,
+  "gain_vs_historical_pct": 24.322725764591336,
+  "offline_wall_throughput_gain_pct": 19.085511001017096,
+  "offline_wall_reduction_pct": 16.026728054980676,
+  "rank_token_identity": {
+    "projection-ab-baseline-1": true,
+    "projection-ab-baseline-2": true,
+    "projection-ab-baseline-3": true,
+    "projection-ab-baseline-warmup-excluded": true,
+    "projection-ab-candidate-1": true,
+    "projection-ab-candidate-2": true,
+    "projection-ab-candidate-3": true,
+    "projection-ab-candidate-coding": true,
+    "projection-ab-candidate-json": true,
+    "projection-ab-candidate-reasoning-high": true,
+    "projection-ab-candidate-smoke": true,
+    "projection-ab-candidate-warmup-excluded": true
+  },
+  "ab_token_compare": [
+    {
+      "pair": 1,
+      "identical": false,
+      "first_diff_index": 40,
+      "a_tokens": 128,
+      "b_tokens": 128
+    },
+    {
+      "pair": 2,
+      "identical": false,
+      "first_diff_index": 40,
+      "a_tokens": 128,
+      "b_tokens": 128
+    },
+    {
+      "pair": 3,
+      "identical": false,
+      "first_diff_index": 40,
+      "a_tokens": 128,
+      "b_tokens": 128
+    }
+  ],
+  "projection_execution": {
+    "pass": true,
+    "rank0": {
+      "tilelang_calls": 48880,
+      "tilelang_tokens": 48880,
+      "fallback_calls": 640,
+      "fallback_reasons": {
+        "tokens_not_1": 640
+      }
+    },
+    "rank1": {
+      "tilelang_calls": 48880,
+      "tilelang_tokens": 48880,
+      "fallback_calls": 640,
+      "fallback_reasons": {
+        "tokens_not_1": 640
+      }
+    },
+    "same_native_library_sha": true,
+    "rank0_library": "a860f50f3c52535c6fbde6dcbb6e6fa5f8b699fae5301ba77f56f02400eaa07d",
+    "rank1_library": "a860f50f3c52535c6fbde6dcbb6e6fa5f8b699fae5301ba77f56f02400eaa07d"
+  },
+  "quality": {
+    "smoke": {
+      "pass": true,
+      "text": "323",
+      "tokens": 2,
+      "finish_reason": "stop",
+      "ttft_s": 2.874588966369629,
+      "wall_s": 2.997376550993067
+    },
+    "coding": {
+      "status": "PASS",
+      "parse": true,
+      "function_found": true,
+      "tests": [
+        {
+          "input": [
+            1,
+            2,
+            0
+          ],
+          "expected": 3,
+          "got": 3,
+          "pass": true
+        },
+        {
+          "input": [
+            3,
+            4,
+            -1,
+            1
+          ],
+          "expected": 2,
+          "got": 2,
+          "pass": true
+        },
+        {
+          "input": [
+            7,
+            8,
+            9,
+            11,
+            12
+          ],
+          "expected": 1,
+          "got": 1,
+          "pass": true
+        },
+        {
+          "input": [
+            1
+          ],
+          "expected": 2,
+          "got": 2,
+          "pass": true
+        },
+        {
+          "input": [],
+          "expected": 1,
+          "got": 1,
+          "pass": true
+        },
+        {
+          "input": [
+            2,
+            1
+          ],
+          "expected": 3,
+          "got": 3,
+          "pass": true
+        },
+        {
+          "input": [
+            1,
+            1,
+            2,
+            2
+          ],
+          "expected": 3,
+          "got": 3,
+          "pass": true
+        },
+        {
+          "input": [
+            -5,
+            -1,
+            4,
+            2,
+            1
+          ],
+          "expected": 3,
+          "got": 3,
+          "pass": true
+        },
+        {
+          "input": [
+            2,
+            3,
+            4,
+            5,
+            1
+          ],
+          "expected": 6,
+          "got": 6,
+          "pass": true
+        }
+      ],
+      "reason": null
+    },
+    "json": {
+      "status": "PASS",
+      "parsed": {
+        "total": 17,
+        "valid_ids": [
+          "a",
+          "c"
+        ]
+      }
+    },
+    "reasoning_high": {
+      "pass": true,
+      "final_answer": "10",
+      "text": "We need answer only integer. Need solve classic 100 doors. Toggle every kth door on pass k. Door n toggled for each divisor k of n. Open if odd number divisors. Perfect squares have odd divisors. 1..100 perfect squares: 1,4,9,16,25,36,49,64,81,100 = 10. Return only integer.</think>10",
+      "tokens": 85,
+      "finish_reason": "stop"
+    }
+  },
+  "promotion_decision": {
+    "all_three_pairs_b_gt_a": true,
+    "mean_gain_pct_min": 5.0,
+    "mean_gain_pct": 26.68987955909683,
+    "pass": true
+  },
+  "raw": {
+    "rank0": "reports/DS41-Q2-001/attempt020/offline-rank0.json",
+    "rank1": "reports/DS41-Q2-001/attempt020/node02/offline-rank1.json",
+    "validation": "reports/DS41-Q2-001/attempt020/projection-rms-ab-validation.json",
+    "supervisor": "reports/DS41-Q2-001/attempt020/supervisor.log"
+  }
+}

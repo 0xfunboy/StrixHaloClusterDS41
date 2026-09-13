@@ -29,7 +29,9 @@ if [[ -x "$devel/bin/hipcc" ]]; then tool="$devel"; else tool="$core"; fi
 if [[ -x "$tool/lib/llvm/bin/clang" ]]; then llvm="$tool/lib/llvm/bin"; else llvm="$tool/llvm/bin"; fi
 mkdir -p "$ROOT/.cache/rank$rank/aiter" "$ROOT/.cache/rank$rank/triton" "$ROOT/.cache/rank$rank/torchinductor"
 export PATH="$tool/bin:$llvm:$VENV/bin:/usr/local/bin:/usr/bin:/bin"
-export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$tool/lib:$core/lib:$libs/lib:$torchlib"
+# Prefer the runtime SDK path consistently in parent and registry subprocesses.
+# Core/devel copies can be hardlinks but rocprofiler compares registration paths.
+export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$core/lib:$tool/lib:$libs/lib:$torchlib"
 export PYTHONPATH="$ROOT:$VLLM_SOURCE:$PLUGIN_SOURCE:$GGUF_PY:$core/share/amd_smi"
 export ROCM_PATH="$tool" ROCM_HOME="$tool" HIP_PATH="$tool" HIP_DEVICE_LIB_PATH="$core/lib/llvm/amdgcn/bitcode"
 export CMAKE_PREFIX_PATH="$tool/lib/cmake:$torchlib/../share/cmake"

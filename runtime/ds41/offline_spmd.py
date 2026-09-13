@@ -189,6 +189,21 @@ def main() -> int:
     wob_llmm1_ab_cfg = token_spec.get("wob_llmm1_ab")
     fault_cfg = token_spec.get("fault_diagnostic")
     advice_cfg = token_spec.get("engram_advice_ab")
+    block_cfg = token_spec.get("block_verify")
+    block_speculative = None
+    if isinstance(block_cfg, dict):
+        if any(isinstance(cfg, dict) for cfg in (
+            native_hip_ab_cfg, mhc_ab_cfg, projection_rms_ab_cfg, wob_llmm1_ab_cfg,
+            fault_cfg, advice_cfg, token_spec.get("profile_mode"),
+        )):
+            raise ValueError("Small-block gate cannot run another experiment")
+        for key in (*WOB_PROMOTED_SWITCHES, "DS41_ENGRAM_RANDOM_ADVICE"):
+            if os.environ.get(key) != "1":
+                raise ValueError(f"Small-block gate requires {key}=1")
+        os.environ["DS41_ATTN_WOB_LLMM1"] = "0"
+        from runtime.ds41.block_verify_experiment import install_bridge, SPECULATIVE_CONFIG
+        install_bridge()
+        block_speculative = SPECULATIVE_CONFIG
     fault_observe = isinstance(fault_cfg, dict) or isinstance(advice_cfg, dict)
     if fault_observe:
         if isinstance(fault_cfg, dict) and isinstance(advice_cfg, dict):
@@ -291,6 +306,7 @@ def main() -> int:
         seed=1,
         generation_config="vllm",
         disable_log_stats=False,
+        speculative_config=block_speculative,
     )
     init_s = time.monotonic() - init_start
     if fault_load is not None:
@@ -298,6 +314,15 @@ def main() -> int:
         fault_load["engine_core_type"] = type(llm.llm_engine.engine_core).__qualname__
         fault_load["executor"] = "external_launcher, V1 multiprocessing disabled"
     emit("llm_init_end", init_s=init_s)
+
+    if isinstance(block_cfg, dict):
+        from runtime.ds41.block_verify_runner import run as run_block_verify
+        report = run_block_verify(llm, run_generation, token_spec, RAW, RANK,
+                                  init_s, artifact_identity, emit)
+        # Existing pair-safe supervisor consumes the normal per-rank checkpoint.
+        RESULT_PATH.write_text(json.dumps(report, indent=2) + "\n")
+        emit("run_complete", status=report["status"])
+        return 0 if report["status"] == "COMPLETE" else 2
 
     results: list[dict[str, Any]] = []
 

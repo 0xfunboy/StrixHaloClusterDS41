@@ -30,6 +30,9 @@ class DS41PerfCollector:
         self.engram_cache_after: dict[tuple[int, int], tuple[int, int, int]] = {}
         self._installed = False
         self._patches: list[tuple[Any, str, Any]] = []
+        # Decoder-local slot used only by the profile wrappers to distinguish
+        # the two hidden-size RMSNorm calls without touching model instances.
+        self._decoder_rms_slot: int | None = None
 
     @staticmethod
     def phase_from_tensor(x: Any) -> str:
@@ -69,12 +72,16 @@ class DS41PerfCollector:
             if tensor_arg is not None and tensor_arg < len(args):
                 phase = collector.phase_from_tensor(args[tensor_arg])
             old_phase = collector.current_phase
+            old_rms_slot = collector._decoder_rms_slot
             if set_phase and phase is not None:
                 collector.current_phase = phase
+                if key == "decoder_layer":
+                    collector._decoder_rms_slot = 0
             try:
                 return collector._recorded_call(key, original, self_obj, *args, phase=phase, **kwargs)
             finally:
                 collector.current_phase = old_phase
+                collector._decoder_rms_slot = old_rms_slot
 
         self._patch(cls, method_name, wrapped)
 
@@ -97,7 +104,9 @@ class DS41PerfCollector:
         from vllm.models.deepseek_v4.amd.model import DeepseekV4MLP
         from vllm.models.deepseek_v4_1.common.engram import Engram
         from vllm.models.deepseek_v4_1.common.disk_engram import DiskAffineEngramEmbedding
+        from vllm.model_executor.layers.layernorm import RMSNorm
         from vllm_gguf_plugin.quantization.fused_moe import GGUFMoEMethod
+        import vllm.models.deepseek_v4_1.amd.model as dsv41_amd_model
         import vllm_gguf_plugin.quantization as gguf_quant
         import vllm_gguf_plugin.ops as gguf_ops
         import vllm_gguf_plugin.quantization.fused_moe as gguf_fused_moe_mod
@@ -115,6 +124,204 @@ class DS41PerfCollector:
         self._wrap_method(DeepseekV4MoE, "forward", "moe_total", tensor_arg=0)
         self._wrap_method(DeepseekV4MLP, "forward", "shared_mlp", tensor_arg=0)
         self._wrap_method(Engram, "forward", "engram_inject", tensor_arg=0)
+
+        # Direct mHC decomposition.  DeepseekV4DecoderLayer imported these
+        # functions by name, so patch the AMD model module that the live layer
+        # actually calls.  The profiled implementation is deliberately the
+        # same operation/order as the pinned reference; it only brackets
+        # asynchronous event pairs and never synchronizes inside an operator.
+        original_mhc_pre = dsv41_amd_model.mhc_pre_delayed_torch
+        collector = self
+
+        @functools.wraps(original_mhc_pre)
+        def mhc_pre_profiled(
+            residual,
+            fn,
+            hc_scale,
+            hc_base,
+            rms_eps,
+            hc_pre_eps,
+            hc_sinkhorn_eps,
+            hc_post_mult_value,
+            sinkhorn_repeat,
+            pre_mix=None,
+            x=None,
+        ):
+            if not collector.active:
+                return original_mhc_pre(
+                    residual,
+                    fn,
+                    hc_scale,
+                    hc_base,
+                    rms_eps,
+                    hc_pre_eps,
+                    hc_sinkhorn_eps,
+                    hc_post_mult_value,
+                    sinkhorn_repeat,
+                    pre_mix=pre_mix,
+                    x=x,
+                )
+            phase = collector.current_phase
+
+            def impl():
+                hc_mult = residual.shape[1]
+
+                def projection_rms():
+                    xf = (residual.flatten(1) if x is None else x).float()
+                    mixes = (xf @ fn.t()) * torch.rsqrt(
+                        xf.square().mean(-1, keepdim=True) + rms_eps
+                    )
+                    return mixes
+
+                mixes = collector._recorded_call(
+                    "mhc_pre_projection_rms", projection_rms, phase=phase
+                )
+
+                def prepost_coeff():
+                    pre = (
+                        torch.sigmoid(
+                            mixes[:, :hc_mult] * hc_scale[0]
+                            + hc_base[:hc_mult]
+                        )
+                        + hc_pre_eps
+                    )
+                    post = (
+                        torch.sigmoid(
+                            mixes[:, hc_mult : 2 * hc_mult] * hc_scale[1]
+                            + hc_base[hc_mult : 2 * hc_mult]
+                        )
+                        * hc_post_mult_value
+                    )
+                    return pre, post
+
+                pre, post = collector._recorded_call(
+                    "mhc_pre_prepost_coeff", prepost_coeff, phase=phase
+                )
+
+                def softmax_seed():
+                    comb = (
+                        mixes[:, 2 * hc_mult :].view(-1, hc_mult, hc_mult)
+                        * hc_scale[2]
+                    )
+                    comb = comb + hc_base[2 * hc_mult :].view(
+                        1, hc_mult, hc_mult
+                    )
+                    return torch.softmax(comb, dim=-1) + hc_sinkhorn_eps
+
+                comb = collector._recorded_call(
+                    "mhc_pre_softmax", softmax_seed, phase=phase
+                )
+
+                def sinkhorn():
+                    out = comb / (
+                        comb.sum(dim=-2, keepdim=True) + hc_sinkhorn_eps
+                    )
+                    for _ in range(sinkhorn_repeat - 1):
+                        out = out / (
+                            out.sum(dim=-1, keepdim=True) + hc_sinkhorn_eps
+                        )
+                        out = out / (
+                            out.sum(dim=-2, keepdim=True) + hc_sinkhorn_eps
+                        )
+                    return out
+
+                comb_out = collector._recorded_call(
+                    "mhc_pre_sinkhorn", sinkhorn, phase=phase
+                )
+
+                def collapse():
+                    return (
+                        residual[:, 0]
+                        if pre_mix is None
+                        else (
+                            pre_mix.unsqueeze(-1) * residual.float()
+                        ).sum(dim=1).to(residual.dtype)
+                    )
+
+                layer_input = collector._recorded_call(
+                    "mhc_pre_collapse", collapse, phase=phase
+                )
+                return post.unsqueeze(-1), comb_out, layer_input, pre
+
+            return collector._recorded_call(
+                "mhc_pre_total", impl, phase=phase
+            )
+
+        self._patch(dsv41_amd_model, "mhc_pre_delayed_torch", mhc_pre_profiled)
+
+        original_mhc_post = dsv41_amd_model.mhc_post_torch
+
+        @functools.wraps(original_mhc_post)
+        def mhc_post_profiled(x, residual, post_layer_mix, comb_res_mix):
+            if not collector.active:
+                return original_mhc_post(
+                    x, residual, post_layer_mix, comb_res_mix
+                )
+            phase = collector.current_phase
+
+            def impl():
+                mixed_residual = collector._recorded_call(
+                    "mhc_post_einsum",
+                    lambda: torch.einsum(
+                        "...ij,...ih->...jh",
+                        comb_res_mix.to(torch.float32),
+                        residual.to(torch.float32),
+                    ),
+                    phase=phase,
+                )
+                post_term = collector._recorded_call(
+                    "mhc_post_term",
+                    lambda: post_layer_mix.to(torch.float32)
+                    * x.unsqueeze(-2).to(torch.float32),
+                    phase=phase,
+                )
+                return collector._recorded_call(
+                    "mhc_post_add_cast",
+                    lambda: (mixed_residual + post_term).to(residual.dtype),
+                    phase=phase,
+                )
+
+            return collector._recorded_call(
+                "mhc_post_total", impl, phase=phase
+            )
+
+        self._patch(dsv41_amd_model, "mhc_post_torch", mhc_post_profiled)
+
+        # DeepSeek layer-local hidden-size RMSNorms.  Decoder forward calls the
+        # attention norm first and the FFN norm second.  Smaller q/kv RMSNorms
+        # inside attention are intentionally excluded from this bucket.
+        original_rms_forward = RMSNorm.forward
+
+        @functools.wraps(original_rms_forward)
+        def rms_forward_profiled(self_obj, *args, **kwargs):
+            if not collector.active or not args:
+                return original_rms_forward(self_obj, *args, **kwargs)
+            x_arg = args[0]
+            slot = collector._decoder_rms_slot
+            if (
+                isinstance(x_arg, torch.Tensor)
+                and int(getattr(self_obj, "hidden_size", -1)) == 5120
+                and slot is not None
+                and collector.current_phase in {"decode", "prefill"}
+            ):
+                if slot == 0:
+                    key = "attn_norm"
+                elif slot == 1:
+                    key = "ffn_norm"
+                else:
+                    key = "rmsnorm_h5120_extra"
+                collector._decoder_rms_slot = slot + 1
+                return collector._recorded_call(
+                    key,
+                    original_rms_forward,
+                    self_obj,
+                    *args,
+                    phase=collector.current_phase,
+                    **kwargs,
+                )
+            return original_rms_forward(self_obj, *args, **kwargs)
+
+        self._patch(RMSNorm, "forward", rms_forward_profiled)
 
         # Disk Engram is intentionally wall-timed too: this function contains
         # GPU->CPU and CPU->GPU blocking transfers plus the affine-row cache.
@@ -220,7 +427,10 @@ class DS41PerfCollector:
         attn = g("attention")
         moe = g("moe_total")
         engram = g("engram_inject")
-        other = max(0.0, decoder - attn - moe - engram)
+        # Keep this raw: a negative value would be a decomposition problem and
+        # must not be hidden behind max(0).  The direct mHC/RMS measurements
+        # below are nested inside this remainder.
+        other = decoder - attn - moe - engram
         top = {
             "attention": attn,
             "moe": moe,
@@ -229,6 +439,39 @@ class DS41PerfCollector:
         }
         top_sum = sum(top.values())
         per_token = {k: (v / decode_steps if decode_steps else None) for k, v in top.items()}
+
+        mhc_pre_parts = {
+            "projection_rms": g("mhc_pre_projection_rms"),
+            "prepost_coeff": g("mhc_pre_prepost_coeff"),
+            "softmax": g("mhc_pre_softmax"),
+            "sinkhorn": g("mhc_pre_sinkhorn"),
+            "collapse": g("mhc_pre_collapse"),
+        }
+        mhc_post_parts = {
+            "einsum": g("mhc_post_einsum"),
+            "post_term": g("mhc_post_term"),
+            "add_cast": g("mhc_post_add_cast"),
+        }
+        mhc_pre_total = g("mhc_pre_total")
+        mhc_post_total = g("mhc_post_total")
+        attn_norm = g("attn_norm")
+        ffn_norm = g("ffn_norm")
+        mhc_pre_sub_sum = sum(mhc_pre_parts.values())
+        mhc_post_sub_sum = sum(mhc_post_parts.values())
+        direct_hc_norm = mhc_pre_total + mhc_post_total + attn_norm + ffn_norm
+        other_after_direct = other - direct_hc_norm
+        hc_direct = {
+            "mhc_pre_total": mhc_pre_total,
+            "mhc_post_total": mhc_post_total,
+            "attn_norm": attn_norm,
+            "ffn_norm": ffn_norm,
+            "mhc_pre_subparts": mhc_pre_parts,
+            "mhc_post_subparts": mhc_post_parts,
+            "mhc_pre_internal_gap": mhc_pre_total - mhc_pre_sub_sum,
+            "mhc_post_internal_gap": mhc_post_total - mhc_post_sub_sum,
+            "direct_hc_norm_sum": direct_hc_norm,
+            "other_after_direct_hc_norm": other_after_direct,
+        }
 
         nested = {
             k.removeprefix("decode."): v
@@ -258,7 +501,25 @@ class DS41PerfCollector:
             "gpu_top_level_ms_per_decode_token": per_token,
             "gpu_top_level_sum_ms": top_sum,
             "gpu_top_level_sum_ms_per_decode_token": top_sum / decode_steps if decode_steps else None,
-            "gpu_nested_decode_ms_total": nested,
+            "gpu_hc_norm_breakdown_ms_total": hc_direct,
+            "gpu_hc_norm_breakdown_ms_per_decode_token": {
+                "mhc_pre_total": mhc_pre_total / decode_steps if decode_steps else None,
+                "mhc_post_total": mhc_post_total / decode_steps if decode_steps else None,
+                "attn_norm": attn_norm / decode_steps if decode_steps else None,
+                "ffn_norm": ffn_norm / decode_steps if decode_steps else None,
+                "mhc_pre_projection_rms": mhc_pre_parts["projection_rms"] / decode_steps if decode_steps else None,
+                "mhc_pre_prepost_coeff": mhc_pre_parts["prepost_coeff"] / decode_steps if decode_steps else None,
+                "mhc_pre_softmax": mhc_pre_parts["softmax"] / decode_steps if decode_steps else None,
+                "mhc_pre_sinkhorn": mhc_pre_parts["sinkhorn"] / decode_steps if decode_steps else None,
+                "mhc_pre_collapse": mhc_pre_parts["collapse"] / decode_steps if decode_steps else None,
+                "mhc_pre_internal_gap": (mhc_pre_total - mhc_pre_sub_sum) / decode_steps if decode_steps else None,
+                "mhc_post_einsum": mhc_post_parts["einsum"] / decode_steps if decode_steps else None,
+                "mhc_post_term": mhc_post_parts["post_term"] / decode_steps if decode_steps else None,
+                "mhc_post_add_cast": mhc_post_parts["add_cast"] / decode_steps if decode_steps else None,
+                "mhc_post_internal_gap": (mhc_post_total - mhc_post_sub_sum) / decode_steps if decode_steps else None,
+                "direct_hc_norm_sum": direct_hc_norm / decode_steps if decode_steps else None,
+                "other_after_direct_hc_norm": other_after_direct / decode_steps if decode_steps else None,
+            },
             "all_gpu_event_ms": gpu_ms,
             "cpu_wrapper_wall_ms": wall_ms,
             "calls": dict(self.calls),
@@ -268,6 +529,8 @@ class DS41PerfCollector:
             "engram_cache": engram_cache,
             "notes": [
                 "Top-level attention/moe/engram/other are derived from nested decoder events and are not double-counted.",
+                "other_layer_hc_norm_residual is the raw decoder remainder; it is intentionally not clamped to zero.",
+                "Direct mHC/RMS timings are nested inside that remainder. mhc_*_internal_gap is total-event elapsed minus the sum of sequential sub-events and can expose launch/idle gaps.",
                 "Collective/routed/shared timings are nested diagnostics; do not add them again to top-level totals.",
                 "CPU wrapper wall time is launch/blocking time, not GPU execution time; Engram disk lookup wall is intentionally useful for synchronous transfer/SSD stalls.",
             ],

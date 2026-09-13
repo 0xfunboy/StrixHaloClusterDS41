@@ -25,6 +25,7 @@ _DTYPE = {
     # NumPy has no portable bfloat16 scalar.  Keep the raw words and widen.
     "BF16": np.dtype("<u2"),
 }
+_ENGRAM_ADVICE_BASES = {"layers.1.engram.embed", "layers.14.engram.embed"}
 
 
 def bf16_to_float32(raw: np.ndarray) -> np.ndarray:
@@ -124,6 +125,96 @@ class SafeTensorMMap:
             self.entries[name] = TensorEntry(dtype, shape, self.data_start + begin, end - begin)
         self.metadata = header.get("__metadata__", {})
         self._mmap = mmap.mmap(self._fd, 0, access=mmap.ACCESS_READ)
+        self.engram_advice: dict[str, dict] = {}
+
+    def set_engram_advice(self, base: str, policy: str) -> dict:
+        """Advise complete pages of the two allowed affine Engram embeddings.
+
+        Boundary pages stay unchanged, so adjacent tensors and the file header
+        are never included. This changes mapping advice only, not data or LRU
+        contents. A failed random request attempts a scoped normal rollback.
+        """
+        previous = self.engram_advice.get(base, {}).get("effective", "normal")
+        result = {"base": base, "requested": policy, "effective": previous,
+                  "status": "rejected", "scope": "complete_pages_within_selected_tensors",
+                  "errors": [], "ranges": []}
+        if base not in _ENGRAM_ADVICE_BASES:
+            result["errors"].append("base is not an allowed Engram embedding")
+            return result
+        self.engram_advice[base] = result
+        try:
+            if policy not in ("random", "normal"):
+                raise ValueError("policy must be random or normal")
+            if self.path.suffix != ".safetensors":
+                raise ValueError("advice requires a SafeTensors file")
+            if self._mmap is None or self._mmap.closed:
+                raise ValueError("mapping is closed")
+            names = [base + "." + suffix for suffix in ("weight", "scales", "biases")]
+            weight, scales, biases = [self.entries[name] for name in names]
+            if (weight.dtype != "U32" or scales.dtype != "BF16" or biases.dtype != "BF16"
+                    or len(weight.shape) != 2 or any(dim <= 0 for dim in weight.shape)
+                    or weight.shape[1] % 4
+                    or scales.shape != (weight.shape[0], weight.shape[1] // 4)
+                    or biases.shape != scales.shape):
+                raise ValueError("invalid affine 2-bit embedding tensor shapes or dtypes")
+            page = mmap.PAGESIZE
+            for name in names:
+                entry = self.entries[name]
+                end = entry.offset + entry.nbytes
+                if entry.offset < self.data_start or end > len(self._mmap):
+                    raise ValueError("tensor range outside mapped payload")
+                for other_name, other in self.entries.items():
+                    if other_name != name and max(entry.offset, other.offset) < min(end, other.offset + other.nbytes):
+                        raise ValueError(f"tensor range overlaps {other_name}")
+                start = (entry.offset + page - 1) // page * page
+                stop = end // page * page
+                length = max(0, stop - start)
+                result["ranges"].append({
+                    "tensor": name, "tensor_start": entry.offset, "tensor_end_exclusive": end,
+                    "advice_start": start if length else None, "advice_length": length,
+                    "unadvised_boundary_bytes": entry.nbytes - length,
+                    "effective": previous, "applied": False,
+                })
+        except (KeyError, ValueError, AttributeError) as exc:
+            result["errors"].append(str(exc))
+            return result
+        regions = [region for region in result["ranges"] if region["advice_length"]]
+        if not regions:
+            result["status"] = "no_complete_pages"
+            return result
+        advise = getattr(self._mmap, "madvise", None)
+        option = getattr(mmap, "MADV_" + policy.upper(), None)
+        if not callable(advise) or option is None:
+            result["status"] = "unsupported"
+            result["errors"].append("requested mmap.madvise option is unavailable")
+            return result
+        try:
+            for region in regions:
+                advise(option, region["advice_start"], region["advice_length"])
+                region.update(effective=policy, applied=True)
+            result.update(status="applied", effective=policy)
+        except (OSError, ValueError, OverflowError) as exc:
+            result["errors"].append(f"{policy}: {exc}")
+            # A failed syscall can have affected part of its range. Never claim
+            # that range retained its preceding policy without a successful reset.
+            region["effective"] = "unknown"
+            result["status"] = "failed"
+            if policy == "random":
+                normal = getattr(mmap, "MADV_NORMAL", None)
+                for region in regions:
+                    try:
+                        if normal is None:
+                            raise ValueError("MADV_NORMAL unavailable for rollback")
+                        advise(normal, region["advice_start"], region["advice_length"])
+                        region.update(effective="normal", applied=False)
+                    except (OSError, ValueError, OverflowError) as rollback_error:
+                        region["effective"] = "unknown"
+                        result["errors"].append(f"normal rollback: {rollback_error}")
+            policies = {region["effective"] for region in regions}
+            result["effective"] = next(iter(policies)) if len(policies) == 1 else "mixed_or_unknown"
+            if policy == "random" and result["effective"] == "normal":
+                result["status"] = "fallback_normal"
+        return result
 
     def close(self) -> None:
         mm = getattr(self, "_mmap", None)
@@ -197,6 +288,16 @@ class AffineRowLRU:
         self.hits = 0
         self.misses = 0
         self.rows_read = 0
+        self._initial_advice_status = None
+        if os.environ.get("DS41_ENGRAM_RANDOM_ADVICE", "0") == "1":
+            self._initial_advice_status = self.source.set_engram_advice(self.base, "random")
+
+    @property
+    def advice_status(self) -> dict:
+        return self.source.engram_advice.get(self.base) or self._initial_advice_status or {
+            "base": self.base, "requested": None, "effective": "normal",
+            "status": "not_requested", "errors": [], "ranges": [],
+        }
 
     def lookup(self, ids: np.ndarray) -> np.ndarray:
         ids = np.asarray(ids, dtype=np.int64)

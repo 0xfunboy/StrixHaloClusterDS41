@@ -98,6 +98,13 @@ nonresident full table pages. Only clean, identified Engram table ranges may
 be discarded in this test harness, never global caches. Record preparation
 cost, boundary-page exclusions, exact output equality and warm decode.
 
+Pre-run attempt025 setup amendment: a synthetic ext4 reproducer retained
+boundary folios after range-only discard. Validation therefore discards clean
+cache for the two exact Engram source files, not global caches, while preserving
+materialized sidecar linears. Candidate advice still excludes boundary pages.
+The zero-residency gate is unchanged. The original failure is a regression test
+in `scripts/test-ds41-engram-experiment.py` and is documented under attempt025.
+
 Raw root: `reports/DS41-Q2-001/attempt024/`.
 Files: `preregister.json`, `prompt-tokens.json`, `source-hashes.txt`,
 `start-once.sh`, `start-receipt.txt`, `pre-start-status.txt`,

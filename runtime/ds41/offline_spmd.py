@@ -188,12 +188,17 @@ def main() -> int:
     projection_rms_ab_cfg = token_spec.get("projection_rms_ab")
     wob_llmm1_ab_cfg = token_spec.get("wob_llmm1_ab")
     fault_cfg = token_spec.get("fault_diagnostic")
-    if isinstance(fault_cfg, dict):
+    advice_cfg = token_spec.get("engram_advice_ab")
+    fault_observe = isinstance(fault_cfg, dict) or isinstance(advice_cfg, dict)
+    if fault_observe:
+        if isinstance(fault_cfg, dict) and isinstance(advice_cfg, dict):
+            raise ValueError("Use diagnostic or matched advice A/B, not both")
         if any(isinstance(cfg, dict) for cfg in (
             native_hip_ab_cfg, mhc_ab_cfg, projection_rms_ab_cfg, wob_llmm1_ab_cfg,
         )):
             raise ValueError("Fault diagnostic cannot run another candidate")
-        if fault_cfg.get("warmup_tokens") != 32 or fault_cfg.get("speed_tokens") != 128:
+        selected = advice_cfg if isinstance(advice_cfg, dict) else fault_cfg
+        if selected.get("warmup_tokens") != 32 or selected.get("speed_tokens") != 128:
             raise ValueError("Fault diagnostic requires frozen warmup32/speed128")
         if not prompts.get("fault_q", {}).get("token_ids"):
             raise ValueError("Fault diagnostic needs frozen comparable Q prompt")
@@ -201,6 +206,13 @@ def main() -> int:
             if os.environ.get(key) != "1":
                 raise ValueError(f"Fault diagnostic requires promoted {key}=1")
         os.environ["DS41_ATTN_WOB_LLMM1"] = "0"
+        os.environ["DS41_ENGRAM_RANDOM_ADVICE"] = "0"
+        if isinstance(advice_cfg, dict):
+            if advice_cfg.get("order") != ["A1", "B1", "B2", "A2", "A3", "B3"]:
+                raise ValueError("Advice A/B requires frozen AB/BA/AB order")
+            for name in ("arithmetic", "coding", "json", "reasoning_high"):
+                if not prompts.get(name, {}).get("token_ids"):
+                    raise ValueError(f"Missing quality prompt {name}")
     wob_ab = isinstance(wob_llmm1_ab_cfg, dict)
     if wob_ab:
         if any(isinstance(cfg, dict) for cfg in (
@@ -247,7 +259,7 @@ def main() -> int:
         epoch=os.environ.get("DS41_OWNER_EPOCH"),
     )
     fault_load = None
-    if isinstance(fault_cfg, dict):
+    if fault_observe:
         from runtime.ds41.fault_diagnostics import process_snapshot
 
         fault_load = {"before_llm": process_snapshot(RANK)}
@@ -306,6 +318,26 @@ def main() -> int:
         tmp = RESULT_PATH.with_suffix(RESULT_PATH.suffix + ".tmp")
         tmp.write_text(json.dumps(checkpoint, indent=2, ensure_ascii=False) + "\n")
         os.replace(tmp, RESULT_PATH)
+
+    if isinstance(advice_cfg, dict):
+        from runtime.ds41.engram_advice_experiment import run_experiment
+
+        observed = run_experiment(llm, prompts, RAW, RANK, run_generation,
+                                  results, save_checkpoint)
+        summary = {
+            "status": "ENGRAM_ADVICE_AB_COMPLETE", "rank": RANK,
+            "world_size": WORLD_SIZE, "attempt": ATTEMPT,
+            "epoch": os.environ.get("DS41_OWNER_EPOCH"), "init_s": init_s,
+            "artifact_identity": artifact_identity,
+            "native_hip_identity": native_hip_identity,
+            "prompt_tokens_file": str(TOKENS_PATH), "fault_load": fault_load,
+            **observed,
+        }
+        tmp = RESULT_PATH.with_suffix(RESULT_PATH.suffix + ".tmp")
+        tmp.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
+        os.replace(tmp, RESULT_PATH)
+        emit("run_complete", status=summary["status"], result=str(RESULT_PATH))
+        return 0
 
     if isinstance(fault_cfg, dict):
         from runtime.ds41.fault_diagnostics import FaultDiagnostics

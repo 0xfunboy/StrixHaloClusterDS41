@@ -1,0 +1,891 @@
+{
+  "schema": "ds41-attempt041-042-k2-vs-k1-final-v1",
+  "status": "PASS",
+  "decision": "EXPERIMENTAL_DSPARK_K2_QUALIFIED",
+  "production_default_changed": false,
+  "source": {
+    "parameterization_commit": "0697970b20461872be8bf33c79965e1527c195e5",
+    "frozen_protocol_commit": "1bb3627f1492fddc137bf3e12b49b53d86acc944",
+    "existing_k1_preset_commit": "7b2e26541d70cd74de5c7cce012f445d49266679",
+    "execution_order": [
+      "B041 K2",
+      "A042 K1"
+    ],
+    "separate_loads": true
+  },
+  "validator": {
+    "status": "PASS",
+    "decision": "QUALIFY_K2_EXPERIMENTAL",
+    "raw_path": "reports/DS41-Q2-001/attempt042-dspark-k1-control/dspark-k2-vs-k1-validation.json",
+    "sha256": "9779561b82e527f3717378635fb319a8d7ae5a33d16a2e2cb92604cb2611538f",
+    "script": "scripts/validate-ds41-dspark-k2-vs-k1.py"
+  },
+  "performance": {
+    "K1": {
+      "runs": [
+        {
+          "trial": 1,
+          "tps": 15.700727201514178,
+          "wall_s": 12.892954851995455,
+          "ttft_s": 4.803815126419067,
+          "tokens": 128,
+          "finish_reason": "length"
+        },
+        {
+          "trial": 2,
+          "tps": 17.42281736561883,
+          "wall_s": 12.084378226019908,
+          "ttft_s": 4.794951677322388,
+          "tokens": 128,
+          "finish_reason": "length"
+        },
+        {
+          "trial": 3,
+          "tps": 17.38138822838535,
+          "wall_s": 12.096013115980895,
+          "ttft_s": 4.789220333099365,
+          "tokens": 128,
+          "finish_reason": "length"
+        }
+      ],
+      "mean_tps": 16.83497759850612,
+      "median_tps": 17.38138822838535,
+      "sample_sd_tps": 0.9825080486490988,
+      "cv_pct": 5.8361114109013315,
+      "mean_wall_s": 12.35778206466542,
+      "mean_ttft_s": 4.795995712280273
+    },
+    "K2": {
+      "runs": [
+        {
+          "trial": 1,
+          "tps": 17.946462004929185,
+          "wall_s": 11.899023150006542,
+          "ttft_s": 4.822178602218628,
+          "tokens": 128,
+          "finish_reason": "length"
+        },
+        {
+          "trial": 2,
+          "tps": 20.25174628806399,
+          "wall_s": 11.086203574988758,
+          "ttft_s": 4.814948558807373,
+          "tokens": 128,
+          "finish_reason": "length"
+        },
+        {
+          "trial": 3,
+          "tps": 20.097239311940797,
+          "wall_s": 11.125839161017211,
+          "ttft_s": 4.806333780288696,
+          "tokens": 128,
+          "finish_reason": "length"
+        }
+      ],
+      "mean_tps": 19.431815868311325,
+      "median_tps": 20.097239311940797,
+      "sample_sd_tps": 1.2886718651448357,
+      "cv_pct": 6.631762434751934,
+      "mean_wall_s": 11.370355295337504,
+      "mean_ttft_s": 4.814486980438232
+    },
+    "decode_gain_pct": 15.425255273494631,
+    "median_win": true,
+    "same_index_speed_wins": 3,
+    "speed_trials": 3,
+    "speed_prompt_repeated": true,
+    "mean_wall_reduction_pct": 7.990323539943822,
+    "mean_wall_throughput_gain_pct": 8.684220885628946,
+    "ttft_delta_ms": 18.491268157958984,
+    "distinct_code_text_reasoning_wall": {
+      "k1_total_s": 38.37849782698322,
+      "k2_total_s": 36.72434241103474,
+      "k2_regression_pct": -4.310109852151312,
+      "gate_max_pct": 10.0
+    },
+    "performance_gate": {
+      "mean_gain_min_pct": 5.0,
+      "median_k2_gt_k1": true,
+      "speed_wins_min": 2,
+      "control_wall_regression_max_pct": 10.0,
+      "pass": true
+    },
+    "decode_tps_definition": "(final emitted completion_tokens - 1)/(last_token_ts - first_token_ts); draft proposals/rejections are excluded"
+  },
+  "correctness": {
+    "rank_coherence": {
+      "warmup-excluded": {
+        "k1": true,
+        "k2": true
+      },
+      "functional-excluded": {
+        "k1": true,
+        "k2": true
+      },
+      "speed-1": {
+        "k1": true,
+        "k2": true
+      },
+      "speed-2": {
+        "k1": true,
+        "k2": true
+      },
+      "speed-3": {
+        "k1": true,
+        "k2": true
+      },
+      "arithmetic": {
+        "k1": true,
+        "k2": true
+      },
+      "coding": {
+        "k1": true,
+        "k2": true
+      },
+      "text": {
+        "k1": true,
+        "k2": true
+      },
+      "json": {
+        "k1": true,
+        "k2": true
+      },
+      "reasoning-high": {
+        "k1": true,
+        "k2": true
+      }
+    },
+    "k1_k2_output_equality": {
+      "warmup-excluded": {
+        "tokens_equal": true,
+        "text_equal": true,
+        "finish_reason_equal": true,
+        "stop_reason_equal": true,
+        "first_diff_index": null
+      },
+      "functional-excluded": {
+        "tokens_equal": true,
+        "text_equal": true,
+        "finish_reason_equal": true,
+        "stop_reason_equal": true,
+        "first_diff_index": null
+      },
+      "speed-1": {
+        "tokens_equal": true,
+        "text_equal": true,
+        "finish_reason_equal": true,
+        "stop_reason_equal": true,
+        "first_diff_index": null
+      },
+      "speed-2": {
+        "tokens_equal": true,
+        "text_equal": true,
+        "finish_reason_equal": true,
+        "stop_reason_equal": true,
+        "first_diff_index": null
+      },
+      "speed-3": {
+        "tokens_equal": true,
+        "text_equal": true,
+        "finish_reason_equal": true,
+        "stop_reason_equal": true,
+        "first_diff_index": null
+      },
+      "arithmetic": {
+        "tokens_equal": true,
+        "text_equal": true,
+        "finish_reason_equal": true,
+        "stop_reason_equal": true,
+        "first_diff_index": null
+      },
+      "coding": {
+        "tokens_equal": true,
+        "text_equal": true,
+        "finish_reason_equal": true,
+        "stop_reason_equal": true,
+        "first_diff_index": null
+      },
+      "text": {
+        "tokens_equal": true,
+        "text_equal": true,
+        "finish_reason_equal": true,
+        "stop_reason_equal": true,
+        "first_diff_index": null
+      },
+      "json": {
+        "tokens_equal": true,
+        "text_equal": true,
+        "finish_reason_equal": true,
+        "stop_reason_equal": true,
+        "first_diff_index": null
+      },
+      "reasoning-high": {
+        "tokens_equal": true,
+        "text_equal": true,
+        "finish_reason_equal": true,
+        "stop_reason_equal": true,
+        "first_diff_index": null
+      }
+    },
+    "quality_K1": {
+      "arithmetic_pass": true,
+      "json_pass": true,
+      "json": {
+        "total": 17,
+        "valid_ids": [
+          "a",
+          "c"
+        ]
+      },
+      "coding": {
+        "status": "PASS",
+        "tests": [
+          {
+            "input": [
+              1,
+              2,
+              0
+            ],
+            "expected": 3,
+            "got": 3,
+            "pass": true
+          },
+          {
+            "input": [
+              3,
+              4,
+              -1,
+              1
+            ],
+            "expected": 2,
+            "got": 2,
+            "pass": true
+          },
+          {
+            "input": [
+              7,
+              8,
+              9,
+              11,
+              12
+            ],
+            "expected": 1,
+            "got": 1,
+            "pass": true
+          },
+          {
+            "input": [
+              1
+            ],
+            "expected": 2,
+            "got": 2,
+            "pass": true
+          },
+          {
+            "input": [],
+            "expected": 1,
+            "got": 1,
+            "pass": true
+          },
+          {
+            "input": [
+              2,
+              1
+            ],
+            "expected": 3,
+            "got": 3,
+            "pass": true
+          },
+          {
+            "input": [
+              1,
+              1,
+              2,
+              2
+            ],
+            "expected": 3,
+            "got": 3,
+            "pass": true
+          },
+          {
+            "input": [
+              -5,
+              -1,
+              4,
+              2,
+              1
+            ],
+            "expected": 3,
+            "got": 3,
+            "pass": true
+          },
+          {
+            "input": [
+              2,
+              3,
+              4,
+              5,
+              1
+            ],
+            "expected": 6,
+            "got": 6,
+            "pass": true
+          }
+        ]
+      },
+      "reasoning_high_pass": true,
+      "reasoning_high_final": "10",
+      "text_finished": true,
+      "text_tokens": 60
+    },
+    "quality_K2": {
+      "arithmetic_pass": true,
+      "json_pass": true,
+      "json": {
+        "total": 17,
+        "valid_ids": [
+          "a",
+          "c"
+        ]
+      },
+      "coding": {
+        "status": "PASS",
+        "tests": [
+          {
+            "input": [
+              1,
+              2,
+              0
+            ],
+            "expected": 3,
+            "got": 3,
+            "pass": true
+          },
+          {
+            "input": [
+              3,
+              4,
+              -1,
+              1
+            ],
+            "expected": 2,
+            "got": 2,
+            "pass": true
+          },
+          {
+            "input": [
+              7,
+              8,
+              9,
+              11,
+              12
+            ],
+            "expected": 1,
+            "got": 1,
+            "pass": true
+          },
+          {
+            "input": [
+              1
+            ],
+            "expected": 2,
+            "got": 2,
+            "pass": true
+          },
+          {
+            "input": [],
+            "expected": 1,
+            "got": 1,
+            "pass": true
+          },
+          {
+            "input": [
+              2,
+              1
+            ],
+            "expected": 3,
+            "got": 3,
+            "pass": true
+          },
+          {
+            "input": [
+              1,
+              1,
+              2,
+              2
+            ],
+            "expected": 3,
+            "got": 3,
+            "pass": true
+          },
+          {
+            "input": [
+              -5,
+              -1,
+              4,
+              2,
+              1
+            ],
+            "expected": 3,
+            "got": 3,
+            "pass": true
+          },
+          {
+            "input": [
+              2,
+              3,
+              4,
+              5,
+              1
+            ],
+            "expected": 6,
+            "got": 6,
+            "pass": true
+          }
+        ]
+      },
+      "reasoning_high_pass": true,
+      "reasoning_high_final": "10",
+      "text_finished": true,
+      "text_tokens": 60
+    },
+    "coding_independent_K1": "PASS",
+    "coding_independent_K2": "PASS",
+    "target_dispatch_switches_pass": true,
+    "numeric_logit_gate": "NOT_RECAPTURED; target T1/T2/T3/T4 verifier math remains attempt036-qualified and unchanged. New K1/K2 gate is exact emitted-token/text/finish/stop equality."
+  },
+  "acceptance": {
+    "K1": {
+      "drafted": 210,
+      "accepted": 174,
+      "rejected": 36,
+      "overall_acceptance_rate": 0.8285714285714286,
+      "verify_calls": 210,
+      "final_emitted_tokens": 384,
+      "final_emitted_tokens_per_verify_call": 1.8285714285714285,
+      "full_width_steps": 210,
+      "full_width_accept_histogram": {
+        "0": 36,
+        "1": 174
+      },
+      "first_proposal_acceptance_rate_full_width": 0.8285714285714286,
+      "second_acceptance_conditional_on_first_full_width": null,
+      "full_block_acceptance_rate": 0.8285714285714286,
+      "tail_steps": 0,
+      "tail_drafted_accepted": []
+    },
+    "K2": {
+      "drafted": 312,
+      "accepted": 225,
+      "rejected": 87,
+      "overall_acceptance_rate": 0.7211538461538461,
+      "verify_calls": 156,
+      "final_emitted_tokens": 384,
+      "final_emitted_tokens_per_verify_call": 2.4615384615384617,
+      "full_width_steps": 156,
+      "full_width_accept_histogram": {
+        "0": 24,
+        "1": 39,
+        "2": 93
+      },
+      "first_proposal_acceptance_rate_full_width": 0.8461538461538461,
+      "second_acceptance_conditional_on_first_full_width": 0.7045454545454546,
+      "full_block_acceptance_rate": 0.5961538461538461,
+      "tail_steps": 0,
+      "tail_drafted_accepted": []
+    }
+  },
+  "proposer": {
+    "K1": {
+      "proposal_calls": 213,
+      "gpu_stream_ms_total": 2556.6185731887817,
+      "gpu_stream_ms_per_call": 12.002904099477849,
+      "cpu_enqueue_ms_total_nonadditive": 2757.347282167757,
+      "cpu_enqueue_ms_per_call_nonadditive": 12.94529240454346
+    },
+    "K2": {
+      "proposal_calls": 159,
+      "gpu_stream_ms_total": 2219.309136390686,
+      "gpu_stream_ms_per_call": 13.957919096796768,
+      "cpu_enqueue_ms_total_nonadditive": 2440.8599435992073,
+      "cpu_enqueue_ms_per_call_nonadditive": 15.351320399995014
+    },
+    "note": "CUDA-event stream span around real propose; CPU enqueue may overlap and is not added to wall",
+    "k2_vs_k1_gpu_ms_per_call_pct": 16.28784984963736,
+    "k2_total_gpu_span_vs_k1_pct": -13.193576872805913
+  },
+  "memory": {
+    "K1": {
+      "before_llm": {
+        "monotonic_ns": 201647338975056,
+        "pid": 849303,
+        "ppid": 849118,
+        "tid": 849303,
+        "rank": 0,
+        "rusage_self": {
+          "ru_minflt": 259046,
+          "ru_majflt": 290,
+          "ru_inblock": 325816,
+          "ru_oublock": 32,
+          "ru_utime": 3.167351,
+          "ru_stime": 0.553029
+        },
+        "rusage_children": {
+          "ru_minflt": 4438,
+          "ru_majflt": 22,
+          "ru_inblock": 21944,
+          "ru_oublock": 0,
+          "ru_utime": 0.003123,
+          "ru_stime": 0.007956999999999999
+        },
+        "observed_live_child_pids": [],
+        "process_io": {
+          "rchar": 382957255,
+          "wchar": 95324,
+          "syscr": 31434,
+          "syscw": 41,
+          "read_bytes": 178053120,
+          "write_bytes": 16384,
+          "cancelled_write_bytes": 0
+        },
+        "status_kib_except_Threads": {
+          "VmRSS": 1268308,
+          "RssAnon": 733344,
+          "RssFile": 465324,
+          "RssShmem": 69640,
+          "VmSwap": 0,
+          "Threads": 4
+        },
+        "meminfo_kib": {
+          "MemFree": 113255532,
+          "MemAvailable": 123721584,
+          "Cached": 11289088,
+          "SwapCached": 141652,
+          "SwapTotal": 8388604,
+          "SwapFree": 5636312
+        },
+        "global_vmstat": {
+          "pswpin": 10498008,
+          "pswpout": 14524928,
+          "pgmajfault": 5108970
+        },
+        "read_errors": {},
+        "snapshot_overhead_ns": 752954
+      },
+      "after_llm": {
+        "monotonic_ns": 201983478020558,
+        "pid": 849303,
+        "ppid": 849118,
+        "tid": 849303,
+        "rank": 0,
+        "rusage_self": {
+          "ru_minflt": 22428859,
+          "ru_majflt": 87511,
+          "ru_inblock": 184565208,
+          "ru_oublock": 128,
+          "ru_utime": 788.578314,
+          "ru_stime": 103.736209
+        },
+        "rusage_children": {
+          "ru_minflt": 19464,
+          "ru_majflt": 59,
+          "ru_inblock": 27456,
+          "ru_oublock": 0,
+          "ru_utime": 0.071198,
+          "ru_stime": 0.096095
+        },
+        "observed_live_child_pids": [
+          849357,
+          850525
+        ],
+        "process_io": {
+          "rchar": 1739578073,
+          "wchar": 27824452,
+          "syscr": 68369,
+          "syscw": 753,
+          "read_bytes": 94511443968,
+          "write_bytes": 65536,
+          "cancelled_write_bytes": 0
+        },
+        "status_kib_except_Threads": {
+          "VmRSS": 2266040,
+          "RssAnon": 1420636,
+          "RssFile": 270588,
+          "RssShmem": 574816,
+          "VmSwap": 820840,
+          "Threads": 93
+        },
+        "meminfo_kib": {
+          "MemFree": 13013484,
+          "MemAvailable": 18728076,
+          "Cached": 7605248,
+          "SwapCached": 220348,
+          "SwapTotal": 8388604,
+          "SwapFree": 4238112
+        },
+        "global_vmstat": {
+          "pswpin": 10808241,
+          "pswpout": 15124035,
+          "pgmajfault": 5262491
+        },
+        "read_errors": {},
+        "snapshot_overhead_ns": 1244670
+      },
+      "cuda": {
+        "allocated_bytes": 102758956544,
+        "reserved_bytes": 104119402496,
+        "free_bytes": 22055006208,
+        "total_bytes": 128849018880
+      }
+    },
+    "K2": {
+      "before_llm": {
+        "monotonic_ns": 201151594748495,
+        "pid": 845759,
+        "ppid": 845580,
+        "tid": 845759,
+        "rank": 0,
+        "rusage_self": {
+          "ru_minflt": 258999,
+          "ru_majflt": 0,
+          "ru_inblock": 856,
+          "ru_oublock": 32,
+          "ru_utime": 3.098744,
+          "ru_stime": 0.350971
+        },
+        "rusage_children": {
+          "ru_minflt": 4446,
+          "ru_majflt": 0,
+          "ru_inblock": 0,
+          "ru_oublock": 0,
+          "ru_utime": 0.0,
+          "ru_stime": 0.013363
+        },
+        "observed_live_child_pids": [],
+        "process_io": {
+          "rchar": 382957334,
+          "wchar": 95310,
+          "syscr": 31431,
+          "syscw": 41,
+          "read_bytes": 438272,
+          "write_bytes": 16384,
+          "cancelled_write_bytes": 0
+        },
+        "status_kib_except_Threads": {
+          "VmRSS": 1269156,
+          "RssAnon": 733468,
+          "RssFile": 466048,
+          "RssShmem": 69640,
+          "VmSwap": 0,
+          "Threads": 4
+        },
+        "meminfo_kib": {
+          "MemFree": 92217624,
+          "MemAvailable": 123710072,
+          "Cached": 32291784,
+          "SwapCached": 195992,
+          "SwapTotal": 8388604,
+          "SwapFree": 5617212
+        },
+        "global_vmstat": {
+          "pswpin": 9924419,
+          "pswpout": 13808158,
+          "pgmajfault": 4825180
+        },
+        "read_errors": {},
+        "snapshot_overhead_ns": 703372
+      },
+      "after_llm": {
+        "monotonic_ns": 201485672435950,
+        "pid": 845759,
+        "ppid": 845580,
+        "tid": 845759,
+        "rank": 0,
+        "rusage_self": {
+          "ru_minflt": 22446189,
+          "ru_majflt": 96450,
+          "ru_inblock": 183361576,
+          "ru_oublock": 1976,
+          "ru_utime": 783.946294,
+          "ru_stime": 99.948878
+        },
+        "rusage_children": {
+          "ru_minflt": 19492,
+          "ru_majflt": 39,
+          "ru_inblock": 5192,
+          "ru_oublock": 0,
+          "ru_utime": 0.064709,
+          "ru_stime": 0.093683
+        },
+        "observed_live_child_pids": [
+          845818,
+          847171
+        ],
+        "process_io": {
+          "rchar": 1739341966,
+          "wchar": 28750353,
+          "syscr": 68311,
+          "syscw": 794,
+          "read_bytes": 93883785216,
+          "write_bytes": 1011712,
+          "cancelled_write_bytes": 0
+        },
+        "status_kib_except_Threads": {
+          "VmRSS": 2378732,
+          "RssAnon": 1415476,
+          "RssFile": 388408,
+          "RssShmem": 574848,
+          "VmSwap": 828264,
+          "Threads": 93
+        },
+        "meminfo_kib": {
+          "MemFree": 9243624,
+          "MemAvailable": 19235208,
+          "Cached": 11413276,
+          "SwapCached": 155276,
+          "SwapTotal": 8388604,
+          "SwapFree": 4241992
+        },
+        "global_vmstat": {
+          "pswpin": 10333331,
+          "pswpout": 14524928,
+          "pgmajfault": 5008710
+        },
+        "read_errors": {},
+        "snapshot_overhead_ns": 1213589
+      },
+      "cuda": {
+        "allocated_bytes": 102760035328,
+        "reserved_bytes": 104119402496,
+        "free_bytes": 22061473792,
+        "total_bytes": 128849018880
+      }
+    },
+    "model_load_gib_per_rank_K1": 93.85,
+    "model_load_gib_per_rank_K2": 93.85,
+    "note": "No visible model-residency increase from K1 to K2; same sidecar/3 stages/weights. Small runtime-buffer differences are included in allocator snapshots, not interpreted as a leak."
+  },
+  "target_dispatch": {
+    "K1": {
+      "before": {
+        "native_hip": {
+          "native_calls": 240,
+          "native_tokens": 240,
+          "triton_fallback_calls": 40,
+          "fallback_reasons": {
+            "tokens_not_1": 40
+          }
+        },
+        "mhc_projection_rms": {
+          "tilelang_calls": 510,
+          "tilelang_tokens": 510,
+          "fallback_calls": 160,
+          "fallback_reasons": {
+            "tokens_not_1": 160
+          }
+        },
+        "mhc_coeff_sinkhorn": {
+          "fused_calls": 270,
+          "fused_tokens": 510,
+          "fallback_calls": 160,
+          "fallback_reasons": {
+            "tokens_not_1": 160
+          }
+        }
+      },
+      "after": {
+        "native_hip": {
+          "native_calls": 32960,
+          "native_tokens": 32960,
+          "triton_fallback_calls": 360,
+          "fallback_reasons": {
+            "tokens_not_1": 360
+          }
+        },
+        "mhc_projection_rms": {
+          "tilelang_calls": 68464,
+          "tilelang_tokens": 68464,
+          "fallback_calls": 960,
+          "fallback_reasons": {
+            "tokens_not_1": 960
+          }
+        },
+        "mhc_coeff_sinkhorn": {
+          "fused_calls": 35504,
+          "fused_tokens": 68464,
+          "fallback_calls": 960,
+          "fallback_reasons": {
+            "tokens_not_1": 960
+          }
+        }
+      }
+    },
+    "K2": {
+      "before": {
+        "native_hip": {
+          "native_calls": 320,
+          "native_tokens": 320,
+          "triton_fallback_calls": 40,
+          "fallback_reasons": {
+            "tokens_not_1": 40
+          }
+        },
+        "mhc_projection_rms": {
+          "tilelang_calls": 700,
+          "tilelang_tokens": 700,
+          "fallback_calls": 160,
+          "fallback_reasons": {
+            "tokens_not_1": 160
+          }
+        },
+        "mhc_coeff_sinkhorn": {
+          "fused_calls": 270,
+          "fused_tokens": 700,
+          "fallback_calls": 160,
+          "fallback_reasons": {
+            "tokens_not_1": 160
+          }
+        }
+      },
+      "after": {
+        "native_hip": {
+          "native_calls": 36920,
+          "native_tokens": 36920,
+          "triton_fallback_calls": 360,
+          "fallback_reasons": {
+            "tokens_not_1": 360
+          }
+        },
+        "mhc_projection_rms": {
+          "tilelang_calls": 77680,
+          "tilelang_tokens": 77680,
+          "fallback_calls": 960,
+          "fallback_reasons": {
+            "tokens_not_1": 960
+          }
+        },
+        "mhc_coeff_sinkhorn": {
+          "fused_calls": 26560,
+          "fused_tokens": 77680,
+          "fallback_calls": 960,
+          "fallback_reasons": {
+            "tokens_not_1": 960
+          }
+        }
+      }
+    }
+  },
+  "raw": {
+    "K2_rank0": "reports/DS41-Q2-001/attempt041-dspark-k2/offline-rank0.json",
+    "K2_rank1": "reports/DS41-Q2-001/attempt041-dspark-k2/node02/offline-rank1.json",
+    "K1_rank0": "reports/DS41-Q2-001/attempt042-dspark-k1-control/offline-rank0.json",
+    "K1_rank1": "reports/DS41-Q2-001/attempt042-dspark-k1-control/node02/offline-rank1.json",
+    "K2_spec": "reports/DS41-Q2-001/attempt041-dspark-k2/prompt-tokens.json",
+    "K1_spec": "reports/DS41-Q2-001/attempt042-dspark-k1-control/prompt-tokens.json"
+  },
+  "cleanup": {
+    "attempt041": "SUPERVISOR_CLEANUP rc=0; OFF_VERIFIED/OFF_VERIFIED; owner NONE/OFF",
+    "attempt042": "SUPERVISOR_CLEANUP rc=0; OFF_VERIFIED/OFF_VERIFIED; owner NONE/OFF"
+  },
+  "next": "STOP. Preserve K2 experimental preset if published; no K3/K4 or tuning without a fresh owner directive."
+}

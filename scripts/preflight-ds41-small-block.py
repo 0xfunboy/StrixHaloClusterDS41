@@ -20,6 +20,23 @@ register()
 from vllm.engine.arg_utils import EngineArgs
 
 
+def source_commit(root: Path) -> str:
+    try:
+        value = subprocess.check_output(
+            ["git", "-C", str(root), "rev-parse", "HEAD"],
+            text=True, stderr=subprocess.DEVNULL,
+        ).strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        marker = root / ".source-commit"
+        if not marker.is_file():
+            raise RuntimeError("DS41 source identity unavailable: no Git HEAD or .source-commit")
+        value = marker.read_text().strip()
+    value = value.lower()
+    if len(value) != 40 or any(ch not in "0123456789abcdef" for ch in value):
+        raise RuntimeError(f"invalid DS41 source identity: {value!r}")
+    return value
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
@@ -56,8 +73,7 @@ def main() -> int:
         cases = [("target-only", None), ("diagnostic-bridge-Kmax3", SPECULATIVE_CONFIG)]
     report = {
         "schema": "ds41-small-block-entrypoint-preflight-v1",
-        "source_commit": subprocess.check_output(
-            ["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip(),
+        "source_commit": source_commit(root),
         "model_loaded": False, "timing_kind": "configuration only, not inference",
         "diagnostic_bridge": args.bridge,
         "B_definition": "K draft candidates plus one committed anchor input position",

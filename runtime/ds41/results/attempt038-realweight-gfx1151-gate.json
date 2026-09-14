@@ -1,0 +1,123 @@
+{
+  "schema": "ds41-attempt038-realweight-gfx1151-result-v1",
+  "status": "PASS",
+  "source_head": "6186823c92969cee23961d7ba588fd5fe5f920d7",
+  "weights_revision": "2bc89ac599031fa673cab993f1df02fc4a98c673",
+  "nodes": {
+    "rank0": {
+      "schema": "ds41-attempt038-realweight-gfx1151-v1",
+      "status": "PASS",
+      "rank": 0,
+      "device": "AMD Radeon 8060S Graphics",
+      "gcn": "gfx1151",
+      "quant_class": "DeepseekV4FP8Config",
+      "thresholds": {
+        "rel_l2": 0.005,
+        "max_abs": 0.125
+      },
+      "linear": {
+        "source_weight_dtype": "torch.float8_e4m3fn",
+        "source_scale_dtype": "torch.float8_e8m0fnu",
+        "kernel": "EmulationMxfp8LinearKernel",
+        "runtime_weight_dtype": "torch.bfloat16",
+        "weight_vs_independent_dequant": {
+          "exact": true,
+          "different": 0,
+          "numel": 6553600,
+          "rel_l2": 0.0,
+          "max_abs": 0.0,
+          "finite": true
+        },
+        "output_vs_reference": {
+          "exact": true,
+          "different": 0,
+          "numel": 1280,
+          "rel_l2": 0.0,
+          "max_abs": 0.0,
+          "finite": true
+        },
+        "cpu_fallback": false
+      },
+      "expert": {
+        "source_weight_dtype": "torch.int8",
+        "source_scale_dtype": "torch.float8_e8m0fnu",
+        "dequant_dtype": "torch.bfloat16",
+        "backend": "TRITON_BF16_FUSED_EXPERTS",
+        "output_vs_independent_reference": {
+          "exact": false,
+          "different": 2898,
+          "numel": 5120,
+          "rel_l2": 0.0036843072809095868,
+          "max_abs": 0.03125,
+          "finite": true
+        },
+        "cpu_fallback": false,
+        "packed_bytes": 17694720,
+        "bf16_bytes": 70778880
+      }
+    },
+    "rank1": {
+      "schema": "ds41-attempt038-realweight-gfx1151-v1",
+      "status": "PASS",
+      "rank": 1,
+      "device": "AMD Radeon 8060S Graphics",
+      "gcn": "gfx1151",
+      "quant_class": "DeepseekV4FP8Config",
+      "thresholds": {
+        "rel_l2": 0.005,
+        "max_abs": 0.125
+      },
+      "linear": {
+        "source_weight_dtype": "torch.float8_e4m3fn",
+        "source_scale_dtype": "torch.float8_e8m0fnu",
+        "kernel": "EmulationMxfp8LinearKernel",
+        "runtime_weight_dtype": "torch.bfloat16",
+        "weight_vs_independent_dequant": {
+          "exact": true,
+          "different": 0,
+          "numel": 6553600,
+          "rel_l2": 0.0,
+          "max_abs": 0.0,
+          "finite": true
+        },
+        "output_vs_reference": {
+          "exact": true,
+          "different": 0,
+          "numel": 1280,
+          "rel_l2": 0.0,
+          "max_abs": 0.0,
+          "finite": true
+        },
+        "cpu_fallback": false
+      },
+      "expert": {
+        "source_weight_dtype": "torch.int8",
+        "source_scale_dtype": "torch.float8_e8m0fnu",
+        "dequant_dtype": "torch.bfloat16",
+        "backend": "TRITON_BF16_FUSED_EXPERTS",
+        "output_vs_independent_reference": {
+          "exact": false,
+          "different": 2814,
+          "numel": 5120,
+          "rel_l2": 0.0035251753890168736,
+          "max_abs": 0.03125,
+          "finite": true
+        },
+        "cpu_fallback": false,
+        "packed_bytes": 17694720,
+        "bf16_bytes": 70778880
+      }
+    }
+  },
+  "decision": {
+    "dense": "MXFP8 source E4M3+UE8M0 dequantizes bit-exact to BF16 with pinned EmulationMxfp8LinearKernel; GPU BF16 GEMM, no CPU fallback.",
+    "experts": "Native packed MXFP4 backend unavailable because optional triton_kernels is absent and AITER excludes gfx1151. Exact load-time MXFP4->BF16 followed by existing GPU Triton fused_experts passes frozen component gates on both nodes.",
+    "integration": "Use opt-in DS41_DSPARK_MXFP4_BF16=1 only for DSpark sidecar; create routed experts as unquantized BF16 and dequant local EP-owned checkpoint matrices one-at-a-time during load."
+  },
+  "thresholds": {
+    "rel_l2_max": 0.005,
+    "max_abs_max": 0.125,
+    "finite": true
+  },
+  "completed_utc": "2026-09-14T14:28:55.632587+00:00"
+}

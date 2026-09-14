@@ -1,0 +1,103 @@
+{
+  "schema": "ds41-attempt033-fidelity-result-v1",
+  "status": "FIDELITY_PASS_STATE_AND_COST_NOT_RUN",
+  "runtime_source_commit": "d280c67d717e96ecf38964d12f2feb156d998b6b",
+  "math_fix_commit": "ce446ef62836980b4d4a3c9a62b4374ba3394c8d",
+  "validator_fix_commit": "03f6699194bf4de1dc6cac960369614712f77d2e",
+  "epoch": "1789373541500776874",
+  "rowwise_native_control": true,
+  "rowwise_mhc_control": true,
+  "rank_fidelity": {
+    "rank0": {
+      "1": {
+        "passed": true,
+        "compared_positions": 56,
+        "max_rel_l2": 0.0,
+        "max_abs": 0.0
+      },
+      "2": {
+        "passed": true,
+        "compared_positions": 56,
+        "max_rel_l2": 0.0,
+        "max_abs": 0.0
+      },
+      "4": {
+        "passed": true,
+        "compared_positions": 56,
+        "max_rel_l2": 0.0,
+        "max_abs": 0.0
+      }
+    },
+    "rank1": {
+      "1": {
+        "passed": true,
+        "compared_positions": 56,
+        "max_rel_l2": 0.0,
+        "max_abs": 0.0
+      },
+      "2": {
+        "passed": true,
+        "compared_positions": 56,
+        "max_rel_l2": 0.0,
+        "max_abs": 0.0
+      },
+      "4": {
+        "passed": true,
+        "compared_positions": 56,
+        "max_rel_l2": 0.0,
+        "max_abs": 0.0
+      }
+    }
+  },
+  "outputs_exact_oracle": {
+    "diagnostic-D1": true,
+    "diagnostic-B2": true,
+    "diagnostic-B4": true
+  },
+  "cross_rank_output_tokens_exact": true,
+  "cross_rank_logits_canonical_digest_exact": true,
+  "cross_rank_boundary_canonical_digest_exact": true,
+  "canonical_digests": {
+    "rank": 0,
+    "logits": {
+      "diagnostic-D1": "868ef7c1f8b745108b8f561d7d2313e69580f19d61b64c0993e311dd81c8b39b",
+      "diagnostic-B2": "84980b68ad69b7a8d2c7375dccd3bffc232eb63051831b89b704f9e861c39dd3",
+      "diagnostic-B4": "a69cd5725a57d576fde597323a1e016ef1d09d55d81dee8df6664700f55c48c4"
+    },
+    "boundaries": {
+      "diagnostic-D1": "2f0dd41c1adab5ea56be916ada8ecd3fa1a9dee020521e57e5ec06d51e152d78",
+      "diagnostic-B2": "89d1c534749c7a2542d710453a7698735f2112c94d4399b6fe8f617c8278b4d7",
+      "diagnostic-B4": "39dfdf75ed04e0e97fc090acbd1dfc3f385e353c9b08dc0c7a47e3b0492b88df"
+    }
+  },
+  "narrow_boundaries": {
+    "rank0_all_exact": true,
+    "rank1_all_exact": true,
+    "boundaries_per_arm": 16
+  },
+  "live_validator_false_negative": {
+    "present": true,
+    "cause": "attempt033 executed with pre-fix validator that required tokens_not_1 fallback for all M>1 native/coeff/projection dispatch",
+    "numerical_gate_failures": 0,
+    "corrected_offline_without_rerun": true
+  },
+  "state_gate": "NOT_RUN",
+  "reject_partial_rollback": "NOT_RUN",
+  "B2_B4_block_cost": "NOT_RUN",
+  "measurements_present": [
+    "measure-B1-1",
+    "measure-B1-2",
+    "measure-B1-3"
+  ],
+  "diagnostic_B2_B4_timing_qualified": false,
+  "supervisor": {
+    "initial_arm": "SETUP_NEGATIVE_RELATIVE_PATH_STATUS127",
+    "replacement": "ACTIVE_AND_CLEANUP_RC0",
+    "cleanup_utc": "2026-09-14T08:19:27Z"
+  },
+  "cleanup": {
+    "node01": "OFF_VERIFIED",
+    "node02": "OFF_VERIFIED",
+    "owner": "NONE/OFF"
+  }
+}

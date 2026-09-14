@@ -1,0 +1,731 @@
+{
+  "schema": "ds41-attempt035-t3-offline-diagnosis-v1",
+  "status": "HYPOTHESIS_CONFIRMED",
+  "source_commit": "bdb0a34eda33ab35018e2f30ff8b46328f90a566",
+  "attempt034_source": "289802e68919e35c7119335bd9002e95bd033e0b",
+  "finding": "corrupt-first final packet is exactly T=3 positions95-97; native routed stays active but mHC projection/coefficient both fall back tokens_not_1 on both ranks; all compared positions through94 are bit-exact",
+  "clean_tail": "T4 [94,95,96,97] promoted rowwise mHC active",
+  "corrupt_last_tail": "T1 [97] promoted M1 path active",
+  "causal_status": "T3 dispatch hole is directly evidenced and exactly coincides with all failing positions; dirty rollback/cache is not established by attempt034",
+  "ranks": [
+    {
+      "rank": 0,
+      "controls": {
+        "diagnostic-B4": {
+          "tail": [
+            {
+              "step": 20,
+              "positions": [
+                90,
+                91,
+                92,
+                93
+              ],
+              "num_positions": 4,
+              "num_drafts": 3,
+              "scheduler_computed_before": 90,
+              "scheduler_computed_after": 94,
+              "emitted_tokens": [
+                455,
+                7076,
+                344,
+                304
+              ],
+              "dispatch": {
+                "native": {
+                  "native_calls": 160,
+                  "native_tokens": 160,
+                  "triton_fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "coefficient": {
+                  "fused_calls": 80,
+                  "fused_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "projection": {
+                  "tilelang_calls": 320,
+                  "tilelang_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                }
+              }
+            },
+            {
+              "step": 21,
+              "positions": [
+                94,
+                95,
+                96,
+                97
+              ],
+              "num_positions": 4,
+              "num_drafts": 3,
+              "scheduler_computed_before": 94,
+              "scheduler_computed_after": null,
+              "emitted_tokens": [
+                33147,
+                260,
+                4216,
+                3608
+              ],
+              "dispatch": {
+                "native": {
+                  "native_calls": 160,
+                  "native_tokens": 160,
+                  "triton_fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "coefficient": {
+                  "fused_calls": 80,
+                  "fused_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "projection": {
+                  "tilelang_calls": 320,
+                  "tilelang_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "diagnostic-B4-corrupt-first": {
+          "tail": [
+            {
+              "step": 21,
+              "positions": [
+                91,
+                92,
+                93,
+                94
+              ],
+              "num_positions": 4,
+              "num_drafts": 3,
+              "scheduler_computed_before": 91,
+              "scheduler_computed_after": 95,
+              "emitted_tokens": [
+                7076,
+                344,
+                304,
+                33147
+              ],
+              "dispatch": {
+                "native": {
+                  "native_calls": 160,
+                  "native_tokens": 160,
+                  "triton_fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "coefficient": {
+                  "fused_calls": 80,
+                  "fused_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "projection": {
+                  "tilelang_calls": 320,
+                  "tilelang_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                }
+              }
+            },
+            {
+              "step": 22,
+              "positions": [
+                95,
+                96,
+                97
+              ],
+              "num_positions": 3,
+              "num_drafts": 2,
+              "scheduler_computed_before": 95,
+              "scheduler_computed_after": null,
+              "emitted_tokens": [
+                260,
+                4216,
+                3608
+              ],
+              "dispatch": {
+                "native": {
+                  "native_calls": 120,
+                  "native_tokens": 120,
+                  "triton_fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "coefficient": {
+                  "fused_calls": 0,
+                  "fused_tokens": 0,
+                  "fallback_calls": 80,
+                  "fallback_reasons": {
+                    "tokens_not_1": 80
+                  }
+                },
+                "projection": {
+                  "tilelang_calls": 0,
+                  "tilelang_tokens": 0,
+                  "fallback_calls": 80,
+                  "fallback_reasons": {
+                    "tokens_not_1": 80
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "diagnostic-B4-corrupt-last": {
+          "tail": [
+            {
+              "step": 20,
+              "positions": [
+                89,
+                90,
+                91,
+                92
+              ],
+              "num_positions": 4,
+              "num_drafts": 3,
+              "scheduler_computed_before": 89,
+              "scheduler_computed_after": 93,
+              "emitted_tokens": [
+                37419,
+                455,
+                7076,
+                344
+              ],
+              "dispatch": {
+                "native": {
+                  "native_calls": 160,
+                  "native_tokens": 160,
+                  "triton_fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "coefficient": {
+                  "fused_calls": 80,
+                  "fused_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "projection": {
+                  "tilelang_calls": 320,
+                  "tilelang_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                }
+              }
+            },
+            {
+              "step": 21,
+              "positions": [
+                93,
+                94,
+                95,
+                96
+              ],
+              "num_positions": 4,
+              "num_drafts": 3,
+              "scheduler_computed_before": 93,
+              "scheduler_computed_after": 97,
+              "emitted_tokens": [
+                304,
+                33147,
+                260,
+                4216
+              ],
+              "dispatch": {
+                "native": {
+                  "native_calls": 160,
+                  "native_tokens": 160,
+                  "triton_fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "coefficient": {
+                  "fused_calls": 80,
+                  "fused_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "projection": {
+                  "tilelang_calls": 320,
+                  "tilelang_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                }
+              }
+            },
+            {
+              "step": 22,
+              "positions": [
+                97
+              ],
+              "num_positions": 1,
+              "num_drafts": 0,
+              "scheduler_computed_before": 97,
+              "scheduler_computed_after": null,
+              "emitted_tokens": [
+                3608
+              ],
+              "dispatch": {
+                "native": {
+                  "native_calls": 40,
+                  "native_tokens": 40,
+                  "triton_fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "coefficient": {
+                  "fused_calls": 80,
+                  "fused_tokens": 80,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "projection": {
+                  "tilelang_calls": 80,
+                  "tilelang_tokens": 80,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "corrupt_first_gate": {
+        "passed": false,
+        "errors": [
+          "position 95: logits gate failed",
+          "position 96: logits gate failed",
+          "position 97: logits gate failed"
+        ],
+        "bad": [
+          {
+            "position": 95,
+            "rel_l2": 0.011163844655488591,
+            "max_abs": 0.25,
+            "reference_top1": 260,
+            "candidate_top1": 260,
+            "passed": false
+          },
+          {
+            "position": 96,
+            "rel_l2": 0.011502877049909805,
+            "max_abs": 0.232421875,
+            "reference_top1": 4216,
+            "candidate_top1": 4216,
+            "passed": false
+          },
+          {
+            "position": 97,
+            "rel_l2": 0.009784480734412645,
+            "max_abs": 0.203125,
+            "reference_top1": 3608,
+            "candidate_top1": 3608,
+            "passed": false
+          }
+        ]
+      },
+      "corrupt_first_positions_before_95_bit_exact": true
+    },
+    {
+      "rank": 1,
+      "controls": {
+        "diagnostic-B4": {
+          "tail": [
+            {
+              "step": 20,
+              "positions": [
+                90,
+                91,
+                92,
+                93
+              ],
+              "num_positions": 4,
+              "num_drafts": 3,
+              "scheduler_computed_before": 90,
+              "scheduler_computed_after": 94,
+              "emitted_tokens": [
+                455,
+                7076,
+                344,
+                304
+              ],
+              "dispatch": {
+                "native": {
+                  "native_calls": 160,
+                  "native_tokens": 160,
+                  "triton_fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "coefficient": {
+                  "fused_calls": 80,
+                  "fused_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "projection": {
+                  "tilelang_calls": 320,
+                  "tilelang_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                }
+              }
+            },
+            {
+              "step": 21,
+              "positions": [
+                94,
+                95,
+                96,
+                97
+              ],
+              "num_positions": 4,
+              "num_drafts": 3,
+              "scheduler_computed_before": 94,
+              "scheduler_computed_after": null,
+              "emitted_tokens": [
+                33147,
+                260,
+                4216,
+                3608
+              ],
+              "dispatch": {
+                "native": {
+                  "native_calls": 160,
+                  "native_tokens": 160,
+                  "triton_fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "coefficient": {
+                  "fused_calls": 80,
+                  "fused_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "projection": {
+                  "tilelang_calls": 320,
+                  "tilelang_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "diagnostic-B4-corrupt-first": {
+          "tail": [
+            {
+              "step": 21,
+              "positions": [
+                91,
+                92,
+                93,
+                94
+              ],
+              "num_positions": 4,
+              "num_drafts": 3,
+              "scheduler_computed_before": 91,
+              "scheduler_computed_after": 95,
+              "emitted_tokens": [
+                7076,
+                344,
+                304,
+                33147
+              ],
+              "dispatch": {
+                "native": {
+                  "native_calls": 160,
+                  "native_tokens": 160,
+                  "triton_fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "coefficient": {
+                  "fused_calls": 80,
+                  "fused_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "projection": {
+                  "tilelang_calls": 320,
+                  "tilelang_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                }
+              }
+            },
+            {
+              "step": 22,
+              "positions": [
+                95,
+                96,
+                97
+              ],
+              "num_positions": 3,
+              "num_drafts": 2,
+              "scheduler_computed_before": 95,
+              "scheduler_computed_after": null,
+              "emitted_tokens": [
+                260,
+                4216,
+                3608
+              ],
+              "dispatch": {
+                "native": {
+                  "native_calls": 120,
+                  "native_tokens": 120,
+                  "triton_fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "coefficient": {
+                  "fused_calls": 0,
+                  "fused_tokens": 0,
+                  "fallback_calls": 80,
+                  "fallback_reasons": {
+                    "tokens_not_1": 80
+                  }
+                },
+                "projection": {
+                  "tilelang_calls": 0,
+                  "tilelang_tokens": 0,
+                  "fallback_calls": 80,
+                  "fallback_reasons": {
+                    "tokens_not_1": 80
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "diagnostic-B4-corrupt-last": {
+          "tail": [
+            {
+              "step": 20,
+              "positions": [
+                89,
+                90,
+                91,
+                92
+              ],
+              "num_positions": 4,
+              "num_drafts": 3,
+              "scheduler_computed_before": 89,
+              "scheduler_computed_after": 93,
+              "emitted_tokens": [
+                37419,
+                455,
+                7076,
+                344
+              ],
+              "dispatch": {
+                "native": {
+                  "native_calls": 160,
+                  "native_tokens": 160,
+                  "triton_fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "coefficient": {
+                  "fused_calls": 80,
+                  "fused_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "projection": {
+                  "tilelang_calls": 320,
+                  "tilelang_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                }
+              }
+            },
+            {
+              "step": 21,
+              "positions": [
+                93,
+                94,
+                95,
+                96
+              ],
+              "num_positions": 4,
+              "num_drafts": 3,
+              "scheduler_computed_before": 93,
+              "scheduler_computed_after": 97,
+              "emitted_tokens": [
+                304,
+                33147,
+                260,
+                4216
+              ],
+              "dispatch": {
+                "native": {
+                  "native_calls": 160,
+                  "native_tokens": 160,
+                  "triton_fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "coefficient": {
+                  "fused_calls": 80,
+                  "fused_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "projection": {
+                  "tilelang_calls": 320,
+                  "tilelang_tokens": 320,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                }
+              }
+            },
+            {
+              "step": 22,
+              "positions": [
+                97
+              ],
+              "num_positions": 1,
+              "num_drafts": 0,
+              "scheduler_computed_before": 97,
+              "scheduler_computed_after": null,
+              "emitted_tokens": [
+                3608
+              ],
+              "dispatch": {
+                "native": {
+                  "native_calls": 40,
+                  "native_tokens": 40,
+                  "triton_fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "coefficient": {
+                  "fused_calls": 80,
+                  "fused_tokens": 80,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                },
+                "projection": {
+                  "tilelang_calls": 80,
+                  "tilelang_tokens": 80,
+                  "fallback_calls": 0,
+                  "fallback_reasons": {
+                    "tokens_not_1": 0
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "corrupt_first_gate": {
+        "passed": false,
+        "errors": [
+          "position 95: logits gate failed",
+          "position 96: logits gate failed",
+          "position 97: logits gate failed"
+        ],
+        "bad": [
+          {
+            "position": 95,
+            "rel_l2": 0.011163844655488591,
+            "max_abs": 0.25,
+            "reference_top1": 260,
+            "candidate_top1": 260,
+            "passed": false
+          },
+          {
+            "position": 96,
+            "rel_l2": 0.011502877049909805,
+            "max_abs": 0.232421875,
+            "reference_top1": 4216,
+            "candidate_top1": 4216,
+            "passed": false
+          },
+          {
+            "position": 97,
+            "rel_l2": 0.009784480734412645,
+            "max_abs": 0.203125,
+            "reference_top1": 3608,
+            "candidate_top1": 3608,
+            "passed": false
+          }
+        ]
+      },
+      "corrupt_first_positions_before_95_bit_exact": true
+    }
+  ],
+  "next": "model-free qualify only T3 P1-per-row+C1-batched on real K5120/K20480 fixtures, then conditionally extend opt-in guard and rerun original controls plus explicit B2 reject"
+}

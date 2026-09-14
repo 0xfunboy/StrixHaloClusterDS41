@@ -1,0 +1,156 @@
+{
+  "schema": "ds41-attempt032-rowwise-mhc-component-gate-v1",
+  "status": "PASS",
+  "fix_commit": "ce446ef62836980b4d4a3c9a62b4374ba3394c8d",
+  "nodes": {
+    "NODE01": {
+      "rank": 0,
+      "B2_attention_exact": true,
+      "B2_ffn_exact": true,
+      "B4_attention_exact": true,
+      "B4_ffn_exact": true,
+      "B2_attention_stats": {
+        "projection": {
+          "tilelang_calls": 2,
+          "tilelang_tokens": 2,
+          "fallback_calls": 0,
+          "fallback_reasons": {}
+        },
+        "coefficient": {
+          "fused_calls": 1,
+          "fused_tokens": 2,
+          "fallback_calls": 0,
+          "fallback_reasons": {}
+        }
+      },
+      "B2_ffn_stats": {
+        "projection": {
+          "tilelang_calls": 2,
+          "tilelang_tokens": 2,
+          "fallback_calls": 0,
+          "fallback_reasons": {}
+        },
+        "coefficient": {
+          "fused_calls": 1,
+          "fused_tokens": 2,
+          "fallback_calls": 0,
+          "fallback_reasons": {}
+        }
+      },
+      "B4_attention_stats": {
+        "projection": {
+          "tilelang_calls": 4,
+          "tilelang_tokens": 4,
+          "fallback_calls": 0,
+          "fallback_reasons": {}
+        },
+        "coefficient": {
+          "fused_calls": 1,
+          "fused_tokens": 4,
+          "fallback_calls": 0,
+          "fallback_reasons": {}
+        }
+      },
+      "B4_ffn_stats": {
+        "projection": {
+          "tilelang_calls": 4,
+          "tilelang_tokens": 4,
+          "fallback_calls": 0,
+          "fallback_reasons": {}
+        },
+        "coefficient": {
+          "fused_calls": 1,
+          "fused_tokens": 4,
+          "fallback_calls": 0,
+          "fallback_reasons": {}
+        }
+      },
+      "M7_exact_fallback": true,
+      "fail_closed": {
+        "projection_off": {
+          "passed": true,
+          "error": "DS41 M>1 mHC fidelity control requires promoted projection/RMS and coefficient/Sinkhorn paths enabled"
+        },
+        "coeff_off": {
+          "passed": true,
+          "error": "DS41 M>1 mHC fidelity control requires promoted projection/RMS and coefficient/Sinkhorn paths enabled"
+        }
+      }
+    },
+    "NODE02": {
+      "rank": 1,
+      "B2_attention_exact": true,
+      "B2_ffn_exact": true,
+      "B4_attention_exact": true,
+      "B4_ffn_exact": true,
+      "B2_attention_stats": {
+        "projection": {
+          "tilelang_calls": 2,
+          "tilelang_tokens": 2,
+          "fallback_calls": 0,
+          "fallback_reasons": {}
+        },
+        "coefficient": {
+          "fused_calls": 1,
+          "fused_tokens": 2,
+          "fallback_calls": 0,
+          "fallback_reasons": {}
+        }
+      },
+      "B2_ffn_stats": {
+        "projection": {
+          "tilelang_calls": 2,
+          "tilelang_tokens": 2,
+          "fallback_calls": 0,
+          "fallback_reasons": {}
+        },
+        "coefficient": {
+          "fused_calls": 1,
+          "fused_tokens": 2,
+          "fallback_calls": 0,
+          "fallback_reasons": {}
+        }
+      },
+      "B4_attention_stats": {
+        "projection": {
+          "tilelang_calls": 4,
+          "tilelang_tokens": 4,
+          "fallback_calls": 0,
+          "fallback_reasons": {}
+        },
+        "coefficient": {
+          "fused_calls": 1,
+          "fused_tokens": 4,
+          "fallback_calls": 0,
+          "fallback_reasons": {}
+        }
+      },
+      "B4_ffn_stats": {
+        "projection": {
+          "tilelang_calls": 4,
+          "tilelang_tokens": 4,
+          "fallback_calls": 0,
+          "fallback_reasons": {}
+        },
+        "coefficient": {
+          "fused_calls": 1,
+          "fused_tokens": 4,
+          "fallback_calls": 0,
+          "fallback_reasons": {}
+        }
+      },
+      "M7_exact_fallback": true,
+      "fail_closed": {
+        "projection_off": {
+          "passed": true,
+          "error": "DS41 M>1 mHC fidelity control requires promoted projection/RMS and coefficient/Sinkhorn paths enabled"
+        },
+        "coeff_off": {
+          "passed": true,
+          "error": "DS41 M>1 mHC fidelity control requires promoted projection/RMS and coefficient/Sinkhorn paths enabled"
+        }
+      }
+    }
+  },
+  "pair_state": "OFF_VERIFIED/OFF_VERIFIED; owner NONE/OFF"
+}

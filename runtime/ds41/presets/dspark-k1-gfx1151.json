@@ -1,0 +1,58 @@
+{
+  "schema": "ds41-experimental-preset-v1",
+  "name": "dspark-k1-gfx1151",
+  "status": "EXPERIMENTAL_QUALIFIED",
+  "production_default": false,
+  "integration_source_commit": "10d29383b4aabfbd4e91d917546cf3ceb39c577d",
+  "evidence": "runtime/ds41/results/attempt040-dspark-real-ab-final.json",
+  "target": {
+    "artifact": "DeepSeek-V4.1-Flash-MixedQ2-Engram2-densefix",
+    "tensor_parallel_size": 2,
+    "expert_parallel": true,
+    "promoted_target_switches": {
+      "DS41_EP_SKIP_REMOTE": "1",
+      "DS41_NATIVE_HIP_MOE": "1",
+      "DS41_MHC_COEFF_SINKHORN": "1",
+      "DS41_MHC_PROJECTION_RMS": "1",
+      "DS41_ENGRAM_RANDOM_ADVICE": "1",
+      "DS41_ATTN_WOB_LLMM1": "0"
+    }
+  },
+  "draft": {
+    "method": "dspark",
+    "model": "/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac",
+    "num_speculative_tokens": 1,
+    "quantization": "fp8",
+    "enable_adaptive_verification": false,
+    "draft_tensor_parallel_size": 2,
+    "draft_load_config": {
+      "load_format": "safetensors",
+      "safetensors_load_strategy": "lazy"
+    },
+    "draft_sample_method": "greedy",
+    "rejection_sample_method": "standard",
+    "environment": {
+      "DS41_DSPARK_MXFP4_BF16": "1",
+      "DS41_NATIVE_HIP_MOE_ROWWISE": "1",
+      "DS41_MHC_ROWWISE_BLOCK": "1"
+    }
+  },
+  "rollback_m1": {
+    "speculative_config": null,
+    "unset": [
+      "DS41_DSPARK_MXFP4_BF16",
+      "DS41_NATIVE_HIP_MOE_ROWWISE",
+      "DS41_MHC_ROWWISE_BLOCK",
+      "DS41_REAL_DSPARK_TELEMETRY"
+    ],
+    "preserve_target_switches": true
+  },
+  "qualified_result": {
+    "A040_m1_mean_decode_tps": 12.288064636846512,
+    "B039_dspark_k1_mean_decode_tps": 16.78874180523504,
+    "decode_gain_pct": 36.62641189966542,
+    "speed_acceptance": "174/210",
+    "token_equality": true,
+    "coding_independent": true
+  }
+}

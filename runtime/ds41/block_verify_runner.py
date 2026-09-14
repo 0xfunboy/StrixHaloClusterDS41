@@ -36,7 +36,7 @@ class StepObserver:
     retained explicitly. Replay proposal work remains included, not subtracted.
     """
 
-    def __init__(self, llm, vocab_size, boundary_position=None):
+    def __init__(self, llm, vocab_size, boundary_position=None, boundary_capture=None):
         self.client = llm.llm_engine.engine_core
         self.core = self.client.engine_core
         self.runner = llm.llm_engine.model_executor.driver_worker.model_runner
@@ -56,6 +56,29 @@ class StepObserver:
         )
         self.boundaries = []
         self.boundary_handles = []
+        self.boundary_capture = None
+        if boundary_capture is not None:
+            if not isinstance(boundary_capture, dict) or not boundary_capture:
+                raise ValueError("boundary_capture must be a non-empty layer->stages mapping")
+            parsed = {}
+            valid_stages = {
+                "layer_entry", "attn_norm_in", "attn_norm_out", "attn_in",
+                "attn_out", "ffn_norm_in", "ffn_norm_out", "ffn_in", "ffn_out",
+                "engram_out", "state_x", "state_pre_mix", "state_post_mix",
+                "state_res_mix", "state_residual",
+            }
+            for raw_layer, raw_stages in boundary_capture.items():
+                layer = int(raw_layer)
+                if layer < 0 or layer >= 40:
+                    raise ValueError(f"invalid boundary capture layer {layer}")
+                if not isinstance(raw_stages, list) or not raw_stages:
+                    raise ValueError(f"boundary capture layer {layer} needs stages")
+                stages = set(raw_stages)
+                unknown = stages - valid_stages
+                if unknown:
+                    raise ValueError(f"unknown boundary stages for layer {layer}: {sorted(unknown)}")
+                parsed[layer] = stages
+            self.boundary_capture = parsed
         self.client.get_output = self.get_output
         self.runner.sample = self.sample
         self.model.compute_logits = self.compute_logits
@@ -89,8 +112,35 @@ class StepObserver:
             "tensor": tensor.detach().cpu().clone(),
         })
 
+    def _capture_layer_state(self, layer, selected, args):
+        if not self.capture or self.current is None:
+            return
+        if self.current.get("scheduler_computed_before") != self.boundary_position:
+            return
+        fields = (
+            ("state_x", 0),
+            ("state_pre_mix", 3),
+            ("state_post_mix", 4),
+            ("state_res_mix", 5),
+            ("state_residual", 6),
+        )
+        for stage, index in fields:
+            if stage not in selected or len(args) <= index:
+                continue
+            value = args[index]
+            if not isinstance(value, torch.Tensor):
+                continue
+            self.boundaries.append({
+                "layer": int(layer),
+                "stage": stage,
+                "shape": list(value.shape),
+                "dtype": str(value.dtype),
+                "tensor": value.detach().cpu().clone(),
+            })
+
     def _install_boundary_hooks(self):
         found = 0
+        selected_found = set()
         for name, module in self.model.named_modules():
             if type(module).__name__ != "DeepseekV4DecoderLayer":
                 continue
@@ -99,40 +149,79 @@ class StepObserver:
             except ValueError:
                 continue
             found += 1
-            self.boundary_handles.append(module.register_forward_pre_hook(
-                lambda _m, args, layer=layer: self._capture_boundary(
-                    layer, "layer_entry", args[0] if args else None
-                )
-            ))
+            selected = (
+                self.boundary_capture.get(layer)
+                if self.boundary_capture is not None
+                else {
+                    "layer_entry", "attn_norm_in", "attn_norm_out", "attn_in",
+                    "attn_out", "ffn_norm_in", "ffn_norm_out", "ffn_in", "ffn_out",
+                    "engram_out", "state_x", "state_pre_mix", "state_post_mix",
+                    "state_res_mix", "state_residual",
+                }
+            )
+            if not selected:
+                continue
+            selected_found.add(layer)
+            if "layer_entry" in selected:
+                self.boundary_handles.append(module.register_forward_pre_hook(
+                    lambda _m, args, layer=layer: self._capture_boundary(
+                        layer, "layer_entry", args[0] if args else None
+                    )
+                ))
+            state_stages = {
+                "state_x", "state_pre_mix", "state_post_mix",
+                "state_res_mix", "state_residual",
+            } & selected
+            if state_stages:
+                self.boundary_handles.append(module.register_forward_pre_hook(
+                    lambda _m, args, layer=layer, stages=frozenset(state_stages):
+                        self._capture_layer_state(layer, stages, args)
+                ))
+            if "engram_out" in selected:
+                engram = getattr(module, "engram", None)
+                if engram is None:
+                    raise RuntimeError(f"Boundary diagnostic requested engram_out on layer {layer} without Engram")
+                self.boundary_handles.append(engram.register_forward_hook(
+                    lambda _m, _args, output, layer=layer:
+                        self._capture_boundary(layer, "engram_out", output)
+                ))
             for attr, pre_stage, post_stage in (
                 ("attn_norm", "attn_norm_in", "attn_norm_out"),
                 ("attn", "attn_in", "attn_out"),
                 ("ffn_norm", "ffn_norm_in", "ffn_norm_out"),
                 ("ffn", "ffn_in", "ffn_out"),
             ):
+                if pre_stage not in selected and post_stage not in selected:
+                    continue
                 child = getattr(module, attr)
-                if attr == "attn":
-                    self.boundary_handles.append(child.register_forward_pre_hook(
-                        lambda _m, args, layer=layer, stage=pre_stage:
-                            self._capture_boundary(
-                                layer, stage, args[1] if len(args) > 1 else None
-                            )
+                if pre_stage in selected:
+                    if attr == "attn":
+                        self.boundary_handles.append(child.register_forward_pre_hook(
+                            lambda _m, args, layer=layer, stage=pre_stage:
+                                self._capture_boundary(
+                                    layer, stage, args[1] if len(args) > 1 else None
+                                )
+                        ))
+                    else:
+                        self.boundary_handles.append(child.register_forward_pre_hook(
+                            lambda _m, args, layer=layer, stage=pre_stage:
+                                self._capture_boundary(
+                                    layer, stage, args[0] if args else None
+                                )
+                        ))
+                if post_stage in selected:
+                    self.boundary_handles.append(child.register_forward_hook(
+                        lambda _m, _args, output, layer=layer, stage=post_stage:
+                            self._capture_boundary(layer, stage, output)
                     ))
-                else:
-                    self.boundary_handles.append(child.register_forward_pre_hook(
-                        lambda _m, args, layer=layer, stage=pre_stage:
-                            self._capture_boundary(
-                                layer, stage, args[0] if args else None
-                            )
-                    ))
-                self.boundary_handles.append(child.register_forward_hook(
-                    lambda _m, _args, output, layer=layer, stage=post_stage:
-                        self._capture_boundary(layer, stage, output)
-                ))
         if found != 40:
             raise RuntimeError(
                 f"Boundary diagnostic expected 40 decoder layers, found {found}"
             )
+        if self.boundary_capture is not None:
+            missing = set(self.boundary_capture) - selected_found
+            if missing:
+                raise RuntimeError(f"Boundary diagnostic layers not found: {sorted(missing)}")
 
     def reset(self, capture):
         self.steps, self.logits, self.boundaries = [], [], []
@@ -228,7 +317,10 @@ def run(llm, run_generation, token_spec, raw, rank, init_s, artifact_identity, e
         output.write_text(json.dumps(report, indent=2) + "\n")
 
     observer = StepObserver(
-        llm, config["vocab_size"], config.get("boundary_capture_position")
+        llm,
+        config["vocab_size"],
+        config.get("boundary_capture_position"),
+        config.get("boundary_capture"),
     )
 
     def request(label, k, mode, cap=64, corrupt=None):

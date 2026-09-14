@@ -1,0 +1,723 @@
+{
+  "schema": "ds41-attempt035-t3-component-gate-v1",
+  "status": "PASS",
+  "analysis_source": "26175513c9e704d5407086e76d9db8f3efe3c058",
+  "runtime_marker": "289802e68919e35c7119335bd9002e95bd033e0b",
+  "rank_results_identical_math": true,
+  "ranks": {
+    "0": {
+      "schema": "ds41-attempt035-mhc-t3-gate-v1",
+      "status": "PASS",
+      "rank": 0,
+      "analysis_source": "26175513c9e704d5407086e76d9db8f3efe3c058",
+      "runtime_marker": "289802e68919e35c7119335bd9002e95bd033e0b",
+      "model_initialized": false,
+      "generation_requests": 0,
+      "tokens": 3,
+      "attention": {
+        "source_shape": [
+          3,
+          5120
+        ],
+        "fn_shape": [
+          24,
+          5120
+        ],
+        "candidate_vs_concat_m1_all_rows": {
+          "post_mix": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4,
+              1
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 12,
+            "reference_norm": 0.370248943567276,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "res_mix": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 48,
+            "reference_norm": 3.190251588821411,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "layer_input": {
+            "shape_match": true,
+            "shape": [
+              3,
+              5120
+            ],
+            "candidate_dtype": "torch.bfloat16",
+            "reference_dtype": "torch.bfloat16",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 15360,
+            "reference_norm": 13.50928783416748,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "next_pre": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 12,
+            "reference_norm": 1.757625699043274,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          }
+        },
+        "candidate_stats": {
+          "projection": {
+            "tilelang_calls": 3,
+            "tilelang_tokens": 3,
+            "fallback_calls": 0,
+            "fallback_reasons": {}
+          },
+          "coefficient": {
+            "fused_calls": 1,
+            "fused_tokens": 3,
+            "fallback_calls": 0,
+            "fallback_reasons": {}
+          }
+        },
+        "C1_T3_vs_concat_T1": {
+          "pre": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 12,
+            "reference_norm": 1.757625699043274,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "post": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 12,
+            "reference_norm": 0.370248943567276,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "comb": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 48,
+            "reference_norm": 3.190251588821411,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          }
+        }
+      },
+      "ffn": {
+        "residual_shape": [
+          3,
+          4,
+          5120
+        ],
+        "source_shape": [
+          3,
+          20480
+        ],
+        "fn_shape": [
+          24,
+          20480
+        ],
+        "pre_mix_shape": [
+          3,
+          4
+        ],
+        "candidate_vs_concat_m1_all_rows": {
+          "post_mix": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4,
+              1
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 12,
+            "reference_norm": 1.4756028652191162,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "res_mix": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 48,
+            "reference_norm": 3.0343284606933594,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "layer_input": {
+            "shape_match": true,
+            "shape": [
+              3,
+              5120
+            ],
+            "candidate_dtype": "torch.bfloat16",
+            "reference_dtype": "torch.bfloat16",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 15360,
+            "reference_norm": 24.975479125976562,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "next_pre": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 12,
+            "reference_norm": 1.6502127647399902,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          }
+        },
+        "candidate_stats": {
+          "projection": {
+            "tilelang_calls": 3,
+            "tilelang_tokens": 3,
+            "fallback_calls": 0,
+            "fallback_reasons": {}
+          },
+          "coefficient": {
+            "fused_calls": 1,
+            "fused_tokens": 3,
+            "fallback_calls": 0,
+            "fallback_reasons": {}
+          }
+        },
+        "C1_T3_vs_concat_T1": {
+          "pre": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 12,
+            "reference_norm": 1.6502127647399902,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "post": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 12,
+            "reference_norm": 1.4756028652191162,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "comb": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 48,
+            "reference_norm": 3.0343284606933594,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          }
+        }
+      },
+      "contract": {
+        "projection": "three existing qualified M1 TileLang calls",
+        "coefficient": "one existing fused [3,24] call",
+        "collective_per_row": false,
+        "runtime_guard_modified_for_test": false
+      }
+    },
+    "1": {
+      "schema": "ds41-attempt035-mhc-t3-gate-v1",
+      "status": "PASS",
+      "rank": 1,
+      "analysis_source": "26175513c9e704d5407086e76d9db8f3efe3c058",
+      "runtime_marker": "289802e68919e35c7119335bd9002e95bd033e0b",
+      "model_initialized": false,
+      "generation_requests": 0,
+      "tokens": 3,
+      "attention": {
+        "source_shape": [
+          3,
+          5120
+        ],
+        "fn_shape": [
+          24,
+          5120
+        ],
+        "candidate_vs_concat_m1_all_rows": {
+          "post_mix": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4,
+              1
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 12,
+            "reference_norm": 0.370248943567276,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "res_mix": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 48,
+            "reference_norm": 3.190251588821411,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "layer_input": {
+            "shape_match": true,
+            "shape": [
+              3,
+              5120
+            ],
+            "candidate_dtype": "torch.bfloat16",
+            "reference_dtype": "torch.bfloat16",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 15360,
+            "reference_norm": 13.50928783416748,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "next_pre": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 12,
+            "reference_norm": 1.757625699043274,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          }
+        },
+        "candidate_stats": {
+          "projection": {
+            "tilelang_calls": 3,
+            "tilelang_tokens": 3,
+            "fallback_calls": 0,
+            "fallback_reasons": {}
+          },
+          "coefficient": {
+            "fused_calls": 1,
+            "fused_tokens": 3,
+            "fallback_calls": 0,
+            "fallback_reasons": {}
+          }
+        },
+        "C1_T3_vs_concat_T1": {
+          "pre": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 12,
+            "reference_norm": 1.757625699043274,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "post": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 12,
+            "reference_norm": 0.370248943567276,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "comb": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 48,
+            "reference_norm": 3.190251588821411,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          }
+        }
+      },
+      "ffn": {
+        "residual_shape": [
+          3,
+          4,
+          5120
+        ],
+        "source_shape": [
+          3,
+          20480
+        ],
+        "fn_shape": [
+          24,
+          20480
+        ],
+        "pre_mix_shape": [
+          3,
+          4
+        ],
+        "candidate_vs_concat_m1_all_rows": {
+          "post_mix": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4,
+              1
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 12,
+            "reference_norm": 1.4756028652191162,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "res_mix": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 48,
+            "reference_norm": 3.0343284606933594,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "layer_input": {
+            "shape_match": true,
+            "shape": [
+              3,
+              5120
+            ],
+            "candidate_dtype": "torch.bfloat16",
+            "reference_dtype": "torch.bfloat16",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 15360,
+            "reference_norm": 24.975479125976562,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "next_pre": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 12,
+            "reference_norm": 1.6502127647399902,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          }
+        },
+        "candidate_stats": {
+          "projection": {
+            "tilelang_calls": 3,
+            "tilelang_tokens": 3,
+            "fallback_calls": 0,
+            "fallback_reasons": {}
+          },
+          "coefficient": {
+            "fused_calls": 1,
+            "fused_tokens": 3,
+            "fallback_calls": 0,
+            "fallback_reasons": {}
+          }
+        },
+        "C1_T3_vs_concat_T1": {
+          "pre": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 12,
+            "reference_norm": 1.6502127647399902,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "post": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 12,
+            "reference_norm": 1.4756028652191162,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          },
+          "comb": {
+            "shape_match": true,
+            "shape": [
+              3,
+              4,
+              4
+            ],
+            "candidate_dtype": "torch.float32",
+            "reference_dtype": "torch.float32",
+            "exact": true,
+            "different_elements": 0,
+            "numel": 48,
+            "reference_norm": 3.0343284606933594,
+            "difference_norm": 0.0,
+            "relative_l2": 0.0,
+            "zero_norm_handling": "nonzero_reference",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "finite": true
+          }
+        }
+      },
+      "contract": {
+        "projection": "three existing qualified M1 TileLang calls",
+        "coefficient": "one existing fused [3,24] call",
+        "collective_per_row": false,
+        "runtime_guard_modified_for_test": false
+      }
+    }
+  },
+  "regression": {
+    "rank0_status": "PASS",
+    "rank1_status": "PASS",
+    "m1_unchanged": true,
+    "t2_t4_unchanged": true,
+    "t7_exact_fallback": true
+  },
+  "decision": "T3 is qualified for the same opt-in rowwise mHC wrapper contract: P1 per row + one C1 [3,24]. No new kernel or collective."
+}

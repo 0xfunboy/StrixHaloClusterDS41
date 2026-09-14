@@ -17,7 +17,11 @@ REL_L2_MAX = 0.005
 MAX_ABS = 0.125
 ACTIVATION_OUTPUT_TOKENS = 8
 LABELS = {1: "diagnostic-D1", 2: "diagnostic-B2", 4: "diagnostic-B4"}
-CORRUPT_LABELS = {0: "diagnostic-B4-corrupt-first", 2: "diagnostic-B4-corrupt-last"}
+REJECT_CONTROL_SPECS = (
+    {"label": "diagnostic-B2-corrupt-only", "width": 2, "desired_k": 1, "corrupt_index": 0},
+    {"label": "diagnostic-B4-corrupt-first", "width": 4, "desired_k": 3, "corrupt_index": 0},
+    {"label": "diagnostic-B4-corrupt-last", "width": 4, "desired_k": 3, "corrupt_index": 2},
+)
 
 
 def _ints(value):
@@ -204,8 +208,11 @@ def _step_history(request, prompt, oracle, *, rowwise_native_control=False,
         if not isinstance(wall, (int, float)) or not math.isfinite(wall) or wall <= 0:
             errors.append(f"{label} step {index}: invalid step wall")
             continue
-        if (step.get("decode") is True and positions[0] >= len(prompt) + 7 and count == width
-                and len(tokens) == width and len(prefix) + width <= cap):
+        # Dispatch is validated on every decode packet, including shortened
+        # tail packets after rejection.  This is essential for the qualified
+        # T=2/3/4 rowwise controls and prevents nominal B4 from hiding a T=3
+        # fallback at the end of a recovered request.
+        if step.get("decode") is True and positions[0] >= len(prompt) + 7:
             dispatch = step.get("dispatch", {})
             dispatch_contract = (
                 ("native", "native_calls", "triton_fallback_calls", bool(rowwise_native_control)),
@@ -216,12 +223,7 @@ def _step_history(request, prompt, oracle, *, rowwise_native_control=False,
                 counters = dispatch.get(section, {})
                 fallback_count = counters.get(fallback, 0)
                 fallback_reasons = counters.get("fallback_reasons", {})
-                # M1 always uses the promoted path.  For M>1 the frozen
-                # diagnostic controls explicitly decide whether the qualified
-                # M1 primitive is reused rowwise or whether the historical
-                # tokens_not_1 fallback remains required.  This is a dispatch
-                # contract only; numerical/logit gates are unchanged.
-                expected_active = width == 1 or rowwise_active
+                expected_active = count == 1 or (rowwise_active and 1 < count <= 4)
                 if expected_active:
                     nonzero_fallback_reasons = {
                         key: value for key, value in fallback_reasons.items()
@@ -233,6 +235,8 @@ def _step_history(request, prompt, oracle, *, rowwise_native_control=False,
                 elif (counters.get(active, 0) != 0 or fallback_count <= 0 or
                       fallback_reasons.get("tokens_not_1", 0) != fallback_count):
                     errors.append(f"{label} step {index}: {section} block fallback mismatch")
+        if (step.get("decode") is True and positions[0] >= len(prompt) + 7 and count == width
+                and len(tokens) == width and len(prefix) + width <= cap):
             selected.append({"step": index, "position": positions[0], "width": count,
                              "wall_s": wall, "actual_new_tokens": len(tokens),
                              "actual_new_tokens_per_s": len(tokens) / wall,
@@ -251,7 +255,8 @@ def _step_history(request, prompt, oracle, *, rowwise_native_control=False,
 
 def validate_diagnostics(requests, prompt_token_ids, oracle_token_ids, *, vocab_size=None,
                          logits_loader=None, require_reject_controls=True,
-                         rowwise_native_control=False, rowwise_mhc_control=False):
+                         rowwise_native_control=False, rowwise_mhc_control=False,
+                         reject_widths=(2, 4)):
     """Return per-width eligibility. A failing B2/B4 never grants eligibility.
 
     Oracle contains completion tokens only. logits_loader(request) returns the
@@ -305,10 +310,21 @@ def validate_diagnostics(requests, prompt_token_ids, oracle_token_ids, *, vocab_
             result["by_width"][str(width)]["errors"].append("baseline structural/output gate failed")
             result["by_width"][str(width)]["passed"] = False
     if require_reject_controls:
-        for index, label in CORRUPT_LABELS.items():
+        requested_widths = set(reject_widths)
+        if not requested_widths.issubset({2, 4}):
+            result["errors"].append(f"invalid reject widths: {sorted(requested_widths)}")
+        for spec in REJECT_CONTROL_SPECS:
+            if spec["width"] not in requested_widths:
+                continue
+            label = spec["label"]
+            width = spec["width"]
+            desired_k = spec["desired_k"]
+            index = spec["corrupt_index"]
             request = by_label.get(label)
             if request is None:
-                result["reject_controls"][label] = {"passed": False, "errors": ["missing rejection control"]}
+                result["reject_controls"][label] = {
+                    "passed": False, "width": width, "errors": ["missing rejection control"]
+                }
                 continue
             control = _read_request(request, prompt_token_ids, oracle_token_ids, vocab_size, loader)
             control["errors"].extend(_step_history(
@@ -317,34 +333,64 @@ def validate_diagnostics(requests, prompt_token_ids, oracle_token_ids, *, vocab_
                 rowwise_mhc_control=rowwise_mhc_control,
             )["errors"])
             if set(control["rows"]) != expected_positions:
-                control["errors"].append("rejection control has incomplete common-prefix position coverage after recovery")
+                control["errors"].append(
+                    "rejection control has incomplete common-prefix position coverage after recovery"
+                )
             check = _compare(parsed[1], control)
-            if request.get("desired_k") != 3 or request.get("corrupt_draft_index") != index or request.get("mode") != "diagnostic":
+            check["width"] = width
+            if (request.get("desired_k") != desired_k or
+                    request.get("corrupt_draft_index") != index or
+                    request.get("mode") != "diagnostic"):
                 check["errors"].append("wrong rejection control protocol")
             corruption = control["corruptions"]
-            if len(corruption) != 1 or corruption[0]["indices"] != [index + 1] or len(corruption[0]["positions"]) != 4:
-                check["errors"].append("expected exactly one observed width-4 packet with requested changed draft")
+            expected_indices = [index + 1]
+            if (len(corruption) != 1 or corruption[0]["indices"] != expected_indices or
+                    len(corruption[0]["positions"]) != width):
+                check["errors"].append(
+                    f"expected exactly one observed width-{width} packet with requested changed draft"
+                )
             else:
                 changed_position = corruption[0]["position"]
                 check["corruption"] = corruption[0]
                 events = request.get("bridge", {}).get("events", [])
-                observed = [e for e in events if e.get("query_start") == corruption[0]["positions"][0]
-                            and e.get("query_len") == 4]
+                observed = [
+                    e for e in events
+                    if e.get("query_start") == corruption[0]["positions"][0]
+                    and e.get("query_len") == width
+                ]
                 injected = [e for e in events if e.get("injected") is True]
-                if len(injected) != 1 or len(observed) != 1 or observed[0].get("num_rejected") != 3 - index or observed[0].get("num_sampled") != index + 1:
-                    check["errors"].append("missing real greedy rejection count or one-shot proposal injection")
-                prior = [p for p in control["rows"] if corruption[0]["positions"][0] <= p < changed_position]
+                expected_rejected = desired_k - index
+                expected_sampled = index + 1
+                if (len(injected) != 1 or len(observed) != 1 or
+                        observed[0].get("num_rejected") != expected_rejected or
+                        observed[0].get("num_sampled") != expected_sampled):
+                    check["errors"].append(
+                        "missing real greedy rejection count or one-shot proposal injection"
+                    )
+                prior = [
+                    p for p in control["rows"]
+                    if corruption[0]["positions"][0] <= p < changed_position
+                ]
                 continuation = [p for p in control["rows"] if p > changed_position]
                 if len(prior) != index + 1 or len(continuation) < 3:
-                    check["errors"].append("missing unaffected causal rows or post-rejection continuation")
-                # Compare the unchanged causal rows directly with clean B4 too.
+                    check["errors"].append(
+                        "missing unaffected causal rows or post-rejection continuation"
+                    )
+                # Compare unchanged causal rows directly with the clean packet
+                # of the same nominal width.
                 for position in prior:
-                    if position not in parsed[4]["rows"]:
-                        check["errors"].append(f"missing clean B4 causal position {position}")
+                    if position not in parsed[width]["rows"]:
+                        check["errors"].append(
+                            f"missing clean B{width} causal position {position}"
+                        )
                         continue
-                    error = _errors(parsed[4]["rows"][position], control["rows"][position])
-                    if error["rel_l2"] is None or error["rel_l2"] > REL_L2_MAX or error["max_abs"] > MAX_ABS or error["reference_top1"] != error["candidate_top1"]:
-                        check["errors"].append(f"causal clean-B4 comparison failed at {position}")
+                    error = _errors(parsed[width]["rows"][position], control["rows"][position])
+                    if (error["rel_l2"] is None or error["rel_l2"] > REL_L2_MAX or
+                            error["max_abs"] > MAX_ABS or
+                            error["reference_top1"] != error["candidate_top1"]):
+                        check["errors"].append(
+                            f"causal clean-B{width} comparison failed at {position}"
+                        )
             check["passed"] = not check["errors"]
             result["reject_controls"][label] = check
     result["passed"] = (not result["errors"] and all(x["passed"] for x in result["by_width"].values()) and

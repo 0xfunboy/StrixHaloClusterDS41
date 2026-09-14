@@ -394,29 +394,51 @@ def run(llm, run_generation, token_spec, raw, rank, init_s, artifact_identity, e
         dist.all_reduce(agreed, op=dist.ReduceOp.MIN)
         eligible = {b: bool(v) for b, v in zip((2, 4), agreed.cpu().tolist())}
         report["eligible_widths"] = eligible
-        if eligible[4]:
+        clean_eligible = dict(eligible)
+        reject_widths = []
+        if clean_eligible[2]:
+            request("diagnostic-B2-corrupt-only", 1, "diagnostic", corrupt=0)
+            reject_widths.append(2)
+        if clean_eligible[4]:
             request("diagnostic-B4-corrupt-first", 3, "diagnostic", corrupt=0)
             request("diagnostic-B4-corrupt-last", 3, "diagnostic", corrupt=2)
+            reject_widths.append(4)
+        if reject_widths:
             report["state_gate"] = validator.validate_diagnostics(
                 report["requests"], prompt, oracle,
                 vocab_size=config["vocab_size"], require_reject_controls=True,
                 rowwise_native_control=bool(config.get("rowwise_native_control", False)),
                 rowwise_mhc_control=bool(config.get("rowwise_mhc_control", False)),
+                reject_widths=tuple(reject_widths),
             )
-            state_pass = (report["state_gate"]["by_width"]["4"]["passed"]
-                          and bool(report["state_gate"]["reject_controls"])
-                          and all(v["passed"] for v in report["state_gate"]["reject_controls"].values()))
-            state_ok = torch.tensor([int(state_pass)], device="cuda", dtype=torch.int32)
-            dist.all_reduce(state_ok, op=dist.ReduceOp.MIN)
-            eligible[4] = bool(state_ok.item())
-        # Contemporary clean M1 measurement is retained even if block fidelity fails.
-        # Block measures are admitted only after their own clean diagnostic gate.
-        for trial in range(3):
-            widths = [1] + [b for b in (2, 4) if eligible[b]]
-            if trial % 2:
-                widths.reverse()
-            for b in widths:
-                request(f"measure-B{b}-{trial + 1}", b - 1, "measure", cap=32)
+            controls = report["state_gate"]["reject_controls"]
+            local_state = {
+                2: (clean_eligible[2]
+                    and controls.get("diagnostic-B2-corrupt-only", {}).get("passed", False)),
+                4: (clean_eligible[4]
+                    and controls.get("diagnostic-B4-corrupt-first", {}).get("passed", False)
+                    and controls.get("diagnostic-B4-corrupt-last", {}).get("passed", False)),
+            }
+            state_vec = torch.tensor(
+                [int(local_state[2]), int(local_state[4])],
+                device="cuda", dtype=torch.int32,
+            )
+            dist.all_reduce(state_vec, op=dist.ReduceOp.MIN)
+            eligible[2], eligible[4] = [bool(v) for v in state_vec.cpu().tolist()]
+        else:
+            eligible[2] = eligible[4] = False
+        report["state_eligible_widths"] = dict(eligible)
+        # attempt035/036 verification can deliberately stop after state recovery;
+        # existing performance campaigns keep the historical measurement loop.
+        if bool(config.get("state_only", False)):
+            report["measurement_status"] = "SKIPPED_STATE_ONLY"
+        else:
+            for trial in range(3):
+                widths = [1] + [b for b in (2, 4) if eligible[b]]
+                if trial % 2:
+                    widths.reverse()
+                for b in widths:
+                    request(f"measure-B{b}-{trial + 1}", b - 1, "measure", cap=32)
         report["after_requests"] = process_snapshot(rank)
         save("COMPLETE")
         emit("block_verify_complete", report=str(output), eligible_widths=eligible)

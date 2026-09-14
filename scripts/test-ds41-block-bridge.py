@@ -76,6 +76,21 @@ class ReplayTest(unittest.TestCase):
         self.assertFalse(bridge.get_state().fidelity_failed)
         self.assertEqual(plan()[0], [12, 0, 0])
 
+    def test_b2_single_draft_rejection_and_resume(self):
+        bridge.configure(list(range(50)), 4, 1, 8, 0)
+        row, event = plan(start=10)
+        self.assertEqual(row, [13, 0, 0])
+        self.assertTrue(event["injected"])
+        self.assertEqual(event["desired_k"], 1)
+        # The one corrupted draft is rejected; the target anchor is retained
+        # and the next proposal resumes from the corrected oracle position.
+        row, event = plan(start=11, tokens=[11, 13], sampled=1, rejected=1)
+        self.assertEqual(row, [13, 0, 0])
+        self.assertEqual(event["num_sampled"], 1)
+        self.assertEqual(event["num_rejected"], 1)
+        self.assertFalse(event["injected"])
+        self.assertEqual(event["prefix_errors"], [])
+
     def test_scheduler_only_truncation_unknown_request_and_exhaustion(self):
         value = Drafts(["r", "unknown"], [[-1, -1, -1], [-1, -1, -1]])
         for k in (0, 1, 3):

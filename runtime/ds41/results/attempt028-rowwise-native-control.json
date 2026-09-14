@@ -1,0 +1,24 @@
+{
+  "schema": "ds41-attempt028-rowwise-native-control-v1",
+  "status": "CAUSAL_NEGATIVE_FIDELITY_FAIL",
+  "source_commit": "b17e2852f414376020b95c26fd71d3d2c33aa14c",
+  "component_gate": {
+    "node01": "PASS",
+    "node02": "PASS",
+    "m2_rowwise_vs_concatenated_m1_rel_l2": 0.0,
+    "m4_rowwise_vs_concatenated_m1_rel_l2": 0.0,
+    "m1_native_vs_triton_rel_l2": 0.022309255735774712,
+    "m16_fallback_vs_triton_rel_l2": 0.0
+  },
+  "fidelity": {
+    "D1": {"passed": true, "compared_positions": 56, "max_rel_l2": 0.0, "max_abs": 0.0},
+    "B2": {"passed": false, "first_bad_position": 42, "first_rel_l2": 0.09636353562599285, "first_max_abs": 1.875, "first_top1": 297, "compared_positions": 8},
+    "B4": {"passed": false, "first_bad_position": 42, "first_rel_l2": 0.09724620056137186, "first_max_abs": 1.875, "first_top1": 297, "compared_positions": 24, "max_rel_l2": 0.10908273902417093, "max_abs": 2.490234375}
+  },
+  "eligible_widths": {"2": false, "4": false},
+  "reject_partial_rollback": "N/A",
+  "block_timing": "N/A",
+  "causal_conclusion": "Exact native-M1 routed MoE per packet row does not remove the first position42 drift; move upstream to FFN input/mHC/attention boundary localization.",
+  "cleanup": {"node01": "OFF_VERIFIED", "node02": "OFF_VERIFIED", "owner": "NONE/OFF", "glm": "OFF"},
+  "raw": "reports/DS41-Q2-001/attempt028/"
+}

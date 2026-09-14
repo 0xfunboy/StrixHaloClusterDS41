@@ -45,6 +45,9 @@ type Config struct {
 	ChatMaxOutput      int                `json:"chat_max_output_tokens,omitempty"`
 	ThinkingBudget     bool               `json:"thinking_budget_supported,omitempty"`
 	ToolCalls          bool               `json:"tool_calls_supported,omitempty"`
+	LifecycleCommand   string             `json:"lifecycle_command,omitempty"`
+	LifecyclePreset    string             `json:"lifecycle_preset,omitempty"`
+	ClusterConfigPath  string             `json:"cluster_config_path,omitempty"`
 }
 
 func loadConfig(path string) (Config, error) {
@@ -71,6 +74,12 @@ func loadConfig(path string) (Config, error) {
 	}
 	if c.ChatDefaultOutput > 0 && c.ChatMaxOutput > 0 && c.ChatDefaultOutput > c.ChatMaxOutput {
 		return c, errors.New("default output exceeds max output")
+	}
+	if c.LifecycleCommand != "" && (!filepath.IsAbs(c.LifecycleCommand) || filepath.Clean(c.LifecycleCommand) != c.LifecycleCommand) {
+		return c, errors.New("lifecycle_command must be an absolute clean path")
+	}
+	if c.LifecycleCommand != "" && c.LifecyclePreset == "" {
+		return c, errors.New("lifecycle_preset required with lifecycle_command")
 	}
 	return c, nil
 }

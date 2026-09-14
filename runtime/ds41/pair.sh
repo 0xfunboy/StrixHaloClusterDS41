@@ -161,7 +161,8 @@ start_unit_local() {
   systemd-run --user --unit=ds41-rank0 --collect \
     --setenv="DS41_OWNER_EPOCH=$epoch" --setenv="DS41_OWNER_NONCE=$nonce" \
     --setenv="DS41_RUN_MODE=${DS41_RUN_MODE:-api}" --setenv="DS41_ATTEMPT_NAME=${DS41_ATTEMPT_NAME:-}" \
-    --setenv="DS41_ENGRAM_RANDOM_ADVICE=${DS41_ENGRAM_RANDOM_ADVICE:-1}" \
+    --setenv="DS41_ROOT=$ROOT" --setenv="DS41_SERVING_PRESET=${DS41_SERVING_PRESET:-}" --setenv="DS41_SERVING_RELEASE_ID=${DS41_SERVING_RELEASE_ID:-}" \
+    --setenv="DS41_REAL_DSPARK_K=${DS41_REAL_DSPARK_K:-}" --setenv="DS41_ENGRAM_RANDOM_ADVICE=${DS41_ENGRAM_RANDOM_ADVICE:-1}" \
     --property="RuntimeMaxSec=$RUNTIME_MAX_SEC" --property="TimeoutStopSec=$STOP_TIMEOUT_SEC" --property=KillMode=control-group --property=Restart=no \
     --property="StandardOutput=append:$log" --property="StandardError=append:$log" \
     bash "$ROOT/runtime/ds41/launch-node.sh" 0 10.55.0.1 "$epoch" "$port"
@@ -172,7 +173,8 @@ start_unit_peer() {
   peer systemd-run --user --unit=ds41-rank1 --collect \
     --setenv="DS41_OWNER_EPOCH=$epoch" --setenv="DS41_OWNER_NONCE=$nonce" \
     --setenv="DS41_RUN_MODE=${DS41_RUN_MODE:-api}" --setenv="DS41_ATTEMPT_NAME=${DS41_ATTEMPT_NAME:-}" \
-    --setenv="DS41_ENGRAM_RANDOM_ADVICE=${DS41_ENGRAM_RANDOM_ADVICE:-1}" \
+    --setenv="DS41_ROOT=$ROOT" --setenv="DS41_SERVING_PRESET=${DS41_SERVING_PRESET:-}" --setenv="DS41_SERVING_RELEASE_ID=${DS41_SERVING_RELEASE_ID:-}" \
+    --setenv="DS41_REAL_DSPARK_K=${DS41_REAL_DSPARK_K:-}" --setenv="DS41_ENGRAM_RANDOM_ADVICE=${DS41_ENGRAM_RANDOM_ADVICE:-1}" \
     --property="RuntimeMaxSec=$RUNTIME_MAX_SEC" --property="TimeoutStopSec=$STOP_TIMEOUT_SEC" --property=KillMode=control-group --property=Restart=no \
     --property="StandardOutput=append:$log" --property="StandardError=append:$log" \
     bash "$ROOT/runtime/ds41/launch-node.sh" 1 10.55.0.2 "$epoch" "$port"

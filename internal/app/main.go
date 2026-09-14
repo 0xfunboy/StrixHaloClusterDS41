@@ -24,22 +24,25 @@ import (
 )
 
 type App struct {
-	publicURL     string
-	cfg           Config
-	client        *http.Client
-	mu            sync.Mutex
-	tasks         map[string]*Task
-	admission     chan struct{}
-	journal       Journal
-	token         string
-	tokenMu       sync.RWMutex
-	retiredTokens []string
-	settingsMu    sync.Mutex
-	apiSettings   atomic.Pointer[APISettings]
-	lastMetrics   Metrics
-	preferred     atomic.Value
-	closing       atomic.Bool
-	attachmentMu  sync.Mutex
+	publicURL       string
+	cfg             Config
+	client          *http.Client
+	mu              sync.Mutex
+	tasks           map[string]*Task
+	admission       chan struct{}
+	journal         Journal
+	token           string
+	tokenMu         sync.RWMutex
+	retiredTokens   []string
+	settingsMu      sync.Mutex
+	apiSettings     atomic.Pointer[APISettings]
+	lastMetrics     Metrics
+	preferred       atomic.Value
+	closing         atomic.Bool
+	attachmentMu    sync.Mutex
+	lifecycleMu     sync.Mutex
+	lifecycleAction string
+	lifecycleError  string
 }
 
 func newApp(c Config) (*App, error) {
@@ -140,6 +143,7 @@ func (a *App) routes() http.Handler {
 	a.setWorkspaceToolCapability(a.cfg.ToolCalls, reason)
 	a.registerOptionsRoutes(mux)
 	a.registerSettingsRoutes(mux)
+	a.registerLifecycleRoutes(mux)
 	a.registerAttachmentRoutes(mux)
 	registerCatalogRoutes(a, mux)
 	a.registerOperationRoutes(mux)
@@ -147,6 +151,11 @@ func (a *App) routes() http.Handler {
 	a.registerConversationRoutes(mux)
 	mux.Handle("/", publicWebHandler(a.publicURL))
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+		if a.cfg.LifecycleCommand != "" {
+			l := a.lifecycleStatus(r.Context())
+			jsonReply(w, 200, map[string]any{"status": "ok", "gateway": "ok", "model_lifecycle": l})
+			return
+		}
 		h := a.health(r.Context())
 		code := 200
 		if h["status"] != "ok" {
@@ -168,7 +177,7 @@ func (a *App) routes() http.Handler {
 			}
 		}
 		a.mu.Unlock()
-		jsonReply(w, 200, map[string]any{"model": a.cfg.Model, "profile": a.preferred.Load(), "profiles": a.cfg.Profiles, "profile_status": a.cfg.ProfileStatus, "active_request": active, "health": a.health(r.Context()), "metrics": m, "acceptance": m.Acceptance, "context_limit": a.cfg.MaxContextTokens, "nodes": a.nodeStats(r.Context())})
+		jsonReply(w, 200, map[string]any{"model": a.cfg.Model, "profile": a.preferred.Load(), "profiles": a.cfg.Profiles, "profile_status": a.cfg.ProfileStatus, "active_request": active, "health": a.health(r.Context()), "lifecycle": a.lifecycleStatus(r.Context()), "metrics": m, "acceptance": m.Acceptance, "context_limit": a.cfg.MaxContextTokens, "nodes": a.nodeStats(r.Context())})
 	})
 	mux.HandleFunc("GET /metrics", func(w http.ResponseWriter, r *http.Request) {
 		if !a.authorized(w, r) {
@@ -333,6 +342,10 @@ func (a *App) proxyChat(w http.ResponseWriter, r *http.Request) {
 // credential. Once admitted it must survive unrelated API-token rotation.
 func (a *App) proxyAuthorizedChat(w http.ResponseWriter, r *http.Request) {
 	started := time.Now()
+	if e := a.requireModelReady(r.Context()); e != nil {
+		jsonReply(w, 503, map[string]string{"error": e.Error(), "code": "model_not_ready"})
+		return
+	}
 	var p map[string]any
 	if e := decodeBody(w, r, &p); e != nil {
 		jsonReply(w, 400, map[string]string{"error": e.Error()})

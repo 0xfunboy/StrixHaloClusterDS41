@@ -7,7 +7,7 @@ rank=$1 host_ip=$2 epoch=$3 api_port=$4
 [[ "$rank" == 0 || "$rank" == 1 ]] || exit 2
 [[ "$(hostname)" == "0$((rank+1))-EVO-X3" ]] || { echo 'host/rank mismatch' >&2; exit 2; }
 [[ "$epoch" =~ ^[0-9]{10,20}$ && "$api_port" =~ ^[0-9]{4,5}$ ]] || exit 2
-ROOT=/home/funboy/StrixHaloClusterDS41
+ROOT=${DS41_ROOT:-/home/funboy/StrixHaloClusterDS41}
 ENGINE=/home/funboy/StrixHaloClusterGLM/.engine
 VENV="$ENGINE/venv"
 VLLM_SOURCE="$ROOT/.vendor/vllm-dsv41"
@@ -57,6 +57,13 @@ export MASTER_ADDR=10.55.0.1 MASTER_PORT="${DS41_MASTER_PORT:-29741}"
 cd "$ROOT"
 "$VENV/bin/python" -m runtime.ds41.artifact_identity verify-fast --rank "$rank"
 run_mode=${DS41_RUN_MODE:-api}
+serving_preset=${DS41_SERVING_PRESET:-}
+dspark_k=${DS41_REAL_DSPARK_K:-}
+if [[ -n "$serving_preset" ]]; then
+  [[ "$run_mode" == api && "$serving_preset" == dspark-k2-gfx1151 && "$dspark_k" == 2 ]] || { echo 'invalid DS41 serving preset/K'; exit 2; }
+  export DS41_DSPARK_MXFP4_BF16=1 DS41_NATIVE_HIP_MOE_ROWWISE=1 DS41_MHC_ROWWISE_BLOCK=1 DS41_ATTN_WOB_LLMM1=0
+  [[ -d /home/funboy/models/ds41/dspark-v41-mtp-2bc89ac ]] || { echo 'missing DSpark sidecar'; exit 2; }
+fi
 case "$run_mode" in
   offline)
     exec "$VENV/bin/python" -m torch.distributed.run \
@@ -65,22 +72,27 @@ case "$run_mode" in
       -m runtime.ds41.offline_spmd
     ;;
   api)
+    api_args=(
+      --model "$MODEL_FILE" --hf-config-path "$MODEL_DIR" --tokenizer "$MODEL_DIR"
+      --served-model-name DeepSeek-V4.1-Flash-MixedQ2-DSpark-K2
+      --host "$host_ip" --port "$api_port" --api-server-count 1
+      --tensor-parallel-size 2 --pipeline-parallel-size 1 --enable-expert-parallel
+      --distributed-executor-backend external_launcher --language-model-only
+      --config-format gguf --load-format gguf --quantization gguf --dtype bfloat16
+      --attention-backend ROCM_FLASHMLA_SPARSE_DSV4
+      --max-model-len 4096 --block-size 128 --max-num-seqs 1 --max-num-batched-tokens 1024
+      --kv-cache-memory-bytes 1073741824 --kv-cache-dtype auto
+      --no-enable-prefix-caching --enable-chunked-prefill --no-async-scheduling
+      --enforce-eager --seed 1 --generation-config vllm --enable-per-request-metrics
+    )
+    if [[ -n "$serving_preset" ]]; then
+      spec_json='{"method":"dspark","model":"/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac","num_speculative_tokens":2,"quantization":"fp8","enable_adaptive_verification":false,"draft_tensor_parallel_size":2,"draft_load_config":{"load_format":"safetensors","safetensors_load_strategy":"lazy"},"draft_sample_method":"greedy","rejection_sample_method":"standard"}'
+      api_args+=(--speculative-config "$spec_json" --per-request-spec-decode-metrics detailed)
+    fi
     exec "$VENV/bin/python" -m torch.distributed.run \
       --nnodes=2 --nproc-per-node=1 --node-rank="$rank" \
       --master-addr="$MASTER_ADDR" --master-port="$MASTER_PORT" \
-      -m runtime.ds41.api_server \
-      --model "$MODEL_FILE" --hf-config-path "$MODEL_DIR" --tokenizer "$MODEL_DIR" \
-      --served-model-name DeepSeek-V4.1-Flash-MixedQ2-Engram2 \
-      --host "$host_ip" --port "$api_port" --api-server-count 1 \
-      --tensor-parallel-size 2 --pipeline-parallel-size 1 \
-      --enable-expert-parallel \
-      --distributed-executor-backend external_launcher --language-model-only \
-      --config-format gguf --load-format gguf --quantization gguf --dtype bfloat16 \
-      --attention-backend ROCM_FLASHMLA_SPARSE_DSV4 \
-      --max-model-len 4096 --block-size 128 --max-num-seqs 1 --max-num-batched-tokens 1024 \
-      --kv-cache-memory-bytes 1073741824 --kv-cache-dtype auto \
-      --no-enable-prefix-caching --enable-chunked-prefill --no-async-scheduling \
-      --enforce-eager --seed 1 --generation-config vllm --enable-per-request-metrics
+      -m runtime.ds41.api_server "${api_args[@]}"
     ;;
   *)
     echo "invalid DS41_RUN_MODE=$run_mode" >&2

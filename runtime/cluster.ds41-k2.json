@@ -1,0 +1,12 @@
+{
+  "state_dir": "/home/funboy/.local/state/haloclu-ds41/cluster",
+  "engine_root": "/home/funboy/StrixHaloClusterGLM/.engine",
+  "launcher": "/home/funboy/.local/share/haloclu-ds41/current/runtime/ds41/launch-node.sh",
+  "manifest": "/home/funboy/.local/share/haloclu-ds41/current/runtime/ds41/artifact.json",
+  "remote_ssh": "02-evo-x3-tb",
+  "rank_urls": ["http://10.55.0.1:18220", "http://10.55.0.2:18220"],
+  "master_port": 29741,
+  "frontend_listen": "127.0.0.1:18221",
+  "legacy_owner": "/home/funboy/.local/state/strix-cluster/owner.json",
+  "load_timeout_seconds": 1200
+}

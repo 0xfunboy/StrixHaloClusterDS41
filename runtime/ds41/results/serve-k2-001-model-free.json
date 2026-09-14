@@ -1,0 +1,22 @@
+{
+  "schema": "ds41-serve-k2-model-free-v1",
+  "status": "PASS",
+  "gateway": "127.0.0.1:18222",
+  "paired_backend": "127.0.0.1:18221",
+  "rank_api_port": 18220,
+  "preset": "dspark-k2-gfx1151",
+  "model": "DeepSeek-V4.1-Flash-MixedQ2-DSpark-K2",
+  "gates": {
+    "lifecycle_auth_off_no_autoload": "PASS",
+    "explicit_on_off_and_confirmation": "PASS",
+    "concurrent_transition_rejected": "PASS",
+    "paired_cancel_drain_shutdown_existing_tests": "PASS",
+    "browser_auth_existing_tests": "PASS",
+    "frontend_unit_tests": "40/40 PASS",
+    "shell_syntax": "PASS",
+    "python_syntax": "PASS",
+    "binary_build_existing_offline_toolchain": "PASS"
+  },
+  "full_go_suite_note": "Not a serving gate: existing sandbox-dependent tests fail in this execution harness because bubblewrap cannot create NETLINK_ROUTE; unrelated pre-existing product tests also remain outside this bounded adapter. Focused lifecycle/paired/auth tests pass.",
+  "no_model_load": true
+}

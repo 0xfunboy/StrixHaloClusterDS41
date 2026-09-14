@@ -328,7 +328,14 @@ function nodeCard(node, index) {
 }
 
 function renderHealth(health, status) {
-  const healthState = healthStatus(status?.health, healthStatus(health));
+  const lifecycle = status?.lifecycle || health?.model_lifecycle || { state: 'UNMANAGED' };
+  const lifecycleState = String(lifecycle.state || 'UNKNOWN').toUpperCase();
+  $('cluster-lifecycle').textContent = lifecycleState;
+  $('cluster-preset').textContent = lifecycle.preset || '—';
+  $('cluster-lifecycle-error').textContent = lifecycle.reason || lifecycle.error || lifecycle.last_error || '';
+  $('model-on').disabled = !state.authenticated || lifecycleState !== 'OFF';
+  $('model-off').disabled = !state.authenticated || !['READY', 'STARTING', 'ERROR'].includes(lifecycleState);
+  const healthState = lifecycleState === 'READY' ? 'ok' : lifecycleState === 'OFF' ? 'off' : lifecycleState === 'RESEARCH_BUSY' ? 'busy' : healthStatus(status?.health, healthStatus(health));
   setBadge($('cluster-health'), healthState);
   $('cluster-model').textContent = status?.model || state.model || 'Model not reported';
   $('model-pill').textContent = status?.model || state.model || 'Server connected';
@@ -363,11 +370,14 @@ async function refreshHealth(interactive = false) {
     syncModelsAuthentication();
     state.model = status?.model || models?.data?.[0]?.id || '';
     renderHealth(health, status);
-    const healthState = healthStatus(status?.health, healthStatus(health));
-    const bad = classifyStatus(healthState) === 'bad';
+    const lifecycleState = String((status?.lifecycle || health?.model_lifecycle || {}).state || 'UNMANAGED').toUpperCase();
+    const healthState = lifecycleState === 'READY' ? 'ok' : healthStatus(status?.health, healthStatus(health));
+    const bad = classifyStatus(healthState) === 'bad' && lifecycleState !== 'OFF' && lifecycleState !== 'RESEARCH_BUSY';
     $('connection-label').textContent = bad ? "Engine needs attention" : "Local API connected";
     $('connection-dot').className = `status-dot ${bad ? 'bad' : 'good'}`;
-    $('connection-result').textContent = bad ? "API reachable; check cluster health before generating." : "Authenticated: chat and workspace controls are available.";
+    $('connection-result').textContent = lifecycleState === 'OFF' ? "Authenticated gateway ready; model is OFF until explicit ON."
+      : lifecycleState === 'RESEARCH_BUSY' ? "Authenticated gateway ready; DS41 pair is occupied by research."
+      : bad ? "API reachable; check cluster health before generating." : "Authenticated: chat and workspace controls are available.";
     if (restoredAuthentication && state.activeTab === 'models') refreshModels();
     if (interactive) notice(bad ? 'The API is reachable, but the engine reports an unhealthy state.' : '', bad ? 'bad' : 'neutral');
   } catch (error) {
@@ -452,6 +462,24 @@ function updateDraftMetrics(metrics) {
   $('chat-step-tokens').textContent = draft.length === null ? '—' : number(draft.length, 2);
   $('chat-acceptance').title = 'Engine-reported fraction of proposed draft tokens accepted. Not a measure of answer quality.';
   $('chat-step-tokens').title = 'Engine-reported mean acceptance length, including the target bonus token. Fewer accepted tokens per step can lower decode TPS.';
+}
+
+async function modelLifecycleAction(action) {
+  if (!state.authenticated || !['on', 'off'].includes(action)) return;
+  const question = action === 'on'
+    ? 'Load the qualified DS41 K2 model on both nodes?'
+    : 'Drain active DS41 work and stop the model on both nodes?';
+  if (!confirm(question)) return;
+  $('model-on').disabled = true;
+  $('model-off').disabled = true;
+  try {
+    await request(`/v1/lifecycle/${action}`, { method: 'POST', body: { confirm: true }, timeout: 15000 });
+    notice(`Model ${action.toUpperCase()} accepted; lifecycle state will update while the gateway stays online.`);
+    setTimeout(() => refreshHealth(), 500);
+  } catch (error) {
+    notice(error.message, 'bad');
+    refreshHealth();
+  }
 }
 
 async function sendChat(event) {
@@ -1340,6 +1368,8 @@ $('forget-token').addEventListener('click', async () => {
 });
 $('refresh-health').addEventListener('click', () => refreshHealth(true));
 $('refresh-cluster').addEventListener('click', () => refreshHealth(true));
+$('model-on').addEventListener('click', () => modelLifecycleAction('on'));
+$('model-off').addEventListener('click', () => modelLifecycleAction('off'));
 $('chat-form').addEventListener('submit', sendChat);
 $('chat-input').addEventListener('keydown', event => {
   if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); $('chat-form').requestSubmit(); }

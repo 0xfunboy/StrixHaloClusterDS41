@@ -1,0 +1,17 @@
+[Unit]
+Description=HaloClu DS41 K2 gateway and frontend
+Requires=ds41-haloclu-pair.service
+After=ds41-haloclu-pair.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/funboy/.local/share/haloclu-ds41/current
+ExecStart=/home/funboy/.local/share/haloclu-ds41/current/bin/strixglm serve --config /home/funboy/.local/share/haloclu-ds41/current/config.ds41-k2-serving.json
+UMask=0077
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=650
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

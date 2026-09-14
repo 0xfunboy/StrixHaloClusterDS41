@@ -1,0 +1,43 @@
+{
+  "schema": "ds41-serving-release-v1",
+  "name": "ds41-k2-serving",
+  "model": "DeepSeek-V4.1-Flash-MixedQ2-DSpark-K2",
+  "preset": "runtime/ds41/presets/dspark-k2-gfx1151.json",
+  "qualified_evidence": "runtime/ds41/results/attempt042-dspark-k2-vs-k1-final.json",
+  "target_artifact": "runtime/ds41/artifact.json",
+  "mtp_sidecar": "/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac",
+  "rank_api_ports": [18220, 18220],
+  "paired_backend": "127.0.0.1:18221",
+  "gateway": "127.0.0.1:18222",
+  "master_port": 29741,
+  "context_limit": 4096,
+  "max_output_tokens": 1024,
+  "runtime": {
+    "pair_controller": "runtime/ds41/pair.sh",
+    "launcher": "runtime/ds41/launch-node.sh",
+    "api_entrypoint": "runtime/ds41/api_server.py",
+    "lifecycle": "runtime/ds41/serve-controller.sh",
+    "paired_coordinator": "internal/app/paired.go",
+    "gateway_config": "config.ds41-k2-serving.json",
+    "cluster_config": "runtime/cluster.ds41-k2.json"
+  },
+  "services": [
+    "deploy/ds41-haloclu-pair.service",
+    "deploy/ds41-haloclu-gateway.service"
+  ],
+  "numerics": {
+    "dspark_k": 2,
+    "adaptive_verification": false,
+    "tensor_parallel": 2,
+    "expert_parallel": true,
+    "wo_b_llmm1": false,
+    "preserve_qualified_target_math": true
+  },
+  "rollback_chain": [
+    "runtime/ds41/presets/dspark-k1-gfx1151.json",
+    "M1 via speculative_config=null and documented K1 rollback"
+  ],
+  "autoload_on_gateway_start": false,
+  "serving_runtime_max": "infinity",
+  "weights_copied_into_release": false
+}

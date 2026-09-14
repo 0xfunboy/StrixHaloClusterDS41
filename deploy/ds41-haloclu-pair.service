@@ -1,0 +1,19 @@
+[Unit]
+Description=HaloClu DS41 K2 paired OpenAI coordinator
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/funboy/.local/share/haloclu-ds41/current
+ExecStart=/home/funboy/.local/share/haloclu-ds41/current/bin/strixglm cluster --config /home/funboy/.local/share/haloclu-ds41/current/config.ds41-k2-serving.json serve-pair
+KillMode=control-group
+KillSignal=SIGTERM
+TimeoutStopSec=650
+Restart=on-failure
+RestartSec=2
+UMask=0077
+NoNewPrivileges=true
+MemoryMax=1G
+
+[Install]
+WantedBy=default.target

@@ -157,7 +157,8 @@ def _compare(reference, candidate):
             "comparisons": comparisons}
 
 
-def _step_history(request, prompt, oracle):
+def _step_history(request, prompt, oracle, *, rowwise_native_control=False,
+                  rowwise_mhc_control=False):
     errors, selected, emitted = [], [], []
     label = request.get("label", "<missing>")
     cap = 32 if request.get("mode") == "measure" else 64
@@ -206,15 +207,31 @@ def _step_history(request, prompt, oracle):
         if (step.get("decode") is True and positions[0] >= len(prompt) + 7 and count == width
                 and len(tokens) == width and len(prefix) + width <= cap):
             dispatch = step.get("dispatch", {})
-            for section, active, fallback in (("native", "native_calls", "triton_fallback_calls"),
-                                               ("coefficient", "fused_calls", "fallback_calls"),
-                                               ("projection", "tilelang_calls", "fallback_calls")):
+            dispatch_contract = (
+                ("native", "native_calls", "triton_fallback_calls", bool(rowwise_native_control)),
+                ("coefficient", "fused_calls", "fallback_calls", bool(rowwise_mhc_control)),
+                ("projection", "tilelang_calls", "fallback_calls", bool(rowwise_mhc_control)),
+            )
+            for section, active, fallback, rowwise_active in dispatch_contract:
                 counters = dispatch.get(section, {})
-                if width == 1:
-                    if counters.get(active, 0) <= 0 or counters.get(fallback, 0) != 0:
-                        errors.append(f"{label} step {index}: {section} M1 dispatch mismatch")
-                elif (counters.get(active, 0) != 0 or counters.get(fallback, 0) <= 0 or
-                      counters.get("fallback_reasons", {}).get("tokens_not_1", 0) != counters.get(fallback)):
+                fallback_count = counters.get(fallback, 0)
+                fallback_reasons = counters.get("fallback_reasons", {})
+                # M1 always uses the promoted path.  For M>1 the frozen
+                # diagnostic controls explicitly decide whether the qualified
+                # M1 primitive is reused rowwise or whether the historical
+                # tokens_not_1 fallback remains required.  This is a dispatch
+                # contract only; numerical/logit gates are unchanged.
+                expected_active = width == 1 or rowwise_active
+                if expected_active:
+                    nonzero_fallback_reasons = {
+                        key: value for key, value in fallback_reasons.items()
+                        if isinstance(value, int) and value != 0
+                    }
+                    if (counters.get(active, 0) <= 0 or fallback_count != 0 or
+                            nonzero_fallback_reasons):
+                        errors.append(f"{label} step {index}: {section} active dispatch mismatch")
+                elif (counters.get(active, 0) != 0 or fallback_count <= 0 or
+                      fallback_reasons.get("tokens_not_1", 0) != fallback_count):
                     errors.append(f"{label} step {index}: {section} block fallback mismatch")
             selected.append({"step": index, "position": positions[0], "width": count,
                              "wall_s": wall, "actual_new_tokens": len(tokens),
@@ -233,7 +250,8 @@ def _step_history(request, prompt, oracle):
 
 
 def validate_diagnostics(requests, prompt_token_ids, oracle_token_ids, *, vocab_size=None,
-                         logits_loader=None, require_reject_controls=True):
+                         logits_loader=None, require_reject_controls=True,
+                         rowwise_native_control=False, rowwise_mhc_control=False):
     """Return per-width eligibility. A failing B2/B4 never grants eligibility.
 
     Oracle contains completion tokens only. logits_loader(request) returns the
@@ -268,7 +286,11 @@ def validate_diagnostics(requests, prompt_token_ids, oracle_token_ids, *, vocab_
             parsed[width] = {"errors": [f"missing {label}"], "rows": {}, "corruptions": [], "packet_widths": []}
             continue
         parsed[width] = _read_request(request, prompt_token_ids, oracle_token_ids, vocab_size, loader)
-        parsed[width]["errors"].extend(_step_history(request, prompt_token_ids, oracle_token_ids)["errors"])
+        parsed[width]["errors"].extend(_step_history(
+            request, prompt_token_ids, oracle_token_ids,
+            rowwise_native_control=rowwise_native_control,
+            rowwise_mhc_control=rowwise_mhc_control,
+        )["errors"])
         if request.get("desired_k") != width - 1 or request.get("mode") != "diagnostic" or request.get("corrupt_draft_index") is not None:
             parsed[width]["errors"].append(f"{label}: wrong diagnostic request protocol")
         if parsed[width]["corruptions"]:
@@ -289,7 +311,11 @@ def validate_diagnostics(requests, prompt_token_ids, oracle_token_ids, *, vocab_
                 result["reject_controls"][label] = {"passed": False, "errors": ["missing rejection control"]}
                 continue
             control = _read_request(request, prompt_token_ids, oracle_token_ids, vocab_size, loader)
-            control["errors"].extend(_step_history(request, prompt_token_ids, oracle_token_ids)["errors"])
+            control["errors"].extend(_step_history(
+                request, prompt_token_ids, oracle_token_ids,
+                rowwise_native_control=rowwise_native_control,
+                rowwise_mhc_control=rowwise_mhc_control,
+            )["errors"])
             if set(control["rows"]) != expected_positions:
                 control["errors"].append("rejection control has incomplete common-prefix position coverage after recovery")
             check = _compare(parsed[1], control)
@@ -339,9 +365,13 @@ def validate_documents(documents, *, logits_loaders=None):
     reports, errors, performance = [], [], []
     for rank, doc in enumerate(documents):
         config = doc.get("config", {})
-        result = validate_diagnostics(doc.get("requests", []), config.get("prompt_token_ids"),
-                                      config.get("oracle_token_ids"), vocab_size=config.get("vocab_size"),
-                                      logits_loader=(logits_loaders[rank] if logits_loaders else None))
+        result = validate_diagnostics(
+            doc.get("requests", []), config.get("prompt_token_ids"),
+            config.get("oracle_token_ids"), vocab_size=config.get("vocab_size"),
+            logits_loader=(logits_loaders[rank] if logits_loaders else None),
+            rowwise_native_control=bool(config.get("rowwise_native_control", False)),
+            rowwise_mhc_control=bool(config.get("rowwise_mhc_control", False)),
+        )
         reports.append(result)
         if doc.get("status") != "COMPLETE" or doc.get("rank") != rank:
             errors.append(f"rank {rank}: not COMPLETE or incorrect rank identity")
@@ -361,7 +391,11 @@ def validate_documents(documents, *, logits_loaders=None):
                     c["passed"] for c in result["reject_controls"].values())
             if not eligible:
                 errors.append(f"rank {rank} {label}: measurement taken despite failed width/state gate")
-            history = _step_history(request, config.get("prompt_token_ids", []), config.get("oracle_token_ids", []))
+            history = _step_history(
+                request, config.get("prompt_token_ids", []), config.get("oracle_token_ids", []),
+                rowwise_native_control=bool(config.get("rowwise_native_control", False)),
+                rowwise_mhc_control=bool(config.get("rowwise_mhc_control", False)),
+            )
             errors.extend(f"rank {rank}: {error}" for error in history["errors"])
             selected = history["selected_steps"]
             output = request.get("output", {})

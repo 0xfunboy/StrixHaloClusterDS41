@@ -382,7 +382,11 @@ def run(llm, run_generation, token_spec, raw, rank, init_s, artifact_identity, e
         request("warmup-B4-excluded", 3, "warmup")
         request("diagnostic-B4", 3, "diagnostic")
         preliminary = validator.validate_diagnostics(
-            report["requests"], prompt, oracle, vocab_size=config["vocab_size"], require_reject_controls=False)
+            report["requests"], prompt, oracle,
+            vocab_size=config["vocab_size"], require_reject_controls=False,
+            rowwise_native_control=bool(config.get("rowwise_native_control", False)),
+            rowwise_mhc_control=bool(config.get("rowwise_mhc_control", False)),
+        )
         report["diagnostic_gate"] = preliminary
         # All ranks must agree on branch selection before a collective-bearing request.
         flags = [int(preliminary["by_width"][str(b)]["passed"]) for b in (2, 4)]
@@ -394,7 +398,11 @@ def run(llm, run_generation, token_spec, raw, rank, init_s, artifact_identity, e
             request("diagnostic-B4-corrupt-first", 3, "diagnostic", corrupt=0)
             request("diagnostic-B4-corrupt-last", 3, "diagnostic", corrupt=2)
             report["state_gate"] = validator.validate_diagnostics(
-                report["requests"], prompt, oracle, vocab_size=config["vocab_size"], require_reject_controls=True)
+                report["requests"], prompt, oracle,
+                vocab_size=config["vocab_size"], require_reject_controls=True,
+                rowwise_native_control=bool(config.get("rowwise_native_control", False)),
+                rowwise_mhc_control=bool(config.get("rowwise_mhc_control", False)),
+            )
             state_pass = (report["state_gate"]["by_width"]["4"]["passed"]
                           and bool(report["state_gate"]["reject_controls"])
                           and all(v["passed"] for v in report["state_gate"]["reject_controls"].values()))

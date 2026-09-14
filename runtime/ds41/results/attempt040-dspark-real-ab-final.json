@@ -1,0 +1,953 @@
+{
+  "schema": "ds41-attempt040-real-dspark-final-v1",
+  "status": "PASS",
+  "decision": "QUALIFY_EXPERIMENTAL_DSPARK_K1_PRESET",
+  "production_default_changed": false,
+  "execution_order": [
+    "attempt039 B DSpark K1",
+    "attempt040 A M1"
+  ],
+  "separate_loads": true,
+  "alternated": false,
+  "same_load": false,
+  "integration_source_commit": "10d29383b4aabfbd4e91d917546cf3ceb39c577d",
+  "b039_evidence_commit": "5360caee018799a67f51cbdd51cc7a4a1c276028",
+  "A040_M1": {
+    "runs": [
+      {
+        "trial": 1,
+        "tps": 11.67359908311818,
+        "wall_s": 15.710675790003734,
+        "ttft_s": 4.831300735473633,
+        "tokens": 128,
+        "finish_reason": "length"
+      },
+      {
+        "trial": 2,
+        "tps": 12.593954919897858,
+        "wall_s": 14.928172466985416,
+        "ttft_s": 4.843864679336548,
+        "tokens": 128,
+        "finish_reason": "length"
+      },
+      {
+        "trial": 3,
+        "tps": 12.5966399075235,
+        "wall_s": 14.90271720700548,
+        "ttft_s": 4.8204874992370605,
+        "tokens": 128,
+        "finish_reason": "length"
+      }
+    ],
+    "mean_tps": 12.288064636846512,
+    "median_tps": 12.593954919897858,
+    "sample_sd_tps": 0.5321444727032659,
+    "cv_pct": 4.33058002565838,
+    "mean_wall_s": 15.180521821331544,
+    "median_wall_s": 14.928172466985416,
+    "mean_ttft_s": 4.831884304682414
+  },
+  "B039_DSpark_K1": {
+    "runs": [
+      {
+        "trial": 1,
+        "tps": 15.634055320631859,
+        "wall_s": 13.07116706398665,
+        "ttft_s": 4.947674512863159,
+        "tokens": 128,
+        "finish_reason": "length"
+      },
+      {
+        "trial": 2,
+        "tps": 17.393164398209663,
+        "wall_s": 12.256697230011923,
+        "ttft_s": 4.954834222793579,
+        "tokens": 128,
+        "finish_reason": "length"
+      },
+      {
+        "trial": 3,
+        "tps": 17.3390056968636,
+        "wall_s": 12.263998275011545,
+        "ttft_s": 4.9392523765563965,
+        "tokens": 128,
+        "finish_reason": "length"
+      }
+    ],
+    "mean_tps": 16.78874180523504,
+    "median_tps": 17.3390056968636,
+    "sample_sd_tps": 1.0003544119594887,
+    "cv_pct": 5.958483509750324,
+    "mean_wall_s": 12.530620856336705,
+    "median_wall_s": 12.263998275011545,
+    "mean_ttft_s": 4.947253704071045
+  },
+  "decode_tps_gain_pct": 36.62641189966542,
+  "ordinal_trial_ratios_descriptive_only": [
+    {
+      "trial": 1,
+      "A_tps": 11.67359908311818,
+      "B_tps": 15.634055320631859,
+      "ratio_gain_pct": 33.926608317747586
+    },
+    {
+      "trial": 2,
+      "A_tps": 12.593954919897858,
+      "B_tps": 17.393164398209663,
+      "ratio_gain_pct": 38.107246761136814
+    },
+    {
+      "trial": 3,
+      "A_tps": 12.5966399075235,
+      "B_tps": 17.3390056968636,
+      "ratio_gain_pct": 37.64786343148274
+    }
+  ],
+  "wall_reduction_pct": 17.45592803846321,
+  "wall_throughput_gain_pct": 21.147403591377433,
+  "ttft_delta_ms_B_minus_A": 115.36939938863088,
+  "token_equality": {
+    "warmup-excluded": {
+      "tokens_equal": true,
+      "text_equal": true,
+      "finish_reason_equal": true,
+      "stop_reason_equal": true,
+      "first_diff_index": null
+    },
+    "functional-excluded": {
+      "tokens_equal": true,
+      "text_equal": true,
+      "finish_reason_equal": true,
+      "stop_reason_equal": true,
+      "first_diff_index": null
+    },
+    "speed-1": {
+      "tokens_equal": true,
+      "text_equal": true,
+      "finish_reason_equal": true,
+      "stop_reason_equal": true,
+      "first_diff_index": null
+    },
+    "speed-2": {
+      "tokens_equal": true,
+      "text_equal": true,
+      "finish_reason_equal": true,
+      "stop_reason_equal": true,
+      "first_diff_index": null
+    },
+    "speed-3": {
+      "tokens_equal": true,
+      "text_equal": true,
+      "finish_reason_equal": true,
+      "stop_reason_equal": true,
+      "first_diff_index": null
+    },
+    "arithmetic": {
+      "tokens_equal": true,
+      "text_equal": true,
+      "finish_reason_equal": true,
+      "stop_reason_equal": true,
+      "first_diff_index": null
+    },
+    "coding": {
+      "tokens_equal": true,
+      "text_equal": true,
+      "finish_reason_equal": true,
+      "stop_reason_equal": true,
+      "first_diff_index": null
+    },
+    "json": {
+      "tokens_equal": true,
+      "text_equal": true,
+      "finish_reason_equal": true,
+      "stop_reason_equal": true,
+      "first_diff_index": null
+    },
+    "reasoning-high": {
+      "tokens_equal": true,
+      "text_equal": true,
+      "finish_reason_equal": true,
+      "stop_reason_equal": true,
+      "first_diff_index": null
+    }
+  },
+  "rank_coherence": {
+    "warmup-excluded": {
+      "a_rank_equal": true,
+      "b_rank_equal": true
+    },
+    "functional-excluded": {
+      "a_rank_equal": true,
+      "b_rank_equal": true
+    },
+    "speed-1": {
+      "a_rank_equal": true,
+      "b_rank_equal": true
+    },
+    "speed-2": {
+      "a_rank_equal": true,
+      "b_rank_equal": true
+    },
+    "speed-3": {
+      "a_rank_equal": true,
+      "b_rank_equal": true
+    },
+    "arithmetic": {
+      "a_rank_equal": true,
+      "b_rank_equal": true
+    },
+    "coding": {
+      "a_rank_equal": true,
+      "b_rank_equal": true
+    },
+    "json": {
+      "a_rank_equal": true,
+      "b_rank_equal": true
+    },
+    "reasoning-high": {
+      "a_rank_equal": true,
+      "b_rank_equal": true
+    }
+  },
+  "prompt_panel_equal": true,
+  "quality_A": {
+    "arithmetic_pass": true,
+    "json_pass": true,
+    "json": {
+      "total": 17,
+      "valid_ids": [
+        "a",
+        "c"
+      ]
+    },
+    "coding": {
+      "status": "PASS",
+      "tests": [
+        {
+          "input": [
+            1,
+            2,
+            0
+          ],
+          "expected": 3,
+          "got": 3,
+          "pass": true
+        },
+        {
+          "input": [
+            3,
+            4,
+            -1,
+            1
+          ],
+          "expected": 2,
+          "got": 2,
+          "pass": true
+        },
+        {
+          "input": [
+            7,
+            8,
+            9,
+            11,
+            12
+          ],
+          "expected": 1,
+          "got": 1,
+          "pass": true
+        },
+        {
+          "input": [
+            1
+          ],
+          "expected": 2,
+          "got": 2,
+          "pass": true
+        },
+        {
+          "input": [],
+          "expected": 1,
+          "got": 1,
+          "pass": true
+        },
+        {
+          "input": [
+            2,
+            1
+          ],
+          "expected": 3,
+          "got": 3,
+          "pass": true
+        },
+        {
+          "input": [
+            1,
+            1,
+            2,
+            2
+          ],
+          "expected": 3,
+          "got": 3,
+          "pass": true
+        },
+        {
+          "input": [
+            -5,
+            -1,
+            4,
+            2,
+            1
+          ],
+          "expected": 3,
+          "got": 3,
+          "pass": true
+        },
+        {
+          "input": [
+            2,
+            3,
+            4,
+            5,
+            1
+          ],
+          "expected": 6,
+          "got": 6,
+          "pass": true
+        }
+      ]
+    },
+    "reasoning_high_pass": true,
+    "reasoning_high_final": "10"
+  },
+  "quality_B": {
+    "arithmetic_pass": true,
+    "json_pass": true,
+    "json": {
+      "total": 17,
+      "valid_ids": [
+        "a",
+        "c"
+      ]
+    },
+    "coding": {
+      "status": "PASS",
+      "tests": [
+        {
+          "input": [
+            1,
+            2,
+            0
+          ],
+          "expected": 3,
+          "got": 3,
+          "pass": true
+        },
+        {
+          "input": [
+            3,
+            4,
+            -1,
+            1
+          ],
+          "expected": 2,
+          "got": 2,
+          "pass": true
+        },
+        {
+          "input": [
+            7,
+            8,
+            9,
+            11,
+            12
+          ],
+          "expected": 1,
+          "got": 1,
+          "pass": true
+        },
+        {
+          "input": [
+            1
+          ],
+          "expected": 2,
+          "got": 2,
+          "pass": true
+        },
+        {
+          "input": [],
+          "expected": 1,
+          "got": 1,
+          "pass": true
+        },
+        {
+          "input": [
+            2,
+            1
+          ],
+          "expected": 3,
+          "got": 3,
+          "pass": true
+        },
+        {
+          "input": [
+            1,
+            1,
+            2,
+            2
+          ],
+          "expected": 3,
+          "got": 3,
+          "pass": true
+        },
+        {
+          "input": [
+            -5,
+            -1,
+            4,
+            2,
+            1
+          ],
+          "expected": 3,
+          "got": 3,
+          "pass": true
+        },
+        {
+          "input": [
+            2,
+            3,
+            4,
+            5,
+            1
+          ],
+          "expected": 6,
+          "got": 6,
+          "pass": true
+        }
+      ]
+    },
+    "reasoning_high_pass": true,
+    "reasoning_high_final": "10"
+  },
+  "coding_independent": "PASS",
+  "numeric_gate": "NOT_RECAPTURED in 039/040; target verifier math/gates are unchanged from attempt036 exact qualification. New A/B gate is exact emitted-token equality across every frozen greedy request.",
+  "B_speed_acceptance": {
+    "accepted": 174,
+    "drafted": 210,
+    "rejected": 36,
+    "rate": 0.8285714285714286,
+    "same_prompt_replicates": true
+  },
+  "B_acceptance_other_requests": {
+    "dspark-real-dspark-warmup-excluded": {
+      "mean_acceptance_length": 1.7777777777777777,
+      "draft_acceptance_rate": 0.7777777777777778,
+      "acceptance_histogram": [
+        4,
+        14
+      ],
+      "num_spec_steps": 18,
+      "num_accepted_draft_tokens": 14,
+      "num_draft_tokens": 18,
+      "num_spec_tokens": 1,
+      "per_step_accepted": [
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1
+      ],
+      "per_step_drafted": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "dspark-real-dspark-functional-excluded": {
+      "mean_acceptance_length": 1.8,
+      "draft_acceptance_rate": 0.8,
+      "acceptance_histogram": [
+        7,
+        28
+      ],
+      "num_spec_steps": 35,
+      "num_accepted_draft_tokens": 28,
+      "num_draft_tokens": 35,
+      "num_spec_tokens": 1,
+      "per_step_accepted": [
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "per_step_drafted": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "dspark-real-dspark-arithmetic": {
+      "mean_acceptance_length": 2.0,
+      "draft_acceptance_rate": 1.0,
+      "acceptance_histogram": [
+        0,
+        1
+      ],
+      "num_spec_steps": 1,
+      "num_accepted_draft_tokens": 1,
+      "num_draft_tokens": 1,
+      "num_spec_tokens": 1,
+      "per_step_accepted": [
+        1
+      ],
+      "per_step_drafted": [
+        1
+      ]
+    },
+    "dspark-real-dspark-coding": {
+      "mean_acceptance_length": 1.9607843137254903,
+      "draft_acceptance_rate": 0.9607843137254902,
+      "acceptance_histogram": [
+        2,
+        49
+      ],
+      "num_spec_steps": 51,
+      "num_accepted_draft_tokens": 49,
+      "num_draft_tokens": 51,
+      "num_spec_tokens": 1,
+      "per_step_accepted": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "per_step_drafted": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "dspark-real-dspark-json": {
+      "mean_acceptance_length": 2.0,
+      "draft_acceptance_rate": 1.0,
+      "acceptance_histogram": [
+        0,
+        7
+      ],
+      "num_spec_steps": 7,
+      "num_accepted_draft_tokens": 7,
+      "num_draft_tokens": 7,
+      "num_spec_tokens": 1,
+      "per_step_accepted": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "per_step_drafted": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "dspark-real-dspark-reasoning-high": {
+      "mean_acceptance_length": 1.75,
+      "draft_acceptance_rate": 0.75,
+      "acceptance_histogram": [
+        12,
+        36
+      ],
+      "num_spec_steps": 48,
+      "num_accepted_draft_tokens": 36,
+      "num_draft_tokens": 48,
+      "num_spec_tokens": 1,
+      "per_step_accepted": [
+        1,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        1
+      ],
+      "per_step_drafted": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  "B_functional_recovery": {
+    "accepted": 28,
+    "drafted": 35,
+    "rejected": 7,
+    "completion_tokens": 64,
+    "reject_then_later_accept_observed": true,
+    "per_step_accepted": [
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  "B_proposer_timing": {
+    "proposal_calls": 213,
+    "gpu_stream_ms_total": 2554.1581296920776,
+    "gpu_stream_ms_per_call": 11.99135272155905,
+    "cpu_enqueue_ms_total_nonadditive": 2845.402574923355,
+    "cpu_enqueue_ms_per_call_nonadditive": 13.358697534851432,
+    "gpu_span_pct_of_client_wall_nonadditive": 6.794444209842552,
+    "note": "GPU event span is around real DSpark propose on its CUDA stream. No synchronize inside timed request. CPU enqueue and GPU spans can overlap and are not added to client wall."
+  },
+  "decode_tps_definition": "(final emitted completion_tokens - 1)/(last_token_ts - first_token_ts); draft proposals/rejections are not counted as output tokens",
+  "memory": {
+    "source_mtp_payload_bytes": 7932874632,
+    "source_mtp_payload_gib": 7.388065226376057,
+    "expert_packed_weight_bytes_global": 6794772480,
+    "expert_scale_bytes_global": 424673280,
+    "nonexpert_source_payload_bytes": 713428872,
+    "bf16_expert_resident_bytes_per_rank": 13589544960,
+    "bf16_expert_resident_gib_per_rank": 12.65625,
+    "target_only_model_load_gib_per_rank": 80.37,
+    "target_plus_dspark_model_load_gib_per_rank": 93.85,
+    "observed_increment_gib_per_rank": 13.48,
+    "residual_after_bf16_experts_gib_per_rank": 0.82375
+  },
+  "init": {
+    "A040_rank0_s": 330.57961991100456,
+    "B039_rank0_s": 347.70645542201237,
+    "B_minus_A_s": 17.126835511007812,
+    "note": "Separate loads; init difference includes target/draft load, KV/profile/warmup/JIT and is not a pure draft-load cost."
+  },
+  "cleanup": {
+    "A040": "OFF_VERIFIED/OFF_VERIFIED owner NONE/OFF supervisor rc=0",
+    "B039": "OFF_VERIFIED/OFF_VERIFIED owner NONE/OFF supervisor rc=0"
+  },
+  "validator_sha256": "83b298fcbc8c99745e25106d3d873fc7c61ecbf34a703a8042715e8aa0249839",
+  "limitations": [
+    "039/040 did not recapture target logits; exact numeric target verification remains inherited from unchanged attempt036 verifier contract.",
+    "Performance panel uses three repetitions of the same frozen technical-text speed prompt; 82.857% acceptance is not generalized to coding/reasoning.",
+    "Proposer CUDA stream span can overlap target/runtime work and is not additive to client wall.",
+    "Experimental preset is not production default and no frontend/API hot-switch was added."
+  ],
+  "completed_utc": "2026-09-14T15:45:41.041032+00:00",
+  "source_identity": {
+    "B039_runtime_commit": "10d29383b4aabfbd4e91d917546cf3ceb39c577d",
+    "A040_runtime_commit": "5360caee018799a67f51cbdd51cc7a4a1c276028",
+    "delta_between_runtime_commits": [
+      "runtime/ds41/results/attempt039-dspark-real-observed.json",
+      "runtime/ds41/results/attempt039-dspark-real-observed.md"
+    ],
+    "runtime_math_code_equivalent": true,
+    "note": "A040 ran after the B039 evidence-only commit; no runtime/model/runner/kernel code changed between arms."
+  }
+}

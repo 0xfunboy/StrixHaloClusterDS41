@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Model-free gate: target GGUF and DSpark sidecar load/quant configs stay independent."""
 from __future__ import annotations
+import argparse
 import json
 from pathlib import Path
 import vllm_gguf_plugin
@@ -15,6 +16,11 @@ SIDE='/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac'
 OUT=ROOT/'reports/DS41-Q2-001/attempt038-dspark-real/draft-config-gate.json'
 
 def main():
+    ap=argparse.ArgumentParser()
+    ap.add_argument('--k', type=int, default=1, choices=(1,2))
+    ap.add_argument('--output', default=str(OUT))
+    cli=ap.parse_args()
+    k=cli.k
     args=EngineArgs(
         model=TARGET, hf_config_path=TARGET_CFG, tokenizer=TARGET_CFG,
         config_format='gguf', load_format='gguf', quantization='gguf', dtype='bfloat16',
@@ -24,7 +30,7 @@ def main():
         kv_cache_memory_bytes=1073741824, enable_prefix_caching=False,
         enable_chunked_prefill=True, enforce_eager=True, seed=1,
         speculative_config={
-            'method':'dspark', 'model':SIDE, 'num_speculative_tokens':1, 'quantization':'fp8',
+            'method':'dspark', 'model':SIDE, 'num_speculative_tokens':k, 'quantization':'fp8',
             'enable_adaptive_verification':False,
             'draft_tensor_parallel_size':2,
             'draft_load_config':{'load_format':'safetensors','safetensors_load_strategy':'lazy'},
@@ -46,6 +52,10 @@ def main():
         'quantization':sp.draft_model_config.quantization,
         'quant_config_class':type(dq).__name__ if dq else None,
         'method':sp.method,'K':sp.num_speculative_tokens,'parallel_drafting':sp.parallel_drafting,
+        'sample_from_anchor':getattr(sp.draft_model_config.hf_config,'sample_from_anchor',True),
+        'num_query_per_req_expected':k if getattr(sp.draft_model_config.hf_config,'sample_from_anchor',True) else 1+k,
+        'target_verify_width_max':k+1,
+        'scheduler_additional_slots':sp.max_num_new_slots_for_drafting,
         'architecture':sp.draft_model_config.architectures,
         'target_layer_ids':list(sp.draft_model_config.hf_config.dspark_target_layer_ids),
         'num_nextn_predict_layers':sp.draft_model_config.hf_config.num_nextn_predict_layers,
@@ -61,9 +71,10 @@ def main():
     assert type(dq).__name__ == 'DeepseekV4FP8Config', type(dq).__name__
     assert type(dq).__name__ != type(cfg.quant_config).__name__
     assert getattr(dq,'weight_block_size',None) == [32,32]
-    assert sp.num_speculative_tokens==1 and sp.parallel_drafting
+    assert sp.num_speculative_tokens==k and sp.parallel_drafting
+    assert sp.max_num_new_slots_for_drafting == k-1
     assert list(sp.draft_model_config.hf_config.dspark_target_layer_ids)==[37,38,39]
     assert sp.draft_model_config.hf_config.num_nextn_predict_layers==3
-    OUT.parent.mkdir(parents=True,exist_ok=True); OUT.write_text(json.dumps(data,indent=2)+'\n')
+    out=Path(cli.output); out.parent.mkdir(parents=True,exist_ok=True); out.write_text(json.dumps(data,indent=2)+'\n')
     print(json.dumps(data,indent=2))
 if __name__=='__main__': main()

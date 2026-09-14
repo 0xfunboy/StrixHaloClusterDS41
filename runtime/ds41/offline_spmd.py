@@ -231,6 +231,11 @@ def main() -> int:
         dspark_real_arm = str(dspark_real_cfg.get("arm", ""))
         if dspark_real_arm not in ("m1", "dspark"):
             raise ValueError("dspark_real.arm must be m1 or dspark")
+        dspark_real_k = int(dspark_real_cfg.get("num_speculative_tokens", 1))
+        if dspark_real_k not in (1, 2):
+            raise ValueError("DS41 real DSpark only authorizes num_speculative_tokens in {1,2}")
+        if dspark_real_arm == "m1" and dspark_real_k != 1:
+            raise ValueError("M1 control must retain num_speculative_tokens=1 metadata/default")
         for key in ("speed", "arithmetic", "coding", "json", "reasoning_high"):
             if not prompts.get(key, {}).get("token_ids"):
                 raise ValueError(f"Real DSpark fixture is missing {key}")
@@ -256,7 +261,7 @@ def main() -> int:
             engine_speculative = {
                 "method": "dspark",
                 "model": sidecar,
-                "num_speculative_tokens": 1,
+                "num_speculative_tokens": dspark_real_k,
                 "quantization": "fp8",
                 "enable_adaptive_verification": False,
                 "draft_tensor_parallel_size": 2,
@@ -493,6 +498,7 @@ def main() -> int:
                 )
             },
             "speculative_config": engine_speculative,
+            "configured_num_speculative_tokens": dspark_real_k,
             "results": results,
         }
         tmp = RESULT_PATH.with_suffix(RESULT_PATH.suffix + ".tmp")

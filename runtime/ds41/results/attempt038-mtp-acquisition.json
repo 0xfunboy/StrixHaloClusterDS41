@@ -1,0 +1,64 @@
+{
+  "schema": "ds41-attempt038-mtp-acquisition-v1",
+  "status": "PASS",
+  "repo": "deepseek-ai/DeepSeek-V4.1-Flash",
+  "revision": "2bc89ac599031fa673cab993f1df02fc4a98c673",
+  "internet_download_nodes": [
+    "NODE01"
+  ],
+  "peer_replication": "NODE01->NODE02 via 02-evo-x3-tb",
+  "total_bytes": 7933129808,
+  "local": [
+    {
+      "file": "model-00044-of-00048.safetensors",
+      "bytes": 2652728736,
+      "sha256": "9a6b39fb88a2510487a8efaef77aa7864e8061f6b62c95a0f010e9dd538f3b05",
+      "path": "/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac/model-00044-of-00048.safetensors"
+    },
+    {
+      "file": "model-00045-of-00048.safetensors",
+      "bytes": 2573998176,
+      "sha256": "0cc9d5f6ca3a2158ccc63ce2c70c76aeda8177d54913340481af566680329eb5",
+      "path": "/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac/model-00045-of-00048.safetensors"
+    },
+    {
+      "file": "model-00046-of-00048.safetensors",
+      "bytes": 2706402896,
+      "sha256": "e625902027b9d23d416f8818c665fab4704e0b96dc1bc778321601b700475a9d",
+      "path": "/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac/model-00046-of-00048.safetensors"
+    }
+  ],
+  "peer": [
+    {
+      "file": "model-00044-of-00048.safetensors",
+      "bytes": 2652728736,
+      "sha256": "9a6b39fb88a2510487a8efaef77aa7864e8061f6b62c95a0f010e9dd538f3b05",
+      "path": "/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac/model-00044-of-00048.safetensors"
+    },
+    {
+      "file": "model-00045-of-00048.safetensors",
+      "bytes": 2573998176,
+      "sha256": "0cc9d5f6ca3a2158ccc63ce2c70c76aeda8177d54913340481af566680329eb5",
+      "path": "/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac/model-00045-of-00048.safetensors"
+    },
+    {
+      "file": "model-00046-of-00048.safetensors",
+      "bytes": 2706402896,
+      "sha256": "e625902027b9d23d416f8818c665fab4704e0b96dc1bc778321601b700475a9d",
+      "path": "/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac/model-00046-of-00048.safetensors"
+    }
+  ],
+  "sidecar": {
+    "path": "/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac",
+    "filtered_tensor_count": 2401,
+    "files": [
+      "model-00044-of-00048.safetensors",
+      "model-00045-of-00048.safetensors",
+      "model-00046-of-00048.safetensors"
+    ],
+    "config_sha256": "8be45ce0476004a3f529fd896115a4a2e800a129ad2d3ec05b16050f52e21879",
+    "index_sha256": "fa4f6ae8464541b321cebbc6c7e6bc9ea3d61adad40c3bad5752fdd2b83313b4"
+  },
+  "weight_payload_in_git": false,
+  "completed_utc": "2026-09-14T13:18:38Z"
+}

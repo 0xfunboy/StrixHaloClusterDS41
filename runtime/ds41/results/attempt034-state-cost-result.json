@@ -26,7 +26,7 @@
     }
   },
   "state_recovery": {
-    "overall": "FAIL",
+    "overall": "FAIL_OBSERVED_IN_ATTEMPT034 / CAUSE_LATER_PROVEN_T3_MHC_DISPATCH_GAP",
     "corrupt_first": {
       "passed": false,
       "corrupted_position": 43,
@@ -62,7 +62,8 @@
       ],
       "rank0_reject_step_ms": 170.9267690021079,
       "rank1_reject_step_ms": 171.9324610021431,
-      "note": "Diagnostic capture mode; timing is observed but not performance-qualified."
+      "note": "Diagnostic capture mode; timing is observed but not performance-qualified.",
+      "later_causal_attribution": "T3 mHC rowwise guard excluded source.shape[0]==3; not evidence of dirty rollback/cache."
     },
     "corrupt_last": {
       "passed": true,
@@ -122,7 +123,7 @@
     },
     "B4": {
       "qualified": false,
-      "reason": "corrupt-first state recovery FAIL",
+      "reason": "No B4 cost was collected in attempt034 because its corrupt-first control failed; attempt036 later proves that failure was a T3 mHC dispatch gap.",
       "ms_per_block": null
     },
     "comparison": {
@@ -157,7 +158,7 @@
   ],
   "decision": {
     "B2": "MARGIN_PRESENT_CLEAN_BOUND: 64.369 ms per accepted two-token block remains for real drafter plus any extra overhead under perfect acceptance.",
-    "B4": "NOT_QUALIFIED: corrupt-first recovery leaves latent state divergence despite oracle token stream.",
+    "B4": "ATTEMPT034 NOT_QUALIFIED AT THE TIME; attempt036 later state-qualifies B4 after the T3 mHC dispatch fix. No B4 performance rerun was performed.",
     "overall": "STOP. Correct verifier shows clean B2 economic headroom but speculative system is not state-qualified; do not integrate DSpark or start another optimization campaign from this mandate.",
     "not_a_physical_limit": true
   },
@@ -175,5 +176,13 @@
     "reports/DS41-Q2-001/attempt034/node02/block-verification-rank1.json",
     "reports/DS41-Q2-001/attempt034/rank0.log",
     "reports/DS41-Q2-001/attempt034/supervisor.log"
-  ]
+  ],
+  "attribution_correction_after_attempt036": {
+    "status": "SUPERSEDED_CAUSAL_ATTRIBUTION",
+    "attempt034_fail_observation_preserved": true,
+    "dirty_state_claim": "WITHDRAWN / NOT DEMONSTRATED",
+    "demonstrated_cause": "final corrupt-first T=3 packet [95,96,97] fell through mHC rowwise guard (2,4) to Torch; attempt036 guard (2,3,4) makes the same control bit-exact",
+    "attempt036_result": "runtime/ds41/results/attempt036-t3-recovery-result.json",
+    "raw_attempt034_modified": false
+  }
 }

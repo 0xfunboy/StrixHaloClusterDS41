@@ -2,12 +2,14 @@
 
 **Status:** `STATE_FAIL_B4_CORRUPT_FIRST / B2_CLEAN_COST_QUALIFIED / STOP`
 
+> **Attribution correction after attempt036:** the attempt034 corrupt-first FAIL is preserved, but the earlier interpretation as latent dirty rollback/cache is withdrawn. Raw034 shows its final `[95,96,97]` forward had T=3: routed native remained active while mHC projection/RMS and coefficient/Sinkhorn fell back. Attempt036 changes only that missing T3 mHC dispatch math and the unchanged corrupt-first control becomes bit-exact on all 56 positions. Demonstrated cause: **T3 mHC dispatch gap**, not dirty cache. Raw attempt034 is unchanged.
+
 ## Recovery
 
 Clean B1/B2/B4 fidelity remains exact on all 56 common-prefix positions per width (`rel-L2=0`, `max-abs=0`) on both ranks.
 
 - `diagnostic-B4-corrupt-last`: **PASS**. One changed last draft is rejected (`num_sampled=3`, `num_rejected=1`) and all 56 compared positions recover exactly.
-- `diagnostic-B4-corrupt-first`: **FAIL**. The first changed draft is rejected correctly (`num_sampled=1`, `num_rejected=3`) and the returned 64-token stream is still the oracle, but latent state is not fully restored. The first observable residual appears at position 95: rel-L2 `0.0111638447`, max-abs `0.25`; positions 96 and 97 also fail. This is identical on both ranks.
+- `diagnostic-B4-corrupt-first`: **FAIL**. The first changed draft is rejected correctly (`num_sampled=1`, `num_rejected=3`) and the returned 64-token stream is still the oracle; the first observable numerical divergence appears at position 95: rel-L2 `0.0111638447`, max-abs `0.25`; positions 96 and 97 also fail. This is identical on both ranks.
 
 Therefore B4 is not state-qualified. Its performance cost is **N/A**.
 
@@ -31,6 +33,6 @@ Per-row work retained by the fidelity control: routed native M1 expert path and 
 
 **B2 clean verifier has measurable headroom: 64.37 ms/two-token block.** This establishes that 12–13 TPS is not a demonstrated physical ceiling and that the corrected verifier itself does not consume the entire two-token M1 budget.
 
-**The speculative path is nevertheless not qualified for integration**, because corrupt-first B4 recovery leaves latent state divergence. Real drafter cost, real acceptance distribution, qualified B4 cost and production rejection/recovery cost remain unknown. No DSpark integration or new attempt is authorized by this result.
+**At the time of attempt034 the speculative path was not qualified**, because corrupt-first B4 failed its frozen numerical state gate. Attempt036 later demonstrates that this was caused by the missing T3 mHC dispatch path and state-qualifies the same recovery protocol; attempt034 itself still contains no qualified B4 cost measurement. Real drafter cost, real acceptance distribution, qualified B4 cost and production integration cost remain unknown.
 
 Cleanup: supervisor rc=0; NODE01/NODE02 `OFF_VERIFIED`; owner `NONE/OFF` at `2026-09-14T08:33:29Z`.

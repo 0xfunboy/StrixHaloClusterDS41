@@ -1,0 +1,209 @@
+{
+  "schema": "ds41-attempt036-t3-recovery-result-v1",
+  "status": "PASS / T3_CAUSAL_FIX_CONFIRMED / B2_B4_STATE_QUALIFIED / NO_PERF_RERUN",
+  "source_commit": "434691d29a411a86d583db5c80f482716023909b",
+  "epoch": "1789377364975234949",
+  "diagnosis_commit": "26175513c9e704d5407086e76d9db8f3efe3c058",
+  "t3_component_commit": "e19fe0bc5fabd093fcef353fc932c273727644bb",
+  "t3_runtime_fix_commit": "243a34352b78ce423160258861fd4a5cc7802dc1",
+  "state_harness_commit": "fcaadf4f8a8a56f383916e785472485852629a72",
+  "preregister_commit": "434691d29a411a86d583db5c80f482716023909b",
+  "clean_fidelity": {
+    "B1": {
+      "passed_rank0": true,
+      "passed_rank1": true,
+      "positions": 56,
+      "max_rel_l2": 0.0,
+      "max_abs": 0.0
+    },
+    "B2": {
+      "passed_rank0": true,
+      "passed_rank1": true,
+      "positions": 56,
+      "max_rel_l2": 0.0,
+      "max_abs": 0.0
+    },
+    "B4": {
+      "passed_rank0": true,
+      "passed_rank1": true,
+      "positions": 56,
+      "max_rel_l2": 0.0,
+      "max_abs": 0.0
+    }
+  },
+  "reject_controls": {
+    "diagnostic-B2-corrupt-only": {
+      "passed_rank0": true,
+      "passed_rank1": true,
+      "positions_compared": 56,
+      "max_rel_l2": 0.0,
+      "max_abs": 0.0,
+      "corrupted_position": 43,
+      "packet_positions": [
+        42,
+        43
+      ],
+      "num_sampled_rank0": 1,
+      "num_rejected_rank0": 1,
+      "num_sampled_rank1": 1,
+      "num_rejected_rank1": 1,
+      "oracle_token_stream_rank0": true,
+      "oracle_token_stream_rank1": true
+    },
+    "diagnostic-B4-corrupt-first": {
+      "passed_rank0": true,
+      "passed_rank1": true,
+      "positions_compared": 56,
+      "max_rel_l2": 0.0,
+      "max_abs": 0.0,
+      "corrupted_position": 43,
+      "packet_positions": [
+        42,
+        43,
+        44,
+        45
+      ],
+      "num_sampled_rank0": 1,
+      "num_rejected_rank0": 3,
+      "num_sampled_rank1": 1,
+      "num_rejected_rank1": 3,
+      "oracle_token_stream_rank0": true,
+      "oracle_token_stream_rank1": true
+    },
+    "diagnostic-B4-corrupt-last": {
+      "passed_rank0": true,
+      "passed_rank1": true,
+      "positions_compared": 56,
+      "max_rel_l2": 0.0,
+      "max_abs": 0.0,
+      "corrupted_position": 45,
+      "packet_positions": [
+        42,
+        43,
+        44,
+        45
+      ],
+      "num_sampled_rank0": 3,
+      "num_rejected_rank0": 1,
+      "num_sampled_rank1": 3,
+      "num_rejected_rank1": 1,
+      "oracle_token_stream_rank0": true,
+      "oracle_token_stream_rank1": true
+    }
+  },
+  "corrupt_first_t3_tail": {
+    "rank0": {
+      "positions": [
+        95,
+        96,
+        97
+      ],
+      "num_positions": 3,
+      "num_drafts": 2,
+      "emitted_tokens": [
+        260,
+        4216,
+        3608
+      ],
+      "dispatch": {
+        "native": {
+          "native_calls": 120,
+          "native_tokens": 120,
+          "triton_fallback_calls": 0,
+          "fallback_reasons": {
+            "tokens_not_1": 0
+          }
+        },
+        "coefficient": {
+          "fused_calls": 80,
+          "fused_tokens": 240,
+          "fallback_calls": 0,
+          "fallback_reasons": {
+            "tokens_not_1": 0
+          }
+        },
+        "projection": {
+          "tilelang_calls": 240,
+          "tilelang_tokens": 240,
+          "fallback_calls": 0,
+          "fallback_reasons": {
+            "tokens_not_1": 0
+          }
+        }
+      }
+    },
+    "rank1": {
+      "positions": [
+        95,
+        96,
+        97
+      ],
+      "num_positions": 3,
+      "num_drafts": 2,
+      "emitted_tokens": [
+        260,
+        4216,
+        3608
+      ],
+      "dispatch": {
+        "native": {
+          "native_calls": 120,
+          "native_tokens": 120,
+          "triton_fallback_calls": 0,
+          "fallback_reasons": {
+            "tokens_not_1": 0
+          }
+        },
+        "coefficient": {
+          "fused_calls": 80,
+          "fused_tokens": 240,
+          "fallback_calls": 0,
+          "fallback_reasons": {
+            "tokens_not_1": 0
+          }
+        },
+        "projection": {
+          "tilelang_calls": 240,
+          "tilelang_tokens": 240,
+          "fallback_calls": 0,
+          "fallback_reasons": {
+            "tokens_not_1": 0
+          }
+        }
+      }
+    },
+    "dispatch_corrected_rank0": true,
+    "dispatch_corrected_rank1": true
+  },
+  "cross_rank": {
+    "all_logits_canonical_digests_exact": true,
+    "all_output_token_streams_exact": true,
+    "logits_digests": {
+      "diagnostic-B2": "7d3d810d5e291ac18a73a782327a7fc5f9c4465101385ab9969cd141231e39c1",
+      "diagnostic-B2-corrupt-only": "6116320c7682c996ae7f8bf6f6925b5de48bb97f7ec1f533681205f784e72754",
+      "diagnostic-B4": "b7a539120c04f11774ac7976007eb7c59fc6d4551bc16a8a1e9e97a57ee00baa",
+      "diagnostic-B4-corrupt-first": "e40a4b9eacd6ea1a1ff4a700e7283a12921c6269ef6bf21dbc634177ce96c426",
+      "diagnostic-B4-corrupt-last": "8e203e0ebcd68017476996b36b2117e8e97ec924236baa5f986b71429de9e9ca",
+      "diagnostic-D1": "f2a6cb10b17e298fe7fb1600df6dbd2448699233709d6a7f6b97e6b37649f392"
+    }
+  },
+  "measurement_status": "SKIPPED_STATE_ONLY",
+  "measure_requests": [],
+  "causal_attribution": {
+    "attempt034_failure_observed": true,
+    "attempt034_dirty_cache_attribution": "WITHDRAWN / NOT_DEMONSTRATED",
+    "demonstrated_cause": "mHC rowwise fidelity guard excluded T=3, so corrupt-first final [95,96,97] packet fell back to Torch projection/RMS and coefficient/Sinkhorn",
+    "causal_counterfactual": "same original corrupt-first protocol with only T3 mHC dispatch coverage added is bit-exact at all 56 compared positions, including 95-97",
+    "cache_patch_required": false
+  },
+  "cleanup": {
+    "supervisor_rc": 0,
+    "node01": "OFF_VERIFIED",
+    "node02": "OFF_VERIFIED",
+    "owner": "NONE",
+    "state": "OFF",
+    "at": "2026-09-14T09:23:04Z"
+  },
+  "decision": "T3 dispatch hole is causally closed; B2 and B4 rejection/recovery are state-qualified under this verifier. No performance rerun or DSpark integration was performed; attempt034 B2 clean cost evidence remains separate.",
+  "raw": "reports/DS41-Q2-001/attempt036/"
+}

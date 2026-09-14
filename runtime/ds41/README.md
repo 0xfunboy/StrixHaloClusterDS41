@@ -232,6 +232,17 @@ with `DS41_ENGRAM_RANDOM_ADVICE=1` (also the default). An already-running pair
 is not reconfigured by a duplicate start. Never restart one rank in isolation.
 The final experiment leaves DS41 and GLM OFF, with the existing gateway available.
 
+## Small-block verification gate
+
+[Attempt027](results/attempt027-small-block-result.md) exercises the actual V2
+target verification path with known continuation tokens, not a learned drafter.
+B2 and B4 both fail common-prefix numerical fidelity against the promoted M1
+path. Their speed and DSpark headroom are unqualified. Contemporary M1 steady
+step median is78.669ms/token on this short diagnostic workload. All production
+optimizations remain intact, and the offline-only replay adapter is not enabled
+by the API launcher. Next work requires a separate numerical alignment gate
+before a drafter integration or small-M kernel extension.
+
 ## Shared cluster ownership
 
 `/home/funboy/.local/state/strix-cluster/compute.lock` serializes lifecycle

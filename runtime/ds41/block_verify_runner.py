@@ -36,7 +36,7 @@ class StepObserver:
     retained explicitly. Replay proposal work remains included, not subtracted.
     """
 
-    def __init__(self, llm, vocab_size):
+    def __init__(self, llm, vocab_size, boundary_position=None):
         self.client = llm.llm_engine.engine_core
         self.core = self.client.engine_core
         self.runner = llm.llm_engine.model_executor.driver_worker.model_runner
@@ -51,12 +51,91 @@ class StepObserver:
         self.current = None
         self.steps, self.logits = [], []
         self.capture = False
+        self.boundary_position = (
+            int(boundary_position) if boundary_position is not None else None
+        )
+        self.boundaries = []
+        self.boundary_handles = []
         self.client.get_output = self.get_output
         self.runner.sample = self.sample
         self.model.compute_logits = self.compute_logits
+        if self.boundary_position is not None:
+            self._install_boundary_hooks()
+
+    @staticmethod
+    def _first_tensor(value):
+        if isinstance(value, torch.Tensor):
+            return value
+        if isinstance(value, (tuple, list)):
+            for item in value:
+                found = StepObserver._first_tensor(item)
+                if found is not None:
+                    return found
+        return None
+
+    def _capture_boundary(self, layer, stage, value):
+        if not self.capture or self.current is None:
+            return
+        if self.current.get("scheduler_computed_before") != self.boundary_position:
+            return
+        tensor = self._first_tensor(value)
+        if tensor is None:
+            return
+        self.boundaries.append({
+            "layer": int(layer),
+            "stage": stage,
+            "shape": list(tensor.shape),
+            "dtype": str(tensor.dtype),
+            "tensor": tensor.detach().cpu().clone(),
+        })
+
+    def _install_boundary_hooks(self):
+        found = 0
+        for name, module in self.model.named_modules():
+            if type(module).__name__ != "DeepseekV4DecoderLayer":
+                continue
+            try:
+                layer = int(name.rsplit(".", 1)[-1])
+            except ValueError:
+                continue
+            found += 1
+            self.boundary_handles.append(module.register_forward_pre_hook(
+                lambda _m, args, layer=layer: self._capture_boundary(
+                    layer, "layer_entry", args[0] if args else None
+                )
+            ))
+            for attr, pre_stage, post_stage in (
+                ("attn_norm", "attn_norm_in", "attn_norm_out"),
+                ("attn", "attn_in", "attn_out"),
+                ("ffn_norm", "ffn_norm_in", "ffn_norm_out"),
+                ("ffn", "ffn_in", "ffn_out"),
+            ):
+                child = getattr(module, attr)
+                if attr == "attn":
+                    self.boundary_handles.append(child.register_forward_pre_hook(
+                        lambda _m, args, layer=layer, stage=pre_stage:
+                            self._capture_boundary(
+                                layer, stage, args[1] if len(args) > 1 else None
+                            )
+                    ))
+                else:
+                    self.boundary_handles.append(child.register_forward_pre_hook(
+                        lambda _m, args, layer=layer, stage=pre_stage:
+                            self._capture_boundary(
+                                layer, stage, args[0] if args else None
+                            )
+                    ))
+                self.boundary_handles.append(child.register_forward_hook(
+                    lambda _m, _args, output, layer=layer, stage=post_stage:
+                        self._capture_boundary(layer, stage, output)
+                ))
+        if found != 40:
+            raise RuntimeError(
+                f"Boundary diagnostic expected 40 decoder layers, found {found}"
+            )
 
     def reset(self, capture):
-        self.steps, self.logits = [], []
+        self.steps, self.logits, self.boundaries = [], [], []
         self.capture = capture
 
     def sample(self, hidden_states, input_batch, *args, **kwargs):
@@ -119,6 +198,9 @@ class StepObserver:
         self.client.get_output = self.original_get_output
         self.runner.sample = self.original_sample
         self.model.compute_logits = self.original_logits
+        for handle in self.boundary_handles:
+            handle.remove()
+        self.boundary_handles = []
 
 
 def run(llm, run_generation, token_spec, raw, rank, init_s, artifact_identity, emit):
@@ -145,7 +227,9 @@ def run(llm, run_generation, token_spec, raw, rank, init_s, artifact_identity, e
         report["status"] = status
         output.write_text(json.dumps(report, indent=2) + "\n")
 
-    observer = StepObserver(llm, config["vocab_size"])
+    observer = StepObserver(
+        llm, config["vocab_size"], config.get("boundary_capture_position")
+    )
 
     def request(label, k, mode, cap=64, corrupt=None):
         bridge.configure(prompt + oracle, len(prompt), desired_k=k,
@@ -170,11 +254,15 @@ def run(llm, run_generation, token_spec, raw, rank, init_s, artifact_identity, e
                    "failed_requests": sorted(state.failed_requests),
                    "injected_requests": sorted(state.injected_requests),
                    "next_counts": state.next_counts,
-               }, "logits_file": None}
+               }, "logits_file": None, "boundary_file": None}
         if mode == "diagnostic":
             logits_path = raw / f"{label}-logits-rank{rank}.pt"
             torch.save(observer.logits, logits_path)
             row["logits_file"] = str(logits_path)
+            if config.get("boundary_capture_position") is not None:
+                boundary_path = raw / f"{label}-boundaries-rank{rank}.pt"
+                torch.save(observer.boundaries, boundary_path)
+                row["boundary_file"] = str(boundary_path)
         report["requests"].append(row)
         save("RUNNING")
         return row

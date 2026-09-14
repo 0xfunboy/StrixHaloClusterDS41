@@ -1,0 +1,123 @@
+{
+  "schema": "ds41-attempt037-dspark-asset-gate-v1",
+  "status": "BLOCKED_MISSING_DSPARK_WEIGHTS / NO_MODEL_LOAD / NO_WEIGHT_DOWNLOAD",
+  "source_commit": "17eeb8ced6d31faecb57409d465b686a75af812d",
+  "pair_state": "OFF_VERIFIED/OFF_VERIFIED; owner NONE/OFF",
+  "source_checkpoint": {
+    "repo_id": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "revision": "2bc89ac599031fa673cab993f1df02fc4a98c673",
+    "target_gguf_dir": "/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2-densefix",
+    "target_gguf_mtp_tensor_count": 0,
+    "pack_skipped": {
+      "DSpark/nextn block has no V4.1 GGUF slot": 67,
+      "DSpark-only, not in deepseek4 tensor table": 5,
+      "DSpark/nextn expert aggregation unresolved": 1152
+    }
+  },
+  "pinned_support": {
+    "architecture": "DSparkV41DraftModel",
+    "method": "dspark",
+    "K1_config_pass": true,
+    "parallel_drafting": true,
+    "num_speculative_tokens": 1,
+    "n_predict": 5,
+    "num_nextn_predict_layers": 3,
+    "dspark_block_size": 5,
+    "target_hidden_layers": [
+      37,
+      38,
+      39
+    ],
+    "draft_tensor_parallel_size": 2,
+    "note": "K=1 changes draft count only; all three learned DSpark/MTP stages remain required."
+  },
+  "required_weights": {
+    "tensor_prefix": "mtp.{0,1,2}.*",
+    "tensor_count": 2401,
+    "stage_counts": {
+      "0": 801,
+      "1": 798,
+      "2": 802
+    },
+    "whole_shard_bytes": 7933129808,
+    "whole_shard_gib": 7.388302877545357,
+    "shards": [
+      {
+        "filename": "model-00044-of-00048.safetensors",
+        "bytes": 2652728736,
+        "gib": 2.470546156167984,
+        "sha256": "9a6b39fb88a2510487a8efaef77aa7864e8061f6b62c95a0f010e9dd538f3b05",
+        "mtp_tensor_count": 801,
+        "contains_only_mtp": true
+      },
+      {
+        "filename": "model-00045-of-00048.safetensors",
+        "bytes": 2573998176,
+        "gib": 2.3972226083278656,
+        "sha256": "0cc9d5f6ca3a2158ccc63ce2c70c76aeda8177d54913340481af566680329eb5",
+        "mtp_tensor_count": 798,
+        "contains_only_mtp": true
+      },
+      {
+        "filename": "model-00046-of-00048.safetensors",
+        "bytes": 2706402896,
+        "gib": 2.520534113049507,
+        "sha256": "e625902027b9d23d416f8818c665fab4704e0b96dc1bc778321601b700475a9d",
+        "mtp_tensor_count": 802,
+        "contains_only_mtp": true
+      }
+    ]
+  },
+  "native_format": {
+    "quant_method": "fp8",
+    "activation_scheme": "dynamic",
+    "weight_block_size": [
+      32,
+      32
+    ],
+    "scale_fmt": "ue8m0",
+    "expert_dtype": "fp4",
+    "observed_tensor_dtypes": [
+      "I8 packed expert payload",
+      "F8_E8M0 scales",
+      "F8_E4M3 dense/attention",
+      "BF16",
+      "F32"
+    ],
+    "target_gguf_loader_is_not_valid_for_sidecar": true
+  },
+  "parameter_payload": {
+    "total_bytes": 7932874632,
+    "expert_bytes": 7219445760,
+    "nonexpert_bytes": 713428872,
+    "per_rank_parameter_lower_bound_bytes": 3966437316.0,
+    "per_rank_parameter_upper_bound_bytes": 4323151752.0,
+    "per_rank_parameter_lower_bound_gib": 3.6940326131880283,
+    "per_rank_parameter_upper_bound_gib": 4.026248820126057,
+    "excludes": [
+      "draft KV caches",
+      "workspace",
+      "allocator overhead",
+      "compile/cache buffers"
+    ]
+  },
+  "loader_adaptation_required": {
+    "reason": "SpeculativeConfig exposes draft_load_config, but pinned load_dspark_model calls get_model without passing it; get_draft_quant_config also reads vllm_config.load_config. With the GGUF target, model-free K=1 currently resolves draft quantization to gguf.",
+    "minimal_design": [
+      "Create a local DSpark sidecar directory containing source config metadata and a filtered safetensors index mapping only mtp.* to shards 44-46.",
+      "Set speculative model to that sidecar and draft_load_config to safetensors/auto, leaving target load_format=gguf unchanged.",
+      "Patch DSpark draft loading/quant resolution to honor speculative_config.draft_load_config rather than target vllm_config.load_config.",
+      "Keep official native FP8/FP4 quant config for the draft; do not convert the MTP shards through the GGUF adapter."
+    ],
+    "embed_lm_head": "Target embedding and LM head are shareable/aliased by pinned load_dspark_model; learned Markov embed/head under mtp.2 are separate required weights."
+  },
+  "local_asset_search": {
+    "required_shards_present": false,
+    "searched": [
+      "/home/funboy/models",
+      "/home/funboy/.cache/huggingface"
+    ],
+    "irrelevant_local_mtp": "Only unrelated Qwen MTP assets were found."
+  },
+  "next": "STOP. Weight acquisition requires separate owner confirmation. If approved, acquire only the three exact MTP-only shards, verify SHA256, build metadata-only sidecar/index, then patch/test draft-specific loader before any full target+DSpark load."
+}

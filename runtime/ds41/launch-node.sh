@@ -84,6 +84,7 @@ case "$run_mode" in
       --kv-cache-memory-bytes 1073741824 --kv-cache-dtype auto
       --no-enable-prefix-caching --enable-chunked-prefill --no-async-scheduling
       --enforce-eager --seed 1 --generation-config vllm --enable-per-request-metrics
+      --reasoning-parser deepseek_v41
     )
     if [[ -n "$serving_preset" ]]; then
       spec_json='{"method":"dspark","model":"/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac","num_speculative_tokens":2,"quantization":"fp8","enable_adaptive_verification":false,"draft_tensor_parallel_size":2,"draft_load_config":{"load_format":"safetensors","safetensors_load_strategy":"lazy"},"draft_sample_method":"greedy","rejection_sample_method":"standard"}'

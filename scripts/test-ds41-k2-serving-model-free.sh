@@ -11,6 +11,7 @@ jq -e '.preset=="runtime/ds41/presets/dspark-k2-gfx1151.json" and .numerics.dspa
 status=$(runtime/ds41/serve-controller.sh status)
 jq -e '.state=="OFF" and .owner=="NONE" and (.ranks|all(.active==false))' <<<"$status" >/dev/null
 grep -q -- '--speculative-config' runtime/ds41/launch-node.sh
+grep -q -- '--reasoning-parser deepseek_v41' runtime/ds41/launch-node.sh
 grep -q 'num_speculative_tokens.*2' runtime/ds41/launch-node.sh
 grep -q 'DS41_RUNTIME_MAX_SEC=infinity' runtime/ds41/serve-controller.sh
 printf 'PASS ds41-k2-serving-model-free\n'

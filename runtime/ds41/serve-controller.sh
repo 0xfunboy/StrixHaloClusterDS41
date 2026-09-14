@@ -22,7 +22,7 @@ unit_show() {
 field() { sed -n "s/^$2=//p" <<<"$1" | tail -1; }
 active() { local a p; a=$(field "$1" ActiveState); p=$(field "$1" MainPID); [[ "$a" == active || "$a" == activating || "$a" == deactivating || ( -n "$p" && "$p" != 0 ) ]]; }
 serving_env() { local e; e=$(field "$1" Environment); [[ " $e " == *" DS41_SERVING_PRESET=$PRESET "* || " $e " == *" \"DS41_SERVING_PRESET=$PRESET\" "* ]] && [[ " $e " == *" DS41_REAL_DSPARK_K=2 "* || " $e " == *" \"DS41_REAL_DSPARK_K=2\" "* ]]; }
-health_code() { curl --noproxy '*' -sS -o /dev/null --max-time 3 -w '%{http_code}' "$1/health" 2>/dev/null || echo 000; }
+health_code() { local c; c=$(curl --noproxy '*' -sS -o /dev/null --max-time 3 -w '%{http_code}' "$1/health" 2>/dev/null || true); printf '%s' "${c:-000}"; }
 status_json() {
   local u0 u1 peer_unknown=0
   u0=$(unit_show 0 || true); u1=$(unit_show 1 || true)

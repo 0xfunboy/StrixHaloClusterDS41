@@ -247,7 +247,7 @@ cmd_start() {
   [[ -n "$inv1" && " $env1 " == *"DS41_OWNER_EPOCH=$epoch"* && " $env1 " == *"DS41_OWNER_NONCE=$nonce1"* ]] || {
     persist_unreconciled 'rank1 identity receipt mismatch'; echo 'rank1 identity mismatch' >&2; exit 5
   }
-  atomic_owner DS41 RUNNING "$epoch" "both ranks identity-confirmed; RuntimeMaxSec=${RUNTIME_MAX_SEC}s" "$inv0" "$nonce0" "$inv1" "$nonce1"
+  atomic_owner DS41 RUNNING "$epoch" "both ranks identity-confirmed; RuntimeMaxSec=${RUNTIME_MAX_SEC}" "$inv0" "$nonce0" "$inv1" "$nonce1"
   echo "DS41_START_CONFIRMED epoch=$epoch rank0_invocation=$inv0 rank1_invocation=$inv1 runtime_max_sec=$RUNTIME_MAX_SEC"
 }
 

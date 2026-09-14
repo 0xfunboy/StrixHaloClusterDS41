@@ -44,7 +44,7 @@ index db20adb..9c6f458 100644
          topk_weights,
          topk_indices,
 diff --git a/vllm/model_executor/kernels/mhc/torch.py b/vllm/model_executor/kernels/mhc/torch.py
-index 9c57cc1..2f52030 100644
+index 9c57cc1..8728ec2 100644
 --- a/vllm/model_executor/kernels/mhc/torch.py
 +++ b/vllm/model_executor/kernels/mhc/torch.py
 @@ -1,5 +1,7 @@
@@ -69,7 +69,7 @@ index 9c57cc1..2f52030 100644
 +    rowwise_block_requested = (
 +        os.environ.get("DS41_MHC_ROWWISE_BLOCK", "0") == "1"
 +        and source.ndim == 2
-+        and source.shape[0] in (2, 4)
++        and source.shape[0] in (2, 3, 4)
      )
 -    post = (
 -        torch.sigmoid(

@@ -1,0 +1,43 @@
+{
+  "schema": "ds41-attempt038-draft-loader-gate-v1",
+  "status": "PASS",
+  "target": {
+    "model": "/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2-densefix",
+    "config_format": "gguf",
+    "load_format": "gguf",
+    "quantization": "gguf",
+    "quant_config_class": "GGUFConfig"
+  },
+  "draft": {
+    "model": "/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac",
+    "config_format": "auto",
+    "load_format": "safetensors",
+    "quantization": "fp8",
+    "quant_config_class": "Fp8Config",
+    "method": "dspark",
+    "K": 1,
+    "parallel_drafting": true,
+    "architecture": [
+      "DSparkV41DraftModel"
+    ],
+    "target_layer_ids": [
+      37,
+      38,
+      39
+    ],
+    "num_nextn_predict_layers": 3
+  },
+  "sidecar": "/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac",
+  "filtered_mtp_tensors": 2401,
+  "loader_changes": [
+    "speculator config inspection uses hf_config_path without replacing target model path",
+    "explicit DSpark sidecar with draft_load_config uses HF config parser instead of target GGUF parser",
+    "DeepSeek DSpark sidecar preserves explicit fp8 quantization instead of forced target gguf",
+    "get_draft_quant_config uses draft_load_config",
+    "load_dspark_model passes and installs draft_load_config"
+  ],
+  "overlay_reproducible": true,
+  "target_global_load_config_mutated": false,
+  "model_initialized": false,
+  "completed_utc": "2026-09-14T13:19:28Z"
+}

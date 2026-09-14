@@ -1,0 +1,137 @@
+{
+  "schema": "ds41-attempt029-boundary-analysis-v1",
+  "status": "LOCALIZED_TO_LAYER0_FFN_INTERVAL",
+  "source_commit_capture": "47519fdfb3f89012d479af782159a7300e852340",
+  "comparator_commit": "c1ef1a075cdb1327b85873739d756e873810f30f",
+  "position": 42,
+  "row0": {
+    "position": 42,
+    "input_token_id": 126513
+  },
+  "capture": {
+    "boundaries_per_arm": 360,
+    "layers": 40,
+    "stages": [
+      "layer_entry",
+      "attn_norm_in",
+      "attn_norm_out",
+      "attn_in",
+      "attn_out",
+      "ffn_norm_in",
+      "ffn_norm_out",
+      "ffn_in",
+      "ffn_out"
+    ],
+    "rowwise_native_control": false,
+    "copies": "tensor.detach().cpu().clone()",
+    "rank_metric_equality": "all reported boundary metrics identical rank0/rank1 for B2/B4"
+  },
+  "last_exact_boundary": {
+    "layer": 0,
+    "stage": "ffn_in"
+  },
+  "first_numeric_boundary": {
+    "B2": {
+      "layer": 0,
+      "stage": "ffn_out",
+      "different_elements": 3766,
+      "elements": 5120,
+      "reference_norm": 8.766240119934082,
+      "difference_norm": 0.059798501431941986,
+      "rel_l2": 0.006821453737727599,
+      "max_abs": 0.0078125,
+      "candidate_nonfinite": 0,
+      "reference_nonfinite": 0
+    },
+    "B4": {
+      "layer": 0,
+      "stage": "ffn_out",
+      "different_elements": 3766,
+      "elements": 5120,
+      "reference_norm": 8.766240119934082,
+      "difference_norm": 0.059798501431941986,
+      "rel_l2": 0.006821453737727599,
+      "max_abs": 0.0078125,
+      "candidate_nonfinite": 0,
+      "reference_nonfinite": 0
+    }
+  },
+  "first_material_boundary": {
+    "B2": {
+      "layer": 0,
+      "stage": "ffn_out",
+      "different_elements": 3766,
+      "elements": 5120,
+      "reference_norm": 8.766240119934082,
+      "difference_norm": 0.059798501431941986,
+      "rel_l2": 0.006821453737727599,
+      "max_abs": 0.0078125,
+      "candidate_nonfinite": 0,
+      "reference_nonfinite": 0,
+      "basis": "same as first numeric boundary: every earlier captured boundary is exact and 3766/5120 BF16 elements change here, so this is a widespread deviation rather than an isolated bit difference; no logit threshold was reused"
+    },
+    "B4": {
+      "layer": 0,
+      "stage": "ffn_out",
+      "different_elements": 3766,
+      "elements": 5120,
+      "reference_norm": 8.766240119934082,
+      "difference_norm": 0.059798501431941986,
+      "rel_l2": 0.006821453737727599,
+      "max_abs": 0.0078125,
+      "candidate_nonfinite": 0,
+      "reference_nonfinite": 0,
+      "basis": "same as first numeric boundary: every earlier captured boundary is exact and 3766/5120 BF16 elements change here, so this is a widespread deviation rather than an isolated bit difference; no logit threshold was reused"
+    }
+  },
+  "amplification": {
+    "B2": {
+      "layer": 34,
+      "stage": "ffn_out",
+      "different_elements": 5075,
+      "elements": 5120,
+      "reference_norm": 28.415739059448242,
+      "difference_norm": 8.36849594116211,
+      "rel_l2": 0.2945021392424274,
+      "max_abs": 0.451171875
+    },
+    "B4": {
+      "layer": 25,
+      "stage": "ffn_out",
+      "different_elements": 5094,
+      "elements": 5120,
+      "reference_norm": 33.801700592041016,
+      "difference_norm": 11.497179985046387,
+      "rel_l2": 0.34013614059860425,
+      "max_abs": 0.552734375
+    }
+  },
+  "causal_interval": {
+    "from": "layer0 ffn_in",
+    "to": "layer0 ffn_out",
+    "source_entry": ".vendor/vllm-dsv41/vllm/models/deepseek_v4_1/amd/model.py:350 -> DeepseekV4MoE.forward",
+    "operations": [
+      "shared expert execution",
+      "gate linear",
+      "router select_experts",
+      "routed expert computation",
+      "shared/routed combination",
+      "single TP final reduction"
+    ],
+    "not_observed_internal": [
+      "gate logits",
+      "topk ids/weights",
+      "shared expert output",
+      "routed expert output before final combine/reduction",
+      "pre-reduction combined output"
+    ]
+  },
+  "attempt028_correction": "Rowwise native M1 routed computation is not sufficient to restore fidelity. It does not by itself prove an upstream origin or exclude a routed contribution.",
+  "cleanup": {
+    "node01": "OFF_VERIFIED",
+    "node02": "OFF_VERIFIED",
+    "owner": "NONE/OFF",
+    "supervisor_rc": 0
+  },
+  "timing": "N/A; attempt029 hooks copy tensors"
+}

@@ -328,8 +328,11 @@ def run(llm, run_generation, token_spec, raw, rank, init_s, artifact_identity, e
                          activation_output_tokens=8, corrupt_draft_index=corrupt)
         observer.reset(capture=mode == "diagnostic")
         rowwise = bool(config.get("rowwise_native_control", False) and k > 0)
+        rowwise_mhc = bool(config.get("rowwise_mhc_control", False) and k > 0)
         previous_rowwise = os.environ.get("DS41_NATIVE_HIP_MOE_ROWWISE")
+        previous_rowwise_mhc = os.environ.get("DS41_MHC_ROWWISE_BLOCK")
         os.environ["DS41_NATIVE_HIP_MOE_ROWWISE"] = "1" if rowwise else "0"
+        os.environ["DS41_MHC_ROWWISE_BLOCK"] = "1" if rowwise_mhc else "0"
         try:
             result = run_generation(llm, prompt, label=label, max_tokens=cap, ignore_eos=True)
         finally:
@@ -337,10 +340,16 @@ def run(llm, run_generation, token_spec, raw, rank, init_s, artifact_identity, e
                 os.environ.pop("DS41_NATIVE_HIP_MOE_ROWWISE", None)
             else:
                 os.environ["DS41_NATIVE_HIP_MOE_ROWWISE"] = previous_rowwise
+            if previous_rowwise_mhc is None:
+                os.environ.pop("DS41_MHC_ROWWISE_BLOCK", None)
+            else:
+                os.environ["DS41_MHC_ROWWISE_BLOCK"] = previous_rowwise_mhc
         state = bridge.get_state()
         row = {"label": label, "desired_k": k, "mode": mode,
                "sampling": {"temperature": 0, "seed": 1, "max_tokens": cap, "ignore_eos": True},
                "corrupt_draft_index": corrupt, "output": result,
+               "rowwise_native_control": rowwise,
+               "rowwise_mhc_control": rowwise_mhc,
                "steps": observer.steps, "bridge": {
                    "events": state.events, "fidelity_failed": state.fidelity_failed,
                    "failed_requests": sorted(state.failed_requests),

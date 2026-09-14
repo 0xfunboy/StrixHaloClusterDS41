@@ -44,7 +44,7 @@ index db20adb..9c6f458 100644
          topk_weights,
          topk_indices,
 diff --git a/vllm/model_executor/kernels/mhc/torch.py b/vllm/model_executor/kernels/mhc/torch.py
-index 9c57cc1..e69ac8f 100644
+index 9c57cc1..2f52030 100644
 --- a/vllm/model_executor/kernels/mhc/torch.py
 +++ b/vllm/model_executor/kernels/mhc/torch.py
 @@ -1,5 +1,7 @@
@@ -55,7 +55,7 @@ index 9c57cc1..e69ac8f 100644
  import torch
  
  
-@@ -18,25 +20,87 @@ def mhc_pre_delayed_torch(
+@@ -18,25 +20,109 @@ def mhc_pre_delayed_torch(
  ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
      """Reference for mHC pre using coefficients from the previous sublayer."""
      hc_mult = residual.shape[1]
@@ -63,13 +63,23 @@ index 9c57cc1..e69ac8f 100644
 -    mixes = (x @ fn.t()) * torch.rsqrt(x.square().mean(-1, keepdim=True) + rms_eps)
 -    pre = (
 -        torch.sigmoid(mixes[:, :hc_mult] * hc_scale[0] + hc_base[:hc_mult]) + hc_pre_eps
--    )
++    source = residual.flatten(1) if x is None else x
++    projection_requested = os.environ.get("DS41_MHC_PROJECTION_RMS", "0") == "1"
++    ds41_requested = os.environ.get("DS41_MHC_COEFF_SINKHORN", "0") == "1"
++    rowwise_block_requested = (
++        os.environ.get("DS41_MHC_ROWWISE_BLOCK", "0") == "1"
++        and source.ndim == 2
++        and source.shape[0] in (2, 4)
+     )
 -    post = (
 -        torch.sigmoid(
 -            mixes[:, hc_mult : 2 * hc_mult] * hc_scale[1]
 -            + hc_base[hc_mult : 2 * hc_mult]
-+    source = residual.flatten(1) if x is None else x
-+    projection_requested = os.environ.get("DS41_MHC_PROJECTION_RMS", "0") == "1"
++    if rowwise_block_requested and (not projection_requested or not ds41_requested):
++        raise RuntimeError(
++            "DS41 M>1 mHC fidelity control requires promoted projection/RMS "
++            "and coefficient/Sinkhorn paths enabled"
++        )
 +    if projection_requested:
 +        from runtime.ds41.mhc_projection_rms import (
 +            contract as projection_contract,
@@ -80,6 +90,18 @@ index 9c57cc1..e69ac8f 100644
 +        projection_ok, projection_reason = projection_contract(source, fn)
 +        if projection_ok:
 +            mixes = projection_rms_tilelang(source, fn, rms_eps)
++        elif rowwise_block_requested:
++            rows = []
++            for i in range(source.shape[0]):
++                row = source[i : i + 1].contiguous()
++                row_ok, row_reason = projection_contract(row, fn)
++                if not row_ok:
++                    raise RuntimeError(
++                        "DS41 M>1 mHC rowwise projection contract failed: "
++                        f"row={i} reason={row_reason}"
++                    )
++                rows.append(projection_rms_tilelang(row, fn, rms_eps))
++            mixes = torch.cat(rows, dim=0).contiguous()
 +        else:
 +            projection_record_fallback(projection_reason)
 +            xf = source.float()
@@ -92,10 +114,9 @@ index 9c57cc1..e69ac8f 100644
 +            xf.square().mean(-1, keepdim=True) + rms_eps
          )
 -        * hc_post_mult_value
-+    ds41_requested = os.environ.get("DS41_MHC_COEFF_SINKHORN", "0") == "1"
 +    ds41_fused_coeff = (
 +        ds41_requested
-+        and residual.shape[0] == 1
++        and (residual.shape[0] == 1 or rowwise_block_requested)
 +        and hc_mult == 4
 +        and sinkhorn_repeat == 20
 +        and mixes.dtype == torch.float32

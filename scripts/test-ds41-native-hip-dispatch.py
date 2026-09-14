@@ -49,9 +49,10 @@ def method():
     return SimpleNamespace(moe=SimpleNamespace(swiglu_limit=10.0))
 
 
-def apply(lyr, x, weights, ids, native: bool):
+def apply(lyr, x, weights, ids, native: bool, rowwise: bool = False):
     os.environ["DS41_EP_SKIP_REMOTE"] = "1"
     os.environ["DS41_NATIVE_HIP_MOE"] = "1" if native else "0"
+    os.environ["DS41_NATIVE_HIP_MOE_ROWWISE"] = "1" if rowwise else "0"
     return GGUFMoEMethod.apply(method(), lyr, x, weights, ids, None, None)
 
 
@@ -92,7 +93,23 @@ def main():
     assert after_m1["native_calls"] > before["native_calls"]
     assert m1["rel_l2"] < 0.035
 
-    # M=16 is outside the qualified dispatch and must remain exactly Triton.
+    # Diagnostic B2/B4 control: rowwise M1 must equal concatenating the exact
+    # same native M1 operation independently for each row.
+    rowwise = {}
+    for m in (2, 4):
+        xm = x1.expand(m, -1).contiguous()
+        idsm = ids1.expand(m, -1).contiguous()
+        weightsm = weights1.expand(m, -1).contiguous()
+        expected = torch.cat([
+            apply(lyr, xm[i:i+1], weightsm[i:i+1], idsm[i:i+1], True, False)
+            for i in range(m)
+        ], dim=0)
+        got = apply(lyr, xm, weightsm, idsm, True, True)
+        torch.testing.assert_close(got, expected, rtol=0, atol=0)
+        rowwise[str(m)] = metric(got, expected)
+    after_rowwise = ds41_native_hip_stats()
+
+    # M=16 is outside the bounded diagnostic dispatch and must remain Triton.
     x16 = x1.expand(16, -1).contiguous()
     ids16 = ids1.expand(16, -1).contiguous()
     weights16 = weights1.expand(16, -1).contiguous()
@@ -100,19 +117,22 @@ def main():
     native_requested16 = apply(lyr, x16, weights16, ids16, True)
     after_m16 = ds41_native_hip_stats()
     torch.testing.assert_close(native_requested16, tri16, rtol=0, atol=0)
-    assert after_m16["native_calls"] == after_m1["native_calls"]
+    assert after_m16["native_calls"] == after_rowwise["native_calls"]
     assert after_m16["fallback_reasons"].get("tokens_not_1", 0) > after_m1["fallback_reasons"].get("tokens_not_1", 0)
 
     out = {
         "status": "PASS",
         "library_identity": ident,
         "m1_native_vs_triton": m1,
+        "rowwise_native_vs_concatenated_m1": rowwise,
         "m16_native_requested_vs_triton": metric(native_requested16, tri16),
         "stats_before": before,
         "stats_after_m1": after_m1,
+        "stats_after_rowwise": after_rowwise,
         "stats_after_m16": after_m16,
         "dispatch": {
             "m1": "native HIP",
+            "m2_m4_rowwise_opt_in": "native HIP M1 per row, no collective here",
             "m16": "Triton fallback",
             "topk": 6,
             "dtype": "bfloat16",

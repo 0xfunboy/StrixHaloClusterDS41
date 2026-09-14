@@ -105,7 +105,7 @@ index cc3a0d3..0c20438 100644
          X,
          W,
 diff --git a/vllm_gguf_plugin/quantization/fused_moe.py b/vllm_gguf_plugin/quantization/fused_moe.py
-index 758429b..1297538 100644
+index 758429b..e812243 100644
 --- a/vllm_gguf_plugin/quantization/fused_moe.py
 +++ b/vllm_gguf_plugin/quantization/fused_moe.py
 @@ -2,12 +2,14 @@
@@ -123,7 +123,7 @@ index 758429b..1297538 100644
      MoEActivation,
      apply_moe_activation,
  )
-@@ -28,10 +30,128 @@ from .params import (
+@@ -28,10 +30,167 @@ from .params import (
      _gguf_moe_weight_loader,
      _gguf_moe_weight_type_loader,
  )
@@ -250,11 +250,50 @@ index 758429b..1297538 100644
 +    return out
 +
 +
++def _fused_moe_gguf_native_hip_rowwise(
++    x: torch.Tensor,
++    w1: torch.Tensor,
++    w2: torch.Tensor,
++    topk_weights: torch.Tensor,
++    topk_ids: torch.Tensor,
++    weight_type: int,
++    weight_type2: int,
++    activation: str,
++    swiglu_limit: float,
++    expert_map: torch.Tensor,
++) -> torch.Tensor:
++    """Diagnostic M>1 control: reuse the qualified M1 routed path per row.
++
++    This function only computes the local routed-expert contribution. Shared
++    experts and the TP reduction remain outside GGUFMoEMethod.apply(), so this
++    loop does not multiply collectives. It is intentionally bounded to the
++    small verification packets by the caller.
++    """
++    rows = []
++    for row in range(x.shape[0]):
++        row_x = x[row : row + 1].contiguous()
++        row_weights = topk_weights[row : row + 1].contiguous()
++        row_ids = topk_ids[row : row + 1].contiguous()
++        ok, reason = _ds41_native_hip_contract(
++            row_x, w1, w2, row_weights, row_ids, weight_type, weight_type2,
++            activation, expert_map
++        )
++        if not ok:
++            raise RuntimeError(f"DS41 native HIP rowwise contract failed: {reason}")
++        rows.append(
++            _fused_moe_gguf_native_hip(
++                row_x, w1, w2, row_weights, row_ids, weight_type, weight_type2,
++                activation, swiglu_limit, expert_map
++            )
++        )
++    return torch.cat(rows, dim=0)
++
++
 +def _fused_moe_gguf_impl(
      x: torch.Tensor,
      w1: torch.Tensor,
      w2: torch.Tensor,
-@@ -40,14 +160,21 @@ def _fused_moe_gguf(
+@@ -40,14 +199,21 @@ def _fused_moe_gguf(
      weight_type: int,
      weight_type2: int,
      activation: str,
@@ -277,7 +316,7 @@ index 758429b..1297538 100644
          return out
  
      from vllm.model_executor.layers.fused_moe.fused_moe import moe_align_block_size
-@@ -98,11 +225,20 @@ def _fused_moe_gguf(
+@@ -98,11 +264,20 @@ def _fused_moe_gguf(
          E, N, _ = w1.shape
          top_k = topk_ids.shape[1]
  
@@ -300,7 +339,7 @@ index 758429b..1297538 100644
          )
          out = out.reshape(num_tokens, top_k, w2.shape[1]).mul_(
              topk_weights.view(num_tokens, top_k, 1)
-@@ -133,6 +269,31 @@ def _fused_moe_gguf(
+@@ -133,6 +308,31 @@ def _fused_moe_gguf(
      return out_hidden_states
  
  
@@ -332,7 +371,7 @@ index 758429b..1297538 100644
  def _fused_moe_gguf_fake(
      x: torch.Tensor,
      w1: torch.Tensor,
-@@ -142,8 +303,9 @@ def _fused_moe_gguf_fake(
+@@ -142,8 +342,9 @@ def _fused_moe_gguf_fake(
      weight_type: int,
      weight_type2: int,
      activation: str,
@@ -343,7 +382,7 @@ index 758429b..1297538 100644
      return torch.empty_like(x)
  
  
-@@ -266,6 +428,75 @@ class GGUFMoEMethod(FusedMoEMethodBase):
+@@ -266,6 +467,92 @@ class GGUFMoEMethod(FusedMoEMethodBase):
  
          from . import fused_moe_gguf as fused_moe_gguf_op
  
@@ -363,6 +402,23 @@ index 758429b..1297538 100644
 +        if ep_skip_remote:
 +            native_requested = os.environ.get("DS41_NATIVE_HIP_MOE", "0") == "1"
 +            if native_requested:
++                rowwise_requested = (
++                    os.environ.get("DS41_NATIVE_HIP_MOE_ROWWISE", "0") == "1"
++                    and 1 < x.shape[0] <= 4
++                )
++                if rowwise_requested:
++                    return _fused_moe_gguf_native_hip_rowwise(
++                        x,
++                        layer.w13_weight,
++                        layer.w2_weight,
++                        topk_weights,
++                        topk_ids,
++                        layer.w13_weight_type.weight_type,
++                        layer.w2_weight_type.weight_type,
++                        layer.activation.value,
++                        float(self.moe.swiglu_limit or 0.0),
++                        expert_map,
++                    )
 +                native_ok, reason = _ds41_native_hip_contract(
 +                    x,
 +                    layer.w13_weight,
@@ -419,7 +475,7 @@ index 758429b..1297538 100644
          return fused_moe_gguf_op(
              x,
              layer.w13_weight,
-@@ -275,4 +506,5 @@ class GGUFMoEMethod(FusedMoEMethodBase):
+@@ -275,4 +562,5 @@ class GGUFMoEMethod(FusedMoEMethodBase):
              layer.w13_weight_type.weight_type,
              layer.w2_weight_type.weight_type,
              layer.activation.value,

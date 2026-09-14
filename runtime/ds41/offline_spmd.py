@@ -419,6 +419,20 @@ def main() -> int:
 
     results: list[dict[str, Any]] = []
 
+    def target_dispatch_stats() -> dict[str, Any] | None:
+        if not isinstance(dspark_real_cfg, dict) or dspark_real_arm != "dspark":
+            return None
+        from vllm_gguf_plugin.quantization.fused_moe import ds41_native_hip_stats
+        from runtime.ds41.mhc_projection_rms import stats as projection_stats
+        from runtime.ds41.mhc_coeff_sinkhorn import stats as coeff_stats
+        return {
+            "native_hip": ds41_native_hip_stats(),
+            "mhc_projection_rms": projection_stats(),
+            "mhc_coeff_sinkhorn": coeff_stats(),
+        }
+
+    dspark_target_dispatch_before = target_dispatch_stats()
+
     def save_checkpoint(status: str) -> None:
         checkpoint = {
             "status": status,
@@ -463,13 +477,18 @@ def main() -> int:
                 max_tokens=speed_tokens, ignore_eos=True,
             ))
             save_checkpoint(f"DSPARK_REAL_SPEED_{trial}_COMPLETE")
-        for label, prompt_key, cap in (
+        quality_cases = [
             ("arithmetic", "arithmetic", 128),
             ("coding", "coding", 512),
+        ]
+        if prompts.get("text_short", {}).get("token_ids"):
+            quality_cases.append(("text", "text_short", 96))
+        quality_cases.extend([
             ("json", "json", 256),
             ("reasoning-high", "reasoning_high",
              int(dspark_real_cfg.get("reasoning_high_max_tokens", 128))),
-        ):
+        ])
+        for label, prompt_key, cap in quality_cases:
             results.append(run_generation(
                 llm, prompts[prompt_key]["token_ids"],
                 label=f"dspark-real-{arm}-{label}",
@@ -499,6 +518,10 @@ def main() -> int:
             },
             "speculative_config": engine_speculative,
             "configured_num_speculative_tokens": dspark_real_k,
+            "target_dispatch_stats": {
+                "before": dspark_target_dispatch_before,
+                "after": target_dispatch_stats(),
+            },
             "results": results,
         }
         tmp = RESULT_PATH.with_suffix(RESULT_PATH.suffix + ".tmp")

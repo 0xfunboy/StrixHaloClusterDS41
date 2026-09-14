@@ -1,0 +1,690 @@
+{
+  "schema": "ds41-attempt039-offline-validation-v1",
+  "status": "PASS",
+  "runtime_source": "10d29383b4aabfbd4e91d917546cf3ceb39c577d",
+  "arm": "dspark",
+  "K": 1,
+  "real_drafter": true,
+  "rank_coherence": {
+    "dspark-real-dspark-warmup-excluded": {
+      "token_ids_equal": true,
+      "text_equal": true,
+      "spec_metrics_equal": true
+    },
+    "dspark-real-dspark-functional-excluded": {
+      "token_ids_equal": true,
+      "text_equal": true,
+      "spec_metrics_equal": true
+    },
+    "dspark-real-dspark-speed-1": {
+      "token_ids_equal": true,
+      "text_equal": true,
+      "spec_metrics_equal": true
+    },
+    "dspark-real-dspark-speed-2": {
+      "token_ids_equal": true,
+      "text_equal": true,
+      "spec_metrics_equal": true
+    },
+    "dspark-real-dspark-speed-3": {
+      "token_ids_equal": true,
+      "text_equal": true,
+      "spec_metrics_equal": true
+    },
+    "dspark-real-dspark-arithmetic": {
+      "token_ids_equal": true,
+      "text_equal": true,
+      "spec_metrics_equal": true
+    },
+    "dspark-real-dspark-coding": {
+      "token_ids_equal": true,
+      "text_equal": true,
+      "spec_metrics_equal": true
+    },
+    "dspark-real-dspark-json": {
+      "token_ids_equal": true,
+      "text_equal": true,
+      "spec_metrics_equal": true
+    },
+    "dspark-real-dspark-reasoning-high": {
+      "token_ids_equal": true,
+      "text_equal": true,
+      "spec_metrics_equal": true
+    }
+  },
+  "coding_independent": {
+    "status": "PASS",
+    "tests": [
+      {
+        "input": [
+          1,
+          2,
+          0
+        ],
+        "expected": 3,
+        "got": 3,
+        "pass": true
+      },
+      {
+        "input": [
+          3,
+          4,
+          -1,
+          1
+        ],
+        "expected": 2,
+        "got": 2,
+        "pass": true
+      },
+      {
+        "input": [
+          7,
+          8,
+          9,
+          11,
+          12
+        ],
+        "expected": 1,
+        "got": 1,
+        "pass": true
+      },
+      {
+        "input": [
+          1
+        ],
+        "expected": 2,
+        "got": 2,
+        "pass": true
+      },
+      {
+        "input": [],
+        "expected": 1,
+        "got": 1,
+        "pass": true
+      },
+      {
+        "input": [
+          2,
+          1
+        ],
+        "expected": 3,
+        "got": 3,
+        "pass": true
+      },
+      {
+        "input": [
+          1,
+          1,
+          2,
+          2
+        ],
+        "expected": 3,
+        "got": 3,
+        "pass": true
+      },
+      {
+        "input": [
+          -5,
+          -1,
+          4,
+          2,
+          1
+        ],
+        "expected": 3,
+        "got": 3,
+        "pass": true
+      },
+      {
+        "input": [
+          2,
+          3,
+          4,
+          5,
+          1
+        ],
+        "expected": 6,
+        "got": 6,
+        "pass": true
+      }
+    ]
+  },
+  "arithmetic_pass": true,
+  "json_pass": true,
+  "json_parsed": {
+    "total": 17,
+    "valid_ids": [
+      "a",
+      "c"
+    ]
+  },
+  "reasoning_high_pass": true,
+  "reasoning_high_final": "10",
+  "speed128": {
+    "same_prompt_replicates": true,
+    "decode_tps": [
+      15.634055320631859,
+      17.393164398209663,
+      17.3390056968636
+    ],
+    "mean": 16.78874180523504,
+    "median": 17.3390056968636,
+    "sample_sd": 1.0003544119594887,
+    "cv_pct": 5.958483509750324,
+    "ttft_s": [
+      4.947674512863159,
+      4.954834222793579,
+      4.9392523765563965
+    ],
+    "ttft_mean": 4.947253704071045,
+    "wall_s": [
+      13.07116706398665,
+      12.256697230011923,
+      12.263998275011545
+    ],
+    "wall_mean": 12.530620856336705,
+    "accepted": 174,
+    "drafted": 210,
+    "acceptance_rate": 0.8285714285714286,
+    "proposal_calls": 213,
+    "proposal_gpu_stream_ms_total": 2554.1581296920776,
+    "proposal_gpu_stream_ms_per_call": 11.99135272155905,
+    "cpu_enqueue_ms_total_nonadditive": 2845.402574923355,
+    "cpu_enqueue_ms_per_call_nonadditive": 13.358697534851432
+  },
+  "acceptance_by_request": {
+    "dspark-real-dspark-warmup-excluded": {
+      "accepted": 14,
+      "drafted": 18,
+      "rate": 0.7777777777777778
+    },
+    "dspark-real-dspark-functional-excluded": {
+      "accepted": 28,
+      "drafted": 35,
+      "rate": 0.8
+    },
+    "dspark-real-dspark-speed-1": {
+      "accepted": 58,
+      "drafted": 70,
+      "rate": 0.8285714285714286
+    },
+    "dspark-real-dspark-speed-2": {
+      "accepted": 58,
+      "drafted": 70,
+      "rate": 0.8285714285714286
+    },
+    "dspark-real-dspark-speed-3": {
+      "accepted": 58,
+      "drafted": 70,
+      "rate": 0.8285714285714286
+    },
+    "dspark-real-dspark-arithmetic": {
+      "accepted": 1,
+      "drafted": 1,
+      "rate": 1.0
+    },
+    "dspark-real-dspark-coding": {
+      "accepted": 49,
+      "drafted": 51,
+      "rate": 0.9607843137254902
+    },
+    "dspark-real-dspark-json": {
+      "accepted": 7,
+      "drafted": 7,
+      "rate": 1.0
+    },
+    "dspark-real-dspark-reasoning-high": {
+      "accepted": 36,
+      "drafted": 48,
+      "rate": 0.75
+    }
+  },
+  "functional_rejection": {
+    "label": "dspark-real-dspark-functional-excluded",
+    "accepted": 28,
+    "drafted": 35,
+    "rejected": 7,
+    "continued_to_tokens": 64,
+    "draft_token_ids_by_call": [
+      [
+        [
+          19393
+        ]
+      ],
+      [
+        [
+          305
+        ]
+      ],
+      [
+        [
+          78651
+        ]
+      ],
+      [
+        [
+          305
+        ]
+      ],
+      [
+        [
+          297
+        ]
+      ],
+      [
+        [
+          271
+        ]
+      ],
+      [
+        [
+          223
+        ]
+      ],
+      [
+        [
+          16
+        ]
+      ],
+      [
+        [
+          59887
+        ]
+      ],
+      [
+        [
+          305
+        ]
+      ],
+      [
+        [
+          1035
+        ]
+      ],
+      [
+        [
+          271
+        ]
+      ],
+      [
+        [
+          5351
+        ]
+      ],
+      [
+        [
+          377
+        ]
+      ],
+      [
+        [
+          2619
+        ]
+      ],
+      [
+        [
+          5554
+        ]
+      ],
+      [
+        [
+          666
+        ]
+      ],
+      [
+        [
+          35
+        ]
+      ],
+      [
+        [
+          18
+        ]
+      ],
+      [
+        [
+          80
+        ]
+      ],
+      [
+        [
+          19
+        ]
+      ],
+      [
+        [
+          66
+        ]
+      ],
+      [
+        [
+          270
+        ]
+      ],
+      [
+        [
+          35
+        ]
+      ],
+      [
+        [
+          63
+        ]
+      ],
+      [
+        [
+          334
+        ]
+      ],
+      [
+        [
+          63
+        ]
+      ],
+      [
+        [
+          362
+        ]
+      ],
+      [
+        [
+          3608
+        ]
+      ],
+      [
+        [
+          818
+        ]
+      ],
+      [
+        [
+          66
+        ]
+      ],
+      [
+        [
+          455
+        ]
+      ],
+      [
+        [
+          344
+        ]
+      ],
+      [
+        [
+          33147
+        ]
+      ],
+      [
+        [
+          4216
+        ]
+      ],
+      [
+        [
+          54
+        ]
+      ]
+    ]
+  },
+  "memory": {
+    "target_plus_draft_model_load_gib_per_rank": 93.85,
+    "model_loading_s_rank0": 219.782264,
+    "historical_target_only_gib_per_rank": 80.37,
+    "observed_increment_gib_per_rank": 13.47999999999999,
+    "rank0_load_resources": {
+      "before_llm": {
+        "monotonic_ns": 195170701480748,
+        "pid": 817787,
+        "ppid": 817601,
+        "tid": 817787,
+        "rank": 0,
+        "rusage_self": {
+          "ru_minflt": 258991,
+          "ru_majflt": 0,
+          "ru_inblock": 9040,
+          "ru_oublock": 208,
+          "ru_utime": 3.099412,
+          "ru_stime": 0.394797
+        },
+        "rusage_children": {
+          "ru_minflt": 4439,
+          "ru_majflt": 0,
+          "ru_inblock": 0,
+          "ru_oublock": 0,
+          "ru_utime": 0.001362,
+          "ru_stime": 0.01077
+        },
+        "observed_live_child_pids": [],
+        "process_io": {
+          "rchar": 382947481,
+          "wchar": 161997,
+          "syscr": 31428,
+          "syscw": 49,
+          "read_bytes": 4628480,
+          "write_bytes": 106496,
+          "cancelled_write_bytes": 0
+        },
+        "status_kib_except_Threads": {
+          "VmRSS": 1268016,
+          "RssAnon": 733440,
+          "RssFile": 464936,
+          "RssShmem": 69640,
+          "VmSwap": 0,
+          "Threads": 4
+        },
+        "meminfo_kib": {
+          "MemFree": 74699436,
+          "MemAvailable": 123386900,
+          "Cached": 49203412,
+          "SwapCached": 362140,
+          "SwapTotal": 8388604,
+          "SwapFree": 5685780
+        },
+        "global_vmstat": {
+          "pswpin": 9087366,
+          "pswpout": 12675556,
+          "pgmajfault": 4389443
+        },
+        "read_errors": {},
+        "snapshot_overhead_ns": 509627
+      },
+      "after_llm": {
+        "monotonic_ns": 195518409481100,
+        "pid": 817787,
+        "ppid": 817601,
+        "tid": 817787,
+        "rank": 0,
+        "rusage_self": {
+          "ru_minflt": 22453416,
+          "ru_majflt": 89313,
+          "ru_inblock": 151435264,
+          "ru_oublock": 17720,
+          "ru_utime": 816.27422,
+          "ru_stime": 138.274115
+        },
+        "rusage_children": {
+          "ru_minflt": 555872,
+          "ru_majflt": 9,
+          "ru_inblock": 1992,
+          "ru_oublock": 0,
+          "ru_utime": 9.756537,
+          "ru_stime": 0.908844
+        },
+        "observed_live_child_pids": [
+          817908,
+          819165
+        ],
+        "process_io": {
+          "rchar": 2378699862,
+          "wchar": 36972828,
+          "syscr": 113616,
+          "syscw": 1033,
+          "read_bytes": 77535875072,
+          "write_bytes": 9072640,
+          "cancelled_write_bytes": 0
+        },
+        "status_kib_except_Threads": {
+          "VmRSS": 2504032,
+          "RssAnon": 1493628,
+          "RssFile": 435580,
+          "RssShmem": 574824,
+          "VmSwap": 779228,
+          "Threads": 94
+        },
+        "meminfo_kib": {
+          "MemFree": 5928320,
+          "MemAvailable": 18918824,
+          "Cached": 14420716,
+          "SwapCached": 282612,
+          "SwapTotal": 8388604,
+          "SwapFree": 4237068
+        },
+        "global_vmstat": {
+          "pswpin": 9370785,
+          "pswpout": 13277472,
+          "pgmajfault": 4526890
+        },
+        "read_errors": {},
+        "snapshot_overhead_ns": 1214009
+      },
+      "cuda": {
+        "allocated_bytes": 102758956544,
+        "reserved_bytes": 104119402496,
+        "free_bytes": 22055002112,
+        "total_bytes": 128849018880
+      }
+    },
+    "rank1_load_resources": {
+      "before_llm": {
+        "monotonic_ns": 256995727461329,
+        "pid": 398506,
+        "ppid": 398405,
+        "tid": 398506,
+        "rank": 1,
+        "rusage_self": {
+          "ru_minflt": 259721,
+          "ru_majflt": 0,
+          "ru_inblock": 6440,
+          "ru_oublock": 344,
+          "ru_utime": 3.063959,
+          "ru_stime": 0.387374
+        },
+        "rusage_children": {
+          "ru_minflt": 4410,
+          "ru_majflt": 0,
+          "ru_inblock": 0,
+          "ru_oublock": 0,
+          "ru_utime": 0.0029,
+          "ru_stime": 0.008183
+        },
+        "observed_live_child_pids": [],
+        "process_io": {
+          "rchar": 382995295,
+          "wchar": 231145,
+          "syscr": 31419,
+          "syscw": 53,
+          "read_bytes": 3297280,
+          "write_bytes": 176128,
+          "cancelled_write_bytes": 0
+        },
+        "status_kib_except_Threads": {
+          "VmRSS": 1271428,
+          "RssAnon": 733548,
+          "RssFile": 468240,
+          "RssShmem": 69640,
+          "VmSwap": 0,
+          "Threads": 4
+        },
+        "meminfo_kib": {
+          "MemFree": 82474844,
+          "MemAvailable": 124789576,
+          "Cached": 42926124,
+          "SwapCached": 21784,
+          "SwapTotal": 8388604,
+          "SwapFree": 8272744
+        },
+        "global_vmstat": {
+          "pswpin": 11020910,
+          "pswpout": 15490219,
+          "pgmajfault": 21224878
+        },
+        "read_errors": {},
+        "snapshot_overhead_ns": 281171
+      },
+      "after_llm": {
+        "monotonic_ns": 257343393473387,
+        "pid": 398506,
+        "ppid": 398405,
+        "tid": 398506,
+        "rank": 1,
+        "rusage_self": {
+          "ru_minflt": 22458802,
+          "ru_majflt": 94179,
+          "ru_inblock": 182818624,
+          "ru_oublock": 17880,
+          "ru_utime": 788.613235,
+          "ru_stime": 96.286719
+        },
+        "rusage_children": {
+          "ru_minflt": 556165,
+          "ru_majflt": 9,
+          "ru_inblock": 1752,
+          "ru_oublock": 0,
+          "ru_utime": 9.768689,
+          "ru_stime": 0.870412
+        },
+        "observed_live_child_pids": [
+          398630,
+          400210
+        ],
+        "process_io": {
+          "rchar": 2376127734,
+          "wchar": 37076442,
+          "syscr": 113431,
+          "syscw": 1018,
+          "read_bytes": 93604032512,
+          "write_bytes": 9154560,
+          "cancelled_write_bytes": 0
+        },
+        "status_kib_except_Threads": {
+          "VmRSS": 2445704,
+          "RssAnon": 1447688,
+          "RssFile": 423184,
+          "RssShmem": 574832,
+          "VmSwap": 824416,
+          "Threads": 94
+        },
+        "meminfo_kib": {
+          "MemFree": 4694448,
+          "MemAvailable": 20257340,
+          "Cached": 17008308,
+          "SwapCached": 771880,
+          "SwapTotal": 8388604,
+          "SwapFree": 6296576
+        },
+        "global_vmstat": {
+          "pswpin": 11241204,
+          "pswpout": 15997380,
+          "pgmajfault": 21334082
+        },
+        "read_errors": {},
+        "snapshot_overhead_ns": 1255308
+      },
+      "cuda": {
+        "allocated_bytes": 102758956544,
+        "reserved_bytes": 104119402496,
+        "free_bytes": 22048968704,
+        "total_bytes": 128849018880
+      }
+    },
+    "note": "Observed increment includes BF16-expanded MXFP8 linears, BF16-dequantized local MXFP4 experts, learned heads, draft KV/workspace/runtime allocations as applicable to model load; no leak attribution is inferred."
+  },
+  "timing_semantics": {
+    "decode_tps": "final emitted completion tokens only: (completion_tokens-1)/(last_token_ts-first_token_ts)",
+    "proposal_gpu": "CUDA-event stream span around real DSpark propose; no synchronize inside timed request; overlaps target/runtime and is not added to client wall",
+    "cpu_enqueue": "host-side propose call duration; may include/overlap GPU work and is not additive"
+  },
+  "a040": "PENDING_NOT_STARTED_AT_VALIDATION_TIME",
+  "completed_utc": "2026-09-14T15:34:10.312579+00:00"
+}

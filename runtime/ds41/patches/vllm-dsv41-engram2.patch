@@ -44,7 +44,7 @@ index db20adb..9c6f458 100644
          topk_weights,
          topk_indices,
 diff --git a/vllm/config/speculative.py b/vllm/config/speculative.py
-index ae56e58..44e3ff2 100644
+index ae56e58..b115ca9 100644
 --- a/vllm/config/speculative.py
 +++ b/vllm/config/speculative.py
 @@ -1289,7 +1289,11 @@ class SpeculativeConfig:
@@ -60,7 +60,7 @@ index ae56e58..44e3ff2 100644
                  )
  
                  # Old-format Medusa checkpoints (e.g. FasterDecoding/medusa-*)
-@@ -1436,9 +1440,14 @@ class SpeculativeConfig:
+@@ -1436,10 +1440,21 @@ class SpeculativeConfig:
                          draft_hf_config.n_predict = getattr(
                              draft_hf_config, "dspark_block_size", None
                          ) or getattr(draft_hf_config, "n_predict", None)
@@ -76,8 +76,15 @@ index ae56e58..44e3ff2 100644
 +                            self.target_model_config.quantization
 +                        )
                      self.update_arch_()
++                    # hf_config_override initially presents DeepSeek drafts as
++                    # deepseek_mtp, so ModelConfig cannot select the V4/V4.1
++                    # expert-aware FP8 config during construction. Re-resolve
++                    # after DSpark restores the real DeepSeek model_type/arch.
++                    if self.draft_load_config is not None:
++                        self.draft_model_config._verify_quantization()
                  elif (
                      self.method == "dspark"
+                     and "Gemma4DSparkModel" in self.draft_model_config.architectures
 diff --git a/vllm/engine/arg_utils.py b/vllm/engine/arg_utils.py
 index db39843..5e9a82a 100644
 --- a/vllm/engine/arg_utils.py

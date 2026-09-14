@@ -57,9 +57,10 @@ def main():
     assert Path(sp.draft_model_config.model)==Path(SIDE)
     assert sp.draft_model_config.config_format != 'gguf'
     assert str(sp.draft_load_config.load_format) == 'safetensors'
-    assert sp.draft_model_config.quantization == 'fp8'
+    assert sp.draft_model_config.quantization == 'deepseek_v4_fp8'
+    assert type(dq).__name__ == 'DeepseekV4FP8Config', type(dq).__name__
     assert type(dq).__name__ != type(cfg.quant_config).__name__
-    assert 'fp8' in type(dq).__name__.lower(), type(dq).__name__
+    assert getattr(dq,'weight_block_size',None) == [32,32]
     assert sp.num_speculative_tokens==1 and sp.parallel_drafting
     assert list(sp.draft_model_config.hf_config.dspark_target_layer_ids)==[37,38,39]
     assert sp.draft_model_config.hf_config.num_nextn_predict_layers==3

@@ -12,8 +12,8 @@
     "model": "/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac",
     "config_format": "auto",
     "load_format": "safetensors",
-    "quantization": "fp8",
-    "quant_config_class": "Fp8Config",
+    "quantization": "deepseek_v4_fp8",
+    "quant_config_class": "DeepseekV4FP8Config",
     "method": "dspark",
     "K": 1,
     "parallel_drafting": true,
@@ -39,5 +39,5 @@
   "overlay_reproducible": true,
   "target_global_load_config_mutated": false,
   "model_initialized": false,
-  "completed_utc": "2026-09-14T13:19:28Z"
+  "completed_utc": "2026-09-14T13:24:39Z"
 }

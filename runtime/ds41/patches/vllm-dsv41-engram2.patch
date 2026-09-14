@@ -283,6 +283,101 @@ index 6cd2176..3003164 100644
  
      return (
          VllmConfig.get_quantization_config(draft_model_config, draft_load_config)
+diff --git a/vllm/models/deepseek_v4_1/amd/dspark.py b/vllm/models/deepseek_v4_1/amd/dspark.py
+index 3a6cef8..68179b6 100644
+--- a/vllm/models/deepseek_v4_1/amd/dspark.py
++++ b/vllm/models/deepseek_v4_1/amd/dspark.py
+@@ -12,6 +12,7 @@ include the future query tokens in the top-k indices for each query token.
+ 
+ from collections.abc import Iterable
+ 
++import os
+ import regex as re
+ import torch
+ import torch.nn as nn
+@@ -59,6 +60,7 @@ logger = init_logger(__name__)
+ # MoE expert scale suffix differs by expert dtype (mirrors deepseek_v4 loaders):
+ # fp4 experts register ``.weight_scale``; block-fp8 experts ``.weight_scale_inv``.
+ _EXPERT_SCALE_RE = re.compile(r"\.experts\.\d+\.w[123]\.scale$")
++_DSPARK_EXPERT_RAW_RE = re.compile(r"mtp\.(\d+)\.ffn\.experts\.(\d+)\.(w[123])\.(weight|scale)$")
+ 
+ 
+ class DSparkDeepseekV4Model(nn.Module):
+@@ -417,6 +419,8 @@ class DSparkDeepseekV4ForCausalLM(nn.Module):
+         params_dict = dict(self.named_parameters())
+         loaded_params: set[str] = set()
+         loaded_confidence_head = False
++        bf16_expert_fallback = os.environ.get("DS41_DSPARK_MXFP4_BF16", "0") == "1"
++        pending_expert_parts: dict[tuple[int, int, str], dict[str, torch.Tensor]] = {}
+ 
+         tp_size = get_tensor_model_parallel_world_size()
+         tp_rank = get_tensor_model_parallel_rank()
+@@ -425,6 +429,54 @@ class DSparkDeepseekV4ForCausalLM(nn.Module):
+         head_end = n_local_head * (tp_rank + 1)
+ 
+         for name, loaded_weight in weights:
++            if bf16_expert_fallback:
++                raw_expert = _DSPARK_EXPERT_RAW_RE.fullmatch(name)
++                if raw_expert is not None:
++                    stage = int(raw_expert.group(1))
++                    expert_id = int(raw_expert.group(2))
++                    proj = raw_expert.group(3)
++                    kind = raw_expert.group(4)
++                    if stage >= len(self.model.layers):
++                        raise RuntimeError(f"invalid DSpark expert stage in {name}")
++                    ffn = self.model.layers[stage].ffn
++                    # EP2 ownership: discard remote expert checkpoint rows before
++                    # any dequantization/copy. Each rank owns a contiguous half.
++                    if not (ffn.experts_start_idx <= expert_id < ffn.experts_end_idx):
++                        continue
++                    key = (stage, expert_id, proj)
++                    parts = pending_expert_parts.setdefault(key, {})
++                    parts[kind] = loaded_weight
++                    if "weight" in parts and "scale" in parts:
++                        raw_weight = parts["weight"]
++                        raw_scale = parts["scale"]
++                        mapped_weight = self._remap_dspark_name(
++                            f"mtp.{stage}.ffn.experts.{expert_id}.{proj}.weight"
++                        )
++                        assert mapped_weight is not None
++                        loaded = False
++                        for param_name, weight_name, mapped_expert_id, shard_id in expert_mapping:
++                            if mapped_expert_id != expert_id or weight_name not in mapped_weight:
++                                continue
++                            name_mapped = mapped_weight.replace(weight_name, param_name)
++                            param = params_dict[name_mapped]
++                            from vllm.utils.flashinfer_moe_ep import _dequant_fp4_ue8m0_gran32
++                            full_weight = _dequant_fp4_ue8m0_gran32(
++                                raw_weight.to(device=param.device, non_blocking=False),
++                                raw_scale.view(torch.uint8).to(device=param.device, non_blocking=False),
++                            )
++                            success = param.weight_loader(
++                                param, full_weight, name_mapped, shard_id=shard_id,
++                                expert_id=expert_id, return_success=True,
++                            )
++                            del full_weight
++                            if success:
++                                loaded_params.add(name_mapped)
++                                loaded = True
++                                break
++                        if not loaded:
++                            raise RuntimeError(f"failed to load local BF16 DSpark expert {key}")
++                        del pending_expert_parts[key]
++                    continue
+             mapped = self._remap_dspark_name(name)
+             if mapped is None:
+                 continue
+@@ -499,6 +551,10 @@ class DSparkDeepseekV4ForCausalLM(nn.Module):
+                 weight_loader(param, loaded_weight)
+                 loaded_params.add(name)
+ 
++        if bf16_expert_fallback and pending_expert_parts:
++            missing = sorted((k, sorted(v)) for k, v in pending_expert_parts.items())[:8]
++            raise RuntimeError(f"incomplete DSpark FP4 expert weight/scale pairs: {missing}")
++
+         if self.model.confidence_head is not None and not loaded_confidence_head:
+             self.model.confidence_head = None
+         self.process_weights_after_loading()
 diff --git a/vllm/models/deepseek_v4_1/amd/rocm.py b/vllm/models/deepseek_v4_1/amd/rocm.py
 index 9271e7a..3aa88e1 100644
 --- a/vllm/models/deepseek_v4_1/amd/rocm.py
@@ -823,6 +918,34 @@ index f30c3a5..27d942d 100644
  
          max_tokens = get_current_vllm_config().scheduler_config.max_num_batched_tokens
          # Keep lookup results alive across breakable graph segments.
+diff --git a/vllm/models/deepseek_v4_1/quant_config.py b/vllm/models/deepseek_v4_1/quant_config.py
+index c8361b2..6df5640 100644
+--- a/vllm/models/deepseek_v4_1/quant_config.py
++++ b/vllm/models/deepseek_v4_1/quant_config.py
+@@ -4,6 +4,7 @@
+ 
+ from __future__ import annotations
+ 
++import os
+ from typing import TYPE_CHECKING, cast
+ 
+ from vllm.config import get_current_vllm_config
+@@ -214,6 +215,15 @@ class DeepseekV4FP8Config(Fp8Config):
+             ):
+                 return UnquantizedFusedMoEMethod(layer.moe_config)
+             if self.expert_dtype == "fp4":
++                # Strix Halo experimental DSpark-only fallback: the official
++                # MXFP4 backend requires optional triton_kernels/AITER support
++                # that is unavailable on gfx1151 in this pinned environment.
++                # Create BF16 expert parameters directly; DSpark load_weights
++                # dequantizes the immutable MXFP4 checkpoint one local matrix
++                # at a time and the normal unquantized Triton MoE executes it.
++                # Target GGUF never uses this quant config.
++                if os.environ.get("DS41_DSPARK_MXFP4_BF16", "0") == "1":
++                    return UnquantizedFusedMoEMethod(layer.moe_config)
+                 if self.moe_quant_algo == "NVFP4":
+                     from vllm.model_executor.layers.quantization.modelopt import (
+                         ModelOptNvFp4FusedMoE,
 diff --git a/vllm/transformers_utils/config.py b/vllm/transformers_utils/config.py
 index 93e3ad4..c83b0a3 100644
 --- a/vllm/transformers_utils/config.py

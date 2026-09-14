@@ -108,6 +108,7 @@ def run_generation(
     label: str,
     max_tokens: int,
     ignore_eos: bool = False,
+    capture_drafts: bool = False,
 ) -> dict[str, Any]:
     params = SamplingParams(
         temperature=0.0,
@@ -122,6 +123,10 @@ def run_generation(
         max_tokens=max_tokens,
         ignore_eos=ignore_eos,
     )
+    telemetry_start = None
+    if os.environ.get("DS41_REAL_DSPARK_TELEMETRY", "0") == "1":
+        from runtime.ds41.dspark_telemetry import begin as dspark_begin
+        telemetry_start = dspark_begin(capture_tokens=capture_drafts)
     start = time.monotonic()
     outputs = llm.generate(
         {"prompt_token_ids": prompt_tokens},
@@ -129,6 +134,10 @@ def run_generation(
         use_tqdm=False,
     )
     end = time.monotonic()
+    draft_timing = None
+    if telemetry_start is not None:
+        from runtime.ds41.dspark_telemetry import end as dspark_end
+        draft_timing = dspark_end(telemetry_start)
     if len(outputs) != 1 or len(outputs[0].outputs) != 1:
         raise RuntimeError(f"unexpected output cardinality for {label}: {outputs!r}")
     request = outputs[0]
@@ -144,6 +153,8 @@ def run_generation(
         if last_ts > first_ts:
             decode_span = last_ts - first_ts
             decode_tps = (len(tokens) - 1) / decode_span
+    spec_decode = getattr(completion, "spec_decode_metrics", None)
+    spec_decode_dict = spec_decode.to_dict() if spec_decode is not None else None
     result = {
         "label": label,
         "prompt_token_count": len(prompt_tokens),
@@ -158,6 +169,8 @@ def run_generation(
             "wall_s": end - start,
             "ttft_s": first_token_latency,
         },
+        "spec_decode_metrics": spec_decode_dict,
+        "dspark_draft_timing": draft_timing,
         "derived": {
             "decode_span_s": decode_span,
             "decode_tps_first_to_last": decode_tps,
@@ -190,7 +203,10 @@ def main() -> int:
     fault_cfg = token_spec.get("fault_diagnostic")
     advice_cfg = token_spec.get("engram_advice_ab")
     block_cfg = token_spec.get("block_verify")
+    dspark_real_cfg = token_spec.get("dspark_real")
     block_speculative = None
+    engine_speculative = None
+    dspark_real_arm: str | None = None
     if isinstance(block_cfg, dict):
         if any(isinstance(cfg, dict) for cfg in (
             native_hip_ab_cfg, mhc_ab_cfg, projection_rms_ab_cfg, wob_llmm1_ab_cfg,
@@ -204,6 +220,60 @@ def main() -> int:
         from runtime.ds41.block_verify_experiment import install_bridge, SPECULATIVE_CONFIG
         install_bridge()
         block_speculative = SPECULATIVE_CONFIG
+        engine_speculative = block_speculative
+
+    if isinstance(dspark_real_cfg, dict):
+        if any(isinstance(cfg, dict) for cfg in (
+            native_hip_ab_cfg, mhc_ab_cfg, projection_rms_ab_cfg, wob_llmm1_ab_cfg,
+            fault_cfg, advice_cfg, block_cfg, token_spec.get("profile_mode"),
+        )):
+            raise ValueError("Real DSpark run cannot be combined with another experiment")
+        dspark_real_arm = str(dspark_real_cfg.get("arm", ""))
+        if dspark_real_arm not in ("m1", "dspark"):
+            raise ValueError("dspark_real.arm must be m1 or dspark")
+        for key in ("speed", "arithmetic", "coding", "json", "reasoning_high"):
+            if not prompts.get(key, {}).get("token_ids"):
+                raise ValueError(f"Real DSpark fixture is missing {key}")
+        for key, expected in (("warmup_tokens", 32), ("speed_tokens", 128),
+                              ("functional_tokens", 64),
+                              ("reasoning_high_max_tokens", 128)):
+            if int(dspark_real_cfg.get(key, expected)) != expected:
+                raise ValueError(f"Real DSpark frozen protocol requires {key}={expected}")
+        for key in WOB_PROMOTED_SWITCHES:
+            os.environ[key] = "1"
+        os.environ["DS41_ENGRAM_RANDOM_ADVICE"] = "1"
+        os.environ["DS41_ATTN_WOB_LLMM1"] = "0"
+        if dspark_real_arm == "dspark":
+            sidecar = str(dspark_real_cfg.get("sidecar"))
+            if sidecar != "/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac":
+                raise ValueError("Real DSpark sidecar path drift")
+            os.environ["DS41_DSPARK_MXFP4_BF16"] = "1"
+            os.environ["DS41_NATIVE_HIP_MOE_ROWWISE"] = "1"
+            os.environ["DS41_MHC_ROWWISE_BLOCK"] = "1"
+            os.environ["DS41_REAL_DSPARK_TELEMETRY"] = "1"
+            from runtime.ds41.dspark_telemetry import install as install_dspark_telemetry
+            install_dspark_telemetry()
+            engine_speculative = {
+                "method": "dspark",
+                "model": sidecar,
+                "num_speculative_tokens": 1,
+                "quantization": "fp8",
+                "enable_adaptive_verification": False,
+                "draft_tensor_parallel_size": 2,
+                "draft_load_config": {
+                    "load_format": "safetensors",
+                    "safetensors_load_strategy": "lazy",
+                },
+                "draft_sample_method": "greedy",
+                "rejection_sample_method": "standard",
+            }
+        else:
+            os.environ.pop("DS41_DSPARK_MXFP4_BF16", None)
+            os.environ.pop("DS41_NATIVE_HIP_MOE_ROWWISE", None)
+            os.environ.pop("DS41_MHC_ROWWISE_BLOCK", None)
+            os.environ["DS41_REAL_DSPARK_TELEMETRY"] = "0"
+            engine_speculative = None
+
     fault_observe = isinstance(fault_cfg, dict) or isinstance(advice_cfg, dict)
     if fault_observe:
         if isinstance(fault_cfg, dict) and isinstance(advice_cfg, dict):
@@ -273,6 +343,10 @@ def main() -> int:
         attempt=ATTEMPT,
         epoch=os.environ.get("DS41_OWNER_EPOCH"),
     )
+    dspark_load_resources = None
+    if isinstance(dspark_real_cfg, dict):
+        from runtime.ds41.fault_diagnostics import process_snapshot
+        dspark_load_resources = {"before_llm": process_snapshot(RANK)}
     fault_load = None
     if fault_observe:
         from runtime.ds41.fault_diagnostics import process_snapshot
@@ -306,9 +380,23 @@ def main() -> int:
         seed=1,
         generation_config="vllm",
         disable_log_stats=False,
-        speculative_config=block_speculative,
+        speculative_config=engine_speculative,
+        per_request_spec_decode_metrics=(
+            "detailed" if dspark_real_arm == "dspark" else "none"
+        ),
     )
     init_s = time.monotonic() - init_start
+    if dspark_load_resources is not None:
+        import torch
+        from runtime.ds41.fault_diagnostics import process_snapshot
+        free_bytes, total_bytes = torch.cuda.mem_get_info()
+        dspark_load_resources["after_llm"] = process_snapshot(RANK)
+        dspark_load_resources["cuda"] = {
+            "allocated_bytes": int(torch.cuda.memory_allocated()),
+            "reserved_bytes": int(torch.cuda.memory_reserved()),
+            "free_bytes": int(free_bytes),
+            "total_bytes": int(total_bytes),
+        }
     if fault_load is not None:
         fault_load["after_llm"] = process_snapshot(RANK)
         fault_load["engine_core_type"] = type(llm.llm_engine.engine_core).__qualname__
@@ -343,6 +431,76 @@ def main() -> int:
         tmp = RESULT_PATH.with_suffix(RESULT_PATH.suffix + ".tmp")
         tmp.write_text(json.dumps(checkpoint, indent=2, ensure_ascii=False) + "\n")
         os.replace(tmp, RESULT_PATH)
+
+    if isinstance(dspark_real_cfg, dict):
+        arm = dspark_real_arm
+        assert arm in ("m1", "dspark")
+        warmup_tokens = int(dspark_real_cfg["warmup_tokens"])
+        speed_tokens = int(dspark_real_cfg["speed_tokens"])
+        functional_tokens = int(dspark_real_cfg["functional_tokens"])
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"],
+            label=f"dspark-real-{arm}-warmup-excluded",
+            max_tokens=warmup_tokens, ignore_eos=True,
+        ))
+        save_checkpoint("DSPARK_REAL_WARMUP_COMPLETE")
+        results.append(run_generation(
+            llm, prompts["speed"]["token_ids"],
+            label=f"dspark-real-{arm}-functional-excluded",
+            max_tokens=functional_tokens, ignore_eos=True,
+            capture_drafts=(arm == "dspark"),
+        ))
+        save_checkpoint("DSPARK_REAL_FUNCTIONAL_COMPLETE")
+        for trial in range(1, 4):
+            results.append(run_generation(
+                llm, prompts["speed"]["token_ids"],
+                label=f"dspark-real-{arm}-speed-{trial}",
+                max_tokens=speed_tokens, ignore_eos=True,
+            ))
+            save_checkpoint(f"DSPARK_REAL_SPEED_{trial}_COMPLETE")
+        for label, prompt_key, cap in (
+            ("arithmetic", "arithmetic", 128),
+            ("coding", "coding", 512),
+            ("json", "json", 256),
+            ("reasoning-high", "reasoning_high",
+             int(dspark_real_cfg.get("reasoning_high_max_tokens", 128))),
+        ):
+            results.append(run_generation(
+                llm, prompts[prompt_key]["token_ids"],
+                label=f"dspark-real-{arm}-{label}",
+                max_tokens=cap, ignore_eos=False,
+            ))
+            save_checkpoint(f"DSPARK_REAL_{label.upper()}_COMPLETE")
+        summary = {
+            "status": "DSPARK_REAL_ARM_COMPLETE",
+            "arm": arm,
+            "rank": RANK,
+            "world_size": WORLD_SIZE,
+            "attempt": ATTEMPT,
+            "epoch": os.environ.get("DS41_OWNER_EPOCH"),
+            "init_s": init_s,
+            "artifact_identity": artifact_identity,
+            "native_hip_identity": native_hip_identity,
+            "prompt_tokens_file": str(TOKENS_PATH),
+            "load_resources": dspark_load_resources,
+            "runtime_switches": {
+                key: os.environ.get(key) for key in (
+                    *WOB_PROMOTED_SWITCHES,
+                    "DS41_ATTN_WOB_LLMM1",
+                    "DS41_NATIVE_HIP_MOE_ROWWISE",
+                    "DS41_MHC_ROWWISE_BLOCK",
+                    "DS41_DSPARK_MXFP4_BF16",
+                )
+            },
+            "speculative_config": engine_speculative,
+            "results": results,
+        }
+        tmp = RESULT_PATH.with_suffix(RESULT_PATH.suffix + ".tmp")
+        tmp.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
+        os.replace(tmp, RESULT_PATH)
+        emit("run_complete", status=summary["status"], arm=arm, result=str(RESULT_PATH))
+        return 0
+
 
     if isinstance(advice_cfg, dict):
         from runtime.ds41.engram_advice_experiment import run_experiment

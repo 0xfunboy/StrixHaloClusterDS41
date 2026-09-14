@@ -1,0 +1,179 @@
+{
+  "schema": "ds41-attempt034-state-cost-result-v1",
+  "status": "STATE_FAIL_B4_CORRUPT_FIRST / B2_CLEAN_COST_QUALIFIED / STOP",
+  "runtime_source": "289802e68919e35c7119335bd9002e95bd033e0b",
+  "math_fix": "ce446ef62836980b4d4a3c9a62b4374ba3394c8d",
+  "validator": "03f6699194bf4de1dc6cac960369614712f77d2e",
+  "epoch": "1789374349758447205",
+  "fidelity": {
+    "B1": {
+      "passed": true,
+      "positions": 56,
+      "max_rel_l2": 0.0,
+      "max_abs": 0.0
+    },
+    "B2": {
+      "passed": true,
+      "positions": 56,
+      "max_rel_l2": 0.0,
+      "max_abs": 0.0
+    },
+    "B4": {
+      "passed": true,
+      "positions": 56,
+      "max_rel_l2": 0.0,
+      "max_abs": 0.0
+    }
+  },
+  "state_recovery": {
+    "overall": "FAIL",
+    "corrupt_first": {
+      "passed": false,
+      "corrupted_position": 43,
+      "packet_positions": [
+        42,
+        43,
+        44,
+        45
+      ],
+      "num_rejected": 3,
+      "num_sampled": 1,
+      "returned_oracle_tokens": true,
+      "first_residual_divergence_position": 95,
+      "bad_positions": [
+        {
+          "position": 95,
+          "rel_l2": 0.011163844655488591,
+          "max_abs": 0.25,
+          "top1": 260
+        },
+        {
+          "position": 96,
+          "rel_l2": 0.011502877049909805,
+          "max_abs": 0.232421875,
+          "top1": 4216
+        },
+        {
+          "position": 97,
+          "rel_l2": 0.009784480734412645,
+          "max_abs": 0.203125,
+          "top1": 3608
+        }
+      ],
+      "rank0_reject_step_ms": 170.9267690021079,
+      "rank1_reject_step_ms": 171.9324610021431,
+      "note": "Diagnostic capture mode; timing is observed but not performance-qualified."
+    },
+    "corrupt_last": {
+      "passed": true,
+      "corrupted_position": 45,
+      "packet_positions": [
+        42,
+        43,
+        44,
+        45
+      ],
+      "num_rejected": 1,
+      "num_sampled": 3,
+      "max_rel_l2": 0.0,
+      "max_abs": 0.0,
+      "rank0_reject_step_ms": 146.17985099903308,
+      "rank1_reject_step_ms": 146.91271001356654,
+      "note": "State control PASS; diagnostic capture timing is not used for throughput."
+    }
+  },
+  "cost": {
+    "measurement_scope": "Complete selected EngineCore step including replay proposal bridge, scheduler/post_step and GPU completion; rank-coupled max wall. Real drafter absent.",
+    "M1": {
+      "qualified": true,
+      "blocks": 72,
+      "positions_per_block": 1,
+      "mean_ms_per_token": 79.05618990520856,
+      "median_ms": 78.17462849197909,
+      "sd_ms": 2.432386988269724,
+      "min_ms": 77.26456399541348,
+      "max_ms": 92.32826498919167,
+      "ideal_tokens_per_s": 12.649230897656956,
+      "trial_mean_ms": [
+        79.61414037830157,
+        79.00616437594483,
+        78.54826496137927
+      ]
+    },
+    "B2": {
+      "qualified_clean_full_acceptance": true,
+      "blocks": 36,
+      "positions_per_block": 2,
+      "actual_new_tokens_per_full_block": 2,
+      "mean_ms_per_block": 93.74321930550246,
+      "median_ms": 92.9331994993845,
+      "sd_ms": 3.527256720195336,
+      "min_ms": 91.29957301774994,
+      "max_ms": 111.98410802171566,
+      "ideal_free_drafter_tokens_per_s": 21.33487642964493,
+      "trial_mean_ms": [
+        93.01187982782722,
+        95.29545983483938,
+        92.92231825384079
+      ],
+      "steady_replay_proposal_wall_ms_mean_rank0": 2.8453897531209,
+      "steady_replay_proposal_wall_ms_mean_rank1": 3.072429195324528,
+      "note": "Proposal bridge time is already included in complete block wall; it is not a real DSpark drafter."
+    },
+    "B4": {
+      "qualified": false,
+      "reason": "corrupt-first state recovery FAIL",
+      "ms_per_block": null
+    },
+    "comparison": {
+      "two_M1_mean_ms": 158.1123798104171,
+      "B2_mean_ms": 93.74321930550246,
+      "margin_ms_per_B2_block_before_real_drafter_and_extra_overhead": 64.36916050491466,
+      "margin_fraction_of_two_M1": 0.4070904356304507,
+      "ideal_verifier_speedup_vs_two_M1": 1.686888746322086,
+      "trial_margin_ms": [
+        66.21640092877593,
+        62.71686891705029,
+        64.17421166891776
+      ]
+    }
+  },
+  "per_row_components": [
+    "routed native M1 expert path per packet row",
+    "mHC TileLang projection/RMS M1 per packet row"
+  ],
+  "batched_components": [
+    "mHC fused coefficient/Sinkhorn one call on [T,24]",
+    "shared expert",
+    "normal TP all-reduce"
+  ],
+  "excluded_costs": [
+    "real DSpark drafter inference",
+    "real acceptance distribution",
+    "qualified B4 cost",
+    "production rejection/recovery cost after corrupt-first because state gate failed",
+    "HTTP/API overhead",
+    "DSpark integration overhead"
+  ],
+  "decision": {
+    "B2": "MARGIN_PRESENT_CLEAN_BOUND: 64.369 ms per accepted two-token block remains for real drafter plus any extra overhead under perfect acceptance.",
+    "B4": "NOT_QUALIFIED: corrupt-first recovery leaves latent state divergence despite oracle token stream.",
+    "overall": "STOP. Correct verifier shows clean B2 economic headroom but speculative system is not state-qualified; do not integrate DSpark or start another optimization campaign from this mandate.",
+    "not_a_physical_limit": true
+  },
+  "cleanup": {
+    "supervisor_rc": 0,
+    "node01": "OFF_VERIFIED",
+    "node02": "OFF_VERIFIED",
+    "owner": "NONE/OFF",
+    "at": "2026-09-14T08:33:29Z"
+  },
+  "raw": [
+    "reports/DS41-Q2-001/attempt034/preregister.json",
+    "reports/DS41-Q2-001/attempt034/prompt-tokens.json",
+    "reports/DS41-Q2-001/attempt034/block-verification-rank0.json",
+    "reports/DS41-Q2-001/attempt034/node02/block-verification-rank1.json",
+    "reports/DS41-Q2-001/attempt034/rank0.log",
+    "reports/DS41-Q2-001/attempt034/supervisor.log"
+  ]
+}

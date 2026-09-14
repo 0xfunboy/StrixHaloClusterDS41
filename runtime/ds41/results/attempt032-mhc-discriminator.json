@@ -1,0 +1,441 @@
+{
+  "schema": "ds41-attempt032-mhc-discriminator-result-v1",
+  "status": "PASS",
+  "source_commit": "db633e79e0e131b01f952dec015208279c700ddc",
+  "nodes": [
+    "01-EVO-X3",
+    "02-EVO-X3"
+  ],
+  "rank_results_identical": true,
+  "model_initialized": false,
+  "generation_requests": 0,
+  "projection_PB_vs_P1_row0": {
+    "shape_match": true,
+    "shape": [
+      1,
+      24
+    ],
+    "candidate_dtype": "torch.float32",
+    "reference_dtype": "torch.float32",
+    "exact": false,
+    "different_elements": 24,
+    "numel": 24,
+    "reference_norm": 302.71380615234375,
+    "difference_norm": 0.0003415982355363667,
+    "relative_l2": 1.1284527781479975e-06,
+    "zero_norm_handling": "nonzero_reference",
+    "max_abs": 0.0001678466796875,
+    "mean_abs": 4.9680471420288086e-05,
+    "finite": true
+  },
+  "coefficient_isolation_on_same_PB_mixes": {
+    "pre": {
+      "shape_match": true,
+      "shape": [
+        1,
+        4
+      ],
+      "candidate_dtype": "torch.float32",
+      "reference_dtype": "torch.float32",
+      "exact": false,
+      "different_elements": 3,
+      "numel": 4,
+      "reference_norm": 0.8203697204589844,
+      "difference_norm": 3.072041465657094e-08,
+      "relative_l2": 3.7447036245296006e-08,
+      "zero_norm_handling": "nonzero_reference",
+      "max_abs": 2.9802322387695312e-08,
+      "mean_abs": 9.371433407068253e-09,
+      "finite": true
+    },
+    "post": {
+      "shape_match": true,
+      "shape": [
+        1,
+        4
+      ],
+      "candidate_dtype": "torch.float32",
+      "reference_dtype": "torch.float32",
+      "exact": false,
+      "different_elements": 1,
+      "numel": 4,
+      "reference_norm": 1.0591206550598145,
+      "difference_norm": 1.4901161193847656e-08,
+      "relative_l2": 1.4069370777219055e-08,
+      "zero_norm_handling": "nonzero_reference",
+      "max_abs": 1.4901161193847656e-08,
+      "mean_abs": 3.725290298461914e-09,
+      "finite": true
+    },
+    "comb": {
+      "shape_match": true,
+      "shape": [
+        1,
+        4,
+        4
+      ],
+      "candidate_dtype": "torch.float32",
+      "reference_dtype": "torch.float32",
+      "exact": false,
+      "different_elements": 13,
+      "numel": 16,
+      "reference_norm": 1.7795727252960205,
+      "difference_norm": 8.757970704209583e-08,
+      "relative_l2": 4.9213896008395784e-08,
+      "zero_norm_handling": "nonzero_reference",
+      "max_abs": 5.960464477539063e-08,
+      "mean_abs": 1.0430426300445106e-08,
+      "finite": true
+    }
+  },
+  "C1_T2_T4_batch_equals_concat_T1": true,
+  "combinations_vs_M1_target_row0": {
+    "PB_CB": {
+      "next_pre": {
+        "shape_match": true,
+        "shape": [
+          1,
+          4
+        ],
+        "candidate_dtype": "torch.float32",
+        "reference_dtype": "torch.float32",
+        "exact": false,
+        "different_elements": 4,
+        "numel": 4,
+        "reference_norm": 0.8203701376914978,
+        "difference_norm": 4.0679105950403027e-07,
+        "relative_l2": 4.958628316831847e-07,
+        "zero_norm_handling": "nonzero_reference",
+        "max_abs": 3.5762786865234375e-07,
+        "mean_abs": 1.398148015141487e-07,
+        "finite": true
+      },
+      "post_mix": {
+        "shape_match": true,
+        "shape": [
+          1,
+          4,
+          1
+        ],
+        "candidate_dtype": "torch.float32",
+        "reference_dtype": "torch.float32",
+        "exact": false,
+        "different_elements": 3,
+        "numel": 4,
+        "reference_norm": 1.0591204166412354,
+        "difference_norm": 4.600092609052808e-07,
+        "relative_l2": 4.343314071539644e-07,
+        "zero_norm_handling": "nonzero_reference",
+        "max_abs": 3.5762786865234375e-07,
+        "mean_abs": 1.7508864402770996e-07,
+        "finite": true
+      },
+      "res_mix": {
+        "shape_match": true,
+        "shape": [
+          1,
+          4,
+          4
+        ],
+        "candidate_dtype": "torch.float32",
+        "reference_dtype": "torch.float32",
+        "exact": false,
+        "different_elements": 14,
+        "numel": 16,
+        "reference_norm": 1.7795729637145996,
+        "difference_norm": 8.172219736479747e-07,
+        "relative_l2": 4.592236397782436e-07,
+        "zero_norm_handling": "nonzero_reference",
+        "max_abs": 4.76837158203125e-07,
+        "mean_abs": 1.113846792577533e-07,
+        "finite": true
+      },
+      "layer_input": {
+        "shape_match": true,
+        "shape": [
+          1,
+          5120
+        ],
+        "candidate_dtype": "torch.bfloat16",
+        "reference_dtype": "torch.bfloat16",
+        "exact": true,
+        "different_elements": 0,
+        "numel": 5120,
+        "reference_norm": 19.526836395263672,
+        "difference_norm": 0.0,
+        "relative_l2": 0.0,
+        "zero_norm_handling": "nonzero_reference",
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "finite": true
+      }
+    },
+    "PB_C1": {
+      "next_pre": {
+        "shape_match": true,
+        "shape": [
+          1,
+          4
+        ],
+        "candidate_dtype": "torch.float32",
+        "reference_dtype": "torch.float32",
+        "exact": false,
+        "different_elements": 3,
+        "numel": 4,
+        "reference_norm": 0.8203701376914978,
+        "difference_norm": 4.217324089950125e-07,
+        "relative_l2": 5.14075768508295e-07,
+        "zero_norm_handling": "nonzero_reference",
+        "max_abs": 3.5762786865234375e-07,
+        "mean_abs": 1.4546094462275505e-07,
+        "finite": true
+      },
+      "post_mix": {
+        "shape_match": true,
+        "shape": [
+          1,
+          4,
+          1
+        ],
+        "candidate_dtype": "torch.float32",
+        "reference_dtype": "torch.float32",
+        "exact": false,
+        "different_elements": 3,
+        "numel": 4,
+        "reference_norm": 1.0591204166412354,
+        "difference_norm": 4.5099096723788534e-07,
+        "relative_l2": 4.2581651732113973e-07,
+        "zero_norm_handling": "nonzero_reference",
+        "max_abs": 3.5762786865234375e-07,
+        "mean_abs": 1.7136335372924805e-07,
+        "finite": true
+      },
+      "res_mix": {
+        "shape_match": true,
+        "shape": [
+          1,
+          4,
+          4
+        ],
+        "candidate_dtype": "torch.float32",
+        "reference_dtype": "torch.float32",
+        "exact": false,
+        "different_elements": 15,
+        "numel": 16,
+        "reference_norm": 1.7795729637145996,
+        "difference_norm": 8.031921083784255e-07,
+        "relative_l2": 4.513398016015476e-07,
+        "zero_norm_handling": "nonzero_reference",
+        "max_abs": 4.76837158203125e-07,
+        "mean_abs": 1.12370230453962e-07,
+        "finite": true
+      },
+      "layer_input": {
+        "shape_match": true,
+        "shape": [
+          1,
+          5120
+        ],
+        "candidate_dtype": "torch.bfloat16",
+        "reference_dtype": "torch.bfloat16",
+        "exact": true,
+        "different_elements": 0,
+        "numel": 5120,
+        "reference_norm": 19.526836395263672,
+        "difference_norm": 0.0,
+        "relative_l2": 0.0,
+        "zero_norm_handling": "nonzero_reference",
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "finite": true
+      }
+    },
+    "P1_CB": {
+      "next_pre": {
+        "shape_match": true,
+        "shape": [
+          1,
+          4
+        ],
+        "candidate_dtype": "torch.float32",
+        "reference_dtype": "torch.float32",
+        "exact": false,
+        "different_elements": 2,
+        "numel": 4,
+        "reference_norm": 0.8203701376914978,
+        "difference_norm": 7.452626960002817e-09,
+        "relative_l2": 9.084468848383893e-09,
+        "zero_norm_handling": "nonzero_reference",
+        "max_abs": 7.450580596923828e-09,
+        "mean_abs": 1.9063008949160576e-09,
+        "finite": true
+      },
+      "post_mix": {
+        "shape_match": true,
+        "shape": [
+          1,
+          4,
+          1
+        ],
+        "candidate_dtype": "torch.float32",
+        "reference_dtype": "torch.float32",
+        "exact": false,
+        "different_elements": 1,
+        "numel": 4,
+        "reference_norm": 1.0591204166412354,
+        "difference_norm": 5.960464477539063e-08,
+        "relative_l2": 5.6277495777499494e-08,
+        "zero_norm_handling": "nonzero_reference",
+        "max_abs": 5.960464477539063e-08,
+        "mean_abs": 1.4901161193847656e-08,
+        "finite": true
+      },
+      "res_mix": {
+        "shape_match": true,
+        "shape": [
+          1,
+          4,
+          4
+        ],
+        "candidate_dtype": "torch.float32",
+        "reference_dtype": "torch.float32",
+        "exact": false,
+        "different_elements": 12,
+        "numel": 16,
+        "reference_norm": 1.7795729637145996,
+        "difference_norm": 6.423734077998233e-08,
+        "relative_l2": 3.6097053669491714e-08,
+        "zero_norm_handling": "nonzero_reference",
+        "max_abs": 5.960464477539063e-08,
+        "mean_abs": 6.966843102418352e-09,
+        "finite": true
+      },
+      "layer_input": {
+        "shape_match": true,
+        "shape": [
+          1,
+          5120
+        ],
+        "candidate_dtype": "torch.bfloat16",
+        "reference_dtype": "torch.bfloat16",
+        "exact": true,
+        "different_elements": 0,
+        "numel": 5120,
+        "reference_norm": 19.526836395263672,
+        "difference_norm": 0.0,
+        "relative_l2": 0.0,
+        "zero_norm_handling": "nonzero_reference",
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "finite": true
+      }
+    },
+    "P1_C1": {
+      "next_pre": {
+        "shape_match": true,
+        "shape": [
+          1,
+          4
+        ],
+        "candidate_dtype": "torch.float32",
+        "reference_dtype": "torch.float32",
+        "exact": true,
+        "different_elements": 0,
+        "numel": 4,
+        "reference_norm": 0.8203701376914978,
+        "difference_norm": 0.0,
+        "relative_l2": 0.0,
+        "zero_norm_handling": "nonzero_reference",
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "finite": true
+      },
+      "post_mix": {
+        "shape_match": true,
+        "shape": [
+          1,
+          4,
+          1
+        ],
+        "candidate_dtype": "torch.float32",
+        "reference_dtype": "torch.float32",
+        "exact": true,
+        "different_elements": 0,
+        "numel": 4,
+        "reference_norm": 1.0591204166412354,
+        "difference_norm": 0.0,
+        "relative_l2": 0.0,
+        "zero_norm_handling": "nonzero_reference",
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "finite": true
+      },
+      "res_mix": {
+        "shape_match": true,
+        "shape": [
+          1,
+          4,
+          4
+        ],
+        "candidate_dtype": "torch.float32",
+        "reference_dtype": "torch.float32",
+        "exact": true,
+        "different_elements": 0,
+        "numel": 16,
+        "reference_norm": 1.7795729637145996,
+        "difference_norm": 0.0,
+        "relative_l2": 0.0,
+        "zero_norm_handling": "nonzero_reference",
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "finite": true
+      },
+      "layer_input": {
+        "shape_match": true,
+        "shape": [
+          1,
+          5120
+        ],
+        "candidate_dtype": "torch.bfloat16",
+        "reference_dtype": "torch.bfloat16",
+        "exact": true,
+        "different_elements": 0,
+        "numel": 5120,
+        "reference_norm": 19.526836395263672,
+        "difference_norm": 0.0,
+        "relative_l2": 0.0,
+        "zero_norm_handling": "nonzero_reference",
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "finite": true
+      }
+    }
+  },
+  "B2_B4_identical_metrics": false,
+  "dispatch_evidence": {
+    "projection_stats": {
+      "tilelang_calls": 9,
+      "tilelang_tokens": 9,
+      "fallback_calls": 2,
+      "fallback_reasons": {
+        "tokens_not_1": 2
+      }
+    },
+    "coefficient_stats": {
+      "fused_calls": 24,
+      "fused_tokens": 40,
+      "fallback_calls": 2,
+      "fallback_reasons": {
+        "tokens_not_1": 2
+      }
+    }
+  },
+  "decision": {
+    "projection_rms": "dominant and necessary for exact fidelity",
+    "coeff_sinkhorn": "smaller residual but also necessary for bit-exact fidelity",
+    "required_alignment": "P1+C1",
+    "P1": "promoted TileLang M1 projection/RMS per row",
+    "C1": "existing fused coefficient/Sinkhorn once for [T,24]",
+    "new_kernel_required": false
+  }
+}

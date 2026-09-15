@@ -1111,6 +1111,105 @@ index e943808..f8af4ef 100644
      @staticmethod
      def with_kv_conn_output_only(
          kv_connector_output: KVConnectorOutput | None,
+diff --git a/vllm/v1/worker/gpu/model_runner.py b/vllm/v1/worker/gpu/model_runner.py
+index 533fcbe..111dbfa 100644
+--- a/vllm/v1/worker/gpu/model_runner.py
++++ b/vllm/v1/worker/gpu/model_runner.py
+@@ -19,6 +19,7 @@ instead of embedding feature-specific logic directly.
+ 
+ import functools
+ import gc
++import os
+ import time
+ from contextlib import AbstractContextManager
+ from copy import deepcopy
+@@ -201,6 +202,9 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+ 
+         self.device = device
+         self.dtype = self.model_config.dtype
++        self.ds41_prefill_telemetry = os.environ.get("DS41_PREFILL_TELEMETRY", "0") == "1"
++        self._ds41_prefill_start_events: dict[str, torch.cuda.Event] = {}
++        self._ds41_prefill_end_events: dict[str, torch.cuda.Event] = {}
+         self.kv_cache_dtype = self.dtype
+         if self.cache_config.cache_dtype != "auto":
+             # Quantized KV cache.
+@@ -1483,6 +1487,19 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+             sample_hidden_states = hidden_states[input_batch.logits_indices]
+             logits = self.model.compute_logits(sample_hidden_states)
+ 
++        if self.ds41_prefill_telemetry:
++            stream = torch.cuda.current_stream()
++            for i, req_id in enumerate(global_input_batch.req_ids):
++                before = int(global_input_batch.num_computed_prefill_tokens_np[i])
++                prompt_len = int(global_input_batch.prefill_len_np[i])
++                scheduled = int(global_input_batch.num_scheduled_tokens[i])
++                if (req_id in self._ds41_prefill_start_events
++                        and req_id not in self._ds41_prefill_end_events
++                        and before < prompt_len and before + scheduled >= prompt_len):
++                    ev = torch.cuda.Event(enable_timing=True)
++                    ev.record(stream)
++                    self._ds41_prefill_end_events[req_id] = ev
++
+         if grammar_output is not None:
+             # Apply grammar bitmask to the logits in-place.
+             assert self.structured_outputs_worker is not None
+@@ -1588,6 +1605,10 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+         valid_dummy_state_slots: bool = False,
+     ) -> ModelRunnerOutput | IntermediateTensors | None:
+         if not dummy_run:
++            if self.ds41_prefill_telemetry:
++                for req_id in scheduler_output.finished_req_ids:
++                    self._ds41_prefill_start_events.pop(req_id, None)
++                    self._ds41_prefill_end_events.pop(req_id, None)
+             # Update the request states.
+             self.update_pp_decode_requests()
+             self.finish_requests(scheduler_output)
+@@ -1663,6 +1684,15 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+             input_batch = self.prepare_inputs(
+                 scheduler_output, batch_req_state, batch_desc
+             )
++            if self.ds41_prefill_telemetry:
++                stream = torch.cuda.current_stream()
++                for i, req_id in enumerate(input_batch.req_ids):
++                    if (input_batch.is_prefilling_np[i]
++                            and int(input_batch.num_computed_prefill_tokens_np[i]) == 0
++                            and req_id not in self._ds41_prefill_start_events):
++                        ev = torch.cuda.Event(enable_timing=True)
++                        ev.record(stream)
++                        self._ds41_prefill_start_events[req_id] = ev
+             block_tables, slot_mappings = self.prepare_attn(input_batch)
+             # Mamba "align" pre-copy: migrate recurrent state across block
+             # boundaries before the forward. Runs only on real batches, and
+@@ -1972,6 +2002,21 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+             hidden_states, input_batch, grammar_output
+         )
+ 
++        ds41_prefill_engine_ms: dict[str, float] = {}
++        if self.ds41_prefill_telemetry:
++            for req_id in input_batch.req_ids:
++                start_ev = self._ds41_prefill_start_events.get(req_id)
++                end_ev = self._ds41_prefill_end_events.get(req_id)
++                if start_ev is None or end_ev is None:
++                    continue
++                # Exactly once per request. The end event is ordered before
++                # sampler work on the same stream; no per-token synchronization.
++                if not end_ev.query():
++                    end_ev.synchronize()
++                ds41_prefill_engine_ms[req_id] = float(start_ev.elapsed_time(end_ev))
++                del self._ds41_prefill_start_events[req_id]
++                del self._ds41_prefill_end_events[req_id]
++
+         if self.pp_handler is not None:
+             # Broadcast to non-last PP ranks (handles spec decode multi-token).
+             self.pp_handler.broadcast(
+@@ -2000,6 +2045,7 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+             sampled_token_ids=None,  # type: ignore
+             prompt_logprobs_dict=prompt_logprobs_dict,  # type: ignore[arg-type]
+             cudagraph_stats=cudagraph_stats,
++            ds41_prefill_engine_ms=(ds41_prefill_engine_ms or None),
+         )
+         # Start async output copy here so that it can overlap with speculator proposal.
+         async_output = AsyncOutput(
 diff --git a/vllm/v1/worker/gpu/spec_decode/dspark/utils.py b/vllm/v1/worker/gpu/spec_decode/dspark/utils.py
 index 5b13530..32541a1 100644
 --- a/vllm/v1/worker/gpu/spec_decode/dspark/utils.py

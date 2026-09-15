@@ -1,6 +1,6 @@
 {
   "schema": "ds41-k2-daily-prefill-hotfix-v1",
-  "status": "READY_FOR_REAL_RETEST",
+  "status": "V2_INTEGRATION_FRESH_APPLY_PASS",
   "epoch_observed": "1789467122418922391",
   "smoke_none": "PASS",
   "final": "323",
@@ -10,5 +10,7 @@
   "collector_keepalive_fix": "PASS",
   "runtime_fix": "single end-event synchronize once per request after sampling/bookkeeping, only when query false",
   "per_token_sync": false,
-  "overlay_sha256": "5ef76a7847c0843819adf1cdfbbccc695829f145481d2ed3551c5008c156f58a"
+  "overlay_sha256": "27f2473dd9b2ce7afe6b591ab41239d7b04fd4383b6bbc058dedd77922e14e5b",
+  "active_runner": "vllm/v1/worker/gpu/model_runner.py",
+  "root_cause": "legacy runner was instrumented while V2 runner is active"
 }

@@ -97,6 +97,52 @@ index db39843..5e9a82a 100644
                      trust_remote_code=self.trust_remote_code,
                      vllm_speculative_config=self.speculative_config,
                      hf_token=self.hf_token,
+diff --git a/vllm/entrypoints/generate/base/protocol.py b/vllm/entrypoints/generate/base/protocol.py
+index 76dc5e4..76c5c82 100644
+--- a/vllm/entrypoints/generate/base/protocol.py
++++ b/vllm/entrypoints/generate/base/protocol.py
+@@ -80,6 +80,13 @@ class PerRequestMetrics(OpenAIBaseModel):
+     queue_time_ms: float | None = None
+     mean_itl_ms: float | None = None
+     tokens_per_second: float | None = None
++    prefill_engine_ms: float | None = None
++    prefill_engine_tokens_per_second: float | None = None
++    prompt_tokens_computed: int | None = None
++    prompt_tokens_cached: int | None = None
++    prompt_tokens_local_cache: int | None = None
++    prompt_tokens_external_cache: int | None = None
++    prompt_tokens_cache_creation: int | None = None
+     # Experimental, subject to change.
+     speculative_decoding: SpeculativeDecodingMetrics | None = None
+ 
+diff --git a/vllm/entrypoints/generate/base/serving.py b/vllm/entrypoints/generate/base/serving.py
+index dc41d3f..390bae0 100644
+--- a/vllm/entrypoints/generate/base/serving.py
++++ b/vllm/entrypoints/generate/base/serving.py
+@@ -93,12 +93,23 @@ def build_per_request_timing_metrics(
+         if inference_time_ms > 0:
+             tokens_per_second = num_generation_tokens / inference_time_ms * 1000
+ 
++    prefill_engine_ms = metrics.ds41_prefill_engine_ms
++    prefill_tps = None
++    if prefill_engine_ms is not None and prefill_engine_ms > 0 and metrics.ds41_prompt_tokens_computed is not None:
++        prefill_tps = metrics.ds41_prompt_tokens_computed * 1000 / prefill_engine_ms
+     return PerRequestMetrics(
+         time_to_first_token_ms=time_to_first_token_ms,
+         generation_time_ms=generation_time_ms,
+         queue_time_ms=queue_time_ms,
+         mean_itl_ms=mean_itl_ms,
+         tokens_per_second=tokens_per_second,
++        prefill_engine_ms=prefill_engine_ms,
++        prefill_engine_tokens_per_second=prefill_tps,
++        prompt_tokens_computed=metrics.ds41_prompt_tokens_computed,
++        prompt_tokens_cached=metrics.ds41_prompt_tokens_cached,
++        prompt_tokens_local_cache=metrics.ds41_prompt_tokens_local_cache,
++        prompt_tokens_external_cache=metrics.ds41_prompt_tokens_external_cache,
++        prompt_tokens_cache_creation=metrics.ds41_prompt_tokens_cache_creation,
+     )
+ 
+ 
 diff --git a/vllm/model_executor/kernels/mhc/torch.py b/vllm/model_executor/kernels/mhc/torch.py
 index 9c57cc1..8728ec2 100644
 --- a/vllm/model_executor/kernels/mhc/torch.py
@@ -967,6 +1013,104 @@ index 93e3ad4..c83b0a3 100644
          revision=revision,
          token=hf_token,
          **without_trust_remote_code(kwargs),
+diff --git a/vllm/v1/core/sched/scheduler.py b/vllm/v1/core/sched/scheduler.py
+index 8b2a551..a3cda23 100644
+--- a/vllm/v1/core/sched/scheduler.py
++++ b/vllm/v1/core/sched/scheduler.py
+@@ -2153,6 +2153,9 @@ class Scheduler(SchedulerInterface):
+ 
+             # Get prompt logprobs for this request.
+             prompt_logprobs_tensors = prompt_logprobs_dict.get(req_id)
++            ds41_prefill_engine_ms = None
++            if model_runner_output.ds41_prefill_engine_ms is not None:
++                ds41_prefill_engine_ms = model_runner_output.ds41_prefill_engine_ms.get(req_id)
+             if should_emit_output:
+                 # Add EngineCoreOutput for this Request.
+                 outputs[request.client_index].append(
+@@ -2177,6 +2180,7 @@ class Scheduler(SchedulerInterface):
+                         trace_headers=request.trace_headers,
+                         routed_experts=routed_experts,
+                         num_nans_in_logits=request.num_nans_in_logits,
++                        ds41_prefill_engine_ms=ds41_prefill_engine_ms,
+                     )
+                 )
+             else:
+diff --git a/vllm/v1/engine/__init__.py b/vllm/v1/engine/__init__.py
+index 5ae9ee0..3bae504 100644
+--- a/vllm/v1/engine/__init__.py
++++ b/vllm/v1/engine/__init__.py
+@@ -233,6 +233,9 @@ class EngineCoreOutput(
+     # Appended last so `array_like` positional serialization stays compatible.
+     spec_decode_metrics: RequestSpecDecodeMetrics | None = None
+ 
++    # DS41 optional pre-sampling prefill duration from the worker.
++    ds41_prefill_engine_ms: float | None = None
++
+     @property
+     def finished(self) -> bool:
+         return self.finish_reason is not None
+diff --git a/vllm/v1/engine/output_processor.py b/vllm/v1/engine/output_processor.py
+index 419e3aa..63094f2 100644
+--- a/vllm/v1/engine/output_processor.py
++++ b/vllm/v1/engine/output_processor.py
+@@ -674,13 +674,18 @@ class OutputProcessor:
+ 
+             if req_state.is_prefilling:
+                 if engine_core_output.prefill_stats is not None:
+-                    req_state.num_cached_tokens = (
+-                        engine_core_output.prefill_stats.num_cached_tokens
+-                    )
+-                    req_state.num_cache_creation_tokens = (
+-                        engine_core_output.prefill_stats.num_cache_creation_tokens
+-                    )
++                    ps = engine_core_output.prefill_stats
++                    req_state.num_cached_tokens = ps.num_cached_tokens
++                    req_state.num_cache_creation_tokens = ps.num_cache_creation_tokens
++                    if req_state.stats is not None:
++                        req_state.stats.ds41_prompt_tokens_computed = ps.num_computed_tokens
++                        req_state.stats.ds41_prompt_tokens_cached = ps.num_cached_tokens
++                        req_state.stats.ds41_prompt_tokens_local_cache = ps.num_local_cached_tokens
++                        req_state.stats.ds41_prompt_tokens_external_cache = ps.num_external_cached_tokens
++                        req_state.stats.ds41_prompt_tokens_cache_creation = ps.num_cache_creation_tokens
+                 req_state.is_prefilling = False
++            if req_state.stats is not None and engine_core_output.ds41_prefill_engine_ms is not None:
++                req_state.stats.ds41_prefill_engine_ms = engine_core_output.ds41_prefill_engine_ms
+ 
+             if engine_core_output.spec_decode_metrics is not None:
+                 req_state.spec_decode_metrics = engine_core_output.spec_decode_metrics
+diff --git a/vllm/v1/metrics/stats.py b/vllm/v1/metrics/stats.py
+index 24e07e5..f7243b8 100644
+--- a/vllm/v1/metrics/stats.py
++++ b/vllm/v1/metrics/stats.py
+@@ -236,6 +236,14 @@ class RequestStateStats:
+     # Track if this request is corrupted (NaNs in logits)
+     is_corrupted: bool = False
+ 
++    # DS41 optional prompt accounting and pre-sampling engine span.
++    ds41_prefill_engine_ms: float | None = None
++    ds41_prompt_tokens_computed: int | None = None
++    ds41_prompt_tokens_cached: int | None = None
++    ds41_prompt_tokens_local_cache: int | None = None
++    ds41_prompt_tokens_external_cache: int | None = None
++    ds41_prompt_tokens_cache_creation: int | None = None
++
+ 
+ @dataclass
+ class FinishedRequestStats:
+diff --git a/vllm/v1/outputs.py b/vllm/v1/outputs.py
+index e943808..f8af4ef 100644
+--- a/vllm/v1/outputs.py
++++ b/vllm/v1/outputs.py
+@@ -369,6 +369,9 @@ class ModelRunnerOutput:
+     # ``None`` when ``return_sampling_mask`` is off.
+     sampling_masks: SamplingMaskLists | None = None
+ 
++    # DS41 opt-in prefill span, per request, milliseconds; first prefill event to logits-ready event before sampling.
++    ds41_prefill_engine_ms: dict[str, float] | None = None
++
+     @staticmethod
+     def with_kv_conn_output_only(
+         kv_connector_output: KVConnectorOutput | None,
 diff --git a/vllm/v1/worker/gpu/spec_decode/dspark/utils.py b/vllm/v1/worker/gpu/spec_decode/dspark/utils.py
 index 5b13530..32541a1 100644
 --- a/vllm/v1/worker/gpu/spec_decode/dspark/utils.py
@@ -993,3 +1137,95 @@ index 5b13530..32541a1 100644
          )
  
      target_language_model = (
+diff --git a/vllm/v1/worker/gpu_model_runner.py b/vllm/v1/worker/gpu_model_runner.py
+index 2730416..16c4288 100644
+--- a/vllm/v1/worker/gpu_model_runner.py
++++ b/vllm/v1/worker/gpu_model_runner.py
+@@ -4,6 +4,7 @@
+ import functools
+ import gc
+ import itertools
++import os
+ import threading
+ import time
+ from collections import defaultdict
+@@ -522,6 +523,9 @@ class GPUModelRunner(
+         parallel_config = self.parallel_config
+         self.device = device
+         self.dtype = self.model_config.dtype
++        self.ds41_prefill_telemetry = os.environ.get("DS41_PREFILL_TELEMETRY", "0") == "1"
++        self._ds41_prefill_start_events: dict[str, torch.cuda.Event] = {}
++        self._ds41_prefill_end_events: dict[str, tuple[torch.cuda.Event, int]] = {}
+ 
+         self.check_ep_fault = False
+         if parallel_config.data_parallel_size > 1 and self.model_config.is_moe:
+@@ -4204,6 +4208,17 @@ class GPUModelRunner(
+                 "after execute_model() returns None."
+             )
+ 
++        if self.ds41_prefill_telemetry:
++            for finished_req_id in scheduler_output.finished_req_ids:
++                self._ds41_prefill_start_events.pop(finished_req_id, None)
++                self._ds41_prefill_end_events.pop(finished_req_id, None)
++            stream = torch.cuda.current_stream()
++            for new_req in scheduler_output.scheduled_new_reqs:
++                if new_req.req_id not in self._ds41_prefill_start_events:
++                    ev = torch.cuda.Event(enable_timing=True)
++                    ev.record(stream)
++                    self._ds41_prefill_start_events[new_req.req_id] = ev
++
+         # If ngram_gpu is used, we need to copy the scheduler_output to avoid
+         # the modification has influence on the scheduler_output in engine core process.
+         # The replace is much faster than deepcopy.
+@@ -4535,6 +4550,19 @@ class GPUModelRunner(
+                 assert broadcasted is not None
+                 logits = broadcasted["logits"]
+ 
++        if self.ds41_prefill_telemetry:
++            stream = torch.cuda.current_stream()
++            for req_id in self.input_batch.req_ids[:num_reqs]:
++                idx = self.input_batch.req_id_to_index[req_id]
++                before = int(self.input_batch.num_computed_tokens_cpu[idx])
++                prompt_len = int(self.input_batch.num_prompt_tokens_cpu[idx])
++                scheduled = int(scheduler_output.num_scheduled_tokens.get(req_id, 0))
++                if (req_id in self._ds41_prefill_start_events and req_id not in self._ds41_prefill_end_events
++                        and before < prompt_len and before + scheduled >= prompt_len):
++                    ev = torch.cuda.Event(enable_timing=True)
++                    ev.record(stream)
++                    self._ds41_prefill_end_events[req_id] = (ev, prompt_len)
++
+         self.execute_model_state = ExecuteModelState(
+             scheduler_output,
+             logits,
+@@ -4753,6 +4781,23 @@ class GPUModelRunner(
+                 scheduler_output.total_num_scheduled_tokens,
+             )
+ 
++        ds41_prefill_engine_ms: dict[str, float] = {}
++        if self.ds41_prefill_telemetry:
++            for req_id in req_ids_output_copy:
++                pair = self._ds41_prefill_end_events.get(req_id)
++                start_ev = self._ds41_prefill_start_events.get(req_id)
++                if pair is None or start_ev is None:
++                    continue
++                end_ev, _ = pair
++                # Existing sync bookkeeping has already waited for sampled output
++                # on this stream. If the pre-sampling event is not complete,
++                # leave it unresolved rather than adding a benchmark sync.
++                if not end_ev.query():
++                    continue
++                ds41_prefill_engine_ms[req_id] = float(start_ev.elapsed_time(end_ev))
++                del self._ds41_prefill_start_events[req_id]
++                del self._ds41_prefill_end_events[req_id]
++
+         if draft_after_bookkeeping:
+             # ngram and other speculative decoding methods use the sampled
+             # tokens on the CPU, so they are run after bookkeeping.
+@@ -4800,6 +4845,7 @@ class GPUModelRunner(
+                 num_nans_in_logits=num_nans_in_logits,
+                 cudagraph_stats=cudagraph_stats,
+                 routed_experts=None,
++                ds41_prefill_engine_ms=(ds41_prefill_engine_ms or None),
+             )
+ 
+         if not self.use_async_scheduling:

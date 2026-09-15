@@ -51,6 +51,7 @@ export DS41_ENGRAM_RANDOM_ADVICE="${DS41_ENGRAM_RANDOM_ADVICE:-1}"
 [[ "$DS41_ENGRAM_RANDOM_ADVICE" == 0 || "$DS41_ENGRAM_RANDOM_ADVICE" == 1 ]] || { echo 'invalid DS41_ENGRAM_RANDOM_ADVICE' >&2; exit 2; }
 export DS41_ENGRAM2_DIR="$ENGRAM_DIR" DS41_ENGRAM_CACHE_ROWS="${DS41_ENGRAM_CACHE_ROWS:-65536}"
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 VLLM_NO_USAGE_STATS=1 DO_NOT_TRACK=1 PYTHONHASHSEED=1 OMP_NUM_THREADS=1
+export DS41_PREFILL_TELEMETRY="${DS41_PREFILL_TELEMETRY:-0}"
 export NCCL_SOCKET_IFNAME='=thunderbolt0' GLOO_SOCKET_IFNAME=thunderbolt0 NCCL_NET=Socket NCCL_IB_DISABLE=1 NCCL_SOCKET_FAMILY=AF_INET
 export NCCL_MIN_NCHANNELS=1 NCCL_MAX_NCHANNELS=1 NCCL_SOCKET_NTHREADS=1 NCCL_NSOCKS_PERTHREAD=1 NCCL_DEBUG=WARN
 export MASTER_ADDR=10.55.0.1 MASTER_PORT="${DS41_MASTER_PORT:-29741}"
@@ -80,7 +81,7 @@ case "$run_mode" in
       --distributed-executor-backend external_launcher --language-model-only
       --config-format gguf --load-format gguf --quantization gguf --dtype bfloat16
       --attention-backend ROCM_FLASHMLA_SPARSE_DSV4
-      --max-model-len 4096 --block-size 128 --max-num-seqs 1 --max-num-batched-tokens 1024
+      --max-model-len "${DS41_API_MAX_MODEL_LEN:-65664}" --block-size 128 --max-num-seqs 1 --max-num-batched-tokens 1024
       --kv-cache-memory-bytes 1073741824 --kv-cache-dtype auto
       --no-enable-prefix-caching --enable-chunked-prefill --no-async-scheduling
       --enforce-eager --seed 1 --generation-config vllm --enable-per-request-metrics

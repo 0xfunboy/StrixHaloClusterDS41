@@ -394,8 +394,17 @@ func (j *pairedJob) run() {
 			j.backend.fail(j.err.Error())
 		}
 		if j.err == nil {
-			j.body0 = rs[0].body
-			if len(rs[0].terminal) > 0 {
+			if !j.stream {
+				merged, e := mergePairedTimingMetrics(rs[0].body, rs[1].body)
+				if e != nil {
+					j.err = e
+				} else {
+					j.body0 = merged
+				}
+			} else {
+				j.body0 = rs[0].body
+			}
+			if j.err == nil && len(rs[0].terminal) > 0 {
 				j.emit(rs[0].terminal)
 			}
 		}
@@ -517,6 +526,47 @@ func (j *pairedJob) drain(ctx context.Context, rank int) (out pairedRankResult) 
 	}
 	out.output, out.err = semantic.finish()
 	return
+}
+
+func mergePairedTimingMetrics(a, b []byte) ([]byte, error) {
+	va, e := pairedObject(a)
+	if e != nil {
+		return nil, e
+	}
+	vb, e := pairedObject(b)
+	if e != nil {
+		return nil, e
+	}
+	ma, _ := va["metrics"].(map[string]any)
+	mb, _ := vb["metrics"].(map[string]any)
+	if ma == nil || mb == nil {
+		return a, nil
+	}
+	for _, key := range []string{"prompt_tokens_computed", "prompt_tokens_cached", "prompt_tokens_local_cache", "prompt_tokens_external_cache", "prompt_tokens_cache_creation"} {
+		if ma[key] != nil && mb[key] != nil && !reflect.DeepEqual(ma[key], mb[key]) {
+			return nil, fmt.Errorf("rank prefill accounting differs for %s", key)
+		}
+	}
+	fa, oka := pairedFloat(ma["prefill_engine_ms"])
+	fb, okb := pairedFloat(mb["prefill_engine_ms"])
+	if oka && okb {
+		if fb > fa {
+			fa = fb
+		}
+		ma["pair_prefill_engine_ms_max"] = fa
+		ma["pair_prefill_scope"] = "max_rank"
+	}
+	return json.Marshal(va)
+}
+func pairedFloat(v any) (float64, bool) {
+	switch n := v.(type) {
+	case json.Number:
+		f, e := strconv.ParseFloat(string(n), 64)
+		return f, e == nil
+	case float64:
+		return n, true
+	}
+	return 0, false
 }
 
 func pairedObject(b []byte) (map[string]any, error) {

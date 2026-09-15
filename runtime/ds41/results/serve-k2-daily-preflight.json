@@ -1,0 +1,29 @@
+{
+  "schema": "serve-k2-daily-preflight-v1",
+  "status": "PASS",
+  "pair_state": "OFF_VERIFIED/OFF_VERIFIED",
+  "owner": "NONE/OFF",
+  "k3_terminal_commit": "b18899fbdb5e4b04b170b6c8cb9deec741dbae4c",
+  "reasoning_none": {
+    "ds41": "PASS literal none -> chat mode",
+    "glm_default": "PASS unchanged reject none"
+  },
+  "prefill_metric_builder": "PASS",
+  "prefill_event_node01": "PASS",
+  "prefill_event_node02": "PASS",
+  "pair_max_merge": "PASS",
+  "vllm_overlay_fresh_apply": "PASS",
+  "engine_max_model_len": 65664,
+  "kv_cache_historical_capacity_tokens": 105455,
+  "gateway_max_context": 65536,
+  "gateway_max_output": 8192,
+  "weights_or_precision_changed": false,
+  "hashes": {
+    "config.ds41-k2-serving.json": "c5a9b4b182f61cb1c65a63b7b18e493a8e4d418e21886bcd21ce3e40517f0f4a",
+    "runtime/ds41/serve-controller.sh": "a572ac6c1ac7d13a105ca5b0c46b01cebfe1dd89e0d68b4ea2c13d4f2a02925a",
+    "runtime/ds41/launch-node.sh": "8ef34bf65bb5ec7c16ed335793acf6a9a92427f58890c9cc2760b8818cbcd083",
+    "runtime/ds41/pair.sh": "2450aab6fbef5286865abbf32f2c351030c10f65423194121fa1830044e48801",
+    "runtime/ds41/patches/vllm-dsv41-engram2.patch": "2a2ea55371cb5fcbc2abf98e58f5fa6fde824bb892d733434e55bb18e89a7975",
+    "bin/strixglm": "89607eb9645365a729a21aef2cf2891e9a272d71e37f94ba6042d86292908bef"
+  }
+}

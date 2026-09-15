@@ -71,7 +71,8 @@ start_serving() {
   local epoch; epoch=$(date +%s%N)
   DS41_ROOT="$ROOT" DS41_RUN_MODE=api DS41_ATTEMPT_NAME=serving-k2 DS41_RUNTIME_MAX_SEC=infinity \
   DS41_SERVING_PRESET="$PRESET" DS41_SERVING_RELEASE_ID="$RELEASE_ID" DS41_REAL_DSPARK_K=2 \
-  DS41_ENGRAM_RANDOM_ADVICE=1 bash "$ROOT/runtime/ds41/pair.sh" start "$epoch" "$RANK_PORT"
+  DS41_ENGRAM_RANDOM_ADVICE=1 DS41_PREFILL_TELEMETRY=1 DS41_API_MAX_MODEL_LEN=65664 \
+  bash "$ROOT/runtime/ds41/pair.sh" start "$epoch" "$RANK_PORT"
   wait_ready
   smoke
   status_json

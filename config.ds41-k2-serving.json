@@ -3,8 +3,8 @@
   "backend": "http://127.0.0.1:18221",
   "tokenizer_endpoint": "http://10.55.0.1:18220/tokenize",
   "chat_context_tokens": 4096,
-  "chat_default_output_tokens": 512,
-  "chat_max_output_tokens": 1024,
+  "chat_default_output_tokens": 4096,
+  "chat_max_output_tokens": 8192,
   "thinking_budget_supported": false,
   "tool_calls_supported": false,
   "model": "DeepSeek-V4.1-Flash-MixedQ2-DSpark-K2",
@@ -18,34 +18,40 @@
     "low": {
       "reasoning": "low",
       "context_tokens": 4096,
-      "max_tokens": 512,
+      "max_tokens": 4096,
       "max_repairs": 2
     },
     "high": {
       "reasoning": "high",
       "context_tokens": 4096,
-      "max_tokens": 512,
+      "max_tokens": 4096,
       "max_repairs": 2
     },
     "max": {
       "reasoning": "max",
       "context_tokens": 4096,
-      "max_tokens": 512,
+      "max_tokens": 4096,
       "max_repairs": 2
     }
   },
-  "profile_status": "DS41_K2_SERVING_4K_CONTEXT; LOW_HIGH_MAX; TOOLS_DISABLED; NO_LONG_CONTEXT_CLAIM",
+  "profile_status": "DS41_K2_DAILY_CANDIDATE_65664_ENGINE; DEFAULT_4K_PENDING_LONG_CONTEXT_QUALIFICATION; NONE_LOW_HIGH_MAX; TOOLS_DISABLED",
   "context_format": "json",
-  "max_context_tokens": 4096,
+  "max_context_tokens": 65536,
   "max_files": 300,
   "max_file_bytes": 262144,
   "max_repo_bytes": 33554432,
-  "model_timeout": 600,
+  "model_timeout": 1800,
   "sandbox_timeout": 90,
   "sandbox_memory_bytes": 1073741824,
   "sandbox_tasks": 64,
   "remote_ssh": "02-evo-x3-tb",
   "lifecycle_command": "/home/funboy/.local/share/haloclu-ds41/current/runtime/ds41/serve-controller.sh",
   "lifecycle_preset": "dspark-k2-gfx1151",
-  "cluster_config_path": "runtime/cluster.ds41-k2.json"
+  "cluster_config_path": "runtime/cluster.ds41-k2.json",
+  "reasoning_modes": [
+    "none",
+    "low",
+    "high",
+    "max"
+  ]
 }

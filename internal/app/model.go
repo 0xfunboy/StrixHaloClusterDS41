@@ -22,6 +22,7 @@ type Metrics struct {
 	FinalTokens      int            `json:"final_tokens"`
 	HTTPSeconds      float64        `json:"http_seconds"`
 	TTFTMS           *float64       `json:"ttft_ms"`
+	FirstFinalMS     *float64       `json:"first_final_content_ms,omitempty"`
 	ServerTTFTMS     *float64       `json:"server_ttft_ms"`
 	DecodeTPS        *float64       `json:"decode_tps"`
 	Acceptance       *float64       `json:"acceptance"`
@@ -109,6 +110,10 @@ func consumeSSEProgress(r io.Reader, start time.Time, emit func([]byte), result 
 					t := float64(time.Since(start).Microseconds()) / 1000
 					result.Metrics.TTFTMS = &t
 				}
+			}
+			if content != "" && result.Metrics.FirstFinalMS == nil {
+				t := float64(time.Since(start).Microseconds()) / 1000
+				result.Metrics.FirstFinalMS = &t
 			}
 			result.Content += content
 			result.Reasoning += reasoning

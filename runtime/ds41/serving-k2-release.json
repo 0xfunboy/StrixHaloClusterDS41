@@ -1,17 +1,20 @@
 {
-  "schema": "ds41-serving-release-v1",
-  "name": "ds41-k2-serving",
+  "schema": "ds41-serving-release-v2",
+  "name": "ds41-k2-daily-candidate",
   "model": "DeepSeek-V4.1-Flash-MixedQ2-DSpark-K2",
   "preset": "runtime/ds41/presets/dspark-k2-gfx1151.json",
   "qualified_evidence": "runtime/ds41/results/attempt042-dspark-k2-vs-k1-final.json",
   "target_artifact": "runtime/ds41/artifact.json",
   "mtp_sidecar": "/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac",
-  "rank_api_ports": [18220, 18220],
+  "rank_api_ports": [
+    18220,
+    18220
+  ],
   "paired_backend": "127.0.0.1:18221",
   "gateway": "127.0.0.1:18222",
   "master_port": 29741,
-  "context_limit": 4096,
-  "max_output_tokens": 1024,
+  "context_limit": 65536,
+  "max_output_tokens": 8192,
   "runtime": {
     "pair_controller": "runtime/ds41/pair.sh",
     "launcher": "runtime/ds41/launch-node.sh",
@@ -39,5 +42,26 @@
   ],
   "autoload_on_gateway_start": false,
   "serving_runtime_max": "infinity",
-  "weights_copied_into_release": false
+  "weights_copied_into_release": false,
+  "engine_max_model_len": 65664,
+  "default_context_limit": 4096,
+  "reasoning_modes": [
+    "none",
+    "low",
+    "high",
+    "max"
+  ],
+  "prefill_telemetry": {
+    "enabled_by_serving_controller": true,
+    "engine_field": "metrics.prefill_engine_ms",
+    "pair_critical_field": "metrics.pair_prefill_engine_ms_max",
+    "prompt_accounting": [
+      "prompt_tokens_computed",
+      "prompt_tokens_cached",
+      "prompt_tokens_local_cache",
+      "prompt_tokens_external_cache",
+      "prompt_tokens_cache_creation"
+    ],
+    "boundary": "first prefill stream event through logits-ready event before sampling; resolved after existing bookkeeping sync"
+  }
 }

@@ -367,7 +367,7 @@ func (a *App) proxyAuthorizedChat(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	if e := validateChatWithTools(p, a.cfg.ToolCalls); e != nil {
+	if e := validateChatWithReasoning(p, a.cfg.ToolCalls, a.supportsReasoning); e != nil {
 		jsonReply(w, 400, map[string]string{"error": e.Error()})
 		return
 	}

@@ -45,6 +45,7 @@ type Config struct {
 	ChatMaxOutput      int                `json:"chat_max_output_tokens,omitempty"`
 	ThinkingBudget     bool               `json:"thinking_budget_supported,omitempty"`
 	ToolCalls          bool               `json:"tool_calls_supported,omitempty"`
+	ReasoningModes     []string           `json:"reasoning_modes,omitempty"`
 	LifecycleCommand   string             `json:"lifecycle_command,omitempty"`
 	LifecyclePreset    string             `json:"lifecycle_preset,omitempty"`
 	ClusterConfigPath  string             `json:"cluster_config_path,omitempty"`
@@ -74,6 +75,18 @@ func loadConfig(path string) (Config, error) {
 	}
 	if c.ChatDefaultOutput > 0 && c.ChatMaxOutput > 0 && c.ChatDefaultOutput > c.ChatMaxOutput {
 		return c, errors.New("default output exceeds max output")
+	}
+	if len(c.ReasoningModes) > 0 {
+		seen := map[string]bool{}
+		for _, mode := range c.ReasoningModes {
+			if mode != "none" && mode != "low" && mode != "high" && mode != "max" {
+				return c, errors.New("reasoning_modes contains unsupported value")
+			}
+			if seen[mode] {
+				return c, errors.New("reasoning_modes contains duplicate")
+			}
+			seen[mode] = true
+		}
 	}
 	if c.LifecycleCommand != "" && (!filepath.IsAbs(c.LifecycleCommand) || filepath.Clean(c.LifecycleCommand) != c.LifecycleCommand) {
 		return c, errors.New("lifecycle_command must be an absolute clean path")

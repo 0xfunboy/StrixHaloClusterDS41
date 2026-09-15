@@ -436,3 +436,15 @@ func TestMergePairedPrefillMetricsUsesCriticalRank(t *testing.T) {
 		t.Fatalf("bad merge %#v", m)
 	}
 }
+
+func TestMergePairedSSETerminalPrefillMetrics(t *testing.T) {
+	a := []byte("data: {\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}]}\n\ndata: {\"choices\":[],\"metrics\":{\"prefill_engine_ms\":100,\"prompt_tokens_computed\":4096,\"prompt_tokens_cached\":0}}\n\ndata: [DONE]\n\n")
+	b := []byte("data: {\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}]}\n\ndata: {\"choices\":[],\"metrics\":{\"prefill_engine_ms\":108,\"prompt_tokens_computed\":4096,\"prompt_tokens_cached\":0}}\n\ndata: [DONE]\n\n")
+	out, err := mergePairedSSETerminalMetrics(a, b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(out), `"pair_prefill_engine_ms_max":108`) || !strings.Contains(string(out), `data: [DONE]`) {
+		t.Fatalf("bad terminal merge %s", out)
+	}
+}

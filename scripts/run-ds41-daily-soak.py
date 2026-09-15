@@ -16,9 +16,11 @@ def reqjson(base,tok,method,path,body=None,timeout=10):
  except:d={'raw':raw.decode(errors='replace')[:4096]}
  return s,d
 def lifecycle(base,tok):
- s,d=reqjson(base,tok,'GET','/v1/model/lifecycle',timeout=5)
- if s!=200:raise RuntimeError(f'lifecycle HTTP{s}')
- return d
+ s,d=reqjson(base,tok,'GET','/v1/status',timeout=5)
+ if s!=200:raise RuntimeError(f'status HTTP{s}')
+ lc=d.get('lifecycle')
+ if not isinstance(lc,dict):raise RuntimeError('status missing lifecycle')
+ return lc
 def health():
  u=urlparse('http://127.0.0.1:18221');c=http.client.HTTPConnection(u.hostname,u.port,timeout=5);c.request('GET','/health');r=c.getresponse();d=json.loads(r.read());c.close();return d
 def snapshot(base,tok):

@@ -1,0 +1,23 @@
+{
+  "schema": "ds41-daily-soak-start-v1",
+  "unit": "ds41-daily-soak.service",
+  "invocation_id": "f1cde71e0059458b934a418438f7c805",
+  "pid": 1225822,
+  "release": "c075e82464c954e202c6f47658821d233edc13a5",
+  "epoch": "1789482113148506636",
+  "start_utc": "2026-09-15T17:57:37.314078+00:00",
+  "minimum_wall_seconds": 7200,
+  "minimum_requests": 24,
+  "profile": "soak-operativo-contesto-breve",
+  "long_context_qualification": false,
+  "first_case": {
+    "id": "01-arith-none",
+    "state": "COMPLETE",
+    "service_status": "PASS",
+    "semantic_status": "PASS",
+    "content": "323",
+    "reasoning_len": 0,
+    "wall_s": 3.2637860890245065
+  },
+  "registry": "reports/DS41-Q2-001/daily-k2-run/soak-short/registry.json"
+}

@@ -1,0 +1,237 @@
+{
+  "schema": "ds41-daily-panel-preparation-v1",
+  "status": "PASS_WITH_SANDBOX_BLOCKER",
+  "serving_release_source": "7fec26f8ba72490847d7b1bf6334b61b520a2c9b",
+  "corpora_manifest_sha256": "af9f26e495b239a9aab476560e5925991a916d512601ac772718105998acdbcf",
+  "corpora": [
+    {
+      "kind": "code",
+      "label": "2k",
+      "actual_prompt_tokens": 1588,
+      "corpus_sha256": "c162e1102363a8d7dea3891bacac73d18948cde6af8014b92d867cf7e4271993",
+      "expected": {
+        "result": 52,
+        "first_file": "__init__.py",
+        "middle_file": "_ds41_artifact.py",
+        "last_file": "envelope_test.go"
+      }
+    },
+    {
+      "kind": "code",
+      "label": "4k",
+      "actual_prompt_tokens": 3445,
+      "corpus_sha256": "c0598c15486c6145c84ec0b80d6312bab8a0669e78908d89ea2ebcb5dbeea2d7",
+      "expected": {
+        "result": 62,
+        "first_file": "__init__.py",
+        "middle_file": "test-ds41-prefill-metrics.py",
+        "last_file": "prompt_test.go"
+      }
+    },
+    {
+      "kind": "code",
+      "label": "8k",
+      "actual_prompt_tokens": 7276,
+      "corpus_sha256": "315ca93620f95325aef302e11dc40b9b23c9684c27b67e64226dd6f94fe7dd25",
+      "expected": {
+        "result": 72,
+        "first_file": "__init__.py",
+        "middle_file": "test-ds41-prefill-event-gfx1151.py",
+        "last_file": "export-ds41-layer0-moe-input.py"
+      }
+    },
+    {
+      "kind": "code",
+      "label": "16k",
+      "actual_prompt_tokens": 14830,
+      "corpus_sha256": "0cdd305f9051c03709a086491beb92e2bf0dcc87d95b28063a89153ca8f45a7a",
+      "expected": {
+        "result": 86,
+        "first_file": "__init__.py",
+        "middle_file": "preflight-ds41-config.py",
+        "last_file": "test-ds41-engram-tp2.py"
+      }
+    },
+    {
+      "kind": "code",
+      "label": "32k",
+      "actual_prompt_tokens": 31721,
+      "corpus_sha256": "44c91b9753b5653f8873a1852f91d6c8f403f0943fb19e8ba5ad78eafeab71bd",
+      "expected": {
+        "result": 92,
+        "first_file": "__init__.py",
+        "middle_file": "downloads.test.mjs",
+        "last_file": "bench-ds41-target.py"
+      }
+    },
+    {
+      "kind": "code",
+      "label": "64k",
+      "actual_prompt_tokens": 62556,
+      "corpus_sha256": "a39f3c68a86f0fd9bab7a0121b772f37e210631f33503ed862491a71fc679168",
+      "expected": {
+        "result": 108,
+        "first_file": "__init__.py",
+        "middle_file": "test-ds41-disk-engram.py",
+        "last_file": "mhc_coeff_sinkhorn.py"
+      }
+    },
+    {
+      "kind": "docs",
+      "label": "2k",
+      "actual_prompt_tokens": 1265,
+      "corpus_sha256": "bf0838e7ca0f1581ca1145f91bd9327bf55d0fdaf61bf2e448f03b8bba14f560",
+      "expected": {
+        "result": 52,
+        "first_file": "dspark-k3-gfx1151.md",
+        "middle_file": "pull_request_template.md",
+        "last_file": "dspark-k1-gfx1151.md"
+      }
+    },
+    {
+      "kind": "docs",
+      "label": "4k",
+      "actual_prompt_tokens": 3309,
+      "corpus_sha256": "ef3a59948e82b36002f4a138740fcf1d3ee96e1bbce988d13aff049a97d6e337",
+      "expected": {
+        "result": 62,
+        "first_file": "dspark-k3-gfx1151.md",
+        "middle_file": "dspark-k1-gfx1151.md",
+        "last_file": "SECURITY.md"
+      }
+    },
+    {
+      "kind": "docs",
+      "label": "8k",
+      "actual_prompt_tokens": 7356,
+      "corpus_sha256": "84d41c7ac93432ba47d938396990d62b5100483c4358398d72480879be4a97ec",
+      "expected": {
+        "result": 72,
+        "first_file": "dspark-k3-gfx1151.md",
+        "middle_file": "artifact.json",
+        "last_file": "BRANDING.md"
+      }
+    },
+    {
+      "kind": "docs",
+      "label": "16k",
+      "actual_prompt_tokens": 15321,
+      "corpus_sha256": "c302af18350303939d58c1282b997beb8c614564f54a88eb3c0b5bbf523d5c58",
+      "expected": {
+        "result": 86,
+        "first_file": "dspark-k3-gfx1151.md",
+        "middle_file": "DS41_K2_SERVING.md",
+        "last_file": "OPTIONS.md"
+      }
+    },
+    {
+      "kind": "docs",
+      "label": "32k",
+      "actual_prompt_tokens": 30534,
+      "corpus_sha256": "3724bfa86daf07acb1680e9e97226a610d521c37198e05869c1392dea7e0966d",
+      "expected": {
+        "result": 92,
+        "first_file": "dspark-k3-gfx1151.md",
+        "middle_file": "ROADMAP.md",
+        "last_file": "WORKSPACES.md"
+      }
+    },
+    {
+      "kind": "docs",
+      "label": "64k",
+      "actual_prompt_tokens": 58305,
+      "corpus_sha256": "7bbb64114d093072192fe7d5cf24d0f1c9722e4b1e68e1b90a24b67e0cdd24c3",
+      "expected": {
+        "result": 108,
+        "first_file": "dspark-k3-gfx1151.md",
+        "middle_file": "README.md",
+        "last_file": "QUALIFICATION.md"
+      }
+    }
+  ],
+  "coding_fixture_prevalidation": {
+    "schema": "ds41-daily-fixture-prevalidation-v1",
+    "status": "PASS",
+    "tasks": [
+      {
+        "id": "c-frame-stream",
+        "buggy": {
+          "rc": -6,
+          "pass": false,
+          "seconds": 0.09045099403010681,
+          "output_tail": "test-bin: test.c:6: main: Assertion `frame_parser_feed(&p,(const unsigned char*)\"ha\\r\\nbeta\",8,out,4,&n)==0 && n==1 && strcmp(out[0],\"alpha\")==0' failed.\n"
+        },
+        "golden": {
+          "rc": 0,
+          "pass": true,
+          "seconds": 0.09987038502003998,
+          "output_tail": ""
+        },
+        "discriminator_pass": true
+      },
+      {
+        "id": "c-ring-wrap",
+        "buggy": {
+          "rc": -6,
+          "pass": false,
+          "seconds": 0.09215724800014868,
+          "output_tail": "test-bin: test.c:4: main: Assertion `ring_read(&r,out,8)==8&&memcmp(out,\"f1234567\",8)==0' failed.\n"
+        },
+        "golden": {
+          "rc": 0,
+          "pass": true,
+          "seconds": 0.09458840603474528,
+          "output_tail": ""
+        },
+        "discriminator_pass": true
+      },
+      {
+        "id": "go-session-state",
+        "buggy": {
+          "rc": 1,
+          "pass": false,
+          "seconds": 4.663178935996257,
+          "output_tail": "--- FAIL: TestStaleCompletionCannotCrossGeneration (0.00s)\n    manager_test.go:3: stale crossed generation id=2 run=false res=\"stale\"\nFAIL\nFAIL\tdaily/sessioncase/session\t0.005s\nFAIL\n"
+        },
+        "golden": {
+          "rc": 0,
+          "pass": true,
+          "seconds": 5.623463524971157,
+          "output_tail": "ok  \tdaily/sessioncase/session\t1.010s\n"
+        },
+        "discriminator_pass": true
+      },
+      {
+        "id": "go-snapshot-feature",
+        "buggy": {
+          "rc": 1,
+          "pass": false,
+          "seconds": 4.684197657974437,
+          "output_tail": "--- FAIL: TestStableRoundTrip (0.00s)\npanic: TODO [recovered, repanicked]\n\ngoroutine 19 [running]:\ntesting.tRunner.func1.2({0x7c7cd8, 0x63dad0})\n\t/home/funboy/StrixHaloClusterGLM/.tools/go/src/testing/testing.go:2123 +0x419\ntesting.tRunner.func1()\n\t/home/funboy/StrixHaloClusterGLM/.tools/go/src/testing/testing.go:2126 +0x65f\npanic({0x7c7cd8?, 0x63dad0?})\n\t/home/funboy/StrixHaloClusterGLM/.tools/go/src/runtime/panic.go:859 +0x125\ndaily/snapshotcase/kv.(*Store).Snapshot(...)\n\t/tmp/ds41-fixture-ry6ye94h/kv/snapshot.go:3\ndaily/snapshotcase/kv.TestStableRoundTrip(0xc00015e248?)\n\t/tmp/ds41-fixture-ry6ye94h/kv/snapshot_test.go:3 +0xcf\ntesting.tRunner(0xc00015e248, 0x7e9e88)\n\t/home/funboy/StrixHaloClusterGLM/.tools/go/src/testing/testing.go:2193 +0x21d\ncreated by testing.(*T).Run in goroutine 1\n\t/home/funboy/StrixHaloClusterGLM/.tools/go/src/testing/testing.go:2258 +0xb13\nFAIL\tdaily/snapshotcase/kv\t0.008s\nFAIL\n"
+        },
+        "golden": {
+          "rc": 0,
+          "pass": true,
+          "seconds": 5.663556081010029,
+          "output_tail": "ok  \tdaily/snapshotcase/kv\t1.011s\n"
+        },
+        "discriminator_pass": true
+      }
+    ]
+  },
+  "coding_languages": [
+    "C",
+    "C",
+    "Go",
+    "Go"
+  ],
+  "typescript_reason": "No local tsc; Node22 rejects typed .ts; no package install authorized",
+  "sandbox_preflight": {
+    "status": "BLOCKED_SYSTEM",
+    "command": "systemd-run --user --scope ... /usr/bin/bwrap --unshare-all ... /usr/bin/true",
+    "rc": 1,
+    "error": "bwrap: loopback: Failed to create NETLINK_ROUTE socket: Address family not supported by protocol",
+    "policy": "do not weaken sandbox; coding qualification blocked until infrastructure supports existing isolation"
+  },
+  "collector_self_test": "PASS"
+}

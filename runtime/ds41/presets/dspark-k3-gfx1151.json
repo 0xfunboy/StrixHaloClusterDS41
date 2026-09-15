@@ -1,0 +1,42 @@
+{
+  "schema": "ds41-experimental-preset-v1",
+  "name": "dspark-k3-gfx1151",
+  "status": "EXPERIMENTAL_QUALIFIED",
+  "production_default": false,
+  "source_commit": "3823b380f2e60ec64e0e60b1e962122dbeaeb506",
+  "evidence": "runtime/ds41/results/attempt044-dspark-k3-vs-k2-final.json",
+  "target": {
+    "artifact": "DeepSeek-V4.1-Flash-MixedQ2-Engram2-densefix",
+    "tensor_parallel_size": 2,
+    "expert_parallel": true
+  },
+  "draft": {
+    "method": "dspark",
+    "model": "/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac",
+    "num_speculative_tokens": 3,
+    "quantization": "fp8",
+    "enable_adaptive_verification": false,
+    "draft_tensor_parallel_size": 2,
+    "draft_load_config": {
+      "load_format": "safetensors",
+      "safetensors_load_strategy": "lazy"
+    },
+    "environment": {
+      "DS41_DSPARK_MXFP4_BF16": "1",
+      "DS41_NATIVE_HIP_MOE_ROWWISE": "1",
+      "DS41_MHC_ROWWISE_BLOCK": "1"
+    }
+  },
+  "rollback": {
+    "K2": "runtime/ds41/presets/dspark-k2-gfx1151.json",
+    "K1": "runtime/ds41/presets/dspark-k1-gfx1151.json",
+    "M1": "speculative_config=None"
+  },
+  "qualified_result": {
+    "K2_mean_tps": 19.387325346299768,
+    "K3_mean_tps": 20.419795887735038,
+    "gain_pct": 5.325492418335709,
+    "token_equality": true,
+    "coding_independent": true
+  }
+}

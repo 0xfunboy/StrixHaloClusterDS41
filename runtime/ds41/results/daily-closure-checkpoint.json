@@ -1,0 +1,64 @@
+{
+  "schema": "ds41-daily-closure-checkpoint-v1",
+  "created_unix": 1789494809.077866,
+  "release": "c075e82464c954e202c6f47658821d233edc13a5",
+  "epoch": "1789482113148506636",
+  "prefill_retest": {
+    "status": "PASS",
+    "prompt_tokens": 29,
+    "computed": 29,
+    "cached": 0,
+    "pair_prefill_engine_ms_max": 4635.7548828125,
+    "engine_ttft_ms": 4650.555836036801,
+    "client_first_final_s": 4.924164905969519
+  },
+  "context": {
+    "code_2k": {
+      "status": "SEMANTIC_FAIL",
+      "prompt_tokens": 1588,
+      "computed": 1588,
+      "cached": 0,
+      "pair_prefill_engine_ms_max": 147426.0,
+      "engine_ttft_ms": 147448.0406070361,
+      "client_ttft_s": 147.76955718599493,
+      "decode_tps": 14.338490806458113
+    },
+    "dependent_4k_to_64k": "BLOCKED_BY_GATE"
+  },
+  "coding": {
+    "reasoning_profile_evidence": "A_deliberately_active",
+    "coding_none": "BLOCKED_BY_CONTROL_PLANE",
+    "c-frame-stream": {
+      "status": "INCOMPLETE",
+      "model_calls": 1,
+      "wall_s": 309.471757286
+    },
+    "c-ring-wrap": {
+      "status": "INCOMPLETE",
+      "model_calls": 1,
+      "wall_s": 306.228883973
+    },
+    "go-session-state": {
+      "status": "INCOMPLETE",
+      "model_calls": 3,
+      "wall_s": 552.877285313,
+      "attempt1_envelope_valid": true,
+      "attempt1_execution": "BLOCKED_SYSTEM_TOOLCHAIN_PATH"
+    },
+    "go-snapshot-feature": {
+      "status": "INCOMPLETE",
+      "model_calls": 1,
+      "wall_s": 557.555530631,
+      "reasoning": "high",
+      "reasoning_tokens": 8192,
+      "final_tokens": 0
+    }
+  },
+  "soak": {
+    "status": "NOT_STARTED",
+    "profile": "operational-short-context",
+    "minimum_seconds": 7200,
+    "minimum_requests": 24
+  },
+  "raw_root": "/home/funboy/StrixHaloClusterDS41/reports/DS41-Q2-001/daily-k2-run"
+}

@@ -232,8 +232,8 @@ def main() -> int:
         if dspark_real_arm not in ("m1", "dspark"):
             raise ValueError("dspark_real.arm must be m1 or dspark")
         dspark_real_k = int(dspark_real_cfg.get("num_speculative_tokens", 1))
-        if dspark_real_k not in (1, 2):
-            raise ValueError("DS41 real DSpark only authorizes num_speculative_tokens in {1,2}")
+        if dspark_real_k not in (1, 2, 3):
+            raise ValueError("DS41 real DSpark only authorizes num_speculative_tokens in {1,2,3}")
         if dspark_real_arm == "m1" and dspark_real_k != 1:
             raise ValueError("M1 control must retain num_speculative_tokens=1 metadata/default")
         for key in ("speed", "arithmetic", "coding", "json", "reasoning_high"):

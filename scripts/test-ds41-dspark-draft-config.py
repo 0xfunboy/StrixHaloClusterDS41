@@ -17,7 +17,7 @@ OUT=ROOT/'reports/DS41-Q2-001/attempt038-dspark-real/draft-config-gate.json'
 
 def main():
     ap=argparse.ArgumentParser()
-    ap.add_argument('--k', type=int, default=1, choices=(1,2))
+    ap.add_argument('--k', type=int, default=1, choices=(1,2,3))
     ap.add_argument('--output', default=str(OUT))
     cli=ap.parse_args()
     k=cli.k

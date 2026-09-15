@@ -1,0 +1,7 @@
+# DS41-Q2-001 attempt043/044 — real DSpark K3 vs K2 preregistration
+
+Component/config contract PASS on both gfx1151 nodes before load: K3 resolves three parallel draft queries, target verify width max T4, two extra scheduler slots, three trained MTP stages unchanged, target hidden layers 37/38/39 unchanged; real shared prepare-inputs kernel covers accepted 3/2/1/0, first/second/third rejection, fresh request and K2/K1 tails. Target T1/T2/T3/T4 math is unchanged from attempt036.
+
+Frozen execution order: **B043 K3 first, then A044 K2**, separate supervised loads, same research source. Both reuse attempt042 prompt panel, temperature0, seed1, context/cache policy, warmup32 excluded, functional64 excluded, three retained speed128, arithmetic/coding/text/JSON/reasoning-high. K3 and K2 differ only in `num_speculative_tokens` 3 vs 2.
+
+Decision gates frozen before results: rank coherence and exact token/text/finish/stop equality on greedy panel; independent coding 9/9 plus arithmetic/JSON/reasoning/text PASS; K3 mean speed128 decode gain >=5% over contemporary K2, K3 median>K2 median, **3/3** same-index speed wins, distinct coding+text+reasoning wall no more than +10% worse. All samples retained. K3 acceptance reports 0/1/2/3 full-width histogram, first acceptance, second conditional on first, third conditional on first two, tails separately, and subtracts one bootstrap final token per independent speed request before tokens-per-verify-call.

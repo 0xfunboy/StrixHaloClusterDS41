@@ -1,0 +1,36 @@
+{
+  "schema": "ds41-daily-request-plan-v1",
+  "serving_release": "7fec26f8ba72490847d7b1bf6334b61b520a2c9b",
+  "stable_preset": "dspark-k2-gfx1151",
+  "sampling": {"temperature": 0, "seed": 1, "reasoning_effort": "none"},
+  "context_screening": [
+    {"label":"code-2k-screen","corpus":"code-2k","samples":1,"max_tokens":128},
+    {"label":"code-4k-screen","corpus":"code-4k","samples":1,"max_tokens":128},
+    {"label":"code-8k-decision","corpus":"code-8k","samples":3,"max_tokens":128},
+    {"label":"code-16k-screen","corpus":"code-16k","samples":1,"max_tokens":128},
+    {"label":"code-32k-decision","corpus":"code-32k","samples":3,"max_tokens":128},
+    {"label":"code-64k-conditional","corpus":"code-64k","samples":1,"max_tokens":128,"condition":"32k safety+correctness PASS with admission margin"}
+  ],
+  "semantic_cross_checks": [
+    {"label":"docs-8k","corpus":"docs-8k","samples":1,"max_tokens":128},
+    {"label":"docs-32k","corpus":"docs-32k","samples":1,"max_tokens":128},
+    {"label":"docs-64k-conditional","corpus":"docs-64k","samples":1,"max_tokens":128,"condition":"64k code screen PASS"}
+  ],
+  "long_output": [
+    {"label":"8k-long-output","base_corpus":"code-8k","requested_min_final_tokens":512,"max_tokens":768},
+    {"label":"high-context-long-output","base_corpus":"highest qualified <=64k","requested_min_final_tokens":512,"max_tokens":768}
+  ],
+  "gates": {
+    "no_silent_truncation": true,
+    "prompt_plus_output_must_fit": true,
+    "semantic_expected_json_exact": true,
+    "prompt_tokens_cached_expected_with_prefix_cache_off": 0,
+    "larger_size_stops_after_first_dependent_safety_or_correctness_fail": true
+  },
+  "soak": {
+    "minimum_wall_seconds": 7200,
+    "minimum_mixed_requests": 24,
+    "single_gpu_inference": true,
+    "includes": ["short","8k","highest_qualified","two_multiturn","reasoning_low","reasoning_high","json","multiline_code","long_output","cancel_prefill","cancel_decode","idle_resume","busy_two_clients","final_off_on_smoke"]
+  }
+}

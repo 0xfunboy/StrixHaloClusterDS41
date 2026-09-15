@@ -1138,7 +1138,7 @@ index 5b13530..32541a1 100644
  
      target_language_model = (
 diff --git a/vllm/v1/worker/gpu_model_runner.py b/vllm/v1/worker/gpu_model_runner.py
-index 2730416..16c4288 100644
+index 2730416..2a1d8f1 100644
 --- a/vllm/v1/worker/gpu_model_runner.py
 +++ b/vllm/v1/worker/gpu_model_runner.py
 @@ -4,6 +4,7 @@
@@ -1197,7 +1197,7 @@ index 2730416..16c4288 100644
          self.execute_model_state = ExecuteModelState(
              scheduler_output,
              logits,
-@@ -4753,6 +4781,23 @@ class GPUModelRunner(
+@@ -4753,6 +4781,25 @@ class GPUModelRunner(
                  scheduler_output.total_num_scheduled_tokens,
              )
  
@@ -1209,11 +1209,13 @@ index 2730416..16c4288 100644
 +                if pair is None or start_ev is None:
 +                    continue
 +                end_ev, _ = pair
-+                # Existing sync bookkeeping has already waited for sampled output
-+                # on this stream. If the pre-sampling event is not complete,
-+                # leave it unresolved rather than adding a benchmark sync.
++                # Resolve exactly once per request, after sampling/bookkeeping.
++                # This is not a per-token synchronization: it runs only when the
++                # final prompt chunk has recorded the pre-sampling end event.
++                # In the normal path the event is already complete; synchronize
++                # only closes the reporting race observed on real serving.
 +                if not end_ev.query():
-+                    continue
++                    end_ev.synchronize()
 +                ds41_prefill_engine_ms[req_id] = float(start_ev.elapsed_time(end_ev))
 +                del self._ds41_prefill_start_events[req_id]
 +                del self._ds41_prefill_end_events[req_id]
@@ -1221,7 +1223,7 @@ index 2730416..16c4288 100644
          if draft_after_bookkeeping:
              # ngram and other speculative decoding methods use the sampled
              # tokens on the CPU, so they are run after bookkeeping.
-@@ -4800,6 +4845,7 @@ class GPUModelRunner(
+@@ -4800,6 +4847,7 @@ class GPUModelRunner(
                  num_nans_in_logits=num_nans_in_logits,
                  cudagraph_stats=cudagraph_stats,
                  routed_experts=None,

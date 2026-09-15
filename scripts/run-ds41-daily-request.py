@@ -71,10 +71,12 @@ def main():
     state={'gateway_timing_events':[],'done':False,'first_any_s':None,'first_final_s':None,'reasoning':'','content':'','usage':None,'metrics':None,'finish_reason':None,'stop_reason':None}
     raw=[]; frame=[]
     while True:
-        b=resp.fp.readline()
+        b=resp.readline()
         if not b: break
         line=b.decode('utf-8',errors='strict').rstrip('\r\n'); raw.append(line)
-        if line=='': feed_frame(frame,state,time.monotonic(),start); frame=[]
+        if line=='':
+            feed_frame(frame,state,time.monotonic(),start); frame=[]
+            if state['done']: break
         else: frame.append(line)
     if frame: feed_frame(frame,state,time.monotonic(),start)
     wall=time.monotonic()-start; conn.close()

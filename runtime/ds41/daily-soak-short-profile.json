@@ -1,0 +1,23 @@
+{
+  "schema": "ds41-daily-soak-short-v1",
+  "name": "soak-operativo-contesto-breve",
+  "release": "c075e82464c954e202c6f47658821d233edc13a5",
+  "epoch": "1789482113148506636",
+  "gateway": "http://127.0.0.1:18222",
+  "minimum_wall_seconds": 7200,
+  "minimum_model_requests": 24,
+  "context_tokens": 4096,
+  "single_inference": true,
+  "long_context_qualification": false,
+  "reason": "Frozen code-2K semantic gate failed; this profile qualifies resident operational stability only and does not replace the long-context daily requirement.",
+  "requirements": [
+    "one GPU inference at a time",
+    "no rank/model restart",
+    "separate service and semantic outcome",
+    "cancel keeps pair busy until both ranks drain",
+    "fresh and multi-turn requests",
+    "reasoning none/low/high",
+    "short-context long output",
+    "explicit start/end and 24 model-bearing requests"
+  ]
+}

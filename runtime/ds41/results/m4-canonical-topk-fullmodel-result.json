@@ -1,0 +1,296 @@
+{
+  "candidate_release": "/home/funboy/.local/share/haloclu-ds41/releases/k2-canonical-85a51c7",
+  "candidate_source": "85a51c77aef430d391c1ca709f2e1622b51b7967",
+  "canonical_fix": {
+    "block_m": 4,
+    "component_cause": "same topk set / different order -> different sparse-attention BF16 reduction; canonical order -> bit-exact",
+    "enabled": true,
+    "raw_capture": "raw-only"
+  },
+  "canonicalization_counts": {
+    "calls_per_request_per_rank": 13,
+    "isolated_component_median_ms": {
+      "1023x512": 0.20636700093746185,
+      "565x512": 0.09708300232887268
+    },
+    "isolated_extrapolated_ms_per_request": 1.8084990233182907,
+    "note": "extrapolation only; not measured full-model overhead",
+    "rows_sorted_per_request": 9635,
+    "shape_counts_per_request": {
+      "1023x512": 5,
+      "565x512": 8
+    }
+  },
+  "corpus_sha256": "c162e1102363a8d7dea3891bacac73d18948cde6af8014b92d867cf7e4271993",
+  "decision": "CANONICAL_TOPK_PREFILL_REPEATABILITY_PASS_OUTPUT_REPEATABILITY_FAIL_SEMANTIC_FAIL_NO_PROMOTION_RESTORE_PASS",
+  "epoch": "1789555075324420446",
+  "final_restore": {
+    "block_m": 4,
+    "canonical_topk_resident": false,
+    "coordinator_http": 200,
+    "diagnostic_hooks_resident": false,
+    "epoch": "1789555810773881374",
+    "gateway_health_http": 200,
+    "gateway_state": "READY",
+    "pair_busy": false,
+    "pair_poison": "",
+    "preset": "dspark-k2-gfx1151",
+    "rank0_health_http": 200,
+    "rank1_health_http": 200,
+    "release": "/home/funboy/.local/share/haloclu-ds41/releases/k2-prefill-5bdfed6",
+    "smoke_content": "323",
+    "smoke_finish_reason": "stop",
+    "smoke_reasoning_tokens": 0,
+    "source": "5bdfed698ab97b6230db3fe8a7e37ff8e9b3d513",
+    "status": "PASS_READY_IDLE"
+  },
+  "m8_status": "DEFERRED_UNCHANGED",
+  "next": "STOP this mandate: preserve causal canonical-topk candidate as experimental; do not extend to decode/spec-verifier or resume M8 until residual same-arm decode variability has a separate causal mandate.",
+  "ordinary_metrics": {
+    "0": {
+      "client_unit_wall_s": null,
+      "client_wall_note": "transient --collect unit did not retain monotonic timestamps; exact client wall not claimed",
+      "completion_tokens": 47,
+      "decode_tps_engine": 12.265835170744834,
+      "draft_acceptance": 0.7368421052631579,
+      "engine_ttft_s": 96.06628718902357,
+      "generation_s": 3.7502542109577917,
+      "prefill_engine_s": 96.0285078125
+    },
+    "1": {
+      "client_unit_wall_s": null,
+      "client_wall_note": "transient --collect unit did not retain monotonic timestamps; exact client wall not claimed",
+      "completion_tokens": 46,
+      "decode_tps_engine": 17.042053164597768,
+      "draft_acceptance": 0.7105263157894737,
+      "engine_ttft_s": 82.9787538999808,
+      "generation_s": 2.6405269110109657,
+      "prefill_engine_s": 82.9508671875
+    }
+  },
+  "output_repeatability": {
+    "common_prefix_tokens": 32,
+    "content_exact": false,
+    "finish_exact": true,
+    "first_divergence_0based": 32,
+    "lengths": [
+      47,
+      46
+    ],
+    "status": "FAIL",
+    "token_at_divergence": [
+      70319,
+      52787
+    ],
+    "token_ids_exact": false
+  },
+  "raw_logits_repeatability": {
+    "cross_rank_request0": {
+      "exact": true,
+      "max_abs": 0.0,
+      "rel_l2": 0.0
+    },
+    "cross_rank_request1": {
+      "exact": true,
+      "max_abs": 0.0,
+      "rel_l2": 0.0
+    },
+    "rank0_request0_vs1": {
+      "exact": true,
+      "max_abs": 0.0,
+      "rel_l2": 0.0,
+      "sample_first": [
+        [
+          [
+            24313
+          ]
+        ],
+        [
+          [
+            24313
+          ]
+        ]
+      ]
+    },
+    "rank1_request0_vs1": {
+      "exact": true,
+      "max_abs": 0.0,
+      "rel_l2": 0.0,
+      "sample_first": [
+        [
+          [
+            24313
+          ]
+        ],
+        [
+          [
+            24313
+          ]
+        ]
+      ]
+    },
+    "status": "PASS"
+  },
+  "request_outputs": {
+    "request0": {
+      "content": "{\"result\": 46, \"first_file\": \"__init__.py\", \"last_file\": \"test-ds41-prefill-metrics.py\", \"median_file\": \"build_perpetual_timing_metrics.py\"}",
+      "finish_reason": "stop",
+      "token_ids": [
+        24313,
+        9001,
+        3362,
+        223,
+        2372,
+        14,
+        582,
+        13213,
+        19086,
+        3362,
+        48778,
+        7025,
+        121183,
+        12403,
+        1760,
+        582,
+        10071,
+        19086,
+        3362,
+        582,
+        7958,
+        2417,
+        85,
+        3286,
+        3095,
+        5044,
+        475,
+        2641,
+        42865,
+        23042,
+        1760,
+        582,
+        70319,
+        19086,
+        3362,
+        582,
+        29295,
+        36106,
+        10698,
+        814,
+        3682,
+        117206,
+        65,
+        93256,
+        23042,
+        62773,
+        1
+      ]
+    },
+    "request1": {
+      "content": "{\"result\": 46, \"first_file\": \"__init__.py\", \"last_file\": \"test-ds41-prefill-metrics.py\", \"middle_file\": \"build_per_request_timing_metrics.py\"}",
+      "finish_reason": "stop",
+      "token_ids": [
+        24313,
+        9001,
+        3362,
+        223,
+        2372,
+        14,
+        582,
+        13213,
+        19086,
+        3362,
+        48778,
+        7025,
+        121183,
+        12403,
+        1760,
+        582,
+        10071,
+        19086,
+        3362,
+        582,
+        7958,
+        2417,
+        85,
+        3286,
+        3095,
+        5044,
+        475,
+        2641,
+        42865,
+        23042,
+        1760,
+        582,
+        52787,
+        19086,
+        3362,
+        582,
+        29295,
+        36106,
+        71933,
+        3682,
+        117206,
+        65,
+        93256,
+        23042,
+        62773,
+        1
+      ]
+    }
+  },
+  "request_sha256": "a335e6c7f6e46be19ce64d388d3e4be21b5dcae8587d19fc27c7423c3b0ec3a9",
+  "schema": "ds41-canonical-topk-fullmodel-result-v1",
+  "semantic": {
+    "request0": {
+      "actual": {
+        "first_file": "__init__.py",
+        "last_file": "test-ds41-prefill-metrics.py",
+        "median_file": "build_perpetual_timing_metrics.py",
+        "result": 46
+      },
+      "cached_zero": true,
+      "computed_present": true,
+      "done": true,
+      "expected": {
+        "first_file": "__init__.py",
+        "last_file": "envelope_test.go",
+        "middle_file": "_ds41_artifact.py",
+        "result": 52
+      },
+      "finish_reason": "stop",
+      "label": "canonical-topk-r0",
+      "prefill_present": true,
+      "prompt_tokens_local_manifest": 1588,
+      "prompt_tokens_server": 1588,
+      "semantic_pass": false,
+      "server_matches_local_token_count": true,
+      "status": "FAIL"
+    },
+    "request1": {
+      "actual": {
+        "first_file": "__init__.py",
+        "last_file": "test-ds41-prefill-metrics.py",
+        "middle_file": "build_per_request_timing_metrics.py",
+        "result": 46
+      },
+      "cached_zero": true,
+      "computed_present": true,
+      "done": true,
+      "expected": {
+        "first_file": "__init__.py",
+        "last_file": "envelope_test.go",
+        "middle_file": "_ds41_artifact.py",
+        "result": 52
+      },
+      "finish_reason": "stop",
+      "label": "canonical-topk-r1",
+      "prefill_present": true,
+      "prompt_tokens_local_manifest": 1588,
+      "prompt_tokens_server": 1588,
+      "semantic_pass": false,
+      "server_matches_local_token_count": true,
+      "status": "FAIL"
+    },
+    "status": "FAIL"
+  }
+}

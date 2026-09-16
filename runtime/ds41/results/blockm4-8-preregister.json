@@ -1,0 +1,20 @@
+{
+  "schema": "ds41-blockm4-8-preregister-v1",
+  "candidate": "BLOCK_M 4 -> 8 only for DS41 MixedQ2 routed-MoE calls with tokens>64 when DS41_MOE_PREFILL_BLOCK_M=8",
+  "default": 4,
+  "fixtures": "real code-2k-s1 target-prefill x/topk/topk_weights/expert_map at chunk0/layer0, chunk0/layer20, chunk1/layer0, chunk1/layer20 on both ranks",
+  "numeric_gates": {
+    "candidate_vs_baseline_rel_l2_max": 0.002,
+    "candidate_vs_baseline_max_abs": 0.125,
+    "independent_gguf_py_rel_l2_max": 0.08,
+    "independent_gguf_py_max_abs": 2.0,
+    "candidate_independent_error_may_not_exceed_baseline_by_factor": 1.10
+  },
+  "performance_gate": {
+    "aggregate_median_component_gain_pct_min": 5.0,
+    "fixture_median_wins_required": 6,
+    "fixture_count": 8
+  },
+  "measurement": "one compilation/warmup excluded per arm; 3 GPU-event samples around complete GGUFMoEMethod.apply including route alignment/padding, gate/up, activation, down, weighting and moe_sum; weights loaded before timing",
+  "full_model": "only if numeric and performance gates pass; contemporaneous BLOCK_M4 then BLOCK_M8, original code-2k-s1, detailed profiler and route capture disabled"
+}

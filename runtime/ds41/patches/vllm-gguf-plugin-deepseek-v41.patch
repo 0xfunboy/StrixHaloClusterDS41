@@ -64,10 +64,22 @@ index ddea77f..611259a 100644
 +                )
          return model
 diff --git a/vllm_gguf_plugin/ops.py b/vllm_gguf_plugin/ops.py
-index cc3a0d3..0c20438 100644
+index cc3a0d3..a4a5963 100644
 --- a/vllm_gguf_plugin/ops.py
 +++ b/vllm_gguf_plugin/ops.py
-@@ -252,17 +252,31 @@ def ggml_moe_a8_vec(
+@@ -6,7 +6,10 @@ import torch
+ 
+ from .triton.dequantize.interface import ggml_dequantize_triton
+ from .triton.fused_moe.interface import ggml_moe_a8_triton
+-from .triton.fused_moe.utils import get_triton_moe_block_m
++from .triton.fused_moe.utils import (
++    get_triton_moe_block_m,
++    get_triton_moe_block_m_for_tokens,
++)
+ from .triton.gemm.interface import ggml_mul_mat_a8_triton
+ from .triton.gemm.utils import (
+     GGML_TYPE_IQ1_M,
+@@ -252,17 +255,32 @@ def ggml_moe_a8_vec(
      quant_type: int,
      row: int,
      tokens: int,
@@ -87,16 +99,17 @@ index cc3a0d3..0c20438 100644
 -    sorted_token_ids, expert_ids, num_tokens_post_padded = moe_align_block_size(
 -        topk_ids, get_triton_moe_block_m(quant_type), E
 -    )
++    block_m = get_triton_moe_block_m_for_tokens(quant_type, tokens)
 +    if expert_map is None:
 +        num_experts = W.shape[0]
 +        sorted_token_ids, expert_ids, num_tokens_post_padded = moe_align_block_size(
-+            topk_ids, get_triton_moe_block_m(quant_type), num_experts
++            topk_ids, block_m, num_experts
 +        )
 +    else:
 +        num_experts = expert_map.numel()
 +        sorted_token_ids, expert_ids, num_tokens_post_padded = moe_align_block_size(
 +            topk_ids,
-+            get_triton_moe_block_m(quant_type),
++            block_m,
 +            num_experts,
 +            expert_map=expert_map,
 +            ignore_invalid_experts=True,
@@ -105,7 +118,7 @@ index cc3a0d3..0c20438 100644
          X,
          W,
 diff --git a/vllm_gguf_plugin/quantization/fused_moe.py b/vllm_gguf_plugin/quantization/fused_moe.py
-index 758429b..e812243 100644
+index 758429b..e673fa5 100644
 --- a/vllm_gguf_plugin/quantization/fused_moe.py
 +++ b/vllm_gguf_plugin/quantization/fused_moe.py
 @@ -2,12 +2,14 @@
@@ -481,6 +494,54 @@ index 758429b..e812243 100644
              layer.activation.value,
 +            float(self.moe.swiglu_limit or 0.0),
          )
+diff --git a/vllm_gguf_plugin/triton/fused_moe/utils.py b/vllm_gguf_plugin/triton/fused_moe/utils.py
+index dfdd006..f3b6fed 100644
+--- a/vllm_gguf_plugin/triton/fused_moe/utils.py
++++ b/vllm_gguf_plugin/triton/fused_moe/utils.py
+@@ -2,6 +2,8 @@
+ 
+ from __future__ import annotations
+ 
++import os
++
+ import torch
+ import triton
+ import triton.language as tl
+@@ -73,6 +75,26 @@ def get_triton_moe_block_m(quant_type: int) -> int:
+     return TRITON_MOE_BLOCK_M_BY_TYPE.get(quant_type, TRITON_FUSED_MOE_BLOCK_M)
+ 
+ 
++def get_triton_moe_block_m_for_tokens(quant_type: int, tokens: int) -> int:
++    """DS41 opt-in prefill block size; default behavior remains unchanged.
++
++    Only the MixedQ2 routed expert quant types are eligible and only for
++    multi-row prefill-sized work.  Alignment and kernel launch both call this
++    helper so the padded route layout and BLOCK_M always agree.
++    """
++    base = get_triton_moe_block_m(quant_type)
++    requested = os.environ.get("DS41_MOE_PREFILL_BLOCK_M", "4")
++    if requested not in {"4", "8"}:
++        raise ValueError(f"invalid DS41_MOE_PREFILL_BLOCK_M={requested}")
++    if (
++        requested == "8"
++        and tokens > 64
++        and quant_type in {GGML_TYPE_IQ2_XXS, GGML_TYPE_Q2_K}
++    ):
++        return 8
++    return base
++
++
+ @triton.jit
+ def load_moe_token_info(
+     sorted_token_ids_ptr, pid_m, top_k, num_valid_tokens, BLOCK_M: tl.constexpr
+@@ -248,6 +270,7 @@ def run_triton_fused_moe_kernel(
+     num_warps: int = TRITON_NUM_WARPS,
+     num_stages: int = TRITON_NUM_STAGES,
+ ) -> torch.Tensor:
++    block_m = get_triton_moe_block_m_for_tokens(quant_type, tokens)
+     (
+         W,
+         X,
 diff --git a/vllm_gguf_plugin/weight_utils.py b/vllm_gguf_plugin/weight_utils.py
 index 681e06d..231eadb 100644
 --- a/vllm_gguf_plugin/weight_utils.py
@@ -627,142 +688,3 @@ index be2c1d7..a34d864 100644
      "DiffusionGGUFAdapter",
      "Flux2KleinDiffusionGGUFAdapter",
      "GGUFModelFiles",
-diff --git a/vllm_gguf_plugin/weights_adapter/deepseek_v41.py b/vllm_gguf_plugin/weights_adapter/deepseek_v41.py
-new file mode 100644
-index 0000000..5a14847
---- /dev/null
-+++ b/vllm_gguf_plugin/weights_adapter/deepseek_v41.py
-@@ -0,0 +1,133 @@
-+# SPDX-License-Identifier: Apache-2.0
-+"""GGUF weight adapter for DeepSeek V4.1 text-backbone artifacts.
-+
-+The current V4.1 GGUF converter emits compact llama.cpp tensor names while the
-+vLLM ROCm model loader consumes the native DeepSeek checkpoint namespace.  Keep
-+this translation explicit and fail closed: the quantized artifact intentionally
-+omits Engram/MTP, which are supplied by separate DS41 runtime components.
-+"""
-+
-+from __future__ import annotations
-+
-+import os
-+import re
-+from collections.abc import Iterable
-+
-+from vllm.logger import init_logger
-+
-+from ..gguf_files import GGUFModelFiles
-+from ..weight_utils import get_gguf_tensor_names
-+from .base import BaseGGUFWeightsAdapter, GGUFWeight
-+
-+logger = init_logger(__name__)
-+
-+_TOP = {
-+    "token_embd": "embed.weight",
-+    "output_norm": "norm.weight",
-+    "output": "head.weight",
-+}
-+
-+_LAYER = {
-+    "attn_kv": "attn.wkv.weight",
-+    "attn_kv_a_norm": "attn.kv_norm.weight",
-+    "attn_norm": "attn_norm.weight",
-+    "attn_output_a": "attn.wo_a.weight",
-+    "attn_output_b": "attn.wo_b.weight",
-+    "attn_q_a": "attn.wq_a.weight",
-+    "attn_q_a_norm": "attn.q_norm.weight",
-+    "attn_q_b": "attn.wq_b.weight",
-+    "attn_sinks": "attn.attn_sink",
-+    "attn_compressor_gate": "attn.compressor.wgate.weight",
-+    "attn_compressor_kv": "attn.compressor.wkv.weight",
-+    "attn_compressor_norm": "attn.compressor.norm.weight",
-+    "indexer.attn_k": "attn.indexer.wk.weight",
-+    "indexer.attn_q_b": "attn.indexer.wq_b.weight",
-+    "indexer.k_norm": "attn.indexer.k_norm.weight",
-+    "indexer.proj": "attn.indexer.weights_proj.weight",
-+    "ffn_down_exps": "ffn.experts.0.w2.weight",
-+    "ffn_gate_exps": "ffn.experts.0.w1.weight",
-+    "ffn_up_exps": "ffn.experts.0.w3.weight",
-+    "ffn_down_shexp": "ffn.shared_experts.w2.weight",
-+    "ffn_gate_shexp": "ffn.shared_experts.w1.weight",
-+    "ffn_up_shexp": "ffn.shared_experts.w3.weight",
-+    "ffn_gate_inp": "ffn.gate.weight",
-+    "exp_probs_b": "ffn.gate.bias",
-+    "exp_probs_b_vl": "ffn.gate.bias_vl",
-+    "ffn_norm": "ffn_norm.weight",
-+    "hc_attn_base": "hc_attn_base",
-+    "hc_attn_fn": "hc_attn_fn",
-+    "hc_attn_scale": "hc_attn_scale",
-+    "hc_ffn_base": "hc_ffn_base",
-+    "hc_ffn_fn": "hc_ffn_fn",
-+    "hc_ffn_scale": "hc_ffn_scale",
-+}
-+
-+_BLOCK_RE = re.compile(r"^blk\.(\d+)\.(.+)$")
-+
-+
-+def map_deepseek_v41_gguf_name(name: str) -> str | None:
-+    if name in _TOP:
-+        return _TOP[name]
-+    match = _BLOCK_RE.fullmatch(name)
-+    if match is None:
-+        return None
-+    layer, leaf = match.groups()
-+    target = _LAYER.get(leaf)
-+    if target is None:
-+        return None
-+    return f"layers.{layer}.{target}"
-+
-+
-+class DeepseekV41GGUFAdapter(BaseGGUFWeightsAdapter):
-+    """Map llama.cpp DeepSeek4/V4.1 GGUF tensors to native V4.1 names."""
-+
-+    @classmethod
-+    def matches(cls, config) -> bool:
-+        return getattr(config, "model_type", None) == "deepseek_v41"
-+
-+    @classmethod
-+    def architecture(cls, config) -> str | None:
-+        if not cls.matches(config):
-+            return None
-+        return "DeepseekV41ForCausalLM"
-+
-+    def build_name_map(self, files: GGUFModelFiles, model_config) -> dict[str, str]:
-+        del model_config
-+        names = sorted(get_gguf_tensor_names(files.backbone))
-+        mapped: dict[str, str] = {}
-+        unmapped: list[str] = []
-+        for name in names:
-+            target = map_deepseek_v41_gguf_name(name)
-+            if target is None:
-+                unmapped.append(name)
-+            else:
-+                mapped[name] = target
-+        if unmapped:
-+            raise RuntimeError(
-+                f"Failed to map {len(unmapped)} DeepSeek V4.1 GGUF tensors: {unmapped}"
-+            )
-+        logger.info("Mapped all %d DeepSeek V4.1 GGUF tensors", len(mapped))
-+        return mapped
-+
-+    def transform_weights(
-+        self, weights: Iterable[GGUFWeight], model_config
-+    ) -> Iterable[GGUFWeight]:
-+        del model_config
-+        phase_log = os.environ.get("DS41_LOAD_PHASE_LOG", "0") == "1"
-+        for name, weight in weights:
-+            if weight.ndim == 3 and ".experts.0." in name:
-+                if phase_log:
-+                    logger.info(
-+                        "DS41_LOAD expert_tensor begin name=%s shape=%s",
-+                        name,
-+                        tuple(weight.shape),
-+                    )
-+                for expert_id, expert_weight in enumerate(weight.unbind()):
-+                    expert_name = name.replace(
-+                        ".experts.0.", f".experts.{expert_id}."
-+                    )
-+                    yield expert_name, expert_weight
-+                if phase_log:
-+                    logger.info("DS41_LOAD expert_tensor end name=%s", name)
-+            else:
-+                yield name, weight

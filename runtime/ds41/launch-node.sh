@@ -58,6 +58,8 @@ export MASTER_ADDR=10.55.0.1 MASTER_PORT="${DS41_MASTER_PORT:-29741}"
 cd "$ROOT"
 "$VENV/bin/python" -m runtime.ds41.artifact_identity verify-fast --rank "$rank"
 run_mode=${DS41_RUN_MODE:-api}
+[[ "${DS41_MOE_PREFILL_BLOCK_M:-4}" == 4 || "${DS41_MOE_PREFILL_BLOCK_M:-4}" == 8 ]] || { echo 'invalid DS41_MOE_PREFILL_BLOCK_M' >&2; exit 2; }
+export DS41_MOE_PREFILL_BLOCK_M="${DS41_MOE_PREFILL_BLOCK_M:-4}"
 serving_preset=${DS41_SERVING_PRESET:-}
 dspark_k=${DS41_REAL_DSPARK_K:-}
 if [[ -n "$serving_preset" ]]; then

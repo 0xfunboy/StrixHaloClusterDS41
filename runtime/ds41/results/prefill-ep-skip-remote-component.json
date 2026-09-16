@@ -1,0 +1,60 @@
+{
+  "schema": "ds41-prefill-ep-skip-remote-component-v1",
+  "status": "PASS",
+  "change": "DS41 EP skip-remote MMVQ guard x.shape[0] <=64 -> <=1024",
+  "numerics": {
+    "m65": {
+      "baseline": {
+        "ep_critical_ms": 47.77706527709961,
+        "ep_sum_ms": 93.71989822387695,
+        "full_ms": 48.75520706176758,
+        "m": 65,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "rank0_ms": 47.77706527709961,
+        "rank1_ms": 45.942832946777344
+      },
+      "candidate": {
+        "ep_critical_ms": 29.097667694091797,
+        "ep_sum_ms": 56.74858856201172,
+        "full_ms": 50.91609573364258,
+        "m": 65,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "rank0_ms": 29.097667694091797,
+        "rank1_ms": 27.650920867919922
+      },
+      "critical_change_pct": -39.09699659171234
+    },
+    "m1024": {
+      "baseline": {
+        "ep_critical_ms": 662.1339111328125,
+        "ep_sum_ms": 1320.13037109375,
+        "full_ms": 660.7496337890625,
+        "m": 1024,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "rank0_ms": 662.1339111328125,
+        "rank1_ms": 657.9964599609375
+      },
+      "candidate": {
+        "ep_critical_ms": 336.5534973144531,
+        "ep_sum_ms": 665.8750305175781,
+        "full_ms": 653.5384521484375,
+        "m": 1024,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "rank0_ms": 329.321533203125,
+        "rank1_ms": 336.5534973144531
+      },
+      "critical_change_pct": -49.17138487309006
+    }
+  },
+  "gates": {
+    "m65_exact": true,
+    "m1024_exact": true,
+    "m65_faster": true,
+    "m1024_faster": true
+  },
+  "decision": "QUALIFY_CANDIDATE_FOR_ONE_REAL_CODE2K_AB"
+}

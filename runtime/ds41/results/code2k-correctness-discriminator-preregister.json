@@ -1,0 +1,23 @@
+{
+  "schema": "ds41-code2k-correctness-discriminator-v1",
+  "source_corpus_sha256": "c162e1102363a8d7dea3891bacac73d18948cde6af8014b92d867cf7e4271993",
+  "prompt_sha256": "f5543bba60bbf849bb106bf9efa9ca5381b88a4c4c9281cf60de37a767258745",
+  "expected": {
+    "begin": 17,
+    "middle": 23,
+    "end": 5,
+    "files": [
+      "__init__.py",
+      "api_server.py",
+      "_ds41_artifact.py",
+      "prompt.go",
+      "test-ds41-prefill-metrics.py",
+      "envelope_test.go"
+    ]
+  },
+  "decision": {
+    "extraction_pass_original_fail": "context evidence is retrievable; localize original failure to instruction/arithmetic/order reasoning rather than missing distant evidence",
+    "extraction_fail": "context retrieval/attention fidelity remains implicated; do not blame arithmetic alone"
+  },
+  "note": "This does not change or retry the original code-2k expected/validator."
+}

@@ -395,7 +395,7 @@ index 758429b..e812243 100644
 +        ep_skip_remote = (
 +            expert_map is not None
 +            and os.environ.get("DS41_EP_SKIP_REMOTE", "0") == "1"
-+            and x.shape[0] <= 64
++            and x.shape[0] <= 1024
 +            and layer.w13_weight_type.weight_type in MMVQ_QUANT_TYPES
 +            and layer.w2_weight_type.weight_type in MMVQ_QUANT_TYPES
 +        )

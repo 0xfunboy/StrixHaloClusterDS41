@@ -1112,7 +1112,7 @@ index e943808..f8af4ef 100644
      def with_kv_conn_output_only(
          kv_connector_output: KVConnectorOutput | None,
 diff --git a/vllm/v1/worker/gpu/model_runner.py b/vllm/v1/worker/gpu/model_runner.py
-index 533fcbe..fc245cb 100644
+index 533fcbe..26d953f 100644
 --- a/vllm/v1/worker/gpu/model_runner.py
 +++ b/vllm/v1/worker/gpu/model_runner.py
 @@ -19,6 +19,7 @@ instead of embedding feature-specific logic directly.
@@ -1123,7 +1123,7 @@ index 533fcbe..fc245cb 100644
  import time
  from contextlib import AbstractContextManager
  from copy import deepcopy
-@@ -201,6 +202,11 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+@@ -201,6 +202,13 @@ class GPUModelRunner(LoRAModelRunnerMixin):
  
          self.device = device
          self.dtype = self.model_config.dtype
@@ -1132,10 +1132,12 @@ index 533fcbe..fc245cb 100644
 +        self._ds41_prefill_end_events: dict[str, torch.cuda.Event] = {}
 +        from runtime.ds41.prefill_profile_once import create_prefill_profile_once
 +        self._ds41_prefill_profile_once = create_prefill_profile_once()
++        from runtime.ds41.kv_capture_once import create_kv_metadata_capture_once
++        self._ds41_kv_capture_once = create_kv_metadata_capture_once()
          self.kv_cache_dtype = self.dtype
          if self.cache_config.cache_dtype != "auto":
              # Quantized KV cache.
-@@ -1483,6 +1489,19 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+@@ -1483,6 +1491,19 @@ class GPUModelRunner(LoRAModelRunnerMixin):
              sample_hidden_states = hidden_states[input_batch.logits_indices]
              logits = self.model.compute_logits(sample_hidden_states)
  
@@ -1155,7 +1157,7 @@ index 533fcbe..fc245cb 100644
          if grammar_output is not None:
              # Apply grammar bitmask to the logits in-place.
              assert self.structured_outputs_worker is not None
-@@ -1588,6 +1607,10 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+@@ -1588,6 +1609,10 @@ class GPUModelRunner(LoRAModelRunnerMixin):
          valid_dummy_state_slots: bool = False,
      ) -> ModelRunnerOutput | IntermediateTensors | None:
          if not dummy_run:
@@ -1166,7 +1168,7 @@ index 533fcbe..fc245cb 100644
              # Update the request states.
              self.update_pp_decode_requests()
              self.finish_requests(scheduler_output)
-@@ -1663,6 +1686,16 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+@@ -1663,7 +1688,20 @@ class GPUModelRunner(LoRAModelRunnerMixin):
              input_batch = self.prepare_inputs(
                  scheduler_output, batch_req_state, batch_desc
              )
@@ -1181,9 +1183,13 @@ index 533fcbe..fc245cb 100644
 +                        self._ds41_prefill_start_events[req_id] = ev
 +            self._ds41_prefill_profile_once.maybe_start(input_batch)
              block_tables, slot_mappings = self.prepare_attn(input_batch)
++            self._ds41_kv_capture_once.capture(
++                input_batch, block_tables, slot_mappings, self.block_tables
++            )
              # Mamba "align" pre-copy: migrate recurrent state across block
              # boundaries before the forward. Runs only on real batches, and
-@@ -1971,6 +2004,22 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+             # before model_state.prepare_attn gathers num_accepted_tokens so the
+@@ -1971,6 +2009,22 @@ class GPUModelRunner(LoRAModelRunnerMixin):
          sampler_output, num_sampled, num_rejected = self.sample(
              hidden_states, input_batch, grammar_output
          )
@@ -1206,7 +1212,7 @@ index 533fcbe..fc245cb 100644
  
          if self.pp_handler is not None:
              # Broadcast to non-last PP ranks (handles spec decode multi-token).
-@@ -2000,6 +2049,7 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+@@ -2000,6 +2054,7 @@ class GPUModelRunner(LoRAModelRunnerMixin):
              sampled_token_ids=None,  # type: ignore
              prompt_logprobs_dict=prompt_logprobs_dict,  # type: ignore[arg-type]
              cudagraph_stats=cudagraph_stats,

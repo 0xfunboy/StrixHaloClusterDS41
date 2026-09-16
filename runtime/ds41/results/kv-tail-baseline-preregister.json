@@ -1,0 +1,10 @@
+{
+  "schema": "ds41-kv-tail-baseline-preregister-v1",
+  "source_before_moe_candidate": "b585cc200cea959adfedda0bd75f2c630f61d0d7",
+  "prompt": "existing code2k-tail-only.txt",
+  "prompt_tokens": 1546,
+  "sampling": {"reasoning_effort":"none","temperature":0,"seed":1,"max_tokens":32},
+  "capture": ["computed_before_after","scheduled","seq_len","positions","block_table","slot_mapping"],
+  "expected_chunk_ranges": [[0,1023],[1024,1545]],
+  "interpretation": "No metadata violation if both ranks cover 0..1545 as 1024+522 and each rank/group slot mapping is internally consistent. Physical block ids are not compared across ranks. This does not prove numerical attention correctness."
+}

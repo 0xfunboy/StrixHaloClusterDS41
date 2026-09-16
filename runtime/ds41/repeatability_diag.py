@@ -1,8 +1,14 @@
 """Bounded DS41 same-arm repeatability capture for V2 serving.
 
 Opt-in via DS41_REPEAT_DIAG_DIR. The runner arms only a real selected prefill
-request. Target model hooks clone GPU tensors without CPU synchronization; one
-materialization happens after the first-token sample of the final prefill chunk.
+request. All tensors are cloned on the current GPU stream; no per-layer CPU
+synchronization is introduced. One materialization happens after the first-token
+sample of the final prefill chunk.
+
+The layer2 diagnostic stores both engine chunks. It keeps the full logical inputs
+needed to distinguish an upstream context difference from attention variability,
+and for the observed final query it stores the exact gathered KV rows selected by
+the ROCm sparse prefill backend rather than dumping the whole physical cache.
 """
 from __future__ import annotations
 import json, os
@@ -23,8 +29,10 @@ class RepeatabilityCapture:
         for i,req_id in enumerate(input_batch.req_ids):
             before=int(input_batch.num_computed_prefill_tokens_np[i]); plen=int(input_batch.prefill_len_np[i])
             if bool(input_batch.is_prefilling_np[i]) and before==0 and plen==self.prompt_tokens:
-                self.current={'schema':'ds41-repeat-diag-v1','rank':self.rank,'request_index':self.completed,
+                self.current={'schema':'ds41-repeat-diag-v2','rank':self.rank,'request_index':self.completed,
                               'request_id':str(req_id),'prompt_tokens':plen,'chunks':[],'layers':{},
+                              'early_full':{},'layer2_boundaries':{},'layer2_final_rows':{},
+                              'layer2_full':{},'layer2_projection':{},'layer2_attention':{},
                               'final_hidden':None,'raw_logits':None,'sample':None,'invalid_reason':None}
                 return
 
@@ -35,10 +43,18 @@ class RepeatabilityCapture:
             self._finalize(invalid=True)
 
     def _for_current(self) -> bool: return self.enabled and self.current is not None
+    def _chunk_index(self) -> int:
+        cur=self.current; assert cur is not None
+        return max(len(cur.get('chunks',[]))-1,0)
+    @staticmethod
+    def _clone(x:Any)->Any:
+        if x is None: return None
+        try: return x.detach().clone()
+        except Exception: return x
 
     def record_model_input(self,input_ids:Any,positions:Any,hidden_states:Any) -> None:
         if not self._for_current() or positions is None or positions.numel()==0: return
-        lo=int(positions[0]); hi=int(positions[-1]);
+        lo=int(positions[0]); hi=int(positions[-1])
         if lo<0 or hi>=self.prompt_tokens: return
         cur=self.current; assert cur is not None
         chunk={'position_start':lo,'position_end':hi,'tokens':int(positions.numel()),
@@ -51,28 +67,93 @@ class RepeatabilityCapture:
     def record_layer2_boundary(self,name:str,**values:Any) -> None:
         if not self._for_current(): return
         cur=self.current; assert cur is not None
-        if not cur.get('_capture_layers'): return
-        dst=cur.setdefault('layer2_boundaries',{})
-        def last(x:Any):
-            if x is None: return None
-            try:
-                return x[-1].detach().clone()
-            except Exception:
-                return x
-        dst[str(name)]={k:last(v) for k,v in values.items()}
+        ci=self._chunk_index(); ck=str(ci); name=str(name)
+        # Always keep a stable final-row indicator per chunk.
+        finals=cur.setdefault('layer2_final_rows',{}).setdefault(ck,{})
+        finals[name]={k:(None if v is None else self._clone(v[-1])) for k,v in values.items()}
+        if cur.get('_capture_layers'):
+            cur['layer2_boundaries'][name]=finals[name]
+        # Full tensors only for the bounded replay/localization boundaries.
+        keep={
+            'entry':{'x','residual','pre_mix','post_mix','res_mix'},
+            'attn_mhc_pre':{'x','residual','pre_mix','post_mix','res_mix'},
+            'attn_norm':{'x'},
+            'attention_out':{'x'},
+            'attn_mhc_post':{'residual'},
+            'ffn_mhc_pre':{'x','residual','pre_mix','post_mix','res_mix'},
+            'ffn_norm':{'x'},
+            'ffn_out':{'x'},
+        }.get(name,set())
+        if keep:
+            dst=cur.setdefault('layer2_full',{}).setdefault(ck,{}).setdefault(name,{})
+            for k,v in values.items():
+                if k in keep: dst[k]=self._clone(v)
+
+    def record_layer2_projection(self,positions:Any,kv:Any) -> None:
+        if not self._for_current() or positions is None or positions.numel()==0: return
+        cur=self.current; assert cur is not None
+        ci=self._chunk_index(); ck=str(ci)
+        cur.setdefault('layer2_projection',{})[ck]={
+            'position_start':int(positions[0]),'position_end':int(positions[-1]),
+            'positions':self._clone(positions),'kv_current_chunk':self._clone(kv),
+        }
+
+    def record_layer2_attention_prefill(self,*,q:Any,positions:Any,workspace:Any,
+                                        combined_indices:Any,combined_lens:Any,
+                                        topk_indices:Any,seq_lens:Any,gather_lens:Any,
+                                        query_start_loc:Any,block_table:Any,swa_block_table:Any,
+                                        N:int,M:int,scale:float,attn_sink:Any) -> None:
+        if not self._for_current() or q is None or q.shape[0]==0: return
+        cur=self.current; assert cur is not None
+        ci=self._chunk_index(); ck=str(ci)
+        row=combined_indices[-1]
+        # Build the exact valid prefix on GPU; no .item()/CPU sync here.
+        import torch
+        cols=torch.arange(row.numel(),device=row.device)
+        mask=(cols < combined_lens[-1]) & (row >= 0)
+        valid_idx=row[mask].to(torch.long)
+        flat=workspace.view(-1,q.shape[-1])
+        context_rows=flat.index_select(0,valid_idx)
+        cur.setdefault('layer2_attention',{})[ck]={
+            'position_start':int(positions[0]),'position_end':int(positions[-1]),
+            'q_position':self._clone(positions[-1:]),
+            'q_final':self._clone(q[-1]),
+            'combined_indices_final':self._clone(row),
+            'combined_lens_final':self._clone(combined_lens[-1:]),
+            'valid_context_indices':self._clone(valid_idx),
+            'context_rows':self._clone(context_rows),
+            'topk_indices_final':self._clone(topk_indices[-1]),
+            'seq_lens':self._clone(seq_lens),'gather_lens':self._clone(gather_lens),
+            'query_start_loc':self._clone(query_start_loc),
+            'block_table':self._clone(block_table),'swa_block_table':self._clone(swa_block_table),
+            'workspace_shape':list(workspace.shape),'N':int(N),'M':int(M),
+            'scale':float(scale),'attn_sink':self._clone(attn_sink),
+            'kernel_output_final':None,
+        }
+
+    def record_layer2_attention_kernel_output(self,output:Any) -> None:
+        if not self._for_current() or output is None or output.shape[0]==0: return
+        cur=self.current; assert cur is not None
+        ck=str(self._chunk_index()); pkt=cur.setdefault('layer2_attention',{}).get(ck)
+        if pkt is not None: pkt['kernel_output_final']=self._clone(output[-1])
 
     def record_layer(self,idx:int,hidden_states:Any,residual:Any,post_mix:Any,res_mix:Any,pre_mix:Any) -> None:
         if not self._for_current(): return
         cur=self.current; assert cur is not None
+        ci=self._chunk_index(); ck=str(ci)
+        # Full early-layer output is a bounded upstream control for contextual
+        # differences that final-row-only capture could miss.
+        if int(idx) in (0,1):
+            cur.setdefault('early_full',{}).setdefault(ck,{})[int(idx)]=self._clone(hidden_states)
         if not cur.get('_capture_layers'): return
-        def last(x:Any): return None if x is None else x[-1].detach().clone()
+        def last(x:Any): return None if x is None else self._clone(x[-1])
         cur['layers'][int(idx)]={'hidden_states':last(hidden_states),'residual':last(residual),
                                  'post_mix':last(post_mix),'res_mix':last(res_mix),'pre_mix':last(pre_mix)}
 
     def record_final_hidden(self,hidden_states:Any) -> None:
         if not self._for_current(): return
         cur=self.current; assert cur is not None
-        if cur.get('_capture_layers'): cur['final_hidden']=hidden_states[-1].detach().clone()
+        if cur.get('_capture_layers'): cur['final_hidden']=self._clone(hidden_states[-1])
 
     def record_raw_logits(self,input_batch:Any,logits:Any,needs_processing:Any) -> None:
         if not self._for_current(): return
@@ -84,7 +165,7 @@ class RepeatabilityCapture:
                 li=input_batch.logits_indices.detach().clone() if hasattr(input_batch,'logits_indices') else None
                 lp=(input_batch.positions[input_batch.logits_indices].detach().clone()
                     if hasattr(input_batch,'logits_indices') and hasattr(input_batch,'positions') else None)
-                cur['raw_logits']={'shape':list(logits.shape),'logits':logits.detach().clone(),
+                cur['raw_logits']={'shape':list(logits.shape),'logits':self._clone(logits),
                                    'num_draft_tokens':int(input_batch.num_draft_tokens),
                                    'needs_logits_processing':bool(needs_processing[i]),
                                    'logits_indices':li,'logit_positions':lp}
@@ -97,10 +178,15 @@ class RepeatabilityCapture:
             if str(req_id)!=cur['request_id']: continue
             before=int(input_batch.num_computed_prefill_tokens_np[i]); plen=int(input_batch.prefill_len_np[i]); sched=int(input_batch.num_scheduled_tokens[i])
             if before<plen and before+sched>=plen:
-                cur['sample']={'sampled_token_ids':sampler_output.sampled_token_ids.detach().clone(),
-                               'num_sampled':sampler_output.num_sampled.detach().clone(),
-                               'num_rejected':sampler_output.num_rejected.detach().clone()}
-                self._finalize(invalid=False)
+                # Required narrow capture must be present for both engine chunks.
+                for key in ('layer2_full','layer2_projection','layer2_attention'):
+                    got=cur.get(key,{})
+                    if set(got.keys())!={'0','1'}:
+                        cur['invalid_reason']=f'missing {key} chunks: {sorted(got.keys())}'
+                cur['sample']={'sampled_token_ids':self._clone(sampler_output.sampled_token_ids),
+                               'num_sampled':self._clone(sampler_output.num_sampled),
+                               'num_rejected':self._clone(sampler_output.num_rejected)}
+                self._finalize(invalid=bool(cur.get('invalid_reason')))
             return
 
     def _cpu(self,x:Any)->Any:
@@ -124,6 +210,8 @@ class RepeatabilityCapture:
             summary['status']='INVALID' if invalid or cpu.get('invalid_reason') else 'COMPLETE'
             summary['chunk_ranges']=[ [c['position_start'],c['position_end']] for c in cpu.get('chunks',[]) ]
             summary['layer_count']=len(cpu.get('layers',{})); summary['has_raw_logits']=cpu.get('raw_logits') is not None
+            summary['layer2_full_chunks']=sorted(cpu.get('layer2_full',{}).keys())
+            summary['layer2_attention_chunks']=sorted(cpu.get('layer2_attention',{}).keys())
             (self.root/f"repeat-rank{self.rank}-request{self.completed}.json").write_text(json.dumps(summary,indent=2)+'\n')
         finally:
             self.completed+=1; self.current=None

@@ -1,0 +1,24 @@
+{
+  "schema":"ds41-m4-layer2-context-extension-preregister-v1",
+  "status":"FROZEN_BEFORE_LOAD",
+  "parent_source":"47875d2254be1dc82fde4ee72a8776b67fe3327d",
+  "purpose":"make the already-authorized layer2 narrow capture sufficient to distinguish upstream contextual drift from attention variability",
+  "unchanged":{"arm":"K2/BLOCK_M4","payload_sha256":"4926fd629b1b2057762c617c985e64211a9853c2678260758ee8ea4e09a364fd","prompt_tokens":1588,"requests":2,"seed":1,"temperature":0,"reasoning":"none","prefix_cache":false},
+  "added_evidence":[
+    "full layer0/layer1 hidden output for both engine chunks as bounded upstream controls",
+    "full layer2 entry/mHC/attn_norm/attention_out/FFN-replay boundaries for both chunks",
+    "layer2 current-chunk KV projection",
+    "layer2 final-query Q, exact combined sparse/SWA indices and lengths",
+    "only workspace KV rows actually referenced by that final query",
+    "seq/gather/query metadata and relevant compressed/SWA block tables",
+    "pre-o-projection sparse attention kernel output"
+  ],
+  "explicit_limits":[
+    "no whole-cache dump",
+    "no per-layer/per-token synchronize",
+    "no M8",
+    "instrumented requests are diagnostic not performance samples",
+    "physical inactive cache regions are not compared"
+  ],
+  "decision":"compare request0/request1 within each rank in execution order; if layer2 attn_norm and actual Q/context/metadata are exact but kernel output differs, replay attention on the saved packet; if context/input is already different, localize only its producer"
+}

@@ -527,7 +527,7 @@ index 069ff5f..cd66bc6 100644
              return hidden_states, aux_hidden_states
          return hidden_states
 diff --git a/vllm/models/deepseek_v4_1/amd/rocm.py b/vllm/models/deepseek_v4_1/amd/rocm.py
-index 9271e7a..3aa88e1 100644
+index 9271e7a..e000fcc 100644
 --- a/vllm/models/deepseek_v4_1/amd/rocm.py
 +++ b/vllm/models/deepseek_v4_1/amd/rocm.py
 @@ -651,7 +651,15 @@ class DeepseekV41ROCMAiterMLAAttention(DeepseekV4Attention):
@@ -547,6 +547,37 @@ index 9271e7a..3aa88e1 100644
          return result
  
      def forward_mqa(
+@@ -891,6 +899,22 @@ class DeepseekV41ROCMAiterMLAAttention(DeepseekV4Attention):
+                 M,
+                 N,
+             )
++            if self.layer_id == 2:
++                from runtime.ds41.repeatability_diag import get_repeatability_capture
++                get_repeatability_capture().record_layer2_attention_prefill(
++                    q=q[query_start:query_end],
++                    positions=positions[query_start:query_end],
++                    workspace=kv,
++                    combined_indices=combined_indices,
++                    combined_lens=combined_lens,
++                    topk_indices=topk_indices[query_start:query_end],
++                    seq_lens=seq_lens[chunk_start:chunk_end],
++                    gather_lens=gather_lens[chunk_start:chunk_end],
++                    query_start_loc=query_start_loc[num_decodes + chunk_start : num_decodes + chunk_end + 1],
++                    block_table=(attn_metadata.block_table[num_decodes:][chunk_start:chunk_end] if attn_metadata is not None else None),
++                    swa_block_table=swa_metadata.block_table[num_decodes:][chunk_start:chunk_end],
++                    N=N, M=M, scale=self.scale, attn_sink=self.attn_sink,
++                )
+             rocm_sparse_attn_prefill(
+                 q=q[query_start:query_end],
+                 kv=kv.view(-1, 1, q.shape[-1]),
+@@ -903,3 +927,7 @@ class DeepseekV41ROCMAiterMLAAttention(DeepseekV4Attention):
+                 attn_sink=self.attn_sink,
+                 output=output[query_start:query_end],
+             )
++            if self.layer_id == 2:
++                get_repeatability_capture().record_layer2_attention_kernel_output(
++                    output[query_start:query_end]
++                )
 diff --git a/vllm/models/deepseek_v4_1/amd/vl_model.py b/vllm/models/deepseek_v4_1/amd/vl_model.py
 index 91a13bd..62bd1a5 100644
 --- a/vllm/models/deepseek_v4_1/amd/vl_model.py
@@ -605,7 +636,7 @@ index 91a13bd..62bd1a5 100644
          self._weights_finalized = True
          return loaded_params
 diff --git a/vllm/models/deepseek_v4_1/attention.py b/vllm/models/deepseek_v4_1/attention.py
-index 9bb5352..8d9eb7c 100644
+index 9bb5352..3192613 100644
 --- a/vllm/models/deepseek_v4_1/attention.py
 +++ b/vllm/models/deepseek_v4_1/attention.py
 @@ -7,6 +7,7 @@ DeepseekV4 MLA Attention Layer
@@ -693,7 +724,17 @@ index 9bb5352..8d9eb7c 100644
  def _replace_layer_index(prefix: str, layer_id: int) -> str:
      """Swap the layer index inside a ``...layers.<idx>...`` prefix."""
      new_prefix, n = re.subn(r"\.layers\.\d+\.", f".layers.{layer_id}.", prefix)
-@@ -863,11 +920,22 @@ class DeepseekV4Attention(nn.Module, AttentionLayerBase, ABC):
+@@ -563,6 +620,9 @@ class DeepseekV4Attention(nn.Module, AttentionLayerBase, ABC):
+             hidden_states
+         )
+         qr, qr_scale, kv = self._split_qkv_and_norm(qr_kv)
++        if self.layer_id == 2:
++            from runtime.ds41.repeatability_diag import get_repeatability_capture
++            get_repeatability_capture().record_layer2_projection(positions, kv)
+ 
+         self._prepare_and_attn_fn(
+             hidden_states,
+@@ -863,11 +923,22 @@ class DeepseekV4Attention(nn.Module, AttentionLayerBase, ABC):
  
          # kv is unchanged; attention reads kv solely via swa_kv_cache.
          if cache_dtype == torch.uint8:

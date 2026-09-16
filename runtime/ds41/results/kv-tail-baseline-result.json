@@ -1,0 +1,22 @@
+{
+  "schema": "ds41-kv-tail-baseline-result-v1",
+  "status": "PASS_NO_METADATA_VIOLATION_OBSERVED",
+  "source": "58a8911bcb953a15d23a811157350e4cc99311fe",
+  "epoch": "1789532175137092259",
+  "prompt_sha256": "9996033c4241cbf61afb5c4c7c31d7c0501075af0b136c733d322f6bf7372563",
+  "prompt_tokens": 1546,
+  "semantic_output": {"end":23},
+  "semantic_expected": {"end":5},
+  "semantic_status": "FAIL_PRESERVED",
+  "observed_chunks": [
+    {"computed_before":0,"scheduled":1023,"computed_after":1023,"positions":[0,1022]},
+    {"computed_before":1023,"scheduled":523,"computed_after":1546,"positions":[1023,1545]}
+  ],
+  "cache_groups": {"count":6,"block_sizes":[32,32,32,32,128,8],"slot_mapping_enabled":[true,true,true,true,true,false]},
+  "slot_contract": "PASS_PER_CHUNK_BOTH_RANKS",
+  "swa_reuse": {"group":2,"sliding_window":128,"extra_retained_tokens":1,"reused_old_position_min":256,"reused_old_position_max":767,"skip_threshold_before_second":895,"status":"CONSISTENT_WITH_SWA_RETENTION"},
+  "nominal_1024_522_assumption": "FALSE; actual K2 scheduling was 1023+523",
+  "initial_validator": "FAIL_EXPECTED_SEGMENTATION_ASSUMPTION",
+  "corrected_observed_contract_validator": "PASS",
+  "interpretation": "No violation in captured V2 positions/computed lengths/block-table/slot metadata. This does not prove numerical attention correctness and does not explain the preserved end=23 failure."
+}

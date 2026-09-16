@@ -1,0 +1,11 @@
+{
+  "schema":"ds41-ds4-prefill-component-preregister-v1",
+  "torch_ggml_ops_ref":"9d7ddbf9f737998ccdabf803d10d12896c97771b",
+  "ds4_ref":"8db1d1d155cb0400a86a86b9c62d0defb3a6148b",
+  "fixtures":"reports/DS41-Q2-001/blockm-real-fixtures-bc41a35/manifest.json",
+  "candidate":"DS4 raw-layout dynamic IQ2_XXS paired MMQ + weighted SwiGLU + Q2_K grouped MMQ + sum6",
+  "timed_scope":"BF16->F32 + EP2 id map + DS4 route preparation/Q8_1 quantization + gate/up MMQ + clamp/SwiGLU/router + Q2_K route preparation/Q8_1 quantization + down MMQ + sum6 + F32->BF16",
+  "excluded":"one-time weight upload, persistent buffer allocation, model load",
+  "precision_difference":"DS4 materializes F32 gate/up/mid/down around internal Q8_1 activation quantization; DS41 baseline is BF16-oriented Triton GGUF. Output delta is diagnostic, not assumed equivalent.",
+  "execution":"rank0 layer0 chunk0 is operational admission. If PASS, all eight existing fixtures are measured; no new model or fixture capture."
+}

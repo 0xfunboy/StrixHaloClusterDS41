@@ -1,0 +1,744 @@
+{
+  "all8": {
+    "ep2_map_exact_all": true,
+    "fixtures": [
+      {
+        "_file": "reports/DS41-Q2-001/ds4-prefill-component/rank0-call00.json",
+        "baseline_ds41": {
+          "mean_ms": 1242.5994873046875,
+          "median_ms": 1236.1259765625,
+          "samples_ms": [
+            1235.5423583984375,
+            1236.1259765625,
+            1256.130126953125
+          ]
+        },
+        "candidate_ds4_raw_mmq": {
+          "mean_ms": 211.40406290690103,
+          "median_ms": 211.56918334960938,
+          "peak_delta_bytes": 10475520,
+          "samples_ms": [
+            211.58338928222656,
+            211.56918334960938,
+            211.0596160888672
+          ]
+        },
+        "candidate_vs_ds41_output": {
+          "exact": false,
+          "max_abs": 0.03125,
+          "mean_abs": 0.0008579354034736753,
+          "rel_l2": 0.025547502228936366
+        },
+        "chunk_index": 0,
+        "ep2_map_exact": true,
+        "fixture": "reports/DS41-Q2-001/blockm-real-fixtures-bc41a35/route-fixture-rank0-call00.pt",
+        "global_experts": 384,
+        "hidden": 5120,
+        "layer_index": 0,
+        "local_experts": 192,
+        "local_routes": 3343,
+        "mid_dim": 2304,
+        "precision_contract": {
+          "ds41_input": "BF16",
+          "ds41_intermediate_boundaries": "BF16-oriented Triton GGUF path",
+          "ds4_down_output": "F32 sum then timed F32->BF16 cast",
+          "ds4_gate_up_mid": "F32 materialized",
+          "ds4_input_boundary": "BF16->F32 timed, then DS4 internal Q8_1 activation quantization"
+        },
+        "rank": 0,
+        "remote_routes": 2795,
+        "schema": "ds41-ds4-prefill-fixture-v1",
+        "speedup_ratio": 5.842656085313959,
+        "status": "PASS",
+        "time_reduction_pct": 82.88449661595537,
+        "tokens": 1023
+      },
+      {
+        "_file": "reports/DS41-Q2-001/ds4-prefill-component/rank0-call20.json",
+        "baseline_ds41": {
+          "mean_ms": 1098.8860677083333,
+          "median_ms": 1097.70703125,
+          "samples_ms": [
+            1101.460693359375,
+            1097.490478515625,
+            1097.70703125
+          ]
+        },
+        "candidate_ds4_raw_mmq": {
+          "mean_ms": 184.53145345052084,
+          "median_ms": 183.27931213378906,
+          "peak_delta_bytes": 10475520,
+          "samples_ms": [
+            187.13572692871094,
+            183.27931213378906,
+            183.1793212890625
+          ]
+        },
+        "candidate_vs_ds41_output": {
+          "exact": false,
+          "max_abs": 256.0,
+          "mean_abs": 0.008004928939044476,
+          "rel_l2": 0.01347520622513653
+        },
+        "chunk_index": 0,
+        "ep2_map_exact": true,
+        "fixture": "reports/DS41-Q2-001/blockm-real-fixtures-bc41a35/route-fixture-rank0-call20.pt",
+        "global_experts": 384,
+        "hidden": 5120,
+        "layer_index": 20,
+        "local_experts": 192,
+        "local_routes": 3015,
+        "mid_dim": 2304,
+        "precision_contract": {
+          "ds41_input": "BF16",
+          "ds41_intermediate_boundaries": "BF16-oriented Triton GGUF path",
+          "ds4_down_output": "F32 sum then timed F32->BF16 cast",
+          "ds4_gate_up_mid": "F32 materialized",
+          "ds4_input_boundary": "BF16->F32 timed, then DS4 internal Q8_1 activation quantization"
+        },
+        "rank": 0,
+        "remote_routes": 3123,
+        "schema": "ds41-ds4-prefill-fixture-v1",
+        "speedup_ratio": 5.989257698919684,
+        "status": "PASS",
+        "time_reduction_pct": 83.30344008773616,
+        "tokens": 1023
+      },
+      {
+        "_file": "reports/DS41-Q2-001/ds4-prefill-component/rank0-call40.json",
+        "baseline_ds41": {
+          "mean_ms": 771.1976521809896,
+          "median_ms": 770.3304443359375,
+          "samples_ms": [
+            775.6893310546875,
+            770.3304443359375,
+            767.5731811523438
+          ]
+        },
+        "candidate_ds4_raw_mmq": {
+          "mean_ms": 189.45631408691406,
+          "median_ms": 189.4983673095703,
+          "peak_delta_bytes": 5785600,
+          "samples_ms": [
+            189.34906005859375,
+            189.4983673095703,
+            189.52151489257812
+          ]
+        },
+        "candidate_vs_ds41_output": {
+          "exact": false,
+          "max_abs": 0.015625,
+          "mean_abs": 0.0007495117606595159,
+          "rel_l2": 0.025375645102548423
+        },
+        "chunk_index": 1,
+        "ep2_map_exact": true,
+        "fixture": "reports/DS41-Q2-001/blockm-real-fixtures-bc41a35/route-fixture-rank0-call40.pt",
+        "global_experts": 384,
+        "hidden": 5120,
+        "layer_index": 0,
+        "local_experts": 192,
+        "local_routes": 1723,
+        "mid_dim": 2304,
+        "precision_contract": {
+          "ds41_input": "BF16",
+          "ds41_intermediate_boundaries": "BF16-oriented Triton GGUF path",
+          "ds4_down_output": "F32 sum then timed F32->BF16 cast",
+          "ds4_gate_up_mid": "F32 materialized",
+          "ds4_input_boundary": "BF16->F32 timed, then DS4 internal Q8_1 activation quantization"
+        },
+        "rank": 0,
+        "remote_routes": 1667,
+        "schema": "ds41-ds4-prefill-fixture-v1",
+        "speedup_ratio": 4.065103331879911,
+        "status": "PASS",
+        "time_reduction_pct": 75.40037931735553,
+        "tokens": 565
+      },
+      {
+        "_file": "reports/DS41-Q2-001/ds4-prefill-component/rank0-call60.json",
+        "baseline_ds41": {
+          "mean_ms": 712.8273111979166,
+          "median_ms": 713.7203979492188,
+          "samples_ms": [
+            708.919189453125,
+            715.8423461914062,
+            713.7203979492188
+          ]
+        },
+        "candidate_ds4_raw_mmq": {
+          "mean_ms": 146.56158447265625,
+          "median_ms": 146.73594665527344,
+          "peak_delta_bytes": 5785600,
+          "samples_ms": [
+            146.73594665527344,
+            146.77145385742188,
+            146.17735290527344
+          ]
+        },
+        "candidate_vs_ds41_output": {
+          "exact": false,
+          "max_abs": 0.03125,
+          "mean_abs": 0.0028627156279981136,
+          "rel_l2": 0.027093202681604776
+        },
+        "chunk_index": 1,
+        "ep2_map_exact": true,
+        "fixture": "reports/DS41-Q2-001/blockm-real-fixtures-bc41a35/route-fixture-rank0-call60.pt",
+        "global_experts": 384,
+        "hidden": 5120,
+        "layer_index": 20,
+        "local_experts": 192,
+        "local_routes": 1807,
+        "mid_dim": 2304,
+        "precision_contract": {
+          "ds41_input": "BF16",
+          "ds41_intermediate_boundaries": "BF16-oriented Triton GGUF path",
+          "ds4_down_output": "F32 sum then timed F32->BF16 cast",
+          "ds4_gate_up_mid": "F32 materialized",
+          "ds4_input_boundary": "BF16->F32 timed, then DS4 internal Q8_1 activation quantization"
+        },
+        "rank": 0,
+        "remote_routes": 1583,
+        "schema": "ds41-ds4-prefill-fixture-v1",
+        "speedup_ratio": 4.863977874664625,
+        "status": "PASS",
+        "time_reduction_pct": 79.44069595363959,
+        "tokens": 565
+      },
+      {
+        "_file": "reports/DS41-Q2-001/ds4-prefill-component/rank1-call00.json",
+        "baseline_ds41": {
+          "mean_ms": 1097.2258707682292,
+          "median_ms": 1092.6068115234375,
+          "samples_ms": [
+            1091.4730224609375,
+            1092.6068115234375,
+            1107.5977783203125
+          ]
+        },
+        "candidate_ds4_raw_mmq": {
+          "mean_ms": 214.08529154459634,
+          "median_ms": 214.16458129882812,
+          "peak_delta_bytes": 10475520,
+          "samples_ms": [
+            214.16458129882812,
+            214.2164764404297,
+            213.87481689453125
+          ]
+        },
+        "candidate_vs_ds41_output": {
+          "exact": false,
+          "max_abs": 0.15625,
+          "mean_abs": 0.0007675533415749669,
+          "rel_l2": 0.020051602605285077
+        },
+        "chunk_index": 0,
+        "ep2_map_exact": true,
+        "fixture": "reports/DS41-Q2-001/blockm-real-fixtures-bc41a35/route-fixture-rank1-call00.pt",
+        "global_experts": 384,
+        "hidden": 5120,
+        "layer_index": 0,
+        "local_experts": 192,
+        "local_routes": 2795,
+        "mid_dim": 2304,
+        "precision_contract": {
+          "ds41_input": "BF16",
+          "ds41_intermediate_boundaries": "BF16-oriented Triton GGUF path",
+          "ds4_down_output": "F32 sum then timed F32->BF16 cast",
+          "ds4_gate_up_mid": "F32 materialized",
+          "ds4_input_boundary": "BF16->F32 timed, then DS4 internal Q8_1 activation quantization"
+        },
+        "rank": 1,
+        "remote_routes": 3343,
+        "schema": "ds41-ds4-prefill-fixture-v1",
+        "speedup_ratio": 5.101715722073116,
+        "status": "PASS",
+        "time_reduction_pct": 80.39875103833415,
+        "tokens": 1023
+      },
+      {
+        "_file": "reports/DS41-Q2-001/ds4-prefill-component/rank1-call20.json",
+        "baseline_ds41": {
+          "mean_ms": 1117.6781005859375,
+          "median_ms": 1115.4117431640625,
+          "samples_ms": [
+            1127.167236328125,
+            1110.455322265625,
+            1115.4117431640625
+          ]
+        },
+        "candidate_ds4_raw_mmq": {
+          "mean_ms": 176.502197265625,
+          "median_ms": 176.49871826171875,
+          "peak_delta_bytes": 10475520,
+          "samples_ms": [
+            176.7674560546875,
+            176.49871826171875,
+            176.24041748046875
+          ]
+        },
+        "candidate_vs_ds41_output": {
+          "exact": false,
+          "max_abs": 0.046875,
+          "mean_abs": 0.0027708334382623434,
+          "rel_l2": 0.02739709435690108
+        },
+        "chunk_index": 0,
+        "ep2_map_exact": true,
+        "fixture": "reports/DS41-Q2-001/blockm-real-fixtures-bc41a35/route-fixture-rank1-call20.pt",
+        "global_experts": 384,
+        "hidden": 5120,
+        "layer_index": 20,
+        "local_experts": 192,
+        "local_routes": 3123,
+        "mid_dim": 2304,
+        "precision_contract": {
+          "ds41_input": "BF16",
+          "ds41_intermediate_boundaries": "BF16-oriented Triton GGUF path",
+          "ds4_down_output": "F32 sum then timed F32->BF16 cast",
+          "ds4_gate_up_mid": "F32 materialized",
+          "ds4_input_boundary": "BF16->F32 timed, then DS4 internal Q8_1 activation quantization"
+        },
+        "rank": 1,
+        "remote_routes": 3015,
+        "schema": "ds41-ds4-prefill-fixture-v1",
+        "speedup_ratio": 6.319659168912996,
+        "status": "PASS",
+        "time_reduction_pct": 84.17636183737416,
+        "tokens": 1023
+      },
+      {
+        "_file": "reports/DS41-Q2-001/ds4-prefill-component/rank1-call40.json",
+        "baseline_ds41": {
+          "mean_ms": 792.0568644205729,
+          "median_ms": 790.65771484375,
+          "samples_ms": [
+            790.65771484375,
+            787.6192016601562,
+            797.8936767578125
+          ]
+        },
+        "candidate_ds4_raw_mmq": {
+          "mean_ms": 192.5857950846354,
+          "median_ms": 192.5544891357422,
+          "peak_delta_bytes": 5785600,
+          "samples_ms": [
+            192.8259735107422,
+            192.37692260742188,
+            192.5544891357422
+          ]
+        },
+        "candidate_vs_ds41_output": {
+          "exact": false,
+          "max_abs": 0.0234375,
+          "mean_abs": 0.0006910211523063481,
+          "rel_l2": 0.024119195198915627
+        },
+        "chunk_index": 1,
+        "ep2_map_exact": true,
+        "fixture": "reports/DS41-Q2-001/blockm-real-fixtures-bc41a35/route-fixture-rank1-call40.pt",
+        "global_experts": 384,
+        "hidden": 5120,
+        "layer_index": 0,
+        "local_experts": 192,
+        "local_routes": 1667,
+        "mid_dim": 2304,
+        "precision_contract": {
+          "ds41_input": "BF16",
+          "ds41_intermediate_boundaries": "BF16-oriented Triton GGUF path",
+          "ds4_down_output": "F32 sum then timed F32->BF16 cast",
+          "ds4_gate_up_mid": "F32 materialized",
+          "ds4_input_boundary": "BF16->F32 timed, then DS4 internal Q8_1 activation quantization"
+        },
+        "rank": 1,
+        "remote_routes": 1723,
+        "schema": "ds41-ds4-prefill-fixture-v1",
+        "speedup_ratio": 4.1061505155892375,
+        "status": "PASS",
+        "time_reduction_pct": 75.6462897255363,
+        "tokens": 565
+      },
+      {
+        "_file": "reports/DS41-Q2-001/ds4-prefill-component/rank1-call60.json",
+        "baseline_ds41": {
+          "mean_ms": 633.8361409505209,
+          "median_ms": 633.5631103515625,
+          "samples_ms": [
+            636.6043701171875,
+            631.3409423828125,
+            633.5631103515625
+          ]
+        },
+        "candidate_ds4_raw_mmq": {
+          "mean_ms": 142.5300750732422,
+          "median_ms": 142.54147338867188,
+          "peak_delta_bytes": 5785600,
+          "samples_ms": [
+            142.54147338867188,
+            142.78404235839844,
+            142.26470947265625
+          ]
+        },
+        "candidate_vs_ds41_output": {
+          "exact": false,
+          "max_abs": 0.046875,
+          "mean_abs": 0.0029264064505696297,
+          "rel_l2": 0.027118342369813177
+        },
+        "chunk_index": 1,
+        "ep2_map_exact": true,
+        "fixture": "reports/DS41-Q2-001/blockm-real-fixtures-bc41a35/route-fixture-rank1-call60.pt",
+        "global_experts": 384,
+        "hidden": 5120,
+        "layer_index": 20,
+        "local_experts": 192,
+        "local_routes": 1583,
+        "mid_dim": 2304,
+        "precision_contract": {
+          "ds41_input": "BF16",
+          "ds41_intermediate_boundaries": "BF16-oriented Triton GGUF path",
+          "ds4_down_output": "F32 sum then timed F32->BF16 cast",
+          "ds4_gate_up_mid": "F32 materialized",
+          "ds4_input_boundary": "BF16->F32 timed, then DS4 internal Q8_1 activation quantization"
+        },
+        "rank": 1,
+        "remote_routes": 1807,
+        "schema": "ds41-ds4-prefill-fixture-v1",
+        "speedup_ratio": 4.444763304950609,
+        "status": "PASS",
+        "time_reduction_pct": 77.50161411550998,
+        "tokens": 565
+      }
+    ],
+    "max_abs_max": 256.0,
+    "mean_fixture_speedup": 5.091660462788017,
+    "ratio_of_sums": 5.113885283488446,
+    "rel_l2_range": [
+      0.01347520622513653,
+      0.02739709435690108
+    ],
+    "speedup_range": [
+      4.065103331879911,
+      6.319659168912996
+    ]
+  },
+  "ced128_shape_control": {
+    "critical": [
+      {
+        "baseline_ms": 220.37310791015625,
+        "chunk_index": 0,
+        "ds4_ms": 70.56719207763672
+      },
+      {
+        "baseline_ms": 235.95269775390625,
+        "chunk_index": 1,
+        "ds4_ms": 85.57695007324219
+      }
+    ],
+    "points": [
+      {
+        "_file": "reports/DS41-Q2-001/ds4-prefill-component/ced128/rank0-call20.json",
+        "baseline_ds41": {
+          "mean_ms": 221.10387166341147,
+          "median_ms": 220.37310791015625,
+          "samples_ms": [
+            220.37310791015625,
+            217.74110412597656,
+            225.19740295410156
+          ]
+        },
+        "candidate_ds4_raw_mmq": {
+          "mean_ms": 70.5641860961914,
+          "median_ms": 70.56719207763672,
+          "peak_delta_bytes": 1572864,
+          "samples_ms": [
+            70.70628356933594,
+            70.41908264160156,
+            70.56719207763672
+          ]
+        },
+        "candidate_vs_ds41_output": {
+          "exact": false,
+          "max_abs": 0.02734375,
+          "mean_abs": 0.0033577734138816595,
+          "rel_l2": 0.02731001063192848
+        },
+        "chunk_index": 0,
+        "ep2_map_exact": true,
+        "fixture": "/tmp/ds41-ced128/rank0-call20.pt",
+        "global_experts": 384,
+        "hidden": 5120,
+        "layer_index": 20,
+        "local_experts": 192,
+        "local_routes": 423,
+        "mid_dim": 2304,
+        "precision_contract": {
+          "ds41_input": "BF16",
+          "ds41_intermediate_boundaries": "BF16-oriented Triton GGUF path",
+          "ds4_down_output": "F32 sum then timed F32->BF16 cast",
+          "ds4_gate_up_mid": "F32 materialized",
+          "ds4_input_boundary": "BF16->F32 timed, then DS4 internal Q8_1 activation quantization"
+        },
+        "rank": 0,
+        "remote_routes": 345,
+        "schema": "ds41-ds4-prefill-fixture-v1",
+        "speedup_ratio": 3.1228833317854825,
+        "status": "PASS",
+        "time_reduction_pct": 67.97831062653697,
+        "tokens": 128
+      },
+      {
+        "_file": "reports/DS41-Q2-001/ds4-prefill-component/ced128/rank0-call60.json",
+        "baseline_ds41": {
+          "mean_ms": 235.61337280273438,
+          "median_ms": 235.95269775390625,
+          "samples_ms": [
+            236.38934326171875,
+            234.49807739257812,
+            235.95269775390625
+          ]
+        },
+        "candidate_ds4_raw_mmq": {
+          "mean_ms": 85.52127583821614,
+          "median_ms": 85.57695007324219,
+          "peak_delta_bytes": 1572864,
+          "samples_ms": [
+            85.57695007324219,
+            85.67300415039062,
+            85.31387329101562
+          ]
+        },
+        "candidate_vs_ds41_output": {
+          "exact": false,
+          "max_abs": 0.02734375,
+          "mean_abs": 0.002527286997064948,
+          "rel_l2": 0.02701140238974565
+        },
+        "chunk_index": 1,
+        "ep2_map_exact": true,
+        "fixture": "/tmp/ds41-ced128/rank0-call60.pt",
+        "global_experts": 384,
+        "hidden": 5120,
+        "layer_index": 20,
+        "local_experts": 192,
+        "local_routes": 349,
+        "mid_dim": 2304,
+        "precision_contract": {
+          "ds41_input": "BF16",
+          "ds41_intermediate_boundaries": "BF16-oriented Triton GGUF path",
+          "ds4_down_output": "F32 sum then timed F32->BF16 cast",
+          "ds4_gate_up_mid": "F32 materialized",
+          "ds4_input_boundary": "BF16->F32 timed, then DS4 internal Q8_1 activation quantization"
+        },
+        "rank": 0,
+        "remote_routes": 419,
+        "schema": "ds41-ds4-prefill-fixture-v1",
+        "speedup_ratio": 2.7571991938479106,
+        "status": "PASS",
+        "time_reduction_pct": 63.731311026374804,
+        "tokens": 128
+      },
+      {
+        "_file": "reports/DS41-Q2-001/ds4-prefill-component/ced128/rank1-call20.json",
+        "baseline_ds41": {
+          "mean_ms": 190.26844278971353,
+          "median_ms": 188.9409637451172,
+          "samples_ms": [
+            188.9409637451172,
+            187.79147338867188,
+            194.07289123535156
+          ]
+        },
+        "candidate_ds4_raw_mmq": {
+          "mean_ms": 57.643402099609375,
+          "median_ms": 57.59097671508789,
+          "peak_delta_bytes": 1572864,
+          "samples_ms": [
+            57.588478088378906,
+            57.75075149536133,
+            57.59097671508789
+          ]
+        },
+        "candidate_vs_ds41_output": {
+          "exact": false,
+          "max_abs": 0.02734375,
+          "mean_abs": 0.002522866940125823,
+          "rel_l2": 0.02720912862276482
+        },
+        "chunk_index": 0,
+        "ep2_map_exact": true,
+        "fixture": "/tmp/ds41-ced128/rank1-call20.pt",
+        "global_experts": 384,
+        "hidden": 5120,
+        "layer_index": 20,
+        "local_experts": 192,
+        "local_routes": 345,
+        "mid_dim": 2304,
+        "precision_contract": {
+          "ds41_input": "BF16",
+          "ds41_intermediate_boundaries": "BF16-oriented Triton GGUF path",
+          "ds4_down_output": "F32 sum then timed F32->BF16 cast",
+          "ds4_gate_up_mid": "F32 materialized",
+          "ds4_input_boundary": "BF16->F32 timed, then DS4 internal Q8_1 activation quantization"
+        },
+        "rank": 1,
+        "remote_routes": 423,
+        "schema": "ds41-ds4-prefill-fixture-v1",
+        "speedup_ratio": 3.280739006734327,
+        "status": "PASS",
+        "time_reduction_pct": 69.51906268839691,
+        "tokens": 128
+      },
+      {
+        "_file": "reports/DS41-Q2-001/ds4-prefill-component/ced128/rank1-call60.json",
+        "baseline_ds41": {
+          "mean_ms": 221.78367614746094,
+          "median_ms": 221.34361267089844,
+          "samples_ms": [
+            221.34361267089844,
+            218.355224609375,
+            225.65219116210938
+          ]
+        },
+        "candidate_ds4_raw_mmq": {
+          "mean_ms": 75.16870625813802,
+          "median_ms": 75.22038269042969,
+          "peak_delta_bytes": 1572864,
+          "samples_ms": [
+            75.27003479003906,
+            75.01570129394531,
+            75.22038269042969
+          ]
+        },
+        "candidate_vs_ds41_output": {
+          "exact": false,
+          "max_abs": 0.03515625,
+          "mean_abs": 0.0029550003819167614,
+          "rel_l2": 0.027415157989834488
+        },
+        "chunk_index": 1,
+        "ep2_map_exact": true,
+        "fixture": "/tmp/ds41-ced128/rank1-call60.pt",
+        "global_experts": 384,
+        "hidden": 5120,
+        "layer_index": 20,
+        "local_experts": 192,
+        "local_routes": 419,
+        "mid_dim": 2304,
+        "precision_contract": {
+          "ds41_input": "BF16",
+          "ds41_intermediate_boundaries": "BF16-oriented Triton GGUF path",
+          "ds4_down_output": "F32 sum then timed F32->BF16 cast",
+          "ds4_gate_up_mid": "F32 materialized",
+          "ds4_input_boundary": "BF16->F32 timed, then DS4 internal Q8_1 activation quantization"
+        },
+        "rank": 1,
+        "remote_routes": 349,
+        "schema": "ds41-ds4-prefill-fixture-v1",
+        "speedup_ratio": 2.942601523071752,
+        "status": "PASS",
+        "time_reduction_pct": 66.01646562881847,
+        "tokens": 128
+      }
+    ],
+    "speedup_range": [
+      2.7571991938479106,
+      3.280739006734327
+    ]
+  },
+  "engram_next": "Existing 8.861-10.094s Engram lookup remains second intervention and alone exceeds 7.94s total 200-TPS budget.",
+  "measurement_scope": {
+    "excluded": "one-time weight upload and persistent allocation",
+    "fixtures": 8,
+    "host": "NODE01 clean component window; rank-specific EP2 fixture maps preserved",
+    "repeats": 3,
+    "timed": "BF16->F32 + EP2 map + DS4 route/Q8_1 prep + IQ2 paired MMQ + clamp/SwiGLU/router + Q2_K grouped route/Q8_1 prep + down MMQ + sum6 + F32->BF16"
+  },
+  "pair_critical_representative": {
+    "baseline_sum_ms": 3855.9158325195312,
+    "ds4_sum_ms": 736.7343292236328,
+    "points": [
+      {
+        "baseline_ms": 1236.1259765625,
+        "chunk_index": 0,
+        "ds4_ms": 214.16458129882812,
+        "layer_index": 0
+      },
+      {
+        "baseline_ms": 1115.4117431640625,
+        "chunk_index": 0,
+        "ds4_ms": 183.27931213378906,
+        "layer_index": 20
+      },
+      {
+        "baseline_ms": 790.65771484375,
+        "chunk_index": 1,
+        "ds4_ms": 192.5544891357422,
+        "layer_index": 0
+      },
+      {
+        "baseline_ms": 713.7203979492188,
+        "chunk_index": 1,
+        "ds4_ms": 146.73594665527344,
+        "layer_index": 20
+      }
+    ],
+    "reduction_pct": 80.8934022104358,
+    "speedup": 5.233794163742685
+  },
+  "precision_contract": "DS4 path converts BF16 activation to F32, internally Q8_1-quantizes activations, materializes F32 gate/up/mid/down and casts final output BF16; DS41 Triton is BF16-oriented. Speed does not imply numerical equivalence.",
+  "projection_not_fullmodel_benchmark": {
+    "baseline_model_error_pct": 0.07048252152839218,
+    "baseline_model_routed_s": 77.11831665039062,
+    "current_kernel_ced128_s": 49.15730654907227,
+    "current_kernel_no_ced_s": 77.11831665039062,
+    "ds4_no_ced_s": 14.734686584472657,
+    "ds4_plus_ced128_s": 10.702449157714844,
+    "measured_rank0_routed_s": 77.064,
+    "method": "Use layer0/layer20 critical fixture costs as two-layer representatives. Baseline model predicts measured routed profile before applying candidate; decoder21-39 uses measured M128 layer20-tail proxy.",
+    "note": "All projected routed-only costs exclude Engram/attention/mHC and are not end-to-end TPS.",
+    "target_200tps_total_budget_s": 7.94
+  },
+  "refs": {
+    "ds4": "8db1d1d155cb0400a86a86b9c62d0defb3a6148b",
+    "torch_ggml_ops": "9d7ddbf9f737998ccdabf803d10d12896c97771b"
+  },
+  "schema": "ds41-useful-prefill-upstream-component-v1",
+  "status": "PASS_COMPONENT_DS4_REUSABLE",
+  "upstream_reuse": {
+    "ds4": {
+      "candidate": "raw-layout IQ2_XXS paired MMQ + weighted SwiGLU + Q2_K grouped MMQ + sum6",
+      "directly_dynamic_for_v41_shapes": true,
+      "measured": true
+    },
+    "torch_ggml_ops": {
+      "directly_dynamic_for_v41_shapes": false,
+      "measured": false,
+      "reason": "exact ref validates physical_experts==256/max_route_entries==256 and shipped/generated tables are V4 geometries; V4.1 K5120/N2304/local192 needs new codegen/adaptation. Upstream timings are not claimed as DS41 results."
+    }
+  },
+  "v41_local_contract": {
+    "current_ced_tail_replay_present": false,
+    "explanation": "40 target layers x 2 engine chunks; expected under current full-layer loop, not a dispatch bug",
+    "index_source_layers": [
+      2,
+      8,
+      14,
+      20,
+      24,
+      28,
+      32,
+      36
+    ],
+    "kv_source_layers": [
+      2,
+      8,
+      14,
+      20
+    ],
+    "layers": 40,
+    "observed_routed_calls": 80,
+    "sliding_window": 128
+  }
+}

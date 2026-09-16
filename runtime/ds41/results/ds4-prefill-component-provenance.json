@@ -1,0 +1,27 @@
+{
+  "schema": "ds41-ds4-prefill-component-provenance-v1",
+  "upstream": {
+    "repo": "https://github.com/antirez/ds4",
+    "commit": "8db1d1d155cb0400a86a86b9c62d0defb3a6148b",
+    "license": "MIT",
+    "files_used": [
+      "cuda/mmq/ds4_mmq.cu",
+      "cuda/mmq/ds4_mmq.h",
+      "cuda/mmq/ds4_ggml_stubs.cu",
+      "cuda/mmq/quantize.cu",
+      "cuda/mmq/mmid.cu",
+      "cuda/mmq/mmvq.cu",
+      "cuda/mmq/test/d2r_stubs.cu"
+    ]
+  },
+  "local_bridge": "runtime/ds41/ds4_prefill_bridge.cu",
+  "benchmark_runner": "scripts/benchmark-ds41-ds4-prefill-fixture.py",
+  "temporary_component_library_sha256": "cdb44f9017dce1baf9bdf3965a2a61ad4c54b9449046266a7d4bc5121341ecb7",
+  "build_contract": {
+    "arch": "gfx1151",
+    "compiler": "/home/funboy/StrixHaloClusterGLM/.engine/venv/lib/python3.14/site-packages/_rocm_sdk_devel/bin/hipcc",
+    "flags": "-O3 -ffast-math -g -fno-finite-math-only -pthread -D__HIP_PLATFORM_AMD__ --offload-arch=gfx1151 -std=c++17 -DGGML_USE_HIP -DDS4_HIP_MMQ_Y=64 -Icuda/mmq -fPIC",
+    "link_libraries": ["hipblas", "hipblaslt", "rocblas", "m", "pthread"]
+  },
+  "note": "The temporary .so was a component artifact only and is not committed. The reproducible source/pin/build contract is committed. No model weights or upstream engine are vendored."
+}

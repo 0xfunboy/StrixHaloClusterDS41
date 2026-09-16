@@ -1,0 +1,144 @@
+{
+  "block_m": 4,
+  "epoch": "1789548631439274164",
+  "input_contract": {
+    "chunk_ranges": [
+      [
+        0,
+        1022
+      ],
+      [
+        1023,
+        1587
+      ]
+    ],
+    "prompt_tokens": 1588,
+    "same_rank_request_inputs_exact": true
+  },
+  "interpretation": {
+    "layer2": "first non-exact post-layer state; hidden max_abs=0.0029296875 rel_l2=0.005481852104501179",
+    "layers0_1": "all captured fields exact between requests on each rank",
+    "next": "capture only layer2 internal attention/FFN boundaries for same-arm requests; do not reopen 40-layer capture or M8.",
+    "raw_target_logits": "different at prompt position1587; max_abs=2.125 rel_l2=0.129303565848279"
+  },
+  "provenance": {
+    "logit_position": 1587,
+    "meaning": "API logprobs for DSpark rejection sampler derive from raw target logits when logprobs_mode is raw; variability is upstream of processors/sampling.",
+    "needs_logits_processing": false,
+    "raw_logprobs_mode": "raw_logprobs"
+  },
+  "rank0": {
+    "final_hidden": {
+      "exact": false,
+      "max_abs": 0.1103515625,
+      "mean_abs": 0.025089537724852562,
+      "rel_l2": 0.1502243135697578
+    },
+    "first_divergence": {
+      "boundary": "layer2.hidden_states",
+      "exact": false,
+      "max_abs": 0.0029296875,
+      "mean_abs": 0.00026715098647400737,
+      "rel_l2": 0.005481852104501179
+    },
+    "raw_logits": {
+      "logit_positions_a": [
+        1587
+      ],
+      "logit_positions_b": [
+        1587
+      ],
+      "metrics": {
+        "exact": false,
+        "max_abs": 2.125,
+        "mean_abs": 0.3892442286014557,
+        "rel_l2": 0.129303565848279
+      },
+      "needs_processing_a": false,
+      "needs_processing_b": false,
+      "num_draft_tokens_a": 0,
+      "num_draft_tokens_b": 0,
+      "shape_a": [
+        1,
+        129280
+      ],
+      "shape_b": [
+        1,
+        129280
+      ],
+      "top2_a": {
+        "margin": 0.875,
+        "top1_id": 24313,
+        "top1_logit": 27.0,
+        "top2_id": 9854,
+        "top2_logit": 26.125
+      },
+      "top2_b": {
+        "margin": 0.875,
+        "top1_id": 24313,
+        "top1_logit": 26.625,
+        "top2_id": 9854,
+        "top2_logit": 25.75
+      }
+    }
+  },
+  "rank1": {
+    "final_hidden": {
+      "exact": false,
+      "max_abs": 0.1103515625,
+      "mean_abs": 0.025089537724852562,
+      "rel_l2": 0.1502243135697578
+    },
+    "first_divergence": {
+      "boundary": "layer2.hidden_states",
+      "exact": false,
+      "max_abs": 0.0029296875,
+      "mean_abs": 0.00026715098647400737,
+      "rel_l2": 0.005481852104501179
+    },
+    "raw_logits": {
+      "logit_positions_a": [
+        1587
+      ],
+      "logit_positions_b": [
+        1587
+      ],
+      "metrics": {
+        "exact": false,
+        "max_abs": 2.125,
+        "mean_abs": 0.3892442286014557,
+        "rel_l2": 0.129303565848279
+      },
+      "needs_processing_a": false,
+      "needs_processing_b": false,
+      "num_draft_tokens_a": 0,
+      "num_draft_tokens_b": 0,
+      "shape_a": [
+        1,
+        129280
+      ],
+      "shape_b": [
+        1,
+        129280
+      ],
+      "top2_a": {
+        "margin": 0.875,
+        "top1_id": 24313,
+        "top1_logit": 27.0,
+        "top2_id": 9854,
+        "top2_logit": 26.125
+      },
+      "top2_b": {
+        "margin": 0.875,
+        "top1_id": 24313,
+        "top1_logit": 26.625,
+        "top2_id": 9854,
+        "top2_logit": 25.75
+      }
+    }
+  },
+  "rank_metric_equality": true,
+  "schema": "ds41-m4-repeatability-localization-stage1-v1",
+  "source": "aa931c88dcdcd9911fdd26d5632604daf99a3048",
+  "status": "FIRST_DIVERGENCE_LAYER2_OUTPUT"
+}

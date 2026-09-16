@@ -1,0 +1,21 @@
+{
+  "base_source": "bc41a355e827fbb193e65069cf867584cc9bb72f",
+  "block_m": 4,
+  "capture": [
+    "effective input_ids and positions for every prompt chunk",
+    "final prompt-row model input",
+    "final prompt-row post-layer state tuple for layers0..39",
+    "final hidden row",
+    "raw target logits row before grammar/processors/sampling",
+    "sampled token and counts"
+  ],
+  "comparison_order": "same-rank request0 vs request1 first; cross-rank only replicated quantities",
+  "decision": "if raw target logits differ, locate earliest captured upstream boundary; if raw equal but API differs, inspect post-logit path; no M8 work in this continuation",
+  "max_requests": 2,
+  "performance": "diagnostic only; no throughput claim from instrumented runs",
+  "prompt_tokens": 1588,
+  "request_sha256": "4926fd629b1b2057762c617c985e64211a9853c2678260758ee8ea4e09a364fd",
+  "rollback": "restore /home/funboy/.local/share/haloclu-ds41/releases/k2-prefill-5bdfed6 and verify READY/idle",
+  "schema": "ds41-m4-repeatability-localization-preregister-v1",
+  "status": "FROZEN_BEFORE_DIAGNOSTIC_LOAD"
+}

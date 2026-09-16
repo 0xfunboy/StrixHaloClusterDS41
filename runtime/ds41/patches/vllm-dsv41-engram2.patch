@@ -424,6 +424,44 @@ index 3a6cef8..68179b6 100644
          if self.model.confidence_head is not None and not loaded_confidence_head:
              self.model.confidence_head = None
          self.process_weights_after_loading()
+diff --git a/vllm/models/deepseek_v4_1/amd/model.py b/vllm/models/deepseek_v4_1/amd/model.py
+index 069ff5f..17cef2e 100644
+--- a/vllm/models/deepseek_v4_1/amd/model.py
++++ b/vllm/models/deepseek_v4_1/amd/model.py
+@@ -433,6 +433,8 @@ class DeepseekV4Model(nn.Module, EagleModelMixin):
+         # layer need it.
+         self.engram_hash: NgramHashState | None = None
+         self.engram_swa_prefix: str | None = None
++        from runtime.ds41.repeatability_diag import get_repeatability_capture
++        self._ds41_repeat_capture = get_repeatability_capture()
+         if self.engram_layout is not None:
+             local_engram = any(
+                 isinstance(layer, DeepseekV4DecoderLayer) and layer.engram is not None
+@@ -513,6 +515,8 @@ class DeepseekV4Model(nn.Module, EagleModelMixin):
+             assert intermediate_tensors is not None
+             hidden_states = intermediate_tensors["hidden_states"]
+ 
++        self._ds41_repeat_capture.record_model_input(input_ids, positions, hidden_states)
++
+         if self.use_mega_moe:
+             input_ids = input_ids.to(torch.int64)
+ 
+@@ -601,6 +605,7 @@ class DeepseekV4Model(nn.Module, EagleModelMixin):
+                 engram_hashes,
+                 engram_mask,
+             )
++            self._ds41_repeat_capture.record_layer(idx, hidden_states, residual, post_mix, res_mix, pre_mix)
+             if idx + 1 in self.aux_hidden_state_layers:
+                 # Reconstruct the aux hidden state for draft models
+                 aux_recon = mhc_post_torch(hidden_states, residual, post_mix, res_mix)
+@@ -641,6 +646,7 @@ class DeepseekV4Model(nn.Module, EagleModelMixin):
+             .to(hidden_states.dtype)
+         )
+         hidden_states = self.norm(hidden_states)
++        self._ds41_repeat_capture.record_final_hidden(hidden_states)
+         if len(aux_hidden_states) > 0:
+             return hidden_states, aux_hidden_states
+         return hidden_states
 diff --git a/vllm/models/deepseek_v4_1/amd/rocm.py b/vllm/models/deepseek_v4_1/amd/rocm.py
 index 9271e7a..3aa88e1 100644
 --- a/vllm/models/deepseek_v4_1/amd/rocm.py
@@ -1112,7 +1150,7 @@ index e943808..f8af4ef 100644
      def with_kv_conn_output_only(
          kv_connector_output: KVConnectorOutput | None,
 diff --git a/vllm/v1/worker/gpu/model_runner.py b/vllm/v1/worker/gpu/model_runner.py
-index 533fcbe..e99c4ed 100644
+index 533fcbe..671182e 100644
 --- a/vllm/v1/worker/gpu/model_runner.py
 +++ b/vllm/v1/worker/gpu/model_runner.py
 @@ -19,6 +19,7 @@ instead of embedding feature-specific logic directly.
@@ -1123,7 +1161,7 @@ index 533fcbe..e99c4ed 100644
  import time
  from contextlib import AbstractContextManager
  from copy import deepcopy
-@@ -201,6 +202,15 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+@@ -201,6 +202,17 @@ class GPUModelRunner(LoRAModelRunnerMixin):
  
          self.device = device
          self.dtype = self.model_config.dtype
@@ -1136,10 +1174,12 @@ index 533fcbe..e99c4ed 100644
 +        self._ds41_kv_capture_once = create_kv_metadata_capture_once()
 +        from runtime.ds41.routed_fixture_capture import create_routed_fixture_capture
 +        self._ds41_routed_fixture_capture = create_routed_fixture_capture()
++        from runtime.ds41.repeatability_diag import get_repeatability_capture
++        self._ds41_repeat_capture = get_repeatability_capture()
          self.kv_cache_dtype = self.dtype
          if self.cache_config.cache_dtype != "auto":
              # Quantized KV cache.
-@@ -1483,6 +1493,19 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+@@ -1483,6 +1495,22 @@ class GPUModelRunner(LoRAModelRunnerMixin):
              sample_hidden_states = hidden_states[input_batch.logits_indices]
              logits = self.model.compute_logits(sample_hidden_states)
  
@@ -1156,13 +1196,17 @@ index 533fcbe..e99c4ed 100644
 +                    ev.record(stream)
 +                    self._ds41_prefill_end_events[req_id] = ev
 +
++        needs_proc = self.sampler.needs_logits_processing[input_batch.idx_mapping_np] if self.sampler is not None else []
++        self._ds41_repeat_capture.record_raw_logits(global_input_batch, logits, needs_proc)
++
          if grammar_output is not None:
              # Apply grammar bitmask to the logits in-place.
              assert self.structured_outputs_worker is not None
-@@ -1588,6 +1611,10 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+@@ -1588,6 +1616,11 @@ class GPUModelRunner(LoRAModelRunnerMixin):
          valid_dummy_state_slots: bool = False,
      ) -> ModelRunnerOutput | IntermediateTensors | None:
          if not dummy_run:
++            self._ds41_repeat_capture.cleanup_finished(scheduler_output.finished_req_ids)
 +            if self.ds41_prefill_telemetry:
 +                for req_id in scheduler_output.finished_req_ids:
 +                    self._ds41_prefill_start_events.pop(req_id, None)
@@ -1170,10 +1214,11 @@ index 533fcbe..e99c4ed 100644
              # Update the request states.
              self.update_pp_decode_requests()
              self.finish_requests(scheduler_output)
-@@ -1663,7 +1690,21 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+@@ -1663,7 +1696,22 @@ class GPUModelRunner(LoRAModelRunnerMixin):
              input_batch = self.prepare_inputs(
                  scheduler_output, batch_req_state, batch_desc
              )
++            self._ds41_repeat_capture.arm_from_input_batch(input_batch)
 +            self._ds41_routed_fixture_capture.maybe_arm(input_batch)
 +            if self.ds41_prefill_telemetry:
 +                stream = torch.cuda.current_stream()
@@ -1192,10 +1237,11 @@ index 533fcbe..e99c4ed 100644
              # Mamba "align" pre-copy: migrate recurrent state across block
              # boundaries before the forward. Runs only on real batches, and
              # before model_state.prepare_attn gathers num_accepted_tokens so the
-@@ -1971,6 +2012,23 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+@@ -1971,6 +2019,24 @@ class GPUModelRunner(LoRAModelRunnerMixin):
          sampler_output, num_sampled, num_rejected = self.sample(
              hidden_states, input_batch, grammar_output
          )
++        self._ds41_repeat_capture.finish_after_sample(input_batch, sampler_output)
 +        self._ds41_routed_fixture_capture.maybe_finish(input_batch)
 +        self._ds41_prefill_profile_once.maybe_finish(input_batch)
 +
@@ -1216,7 +1262,7 @@ index 533fcbe..e99c4ed 100644
  
          if self.pp_handler is not None:
              # Broadcast to non-last PP ranks (handles spec decode multi-token).
-@@ -2000,6 +2058,7 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+@@ -2000,6 +2066,7 @@ class GPUModelRunner(LoRAModelRunnerMixin):
              sampled_token_ids=None,  # type: ignore
              prompt_logprobs_dict=prompt_logprobs_dict,  # type: ignore[arg-type]
              cudagraph_stats=cudagraph_stats,

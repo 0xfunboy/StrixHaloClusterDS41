@@ -1,0 +1,171 @@
+{
+  "candidate_source": "bc41a355e827fbb193e65069cf867584cc9bb72f",
+  "decision": "DO_NOT_PROMOTE_BLOCK_M8_NO_FULL_MODEL_AB",
+  "fixture_manifest": {
+    "count": 8,
+    "executed_shapes": [
+      [
+        0,
+        1023
+      ],
+      [
+        1,
+        565
+      ]
+    ],
+    "padding_block4": {
+      "max": 281,
+      "min": 213,
+      "sum": 1980
+    },
+    "padding_block8": {
+      "max": 709,
+      "min": 537,
+      "sum": 4928
+    },
+    "path": "reports/DS41-Q2-001/blockm-real-fixtures-bc41a35/manifest.json",
+    "sha256": "be5d2a1c1bdeda7e97a2338355d7841fc66b25a1beae87179925ecaf14b9f37a"
+  },
+  "frozen_gates": {
+    "candidate_independent_error_may_not_exceed_baseline_by_factor": 1.1,
+    "candidate_vs_baseline_max_abs": 0.125,
+    "candidate_vs_baseline_rel_l2_max": 0.002,
+    "independent_gguf_py_max_abs": 2.0,
+    "independent_gguf_py_rel_l2_max": 0.08
+  },
+  "interpretation": {
+    "candidate_regression_claim": false,
+    "candidate_vs_baseline": "bit-identical on both measured real fixtures",
+    "full_model_ab": "NOT_RUN_BY_PREREGISTERED_RULE",
+    "independent_reference_failure": "layer20 sampled row max_abs=128 for both BLOCK_M4 and BLOCK_M8, above preregistered max_abs=2.0 while rel-L2 remains <=0.01694",
+    "performance_gate": "NOT_EVALUATED_AFTER_NUMERIC_STOP; two observed real fixtures were ~27% faster but frozen aggregate 8-fixture gate was intentionally not completed",
+    "qualification": "failed because frozen absolute independent-reference gate is not satisfied; thresholds were not widened after observation"
+  },
+  "measured_fixtures": [
+    {
+      "block_m4_ms": 2139.69921875,
+      "block_m8_ms": 1683.99072265625,
+      "candidate_vs_baseline": {
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "rel_l2": 0.0
+      },
+      "fixture": "rank0-call00 chunk0/layer0",
+      "gain_pct": 27.061223673188415,
+      "independent": {
+        "4": {
+          "max_abs": 0.0009765625,
+          "max_rel_l2": 0.016195982572097103,
+          "rows": [
+            {
+              "max_abs": 0.00048828125,
+              "mean_abs": 5.3912495786789805e-05,
+              "rel_l2": 0.015971777048242437
+            },
+            {
+              "max_abs": 0.0009765625,
+              "mean_abs": 0.0002026325964834541,
+              "rel_l2": 0.016195982572097103
+            }
+          ]
+        },
+        "8": {
+          "max_abs": 0.0009765625,
+          "max_rel_l2": 0.016195982572097103,
+          "rows": [
+            {
+              "max_abs": 0.00048828125,
+              "mean_abs": 5.3912495786789805e-05,
+              "rel_l2": 0.015971777048242437
+            },
+            {
+              "max_abs": 0.0009765625,
+              "mean_abs": 0.0002026325964834541,
+              "rel_l2": 0.016195982572097103
+            }
+          ]
+        }
+      },
+      "memory": {
+        "4": {
+          "base_allocated": 1921854464,
+          "peak_allocated": 2034084352,
+          "peak_delta": 112229888
+        },
+        "8": {
+          "base_allocated": 1921854464,
+          "peak_allocated": 2034087424,
+          "peak_delta": 112232960
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "block_m4_ms": 2083.669677734375,
+      "block_m8_ms": 1634.8419189453125,
+      "candidate_vs_baseline": {
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "rel_l2": 0.0
+      },
+      "fixture": "rank0-call20 chunk0/layer20",
+      "gain_pct": 27.45389346748677,
+      "independent": {
+        "4": {
+          "max_abs": 128.0,
+          "max_rel_l2": 0.016930653508796564,
+          "rows": [
+            {
+              "max_abs": 128.0,
+              "mean_abs": 4.075417518615723,
+              "rel_l2": 0.011080068680243886
+            },
+            {
+              "max_abs": 0.0078125,
+              "mean_abs": 0.0015384636353701353,
+              "rel_l2": 0.016930653508796564
+            }
+          ]
+        },
+        "8": {
+          "max_abs": 128.0,
+          "max_rel_l2": 0.016930653508796564,
+          "rows": [
+            {
+              "max_abs": 128.0,
+              "mean_abs": 4.075417518615723,
+              "rel_l2": 0.011080068680243886
+            },
+            {
+              "max_abs": 0.0078125,
+              "mean_abs": 0.0015384636353701353,
+              "rel_l2": 0.016930653508796564
+            }
+          ]
+        }
+      },
+      "memory": {
+        "4": {
+          "base_allocated": 1921854464,
+          "peak_allocated": 2034084352,
+          "peak_delta": 112229888
+        },
+        "8": {
+          "base_allocated": 1921854464,
+          "peak_allocated": 2034087424,
+          "peak_delta": 112232960
+        }
+      },
+      "numeric_gate": {
+        "candidate_baseline_pass": true,
+        "independent_pass": false,
+        "independent_regression_pass": true,
+        "pass": false
+      },
+      "status": "FAIL_NUMERIC"
+    }
+  ],
+  "rollback": "DS41_MOE_PREFILL_BLOCK_M=4; restore /home/funboy/.local/share/haloclu-ds41/releases/k2-prefill-5bdfed6",
+  "schema": "ds41-blockm4-8-terminal-v1",
+  "status": "FAIL_NUMERIC_GATE_STOP"
+}

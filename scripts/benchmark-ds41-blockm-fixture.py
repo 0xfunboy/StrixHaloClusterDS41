@@ -47,15 +47,18 @@ def main():
   os.environ['DS41_MOE_PREFILL_BLOCK_M']=str(bm); GGUFMoEMethod.apply(M,L,x,weights,ids,None,None); torch.cuda.synchronize(); vals=[]; last=None; torch.cuda.reset_peak_memory_stats(); base=torch.cuda.memory_allocated()
   for _ in range(REPEATS): last,ms=event_ms(lambda:GGUFMoEMethod.apply(M,L,x,weights,ids,None,None)); vals.append(ms)
   outputs[bm]=last.detach().cpu(); timings[bm]={'samples_ms':vals,'median_ms':statistics.median(vals),'mean_ms':statistics.mean(vals)}; mem[bm]={'base_allocated':base,'peak_allocated':torch.cuda.max_memory_allocated(),'peak_delta':torch.cuda.max_memory_allocated()-base}
- cb=metric(outputs[8],outputs[4]); assert cb['rel_l2']<=REL_CAND_BASE_MAX and cb['max_abs']<=ABS_CAND_BASE_MAX,cb
+ cb=metric(outputs[8],outputs[4])
+ candidate_baseline_pass = cb['rel_l2']<=REL_CAND_BASE_MAX and cb['max_abs']<=ABS_CAND_BASE_MAX
  # Two deterministic real tokens carrying at least one local route.
  localmask=em[fix['topk_ids'].to(torch.int64)]>=0; candidates=torch.nonzero(localmask.any(dim=1),as_tuple=False).flatten().tolist(); assert candidates; sample=[candidates[0],candidates[-1]] if len(candidates)>1 else [candidates[0]]; refs=indep_rows(fix,tensors,sample); indep={}
  for bm in (4,8):
   ms=[]
   for ti,ref in refs.items(): ms.append(metric(outputs[bm][ti],ref))
-  indep[bm]={'rows':ms,'max_rel_l2':max(m['rel_l2'] for m in ms),'max_abs':max(m['max_abs'] for m in ms)}; assert indep[bm]['max_rel_l2']<=REL_INDEP_MAX and indep[bm]['max_abs']<=ABS_INDEP_MAX,indep[bm]
- assert indep[8]['max_rel_l2'] <= indep[4]['max_rel_l2']*INDEP_REGRESSION_FACTOR + 1e-7
+  indep[bm]={'rows':ms,'max_rel_l2':max(m['rel_l2'] for m in ms),'max_abs':max(m['max_abs'] for m in ms)}
+ independent_pass = all(indep[bm]['max_rel_l2']<=REL_INDEP_MAX and indep[bm]['max_abs']<=ABS_INDEP_MAX for bm in (4,8))
+ independent_regression_pass = indep[8]['max_rel_l2'] <= indep[4]['max_rel_l2']*INDEP_REGRESSION_FACTOR + 1e-7
+ numeric_pass = candidate_baseline_pass and independent_pass and independent_regression_pass
  gain=(timings[4]['median_ms']/timings[8]['median_ms']-1)*100
- out={'schema':'ds41-blockm-real-fixture-v1','status':'PASS','fixture':a.fixture,'rank':int(fix['rank']),'chunk_index':int(fix['chunk_index']),'layer_index':int(fix['layer_index']),'tokens':int(fix['tokens']),'gates':{'candidate_baseline_rel_l2_max':REL_CAND_BASE_MAX,'candidate_baseline_max_abs':ABS_CAND_BASE_MAX,'independent_rel_l2_max':REL_INDEP_MAX,'independent_max_abs':ABS_INDEP_MAX,'independent_regression_factor':INDEP_REGRESSION_FACTOR},'candidate_vs_baseline':cb,'independent':indep,'timing':timings,'gain_pct_by_median':gain,'memory':mem,'sampled_reference_tokens':sample}
+ out={'schema':'ds41-blockm-real-fixture-v1','status':'PASS' if numeric_pass else 'FAIL_NUMERIC','fixture':a.fixture,'rank':int(fix['rank']),'chunk_index':int(fix['chunk_index']),'layer_index':int(fix['layer_index']),'tokens':int(fix['tokens']),'gates':{'candidate_baseline_rel_l2_max':REL_CAND_BASE_MAX,'candidate_baseline_max_abs':ABS_CAND_BASE_MAX,'independent_rel_l2_max':REL_INDEP_MAX,'independent_max_abs':ABS_INDEP_MAX,'independent_regression_factor':INDEP_REGRESSION_FACTOR},'candidate_vs_baseline':cb,'numeric_gate':{'candidate_baseline_pass':candidate_baseline_pass,'independent_pass':independent_pass,'independent_regression_pass':independent_regression_pass,'pass':numeric_pass},'independent':indep,'timing':timings,'gain_pct_by_median':gain,'memory':mem,'sampled_reference_tokens':sample}
  p=Path(a.out); p.parent.mkdir(parents=True,exist_ok=True); p.write_text(json.dumps(out,indent=2,sort_keys=True)+'\n'); print(json.dumps(out,sort_keys=True))
 if __name__=='__main__': main()

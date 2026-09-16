@@ -1,0 +1,17 @@
+{
+  "schema": "ds41-m4-decode-residual-preregister-v1",
+  "date": "2026-09-16",
+  "base_source": "85a51c77aef430d391c1ca709f2e1622b51b7967",
+  "runtime": "K2 / BLOCK_M4 / canonical-prefill enabled",
+  "payload_sha256": "a335e6c7f6e46be19ce64d388d3e4be21b5dcae8587d19fc27c7423c3b0ec3a9",
+  "prompt_tokens": 1588,
+  "capture": {
+    "requests": 2,
+    "emitted_token_cap": 40,
+    "records": ["raw target logits", "target input ids", "logical positions", "draft-width", "sampled ids", "num sampled/rejected", "index-source top-k", "index-source q", "SWA metadata", "index-source attention output"]
+  },
+  "comparison_rule": "Compare numerical states only while emitted prefix, target input IDs, logical positions and expanded-local positions are identical. Different proposal-conditioned inputs are not a valid target-logit comparison.",
+  "first_hypothesis": "Residual variability may reuse the demonstrated top-k-order sensitivity in target decode/verifier. Test; do not assume.",
+  "no_auto_fix": "Do not canonicalize decode/verifier unless same set/multiplicity with order-only difference is demonstrated and a same-input replay removes the difference.",
+  "deferred": ["M8", "soak", "coding", "K3/K4", "Engram performance", "4K-64K"]
+}

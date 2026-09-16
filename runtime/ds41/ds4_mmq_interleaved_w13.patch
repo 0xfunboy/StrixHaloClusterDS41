@@ -1,0 +1,75 @@
+diff --git a/cuda/mmq/ds4_mmq.cu b/cuda/mmq/ds4_mmq.cu
+index 5e9e5ce..20e98de 100644
+--- a/cuda/mmq/ds4_mmq.cu
++++ b/cuda/mmq/ds4_mmq.cu
+@@ -1270,7 +1270,8 @@ int ds4_mmq_moe_pair_impl(
+         /* ds4 (P3): see ds4_mmq_moe_impl. */
+         bool            sanitize_out = true,
+         const ds4_mmq_fused_down *fused_down = nullptr,
+-        bool allow_d2r = true) {
++        bool allow_d2r = true,
++        int weight_expert_stride_rows = 0) {
+ 
+     const bool direct_gateup_q8 =
+         fused_down != nullptr && fused_down->direct_gateup_q8;
+@@ -1335,7 +1336,7 @@ int ds4_mmq_moe_pair_impl(
+     const int64_t ne12         = n_tokens;
+     const int64_t blck         = ggml_blck_size(type);
+     const int64_t s01          = (int64_t)K / blck;
+-    const int64_t s02          = (int64_t)M * s01;
++    const int64_t s02          = (int64_t)(weight_expert_stride_rows > 0 ? weight_expert_stride_rows : M) * s01;
+ 
+     ggml_cuda_pool_alloc<int32_t> ids_src1_alloc;
+     ggml_cuda_pool_alloc<int32_t> ids_dst_alloc;
+@@ -1958,6 +1959,25 @@ extern "C" int ds4_mmq_iq2_xxs_moe_pair(
+         M, K, n_tokens, n_experts, n_expert_used, stream);
+ }
+ 
++// DS41 V4.1 resident GGUF layout: w13 stores [expert, gate_rows + up_rows, packed_K].
++// Reuse it in-place by widening only the per-expert row stride; arithmetic and
++// MMQ kernels are unchanged from the upstream paired IQ2_XXS path.
++extern "C" int ds4_mmq_iq2_xxs_moe_pair_interleaved_w13(
++        const void * W13, const float * X, const int32_t * ids,
++        float * out_gate, float * out_up,
++        int M, int K, int n_tokens, int n_experts, int n_expert_used,
++        cudaStream_t stream) {
++    if (!W13 || M <= 0 || K <= 0 || K % 256 != 0) return -1;
++    const int64_t s01 = (int64_t)K / ggml_blck_size(GGML_TYPE_IQ2_XXS);
++    const size_t gate_bank_offset = (size_t)M * (size_t)s01 * ggml_type_size(GGML_TYPE_IQ2_XXS);
++    const char * base = (const char *)W13;
++    return ds4_mmq_moe_pair_impl<GGML_TYPE_IQ2_XXS>(
++        "ds4_mmq_iq2_xxs_moe_pair_interleaved_w13",
++        base, base + gate_bank_offset, X, ids, out_gate, out_up,
++        M, K, n_tokens, n_experts, n_expert_used, stream,
++        nullptr, nullptr, 0, true, nullptr, true, 2 * M);
++}
++
+ /* ds4 (P4 Inc3): paired mmq MoE over the aligned-SoA IQ2_XXS gate/up
+  * artifacts (weight server --repack-iq2-aligned); same contract as
+  * ds4_mmq_q2_K_moe_soa. */
+diff --git a/cuda/mmq/ds4_mmq.h b/cuda/mmq/ds4_mmq.h
+index c39e120..965e919 100644
+--- a/cuda/mmq/ds4_mmq.h
++++ b/cuda/mmq/ds4_mmq.h
+@@ -301,6 +301,21 @@ int ds4_mmq_iq2_xxs_moe_pair(
+     int             n_expert_used,
+     cudaStream_t    stream);
+ 
++// DS41 V4.1 w13 resident layout [expert, gate_rows+up_rows, packed_K].
++// No repack/copy: uses a 2*M expert stride while sharing upstream MMQ math.
++int ds4_mmq_iq2_xxs_moe_pair_interleaved_w13(
++    const void    * W13,
++    const float   * X_f32,
++    const int32_t * ids,
++    float         * out_gate,
++    float         * out_up,
++    int             M,
++    int             K,
++    int             n_tokens,
++    int             n_experts,
++    int             n_expert_used,
++    cudaStream_t    stream);
++
+ // ds4 (P4 Inc3): same contract as ds4_mmq_iq2_xxs_moe_pair but over the
+ // aligned-SoA artifacts (weight server --repack-iq2-aligned); see
+ // ds4_mmq_q2_K_moe_soa.

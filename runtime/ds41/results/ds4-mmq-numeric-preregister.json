@@ -1,0 +1,18 @@
+{
+  "schema":"ds41-ds4-mmq-numeric-preregister-v1",
+  "upstream":"antirez/ds4@8db1d1d155cb0400a86a86b9c62d0defb3a6148b",
+  "development_fixtures":"existing 8 routed EP2 fixtures; used only to motivate/gross-check thresholds",
+  "holdout":"reports/DS41-Q2-001/perf/native-hip/layer0-moe-input.npz with existing frozen rank expert maps; not used in DS4 component timing campaign",
+  "stress":["zero activation","remote-only routes","scaled clamp activation"],
+  "q8_contract":{"IQ2_XXS":"D4 scale per 32 values; d=maxabs/127; roundf","Q2_K":"D2S6 scale per 64 values; same quantized value contract"},
+  "gates":{
+    "bridge_emulation_stage_rel_l2_max":0.04,
+    "high_precision_final_rel_l2_max":0.05,
+    "per_row_rel_l2_p95_max":0.08,
+    "epilogue_self_rel_l2_max":1e-5,
+    "finite_required":true,
+    "ep2_map_exact_required":true,
+    "remote_only_exact_zero_required":true
+  },
+  "absolute_error_policy":"record max_abs/reference scale/worst coordinate; no global absolute threshold across heterogeneous magnitudes"
+}

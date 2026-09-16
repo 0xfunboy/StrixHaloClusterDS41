@@ -636,7 +636,7 @@ index 91a13bd..62bd1a5 100644
          self._weights_finalized = True
          return loaded_params
 diff --git a/vllm/models/deepseek_v4_1/attention.py b/vllm/models/deepseek_v4_1/attention.py
-index 9bb5352..3192613 100644
+index 9bb5352..9606db8 100644
 --- a/vllm/models/deepseek_v4_1/attention.py
 +++ b/vllm/models/deepseek_v4_1/attention.py
 @@ -7,6 +7,7 @@ DeepseekV4 MLA Attention Layer
@@ -663,10 +663,64 @@ index 9bb5352..3192613 100644
  )
  
  if TYPE_CHECKING:
-@@ -72,6 +75,60 @@ from vllm.v1.kv_cache_interface import (
+@@ -51,6 +54,7 @@ from vllm.model_executor.layers.quantization import QuantizationConfig
+ from vllm.model_executor.models.utils import extract_layer_index
+ from vllm.models.deepseek_v4_1.common.rope import build_deepseek_v4_rope
+ from vllm.models.deepseek_v4_1.compressor import DeepseekCompressor
++from vllm.platforms import current_platform
+ from vllm.triton_utils import tl, triton
+ from vllm.utils.multi_stream_utils import (
+     execute_in_parallel,
+@@ -72,6 +76,106 @@ from vllm.v1.kv_cache_interface import (
  logger = init_logger(__name__)
  
  
++def _ds41_canonicalize_prefill_topk(indices: torch.Tensor) -> None:
++    """Canonicalize selected sparse-prefill indices without changing the set.
++
++    The native ROCm top-k contract does not require result ordering. The sparse
++    attention reduction is mathematically permutation invariant but BF16 reduction
++    order can change the output. Keep invalid -1 entries at the end and sort only
++    the selected logical indices. This helper is called only for real prefill rows.
++    """
++    if indices.numel() == 0:
++        return
++    if indices.dtype not in (torch.int32, torch.int64):
++        raise TypeError(f"DS41 canonical sparse top-k needs integer indices, got {indices.dtype}")
++    sentinel = torch.iinfo(indices.dtype).max
++    tmp = torch.where(indices >= 0, indices, torch.full_like(indices, sentinel))
++    tmp = torch.sort(tmp, dim=-1, stable=True).values
++    indices.copy_(torch.where(tmp == sentinel, torch.full_like(tmp, -1), tmp))
++
++
++def _ds41_maybe_canonicalize_prefill_topk(
++    topk_buffer: torch.Tensor, index_meta: Any, topk_tokens: int
++) -> tuple[int, int] | None:
++    """Canonicalize only the real prefill slice of the shared top-k buffer.
++
++    Mixed batches place decode rows first.  Keep decode/verifier rows and any
++    unused tail untouched; this candidate is ROCm/DS41 opt-in only.
++    """
++    if os.environ.get("DS41_CANONICAL_PREFILL_TOPK", "0") != "1":
++        return None
++    if not current_platform.is_rocm():
++        return None
++    num_prefill = int(getattr(index_meta, "num_prefill_tokens", 0))
++    if num_prefill <= 0:
++        return None
++    num_decode = int(getattr(index_meta, "num_decode_tokens", 0))
++    if num_decode < 0 or num_prefill < 0:
++        raise ValueError("negative DS41 indexer token counts")
++    start, end = num_decode, num_decode + num_prefill
++    if end > topk_buffer.shape[0]:
++        raise ValueError(
++            f"DS41 prefill top-k slice [{start}:{end}] exceeds buffer rows {topk_buffer.shape[0]}"
++        )
++    selected = topk_buffer[start:end, :topk_tokens]
++    _ds41_canonicalize_prefill_topk(selected)
++    return num_decode, num_prefill
++
++
 +def _ds41_decomposed_q_rope_kv_insert(
 +    q: torch.Tensor,
 +    kv: torch.Tensor,
@@ -724,7 +778,7 @@ index 9bb5352..3192613 100644
  def _replace_layer_index(prefix: str, layer_id: int) -> str:
      """Swap the layer index inside a ``...layers.<idx>...`` prefix."""
      new_prefix, n = re.subn(r"\.layers\.\d+\.", f".layers.{layer_id}.", prefix)
-@@ -563,6 +620,9 @@ class DeepseekV4Attention(nn.Module, AttentionLayerBase, ABC):
+@@ -563,6 +667,9 @@ class DeepseekV4Attention(nn.Module, AttentionLayerBase, ABC):
              hidden_states
          )
          qr, qr_scale, kv = self._split_qkv_and_norm(qr_kv)
@@ -734,7 +788,32 @@ index 9bb5352..3192613 100644
  
          self._prepare_and_attn_fn(
              hidden_states,
-@@ -863,11 +923,22 @@ class DeepseekV4Attention(nn.Module, AttentionLayerBase, ABC):
+@@ -824,6 +931,24 @@ class DeepseekV4Attention(nn.Module, AttentionLayerBase, ABC):
+                 index_weights,
+             )
+ 
++            # The prefill top-k selection is a set; its order carries no semantic
++            # score information into MLA attention. Canonicalize only real prefill
++            # rows so identical selections feed an identical BF16 reduction order.
++            attn_metadata = get_forward_context().attn_metadata
++            if isinstance(attn_metadata, dict):
++                index_meta = attn_metadata.get(self.indexer.k_cache.prefix)
++                assert self.topk_indices_buffer is not None
++                counts = _ds41_maybe_canonicalize_prefill_topk(
++                    self.topk_indices_buffer, index_meta, self.indexer.topk_tokens
++                )
++                if counts is not None:
++                    num_decode, num_prefill = counts
++                    from runtime.ds41.repeatability_diag import get_repeatability_capture
++                    get_repeatability_capture().record_canonical_topk(
++                        self.layer_id, num_prefill, self.indexer.topk_tokens,
++                        num_decode, num_prefill,
++                    )
++
+         # MLA attention writes into the pre-allocated `out` buffer
+         # ([num_tokens, padded_heads, head_dim]).
+         self.forward_mqa(q, kv, positions, out)
+@@ -863,11 +988,22 @@ class DeepseekV4Attention(nn.Module, AttentionLayerBase, ABC):
  
          # kv is unchanged; attention reads kv solely via swa_kv_cache.
          if cache_dtype == torch.uint8:

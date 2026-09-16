@@ -70,4 +70,15 @@ with tempfile.TemporaryDirectory() as td:
             assert set(d['early_full'][ck])=={0,1}
     os.environ['DS41_REPEAT_DIAG_DIR']=td+'/invalid'; os.environ['DS41_REPEAT_DIAG_MAX_REQUESTS']='1'; mod._CAPTURE=None; bad=mod.get_repeatability_capture(); bad.arm_from_input_batch(batch('bad',0,1023)); assert bad.current is not None; bad.cleanup_finished(['bad']);
     j=json.load(open(Path(td)/'invalid/repeat-rank0-request0.json')); assert j['status']=='INVALID'
+
+# Raw-only mode must capture first raw logits/sample without layer payloads.
+with tempfile.TemporaryDirectory() as td:
+    os.environ['DS41_REPEAT_DIAG_DIR']=td; os.environ['DS41_REPEAT_DIAG_MAX_REQUESTS']='1'; os.environ['DS41_REPEAT_DIAG_MODE']='raw-only'; os.environ['RANK']='0'
+    mod._CAPTURE=None; raw=mod.get_repeatability_capture(); b0=batch('raw',0,1023); raw.arm_from_input_batch(b0); assert raw.current is not None
+    raw.record_model_input(torch.arange(1023,dtype=torch.int32),torch.arange(1023),torch.randn(1023,4)); raw.record_canonical_topk(2,1023,512,0,1023); raw.record_layer(0,torch.randn(1023,2,4),None,None,None,None)
+    b1=batch('raw',1023,565); raw.record_model_input(torch.arange(565,dtype=torch.int32),torch.arange(1023,1588),torch.randn(565,4)); raw.record_raw_logits(b1,torch.randn(1,16),np.array([False])); raw.finish_after_sample(b1,sampler())
+    d=torch.load(Path(td)/'repeat-rank0-request0.pt',weights_only=False); assert d['raw_logits'] is not None; assert d['sample'] is not None; assert d['canonical_topk_calls']==[{'layer_id':2,'rows':1023,'width':512,'num_decode_tokens':0,'num_prefill_tokens':1023}]; assert d['layers']=={}; assert d['layer2_full']=={}; assert d['layer2_attention']=={}
+    j=json.load(open(Path(td)/'repeat-rank0-request0.json')); assert j['status']=='COMPLETE'
+os.environ.pop('DS41_REPEAT_DIAG_MODE',None)
+
 print('REPEATABILITY_DIAG_EXTENDED_MODEL_FREE=PASS')

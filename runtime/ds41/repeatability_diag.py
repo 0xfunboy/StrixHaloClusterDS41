@@ -22,6 +22,8 @@ class RepeatabilityCapture:
         self.rank=int(os.environ.get('RANK',os.environ.get('LOCAL_RANK','0')))
         self.prompt_tokens=int(os.environ.get('DS41_REPEAT_DIAG_PROMPT_TOKENS','1588'))
         self.max_requests=int(os.environ.get('DS41_REPEAT_DIAG_MAX_REQUESTS','2'))
+        self.mode=os.environ.get('DS41_REPEAT_DIAG_MODE','full').strip() or 'full'
+        if self.mode not in ('full','raw-only'): raise ValueError(f'invalid DS41_REPEAT_DIAG_MODE={self.mode}')
         self.completed=0; self.current:dict[str,Any]|None=None
 
     def arm_from_input_batch(self,input_batch:Any) -> None:
@@ -33,7 +35,7 @@ class RepeatabilityCapture:
                               'request_id':str(req_id),'prompt_tokens':plen,'chunks':[],'layers':{},
                               'early_full':{},'layer2_boundaries':{},'layer2_final_rows':{},
                               'layer2_full':{},'layer2_projection':{},'layer2_attention':{},
-                              'final_hidden':None,'raw_logits':None,'sample':None,'invalid_reason':None}
+                              'final_hidden':None,'raw_logits':None,'sample':None,'invalid_reason':None,'mode':self.mode,'canonical_topk_calls':[]}
                 return
 
     def cleanup_finished(self,finished_req_ids:Any) -> None:
@@ -64,8 +66,17 @@ class RepeatabilityCapture:
         cur['chunks'].append(chunk)
         cur['_capture_layers']=(hi==self.prompt_tokens-1)
 
+    def record_canonical_topk(self,layer_id:int,rows:int,width:int,num_decode:int,num_prefill:int) -> None:
+        if not self._for_current(): return
+        cur=self.current; assert cur is not None
+        cur.setdefault('canonical_topk_calls',[]).append({
+            'layer_id':int(layer_id),'rows':int(rows),'width':int(width),
+            'num_decode_tokens':int(num_decode),'num_prefill_tokens':int(num_prefill),
+        })
+
     def record_layer2_boundary(self,name:str,**values:Any) -> None:
         if not self._for_current(): return
+        if self.mode=='raw-only': return
         cur=self.current; assert cur is not None
         ci=self._chunk_index(); ck=str(ci); name=str(name)
         # Always keep a stable final-row indicator per chunk.
@@ -91,6 +102,7 @@ class RepeatabilityCapture:
 
     def record_layer2_projection(self,positions:Any,kv:Any) -> None:
         if not self._for_current() or positions is None or positions.numel()==0: return
+        if self.mode=='raw-only': return
         cur=self.current; assert cur is not None
         ci=self._chunk_index(); ck=str(ci)
         cur.setdefault('layer2_projection',{})[ck]={
@@ -104,6 +116,7 @@ class RepeatabilityCapture:
                                         query_start_loc:Any,block_table:Any,swa_block_table:Any,
                                         N:int,M:int,scale:float,attn_sink:Any) -> None:
         if not self._for_current() or q is None or q.shape[0]==0: return
+        if self.mode=='raw-only': return
         cur=self.current; assert cur is not None
         ci=self._chunk_index(); ck=str(ci)
         row=combined_indices[-1]
@@ -133,12 +146,14 @@ class RepeatabilityCapture:
 
     def record_layer2_attention_kernel_output(self,output:Any) -> None:
         if not self._for_current() or output is None or output.shape[0]==0: return
+        if self.mode=='raw-only': return
         cur=self.current; assert cur is not None
         ck=str(self._chunk_index()); pkt=cur.setdefault('layer2_attention',{}).get(ck)
         if pkt is not None: pkt['kernel_output_final']=self._clone(output[-1])
 
     def record_layer(self,idx:int,hidden_states:Any,residual:Any,post_mix:Any,res_mix:Any,pre_mix:Any) -> None:
         if not self._for_current(): return
+        if self.mode=='raw-only': return
         cur=self.current; assert cur is not None
         ci=self._chunk_index(); ck=str(ci)
         # Full early-layer output is a bounded upstream control for contextual
@@ -152,6 +167,7 @@ class RepeatabilityCapture:
 
     def record_final_hidden(self,hidden_states:Any) -> None:
         if not self._for_current(): return
+        if self.mode=='raw-only': return
         cur=self.current; assert cur is not None
         if cur.get('_capture_layers'): cur['final_hidden']=self._clone(hidden_states[-1])
 
@@ -178,11 +194,12 @@ class RepeatabilityCapture:
             if str(req_id)!=cur['request_id']: continue
             before=int(input_batch.num_computed_prefill_tokens_np[i]); plen=int(input_batch.prefill_len_np[i]); sched=int(input_batch.num_scheduled_tokens[i])
             if before<plen and before+sched>=plen:
-                # Required narrow capture must be present for both engine chunks.
-                for key in ('layer2_full','layer2_projection','layer2_attention'):
-                    got=cur.get(key,{})
-                    if set(got.keys())!={'0','1'}:
-                        cur['invalid_reason']=f'missing {key} chunks: {sorted(got.keys())}'
+                # Full mode requires both layer2 engine chunks; raw-only intentionally does not.
+                if self.mode=='full':
+                    for key in ('layer2_full','layer2_projection','layer2_attention'):
+                        got=cur.get(key,{})
+                        if set(got.keys())!={'0','1'}:
+                            cur['invalid_reason']=f'missing {key} chunks: {sorted(got.keys())}'
                 cur['sample']={'sampled_token_ids':self._clone(sampler_output.sampled_token_ids),
                                'num_sampled':self._clone(sampler_output.num_sampled),
                                'num_rejected':self._clone(sampler_output.num_rejected)}

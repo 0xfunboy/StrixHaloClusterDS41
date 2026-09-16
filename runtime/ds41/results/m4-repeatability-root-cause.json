@@ -1,0 +1,174 @@
+{
+  "candidate_fix": "canonicalize valid sparse-prefill top-k indices by logical index after indexer_op and before all attention consumers; keep -1 at end; only metadata num_prefill_tokens rows; decode/verifier unchanged",
+  "cause": "native ROCm prefill top-k returns an order that is not semantically required to be canonical; sparse BF16 attention reduction is order-sensitive, so repeated identical selected sets can yield different numerical outputs",
+  "component_cost": {
+    "schema": "ds41-canonical-topk-component-v1",
+    "shapes": [
+      {
+        "mean_ms": 0.20595528611115047,
+        "median_ms": 0.20636700093746185,
+        "rows": 1023,
+        "samples_ms": [
+          0.20184700191020966,
+          0.20408600568771362,
+          0.2139270007610321,
+          0.2012459933757782,
+          0.20672699809074402,
+          0.20636700093746185,
+          0.20748700201511383
+        ],
+        "valid_counts_minmax": [
+          1,
+          511
+        ],
+        "width": 512
+      },
+      {
+        "mean_ms": 0.09688314369746617,
+        "median_ms": 0.09708300232887268,
+        "rows": 565,
+        "samples_ms": [
+          0.09736300259828568,
+          0.0970430001616478,
+          0.09540300071239471,
+          0.09776300191879272,
+          0.09644299745559692,
+          0.09708300232887268,
+          0.09708400070667267
+        ],
+        "valid_counts_minmax": [
+          1,
+          282
+        ],
+        "width": 512
+      }
+    ],
+    "status": "PASS"
+  },
+  "evidence": {
+    "attention_output": {
+      "rank0_max_abs": 0.001953125,
+      "rank1_max_abs": 0.001953125
+    },
+    "canonical_topk_only": "sorting only the compressed top-k, preserving the SWA suffix, gives identical rows and bit-exact sparse-attention output",
+    "chunk0": "logical inputs/selection/context/output exact across request0/request1",
+    "chunk1_context": "same 640 logical context indices as a set; KV rows become bit-exact after alignment by logical index",
+    "chunk1_topk": "same 512 valid compressed indices as a set, but different order; SWA suffix128 is exact and ordered",
+    "chunk1_upstream": "layer0/layer1 full outputs, layer2 entry, attn_mhc_pre, attn_norm, current KV projection, and final-query Q are exact within each rank",
+    "isolated_replay": {
+      "rank0": {
+        "canonical_A_vs_B": {
+          "exact": true,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "rel_l2": 0.0
+        },
+        "canonical_rows_exact": true,
+        "captured_kernel_A_vs_B": {
+          "exact": false,
+          "max_abs": 0.001953125,
+          "mean_abs": 7.796450518071651e-06,
+          "rel_l2": 0.000523589934160006
+        },
+        "context_aligned_exact": true,
+        "context_set_equal": true,
+        "num_context_rows": 640,
+        "q_exact": true,
+        "replay_A_vs_B": {
+          "exact": false,
+          "max_abs": 0.001953125,
+          "mean_abs": 7.796450518071651e-06,
+          "rel_l2": 0.000523589934160006
+        },
+        "replay_A_vs_canonical": {
+          "exact": false,
+          "max_abs": 0.001953125,
+          "mean_abs": 1.033387343341019e-05,
+          "rel_l2": 0.000602906570835167
+        },
+        "replay_A_vs_captured_A": {
+          "exact": true,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "rel_l2": 0.0
+        },
+        "replay_B_vs_canonical": {
+          "exact": false,
+          "max_abs": 0.001953125,
+          "mean_abs": 1.2006907127215527e-05,
+          "rel_l2": 0.0006465539163409967
+        },
+        "replay_B_vs_captured_B": {
+          "exact": true,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "rel_l2": 0.0
+        },
+        "schema": "ds41-layer2-sparse-order-replay-v1"
+      },
+      "rank1": {
+        "canonical_A_vs_B": {
+          "exact": true,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "rel_l2": 0.0
+        },
+        "canonical_rows_exact": true,
+        "captured_kernel_A_vs_B": {
+          "exact": false,
+          "max_abs": 0.001953125,
+          "mean_abs": 8.708368113730103e-06,
+          "rel_l2": 0.0005365331328086745
+        },
+        "context_aligned_exact": true,
+        "context_set_equal": true,
+        "num_context_rows": 640,
+        "q_exact": true,
+        "replay_A_vs_B": {
+          "exact": false,
+          "max_abs": 0.001953125,
+          "mean_abs": 8.708368113730103e-06,
+          "rel_l2": 0.0005365331328086745
+        },
+        "replay_A_vs_canonical": {
+          "exact": false,
+          "max_abs": 0.001953125,
+          "mean_abs": 1.17672752821818e-05,
+          "rel_l2": 0.0006385095148159141
+        },
+        "replay_A_vs_captured_A": {
+          "exact": true,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "rel_l2": 0.0
+        },
+        "replay_B_vs_canonical": {
+          "exact": false,
+          "max_abs": 0.001953125,
+          "mean_abs": 5.675981810782105e-06,
+          "rel_l2": 0.0004717862925237346
+        },
+        "replay_B_vs_captured_B": {
+          "exact": true,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "rel_l2": 0.0
+        },
+        "schema": "ds41-layer2-sparse-order-replay-v1"
+      }
+    }
+  },
+  "not_causes": [
+    "different prompt/input tokens",
+    "different layer0/layer1 full hidden states in the captured chunks",
+    "different final-query Q",
+    "different current-chunk KV projection",
+    "missing/extra context member",
+    "SWA ordering",
+    "API logprob reporting",
+    "BLOCK_M8"
+  ],
+  "schema": "ds41-m4-repeatability-root-cause-v1",
+  "source_capture": "d4548014d9903064074c2122bc92b690d366a3b6",
+  "status": "CAUSE_LOCALIZED_SPARSE_TOPK_ORDER"
+}

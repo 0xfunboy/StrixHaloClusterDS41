@@ -1,0 +1,44 @@
+{
+  "component_gates": {
+    "canonicalize_1023x512_median_ms": 0.20636700093746185,
+    "canonicalize_565x512_median_ms": 0.09708300232887268,
+    "model_free_set_preservation": "PASS",
+    "rank0_sparse_replay_canonical_exact": true,
+    "rank1_sparse_replay_canonical_exact": true
+  },
+  "fix": "canonicalize valid sparse-prefill top-k indices by logical index after indexer_op; invalid -1 suffix; no change to selected set; decode rows excluded by metadata",
+  "full_model_protocol": {
+    "arm": "K2/BLOCK_M4 only",
+    "capture": false,
+    "logprobs": "raw/top2 API",
+    "payload_sha256": "4926fd629b1b2057762c617c985e64211a9853c2678260758ee8ea4e09a364fd",
+    "performance_profiler": false,
+    "requests": 2,
+    "required": [
+      "rank coherence",
+      "prompt1588/computed1588/cache0",
+      "same final content/finish/stop",
+      "same first-token raw logprobs/top2",
+      "healthy idle no poison"
+    ],
+    "same_load": true
+  },
+  "parent_source": "d4548014d9903064074c2122bc92b690d366a3b6",
+  "preload_gates": {
+    "component_replay_canonical_A_B": "BIT_EXACT",
+    "component_sort_cost_ms_median": {
+      "rows_1023_width_512": 0.20636700093746185,
+      "rows_565_width_512": 0.09708300232887268
+    },
+    "fresh_apply": "PASS",
+    "invalid_minus1_tail_preserved": "PASS",
+    "mixed_decode_prefill_slice": "PASS",
+    "raw_only_capture": "PASS",
+    "swa_unchanged_by_fix": "PASS_BY_PLACEMENT_BEFORE_COMBINE",
+    "valid_multiset_preserved": "PASS"
+  },
+  "promotion": "none; this validates repeatability fix only, not M8 or daily quality",
+  "schema": "ds41-canonical-sparse-topk-fix-preregister-v1",
+  "semantic_gate": "reported separately against original expected; stable wrong output is still FAIL",
+  "status": "FROZEN_BEFORE_FULL_MODEL"
+}

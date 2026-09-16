@@ -42,7 +42,10 @@ def compare(a,b):
         out['chunks']['input_exact'] &= row['positions']['exact'] and row['input_ids']['exact']; out['chunks']['rows'].append(row)
         # Upstream context controls: outputs of layer0/layer1 over every row.
         ea=(a.get('early_full') or {}).get(str(ci),{}); eb=(b.get('early_full') or {}).get(str(ci),{})
-        for li in (0,1): add(out['execution'],first,f'chunk{ci}.layer{li}.hidden_full',ea.get(li) or ea.get(str(li)),eb.get(li) or eb.get(str(li)),pos)
+        for li in (0,1):
+            xa = ea[li] if li in ea else ea.get(str(li))
+            xb = eb[li] if li in eb else eb.get(str(li))
+            add(out['execution'],first,f'chunk{ci}.layer{li}.hidden_full',xa,xb,pos)
         fa=(a.get('layer2_full') or {}).get(str(ci),{}); fb=(b.get('layer2_full') or {}).get(str(ci),{})
         order=['entry','attn_mhc_pre','attn_norm']
         for name in order:

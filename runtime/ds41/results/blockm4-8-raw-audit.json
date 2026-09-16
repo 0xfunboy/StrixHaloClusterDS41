@@ -1,0 +1,16 @@
+{
+  "schema":"ds41-blockm4-8-raw-audit-v1",
+  "status":"COMPARABLE_WITH_EXPLICIT_TOKEN_ID_LIMITATION",
+  "source":"bc41a355e827fbb193e65069cf867584cc9bb72f",
+  "release_manifest_sha256":"f2c1232771bd36b37df854ade39f62aa68d1c3b05c23ddc91d39fae82da4ef7c",
+  "prompt_preregistered_sha256":"c162e1102363a8d7dea3891bacac73d18948cde6af8014b92d867cf7e4271993",
+  "arms":{
+    "A_M4":{"epoch":"1789538815652030655","prompt_tokens":1588,"computed":1588,"cached":0,"reasoning":"none","max_tokens":128,"context_tokens":65536,"temperature":0,"seed":1,"finish":"stop","rank_coherence":"PASS_BY_PAIRED_DEEP_EQUAL_AND_EMPTY_POISON"},
+    "B_M8":{"epoch":"1789539260720103843","prompt_tokens":1588,"computed":1588,"cached":0,"reasoning":"none","max_tokens":128,"context_tokens":65536,"temperature":0,"seed":1,"finish":"stop","rank_coherence":"PASS_BY_PAIRED_DEEP_EQUAL_AND_EMPTY_POISON"}
+  },
+  "engine_common":{"dtype":"bfloat16","max_model_len":65664,"tp":2,"ep":true,"block_size":128,"kv_cache_bytes":1073741824,"prefix_cache":false,"max_num_batched_tokens":1024,"max_num_seqs":1,"chunked_prefill":true,"dspark_k":2,"seed":1,"attention_backend":"ROCM_FLASHMLA_SPARSE_DSV4"},
+  "first_observable_output_divergence":{"completion_token_1_based":5,"completion_index_0_based":4,"previous_common_completion_tokens":4,"A_delta":"48","B_delta":"46","basis":"SSE cumulative completion_tokens; no retokenization"},
+  "missing_evidence":{"prompt_token_ids":"not stored; SSE prompt_token_ids=null","completion_token_ids":"not stored; SSE token_ids=null","exact_A_B_chunk_segmentation":"not stored in A/B raw; comparable route-capture on same source/config observed 1023+565, but this audit does not promote that to direct A/B evidence","arm_env_after_unit_removal":"BLOCK_M launch env was observed at runtime but is not embedded in result.json/rank log; preregister and experiment launch receipts define A=4/B=8"},
+  "coordinator_contract":"paired.go drains both ranks and reflect.DeepEqual-compares semantic generated output; mismatch poisons pair. Both requests returned HTTP200 and subsequent pair health was ok with empty poison.",
+  "decision":"same-arm repeatability controls are still required before attributing the A/B output divergence to BLOCK_M8"
+}

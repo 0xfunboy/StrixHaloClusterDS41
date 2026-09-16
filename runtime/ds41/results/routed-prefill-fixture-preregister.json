@@ -1,0 +1,17 @@
+{
+  "schema": "ds41-routed-prefill-fixture-preregister-v1",
+  "baseline_math": "5bdfed698ab97b6230db3fe8a7e37ff8e9b3d513 routed-MoE math/dispatch",
+  "capture_source_parent": "f3f61f8f7137402a9357ed85e9db04a5e5a03f6a",
+  "prompt_file": "reports/DS41-Q2-001/daily-k2-panel/corpora/code-2k.txt",
+  "prompt_sha256": "c162e1102363a8d7dea3891bacac73d18948cde6af8014b92d867cf7e4271993",
+  "expected_prompt_tokens": 1588,
+  "selected_prefill_routed_calls": [0,20,40,60],
+  "interpretation": {
+    "call0": "first actual prefill chunk target layer0",
+    "call20": "first actual prefill chunk target layer20",
+    "call40": "second actual prefill chunk target layer0",
+    "call60": "second actual prefill chunk target layer20"
+  },
+  "required_contract": {"hidden":5120,"top_k":6,"w13_quant_iq2_xxs":16,"w2_quant_q2_k":10,"expert_count_global":384},
+  "note": "Actual chunk token counts are observed, not assumed. Diagnostic CPU copies perturb timing and are not performance samples."
+}

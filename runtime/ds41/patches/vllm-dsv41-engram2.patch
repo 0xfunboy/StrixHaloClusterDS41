@@ -527,10 +527,15 @@ index 069ff5f..cd66bc6 100644
              return hidden_states, aux_hidden_states
          return hidden_states
 diff --git a/vllm/models/deepseek_v4_1/amd/rocm.py b/vllm/models/deepseek_v4_1/amd/rocm.py
-index 9271e7a..eee4193 100644
+index 9271e7a..0f47fc8 100644
 --- a/vllm/models/deepseek_v4_1/amd/rocm.py
 +++ b/vllm/models/deepseek_v4_1/amd/rocm.py
-@@ -651,7 +651,15 @@ class DeepseekV41ROCMAiterMLAAttention(DeepseekV4Attention):
+@@ -1,3 +1,4 @@
++import os
+ # SPDX-License-Identifier: Apache-2.0
+ # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+ 
+@@ -651,7 +652,15 @@ class DeepseekV41ROCMAiterMLAAttention(DeepseekV4Attention):
          if self._wo_b_scale is not None and zf.dim() == 2:
              result = self._bpre_attn_gemm(self.wo_b.weight, self._wo_b_scale, zf, True)
          else:
@@ -547,7 +552,7 @@ index 9271e7a..eee4193 100644
          return result
  
      def forward_mqa(
-@@ -764,6 +772,13 @@ class DeepseekV41ROCMAiterMLAAttention(DeepseekV4Attention):
+@@ -764,6 +773,13 @@ class DeepseekV41ROCMAiterMLAAttention(DeepseekV4Attention):
                  is_valid,
              )
  
@@ -561,7 +566,7 @@ index 9271e7a..eee4193 100644
          rocm_sparse_attn_decode(
              q=q,
              kv_cache=kv_cache,
-@@ -789,6 +804,8 @@ class DeepseekV41ROCMAiterMLAAttention(DeepseekV4Attention):
+@@ -789,6 +805,8 @@ class DeepseekV41ROCMAiterMLAAttention(DeepseekV4Attention):
                  not swa_only and kv_cache is not None,
              ),
          )
@@ -570,7 +575,7 @@ index 9271e7a..eee4193 100644
  
      def _forward_prefill(
          self,
-@@ -891,6 +908,22 @@ class DeepseekV41ROCMAiterMLAAttention(DeepseekV4Attention):
+@@ -891,6 +909,22 @@ class DeepseekV41ROCMAiterMLAAttention(DeepseekV4Attention):
                  M,
                  N,
              )
@@ -593,7 +598,7 @@ index 9271e7a..eee4193 100644
              rocm_sparse_attn_prefill(
                  q=q[query_start:query_end],
                  kv=kv.view(-1, 1, q.shape[-1]),
-@@ -903,3 +936,7 @@ class DeepseekV41ROCMAiterMLAAttention(DeepseekV4Attention):
+@@ -903,3 +937,7 @@ class DeepseekV41ROCMAiterMLAAttention(DeepseekV4Attention):
                  attn_sink=self.attn_sink,
                  output=output[query_start:query_end],
              )

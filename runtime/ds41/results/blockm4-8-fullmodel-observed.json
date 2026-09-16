@@ -1,0 +1,164 @@
+{
+  "arms": {
+    "A_M4": {
+      "block_m": 4,
+      "cached": 0,
+      "client_ttft_s": 98.7654429289978,
+      "computed": 1588,
+      "content": "{\"result\": 48, \"first_file\": \"__init__.py\", \"last_file\": \"test-ds41-prefill-metrics.py\", \"median_file\": \"app.py\"}",
+      "decode_tps_observed_not_promotional": 15.408086306779701,
+      "epoch": "1789538815652030655",
+      "finish_reason": "stop",
+      "prefill_s": 98.3665078125,
+      "prompt_tokens": 1588,
+      "raw": "reports/DS41-Q2-001/blockm-fullmodel-ab/A-m4/result.json",
+      "reasoning_tokens": 0,
+      "semantic_status": "FAIL",
+      "wall_s": 101.08513107901672
+    },
+    "B_M8": {
+      "block_m": 8,
+      "cached": 0,
+      "client_ttft_s": 82.63302127597854,
+      "computed": 1588,
+      "content": "{\"result\": 46, \"first_file\": \"__init__.py\", \"middle_file\": \"prompt.go\", \"last_file\": \"envelope_test.go\"}",
+      "decode_tps_observed_not_promotional": 16.29088367868548,
+      "epoch": "1789539260720103843",
+      "finish_reason": "stop",
+      "prefill_s": 82.476046875,
+      "prompt_tokens": 1588,
+      "raw": "reports/DS41-Q2-001/blockm-fullmodel-ab/B-m8/result.json",
+      "reasoning_tokens": 0,
+      "semantic_status": "FAIL",
+      "wall_s": 84.70747947698692
+    }
+  },
+  "component_non_regression": {
+    "aggregate": {
+      "max_fixture_gain_pct": 24.320894007455117,
+      "mean_fixture_gain_pct": 19.681363887502055,
+      "min_fixture_gain_pct": 15.629753884396468,
+      "peak_delta_m4_max": 112154624,
+      "peak_delta_m8_max": 112163840,
+      "ratio_of_sums_gain_pct": 19.225998625614714,
+      "sum_m4_critical_ms": 3797.8985595703125,
+      "sum_m8_critical_ms": 3185.4617309570312
+    },
+    "bit_exact_all": true,
+    "files": [
+      "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank0-call00.json",
+      "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank0-call20.json",
+      "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank0-call40.json",
+      "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank0-call60.json",
+      "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank1-call00.json",
+      "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank1-call20.json",
+      "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank1-call40.json",
+      "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank1-call60.json"
+    ],
+    "finite_all": true,
+    "fixture_count": 8,
+    "independent_fidelity": {
+      "historical_abs_gate_failures": [
+        "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank0-call20.json"
+      ],
+      "m8_never_worse_than_m4_on_sampled_independent_metrics": true
+    },
+    "paired_critical": [
+      {
+        "call": "00",
+        "gain_pct": 19.838124041062464,
+        "m4_critical_ms": 1222.123291015625,
+        "m8_critical_ms": 1019.811767578125
+      },
+      {
+        "call": "20",
+        "gain_pct": 19.851892535961156,
+        "m4_critical_ms": 1108.393798828125,
+        "m8_critical_ms": 924.8029174804688
+      },
+      {
+        "call": "40",
+        "gain_pct": 20.73601566976304,
+        "m4_critical_ms": 770.6536254882812,
+        "m8_critical_ms": 638.29638671875
+      },
+      {
+        "call": "60",
+        "gain_pct": 15.629753884396468,
+        "m4_critical_ms": 696.7278442382812,
+        "m8_critical_ms": 602.5506591796875
+      }
+    ],
+    "schema": "ds41-blockm4-8-nonreg-v3-summary",
+    "status": "PASS_8_OF_8_BIT_EXACT"
+  },
+  "historical_result_commit": "be4bf3ae7bedbfeb4d65e8a8f7eeab5689c76888",
+  "interpretation": {
+    "component": "8/8 captured routed-MoE fixtures finite and bit-exact M4/M8; aggregate paired-critical component throughput gain +19.2259986256%",
+    "decode": "not treated as acquired speedup because completions/output paths differ",
+    "full_model": "outputs differ; causality not yet isolated because same-arm repeatability was not measured",
+    "performance": "one contemporary full-model observation; M8 materially reduced prefill latency",
+    "promotion": "M8 remains experimental; no serving promotion",
+    "quality": "both arms fail the frozen code-2k semantic expected result"
+  },
+  "missing_evidence": [
+    "original request token-id vector was not stored in result.json; do not reconstruct it by retokenizing",
+    "same-arm M4/M4 and M8/M8 repeatability controls not yet acquired",
+    "first target-logit divergence not yet localized"
+  ],
+  "observed_effect": {
+    "client_ttft_seconds_saved": 16.132421653019264,
+    "prefill_seconds_saved": 15.89046093750001,
+    "prefill_throughput_gain_pct": 19.26675870096375,
+    "prefill_time_reduction_pct": 16.154340832948343,
+    "wall_seconds_saved": 16.3776516020298
+  },
+  "schema": "ds41-blockm4-8-fullmodel-observed-v1",
+  "shared_reference_diagnosis": {
+    "bf16_spacing": {
+      "final_difference_ulps": 1.0,
+      "next_after_17152": 17280.0,
+      "prev_before_17280": 17152.0,
+      "ulp_down_from_17280": 128.0,
+      "ulp_up_from_17152": 128.0
+    },
+    "first_divergent_boundary": {
+      "activation": {
+        "max_abs": 2.5,
+        "rel_l2": 0.009305039259634705
+      },
+      "down": {
+        "coordinate2455_reference": 12032.0,
+        "coordinate2455_runtime": 11968.0,
+        "max_abs": 64.0,
+        "rel_l2": 0.010549987232555689
+      },
+      "gate_up_runtime_vs_explicit_dequant": {
+        "gate_max_abs": 0.125,
+        "gate_rel_l2": 0.0058918083334745875,
+        "up_max_abs": 0.125,
+        "up_rel_l2": 0.005988089753112156
+      },
+      "route": {
+        "gid": 180,
+        "weight": 1.4369423389434814
+      }
+    },
+    "fixture": "rank0-call20 chunk0/layer20 token0",
+    "high_precision_reference_fp32": 17336.107421875,
+    "historical_independent_value": 17280.0,
+    "interpretation": "max_abs128 is a shared M4/M8 baseline-vs-reference discrepancy amplified from small gate/up differences; it is one BF16 ULP at the final ~17k scale. This explains the observed absolute maximum without classifying M8 as a regression. It does not by itself certify all fused-kernel numerical error.",
+    "kernel_contract_difference": "Triton IQ2_XXS/Q2_K fused path dequantizes quant tiles to activation dtype BF16 before product/accumulation; independent gguf-py reference dequantizes weights to FP32 and performs explicit FP32 matmul before BF16 boundaries.",
+    "m4_value": 17152.0,
+    "m8_value": 17152.0,
+    "schema": "ds41-blockm-shared-reference-cause-v1",
+    "weighting_check": {
+      "conclusion": "BF16 route-weight rounding is not sufficient cause of max_abs128",
+      "m4_vs_runtime_cast_max_abs": 128.0,
+      "old_vs_runtime_cast_max_abs": 16.0
+    },
+    "worst_coordinate": 2455
+  },
+  "source": "bc41a355e827fbb193e65069cf867584cc9bb72f",
+  "status": "DIAGNOSTIC_GAIN_NONREG_COMPONENT_PASS_FULLMODEL_OUTPUT_DIVERGES_NO_PROMOTION"
+}

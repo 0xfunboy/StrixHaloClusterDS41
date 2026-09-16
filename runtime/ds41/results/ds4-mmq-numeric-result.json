@@ -1,0 +1,14 @@
+{
+  "schema":"ds41-ds4-mmq-numeric-result-v1",
+  "status":"PASS_ADMIT_FULLMODEL_B",
+  "candidate_source":"9fad9886ee69c7f15853fb64bfb04b82d6bba222",
+  "upstream":"antirez/ds4@8db1d1d155cb0400a86a86b9c62d0defb3a6148b",
+  "component_library_sha256":"37c74968a16c5e8e5dd8dd48e0e428e5f686cdde69e027b43740203cebcf2c77",
+  "resident_w13_abi_gate":{"status":"PASS","all_buffers_bit_exact":true,"permanent_expert_bank_copy":false,"shared_scratch_max_bytes_per_rank":337666048},
+  "holdout_selected_row":{"rank0":{"runtime_vs_q8_emulation_rel_l2":0.00796331220176015,"runtime_vs_fp32_dequant_rel_l2":0.014483478938206316},"rank1":{"runtime_vs_q8_emulation_rel_l2":0.02711015287657568,"runtime_vs_fp32_dequant_rel_l2":0.029778978912429737}},
+  "holdout_all_rows":{"rank0":{"full_rel_l2":0.021619398146867752,"row_rel_l2_p95":0.04364965856075287,"row_rel_l2_max":0.05272606760263443},"rank1":{"full_rel_l2":0.0082121342420578,"row_rel_l2_p95":0.030708881095051765,"row_rel_l2_max":0.03287854045629501}},
+  "stress":{"zero_activation_exact_zero":true,"remote_only_exact_zero":true,"clamp64_runtime_vs_fp32_rel_l2":0.012180158585848153,"clamp64_runtime_vs_q8_emulation_rel_l2":0.007385380884959056},
+  "epilogue":{"runtime_vs_explicit_clamp_swiglu_weight_max_rel_l2":1.4e-7},
+  "gates":{"bridge_emulation_stage_rel_l2_max":0.04,"high_precision_final_rel_l2_max":0.05,"per_row_rel_l2_p95_max":0.08,"epilogue_self_rel_l2_max":1e-5,"finite_required":true,"ep2_map_exact_required":true,"remote_only_exact_zero_required":true},
+  "interpretation":"Numerically admitted for B full-model qualification under the explicitly different BF16/F32+Q8_1 activation contract. This is not bit equivalence with the Triton BF16 path and does not qualify model/task quality."
+}

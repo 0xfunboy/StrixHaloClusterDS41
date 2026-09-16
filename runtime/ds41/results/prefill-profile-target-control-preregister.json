@@ -1,0 +1,41 @@
+{
+  "schema": "ds41-prefill-profile-target-control-preregister-v1",
+  "candidate_source": "5bdfed698ab97b6230db3fe8a7e37ff8e9b3d513",
+  "candidate_k2_epoch_observed": "1789526790457522611",
+  "code2k_prompt_tokens": 1588,
+  "code2k_corpus_sha256": "c162e1102363a8d7dea3891bacac73d18948cde6af8014b92d867cf7e4271993",
+  "clean_k2_prefill_ms": 92699.4765625,
+  "profile": {
+    "collector": "runtime.ds41.perf_profile.DS41PerfCollector",
+    "runner": "V2 GPUModelRunner",
+    "first_prompt_min_tokens": 1500,
+    "request": "original code-2k-s1 corpus/task unchanged",
+    "coverage": [
+      "all prefill chunks",
+      "attention",
+      "moe_total",
+      "routed_moe",
+      "shared_mlp",
+      "mHC",
+      "collectives",
+      "Engram",
+      "unattributed residual"
+    ],
+    "interpretation": "instrumented attribution only; not a clean performance benchmark"
+  },
+  "target_only_control": {
+    "prompt_file": "reports/DS41-Q2-001/prefill-priority-001/code2k-tail-only.txt",
+    "prompt_sha256": "9996033c4241cbf61afb5c4c7c31d7c0501075af0b136c733d322f6bf7372563",
+    "reasoning_effort": "none",
+    "temperature": 0,
+    "seed": 1,
+    "max_tokens": 32,
+    "only_variable": "speculative_config K2 -> None",
+    "existing_k2_result": "end=23 on the exact tail-only prompt",
+    "decision": {
+      "target_correct_k2_wrong": "speculation implicated; localize first common-prefix divergence only",
+      "both_wrong": "failure reproduces without speculation; speculation not necessary for failure, no weight/quantization conclusion",
+      "not_comparable": "report differing variable and stop causal attribution"
+    }
+  }
+}

@@ -164,6 +164,7 @@ start_unit_local() {
     --setenv="DS41_ROOT=$ROOT" --setenv="DS41_SERVING_PRESET=${DS41_SERVING_PRESET:-}" --setenv="DS41_SERVING_RELEASE_ID=${DS41_SERVING_RELEASE_ID:-}" \
     --setenv="DS41_REAL_DSPARK_K=${DS41_REAL_DSPARK_K:-}" --setenv="DS41_ENGRAM_RANDOM_ADVICE=${DS41_ENGRAM_RANDOM_ADVICE:-1}" \
     --setenv="DS41_PREFILL_TELEMETRY=${DS41_PREFILL_TELEMETRY:-0}" --setenv="DS41_API_MAX_MODEL_LEN=${DS41_API_MAX_MODEL_LEN:-65664}" \
+    --setenv="DS41_PREFILL_PROFILE_ONCE=${DS41_PREFILL_PROFILE_ONCE:-0}" --setenv="DS41_PREFILL_PROFILE_MIN_TOKENS=${DS41_PREFILL_PROFILE_MIN_TOKENS:-1500}" --setenv="DS41_PREFILL_PROFILE_DIR=${DS41_PREFILL_PROFILE_DIR:-}" \
     --property="RuntimeMaxSec=$RUNTIME_MAX_SEC" --property="TimeoutStopSec=$STOP_TIMEOUT_SEC" --property=KillMode=control-group --property=Restart=no \
     --property="StandardOutput=append:$log" --property="StandardError=append:$log" \
     bash "$ROOT/runtime/ds41/launch-node.sh" 0 10.55.0.1 "$epoch" "$port"
@@ -177,6 +178,7 @@ start_unit_peer() {
     --setenv="DS41_ROOT=$ROOT" --setenv="DS41_SERVING_PRESET=${DS41_SERVING_PRESET:-}" --setenv="DS41_SERVING_RELEASE_ID=${DS41_SERVING_RELEASE_ID:-}" \
     --setenv="DS41_REAL_DSPARK_K=${DS41_REAL_DSPARK_K:-}" --setenv="DS41_ENGRAM_RANDOM_ADVICE=${DS41_ENGRAM_RANDOM_ADVICE:-1}" \
     --setenv="DS41_PREFILL_TELEMETRY=${DS41_PREFILL_TELEMETRY:-0}" --setenv="DS41_API_MAX_MODEL_LEN=${DS41_API_MAX_MODEL_LEN:-65664}" \
+    --setenv="DS41_PREFILL_PROFILE_ONCE=${DS41_PREFILL_PROFILE_ONCE:-0}" --setenv="DS41_PREFILL_PROFILE_MIN_TOKENS=${DS41_PREFILL_PROFILE_MIN_TOKENS:-1500}" --setenv="DS41_PREFILL_PROFILE_DIR=${DS41_PREFILL_PROFILE_DIR:-}" \
     --property="RuntimeMaxSec=$RUNTIME_MAX_SEC" --property="TimeoutStopSec=$STOP_TIMEOUT_SEC" --property=KillMode=control-group --property=Restart=no \
     --property="StandardOutput=append:$log" --property="StandardError=append:$log" \
     bash "$ROOT/runtime/ds41/launch-node.sh" 1 10.55.0.2 "$epoch" "$port"

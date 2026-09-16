@@ -1,0 +1,8 @@
+{
+  "schema": "ds41-prefill-profile-equivalence-v1",
+  "status": "PASS",
+  "tokens": 1024,
+  "pre_bitwise": true,
+  "post_bitwise": true,
+  "observed_before_commit": true
+}

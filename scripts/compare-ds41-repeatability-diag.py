@@ -25,6 +25,20 @@ def compare(a,b):
              'model_input_last':metrics(ra['model_input_last'],rb['model_input_last'])}
         out['chunks']['rows'].append(row); out['chunks']['input_exact'] &= row['positions_exact'] and row['input_ids_exact']
     out['layers']=[]; first=None
+    out['layer2_boundaries']=[]
+    ba=a.get('layer2_boundaries') or {}; bb=b.get('layer2_boundaries') or {}
+    order=['entry','attn_mhc_pre','attn_norm','attention_out','attn_mhc_post','ffn_mhc_pre','ffn_norm','ffn_out']
+    for name in order:
+        va=ba.get(name); vb=bb.get(name)
+        if va is None and vb is None: continue
+        row={'boundary':name,'fields':{}}
+        for k in sorted(set((va or {}).keys())|set((vb or {}).keys())):
+            xa=None if va is None else va.get(k); xb=None if vb is None else vb.get(k)
+            if xa is None or xb is None: m={'exact':xa is None and xb is None,'missing':True}
+            else: m=metrics(xa,xb)
+            row['fields'][k]=m
+            if first is None and not m.get('exact',False): first={'boundary':f'layer2.{name}.{k}',**m}
+        out['layer2_boundaries'].append(row)
     keys=['hidden_states','residual','post_mix','res_mix','pre_mix']
     for li in sorted(set(a['layers'])|set(b['layers']), key=int):
         la=a['layers'].get(li) or a['layers'].get(int(li)); lb=b['layers'].get(li) or b['layers'].get(int(li)); r={'layer':int(li),'fields':{}}

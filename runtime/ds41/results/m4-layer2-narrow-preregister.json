@@ -1,0 +1,25 @@
+{
+  "base_source": "aa931c88dcdcd9911fdd26d5632604daf99a3048",
+  "block_m": 4,
+  "boundaries": [
+    "entry",
+    "attn_mhc_pre",
+    "attn_norm",
+    "attention_out",
+    "attn_mhc_post",
+    "ffn_mhc_pre",
+    "ffn_norm",
+    "ffn_out"
+  ],
+  "capture_contract": "final prompt row only; GPU clones during forward; CPU materialization once after sample; no per-layer synchronize",
+  "capture_layer": 2,
+  "comparison": "request0 vs request1 same rank first; rank0/rank1 replicated metrics compared only after same-rank localization",
+  "decision": "first non-exact internal boundary is authoritative next causal interval; no broad recapture, no M8 work",
+  "parent_result": "runtime/ds41/results/m4-repeatability-localization-stage1.json",
+  "prompt_tokens": 1588,
+  "request_sha256": "4926fd629b1b2057762c617c985e64211a9853c2678260758ee8ea4e09a364fd",
+  "requests": 2,
+  "rollback": "k2-prefill-5bdfed6 source5bdfed698ab97b6230db3fe8a7e37ff8e9b3d513 READY/idle",
+  "schema": "ds41-m4-layer2-narrow-preregister-v1",
+  "status": "FROZEN_BEFORE_LAYER2_DIAGNOSTIC_LOAD"
+}

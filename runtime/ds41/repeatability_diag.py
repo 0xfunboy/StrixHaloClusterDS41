@@ -48,6 +48,19 @@ class RepeatabilityCapture:
         cur['chunks'].append(chunk)
         cur['_capture_layers']=(hi==self.prompt_tokens-1)
 
+    def record_layer2_boundary(self,name:str,**values:Any) -> None:
+        if not self._for_current(): return
+        cur=self.current; assert cur is not None
+        if not cur.get('_capture_layers'): return
+        dst=cur.setdefault('layer2_boundaries',{})
+        def last(x:Any):
+            if x is None: return None
+            try:
+                return x[-1].detach().clone()
+            except Exception:
+                return x
+        dst[str(name)]={k:last(v) for k,v in values.items()}
+
     def record_layer(self,idx:int,hidden_states:Any,residual:Any,post_mix:Any,res_mix:Any,pre_mix:Any) -> None:
         if not self._for_current(): return
         cur=self.current; assert cur is not None

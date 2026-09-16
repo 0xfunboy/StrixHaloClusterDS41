@@ -425,10 +425,74 @@ index 3a6cef8..68179b6 100644
              self.model.confidence_head = None
          self.process_weights_after_loading()
 diff --git a/vllm/models/deepseek_v4_1/amd/model.py b/vllm/models/deepseek_v4_1/amd/model.py
-index 069ff5f..17cef2e 100644
+index 069ff5f..cd66bc6 100644
 --- a/vllm/models/deepseek_v4_1/amd/model.py
 +++ b/vllm/models/deepseek_v4_1/amd/model.py
-@@ -433,6 +433,8 @@ class DeepseekV4Model(nn.Module, EagleModelMixin):
+@@ -165,6 +165,7 @@ class DeepseekV4DecoderLayer(nn.Module):
+     ):
+         super().__init__()
+         config = vllm_config.model_config.hf_config
++        self.layer_id = extract_layer_index(prefix)
+         self.hidden_size = config.hidden_size
+         self.use_sequence_parallel = _use_sequence_parallel(vllm_config)
+ 
+@@ -266,6 +267,11 @@ class DeepseekV4DecoderLayer(nn.Module):
+         engram_hashes: torch.Tensor | None = None,
+         engram_mask: torch.Tensor | None = None,
+     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
++        if self.layer_id == 2:
++            from runtime.ds41.repeatability_diag import get_repeatability_capture
++            get_repeatability_capture().record_layer2_boundary(
++                "entry", x=x, residual=residual, pre_mix=pre_mix, post_mix=post_mix, res_mix=res_mix
++            )
+         # The reference collapses each sublayer's input with the *previous*
+         # sublayer's pre-mix: attention uses the pre-mix carried in (identity
+         # for the first layer), the FFN uses this layer's attention pre-mix.
+@@ -324,16 +330,26 @@ class DeepseekV4DecoderLayer(nn.Module):
+                 self.hc_sinkhorn_iters,
+                 pre_mix=pre_mix,
+             )
++        if self.layer_id == 2:
++            get_repeatability_capture().record_layer2_boundary(
++                "attn_mhc_pre", x=x, residual=residual, post_mix=post_mix, res_mix=res_mix, pre_mix=attn_pre
++            )
+         x = self.attn_norm(x)
++        if self.layer_id == 2:
++            get_repeatability_capture().record_layer2_boundary("attn_norm", x=x)
+ 
+         if self.use_sequence_parallel:
+             x = sp_all_gather(x)[: positions.shape[0]]
+ 
+         x = self.attn(positions, x, None)
++        if self.layer_id == 2:
++            get_repeatability_capture().record_layer2_boundary("attention_out", x=x)
+         if self.use_sequence_parallel:
+             x = sp_reduce_scatter(x)
+ 
+         residual = mhc_post_torch(x, residual, post_mix, res_mix)
++        if self.layer_id == 2:
++            get_repeatability_capture().record_layer2_boundary("attn_mhc_post", residual=residual)
+         post_mix, res_mix, x, ffn_pre = mhc_pre_delayed_torch(
+             residual,
+             self.hc_ffn_fn,
+@@ -346,8 +362,16 @@ class DeepseekV4DecoderLayer(nn.Module):
+             self.hc_sinkhorn_iters,
+             pre_mix=attn_pre,
+         )
++        if self.layer_id == 2:
++            get_repeatability_capture().record_layer2_boundary(
++                "ffn_mhc_pre", x=x, residual=residual, post_mix=post_mix, res_mix=res_mix, pre_mix=ffn_pre
++            )
+         x = self.ffn_norm(x)
++        if self.layer_id == 2:
++            get_repeatability_capture().record_layer2_boundary("ffn_norm", x=x)
+         x = self.ffn(x, input_ids)
++        if self.layer_id == 2:
++            get_repeatability_capture().record_layer2_boundary("ffn_out", x=x)
+         return x, residual, post_mix, res_mix, ffn_pre
+ 
+ 
+@@ -433,6 +457,8 @@ class DeepseekV4Model(nn.Module, EagleModelMixin):
          # layer need it.
          self.engram_hash: NgramHashState | None = None
          self.engram_swa_prefix: str | None = None
@@ -437,7 +501,7 @@ index 069ff5f..17cef2e 100644
          if self.engram_layout is not None:
              local_engram = any(
                  isinstance(layer, DeepseekV4DecoderLayer) and layer.engram is not None
-@@ -513,6 +515,8 @@ class DeepseekV4Model(nn.Module, EagleModelMixin):
+@@ -513,6 +539,8 @@ class DeepseekV4Model(nn.Module, EagleModelMixin):
              assert intermediate_tensors is not None
              hidden_states = intermediate_tensors["hidden_states"]
  
@@ -446,7 +510,7 @@ index 069ff5f..17cef2e 100644
          if self.use_mega_moe:
              input_ids = input_ids.to(torch.int64)
  
-@@ -601,6 +605,7 @@ class DeepseekV4Model(nn.Module, EagleModelMixin):
+@@ -601,6 +629,7 @@ class DeepseekV4Model(nn.Module, EagleModelMixin):
                  engram_hashes,
                  engram_mask,
              )
@@ -454,7 +518,7 @@ index 069ff5f..17cef2e 100644
              if idx + 1 in self.aux_hidden_state_layers:
                  # Reconstruct the aux hidden state for draft models
                  aux_recon = mhc_post_torch(hidden_states, residual, post_mix, res_mix)
-@@ -641,6 +646,7 @@ class DeepseekV4Model(nn.Module, EagleModelMixin):
+@@ -641,6 +670,7 @@ class DeepseekV4Model(nn.Module, EagleModelMixin):
              .to(hidden_states.dtype)
          )
          hidden_states = self.norm(hidden_states)

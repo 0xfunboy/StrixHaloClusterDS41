@@ -1,0 +1,55 @@
+{
+  "schema": "ds41-retrieval-fidelity-001-preregister-v1",
+  "phase": "RETRIEVAL_FIDELITY_001",
+  "parent_terminal_commit": "2c44ae9c255fff5531fea1fbf80ea669ecc6ad1c",
+  "source": "5bdfed698ab97b6230db3fe8a7e37ff8e9b3d513",
+  "release": "k2-prefill-5bdfed6",
+  "prompt": "reports/DS41-Q2-001/prefill-priority-001/code2k-extract.txt",
+  "prompt_sha256": "f5543bba60bbf849bb106bf9efa9ca5381b88a4c4c9281cf60de37a767258745",
+  "expected": {
+    "begin": 17,
+    "middle": 23,
+    "end": 5,
+    "files": [
+      "__init__.py",
+      "api_server.py",
+      "_ds41_artifact.py",
+      "prompt.go",
+      "test-ds41-prefill-metrics.py",
+      "envelope_test.go"
+    ]
+  },
+  "input_contract": {
+    "prompt_chars": 4811,
+    "fact_char_offsets": {
+      "begin": 26,
+      "middle": 3302,
+      "end": 4460,
+      "task": 4480
+    },
+    "historical_server_prompt_tokens": 1571,
+    "historical_cache": 0,
+    "median_ambiguity_relevant": false,
+    "validator_compares_decoded_json": true
+  },
+  "hypotheses": {
+    "H_K2_SPEC": "K2 speculative/verifier path is necessary for the observed retrieval failure.",
+    "H_TARGET_SHARED": "Failure persists in target-only M1, narrowing cause to target model/runtime/weights or remaining test contract rather than K2 speculative decoding."
+  },
+  "single_missing_control": "same release/source/weights/tokenizer/TP2/EP2 and prompt, API target-only M1 with speculative_config absent",
+  "settings": {
+    "reasoning": "none",
+    "temperature": 0,
+    "seed": 1,
+    "max_tokens": 128,
+    "context_tokens": 65536
+  },
+  "decision": {
+    "M1_PASS": "implicate K2/spec-verifier path; localize only that delta before any fix.",
+    "M1_FAIL_SAME": "exclude K2 as necessary cause; keep issue in target model/runtime/weights/test-reference scope and seek next smallest independent reference.",
+    "M1_FAIL_DIFFERENT": "K2 is not sole explanation; compare exact failure signature before choosing next component control."
+  },
+  "no_repeat": true,
+  "state": "NOT_SENT",
+  "created_at": 1789650654.3587234
+}

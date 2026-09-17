@@ -20,3 +20,11 @@ Next exact act:
 3. Model-free/state gate before a new model load; then one qualified integration measurement.
 4. Continue Engram §5 even if CED independently blocks, using the best admissible predecessor and honest labeling.
 5. Quality/repeated confirmation/release; soak only after gates.
+
+## CED terminal gate
+
+- `runtime/ds41/results/ced-k2-contract-blocker.{json,md}`: `BLOCKED_BY_K2_AUX_HIDDEN_CONTRACT`, no model load.
+- Config + DS4 pin confirm SWA128, KV `[2,8,14,20]`, index `[2,8,14,20,24,28,32,36]`.
+- DS4 `8db1d1d` decoder suffix is admitted only for sweeps >=8192 and uses `1+(39-layer)*127`, not fixed 128 rows/layer. Frozen code-2k chunks 1023+565 do not enter it.
+- Current K2 DSpark consumes target aux hidden `[37,38,39]` for every scheduled target token and precomputes context KV from all those rows. Skipping those deep target rows breaks the qualified K2 state contract; recomputing them removes CED work elimination.
+- Decision: CED OFF/BLOCKED for current K2 profile. Continue Engram on MMQ ON predecessor; label candidate MMQ+Engram.

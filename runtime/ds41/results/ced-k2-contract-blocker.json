@@ -1,0 +1,70 @@
+{
+  "schema": "ds41-ced-contract-v1",
+  "status": "BLOCKED_BY_K2_AUX_HIDDEN_CONTRACT",
+  "topology": {
+    "layers": 40,
+    "swa": 128,
+    "kv_sources": [
+      2,
+      8,
+      14,
+      20
+    ],
+    "index_sources": [
+      2,
+      8,
+      14,
+      20,
+      24,
+      28,
+      32,
+      36
+    ],
+    "dspark_target_layers": [
+      37,
+      38,
+      39
+    ]
+  },
+  "upstream_ds4": {
+    "pin": "8db1d1d155cb0400a86a86b9c62d0defb3a6148b",
+    "decoder_suffix_min_total_count": 8192,
+    "dependency_formula": "1 + (39-layer)*127",
+    "code2k_chunks": [
+      1023,
+      565
+    ],
+    "suffix_enabled_for_chunks": [
+      false,
+      false
+    ],
+    "forced_1588_tail_rows_diagnostic_only": {
+      "20": 1588,
+      "21": 1588,
+      "22": 1588,
+      "23": 1588,
+      "24": 1588,
+      "25": 1588,
+      "26": 1588,
+      "27": 1525,
+      "28": 1398,
+      "29": 1271,
+      "30": 1144,
+      "31": 1017,
+      "32": 890,
+      "33": 763,
+      "34": 636,
+      "35": 509,
+      "36": 382,
+      "37": 255,
+      "38": 128,
+      "39": 1
+    }
+  },
+  "local_k2": {
+    "all_target_rows_copied_to_dspark": true,
+    "mtp_hidden_buffer_all_forward_rows": true,
+    "consequence": "Skipping decoder rows at layers 37/38/39 would leave DSpark context hidden states missing; recomputing them requires their full upstream dependency chain and removes the CED work elimination."
+  },
+  "decision": "Do not implement a fake last-128 slice or silently weaken DSpark. CED is blocked for the current K2/code-2k profile; continue Engram on qualified MMQ predecessor as mandated."
+}

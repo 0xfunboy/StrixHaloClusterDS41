@@ -1,0 +1,71 @@
+{
+  "schema": "ds41-engram-fullmodel-attribution-v1",
+  "source": "9c13117f56fd81d03c8c610a5fb0148ccdc603b9",
+  "release": "k2-mmq-engram-9c13117",
+  "serial": {
+    "prefill_s": 29.238171875,
+    "prefill_tok_s": 54.312561222673914,
+    "ttft_s": 29.60676901799161,
+    "wall_s": 31.974004183954094,
+    "validation": "FAIL"
+  },
+  "parallel_samples": [
+    {
+      "prefill_s": 20.84817578125,
+      "prefill_tok_s": 76.16973382525786,
+      "ttft_s": 21.245708935020957,
+      "wall_s": 23.61805115797324,
+      "pre_mincore": "UNOBSERVED",
+      "validation": "FAIL"
+    },
+    {
+      "prefill_s": 23.79239453125,
+      "prefill_tok_s": 66.74401762774443,
+      "ttft_s": 24.171833086002152,
+      "wall_s": 26.544320837012492,
+      "pre_mincore": "reports/DS41-Q2-001/mmq-engram-fullmodel/parallel-confirm-code2k/os-cache-pre-request.jsonl",
+      "validation": "FAIL"
+    }
+  ],
+  "parallel_prefill_median_s": 22.32028515625,
+  "serial_vs_parallel_confirm": {
+    "time_speedup": 1.2288873167682752,
+    "time_reduction_pct": 18.62557401684335,
+    "throughput_gain_pct": 22.888731676827547,
+    "ttft_saved_s": 5.4349359319894575,
+    "wall_saved_s": 5.4296833469416015
+  },
+  "serial_vs_parallel_median": {
+    "time_speedup": 1.3099372015331483,
+    "time_reduction_pct": 23.660462590908814
+  },
+  "focused_reader_gate": {
+    "rows_per_table_rank_t1024": 12288,
+    "serial_read_wall_ms_approx": 3930,
+    "parallel4_read_wall_ms_approx": 1008,
+    "speedup_range": [
+      3.842759936090296,
+      3.855923460655006
+    ],
+    "bytes_per_arm_approx": [
+      149843968,
+      150048768
+    ],
+    "bytes_equal": true,
+    "output_sha_equal": true
+  },
+  "cache_regime": {
+    "prefix_cache": "0 on all full-model samples",
+    "parallel_confirm_os_cache_pre": "reports/DS41-Q2-001/mmq-engram-fullmodel/parallel-confirm-code2k/os-cache-pre-request.jsonl",
+    "parallel_confirm_os_cache_post": "reports/DS41-Q2-001/mmq-engram-fullmodel/parallel-confirm-code2k/os-cache-post-request.jsonl",
+    "serial_os_cache_pre": "reports/DS41-Q2-001/mmq-engram-fullmodel/serial-code2k/os-cache-pre-request.jsonl",
+    "serial_os_cache_post": "reports/DS41-Q2-001/mmq-engram-fullmodel/serial-code2k/os-cache-post-request.jsonl",
+    "lru_per_request": "N/A: no request-scoped export; each characterized arm was a fresh model load, but startup smoke may populate a small number of rows"
+  },
+  "quality": {
+    "serial": "FAIL",
+    "parallel_initial": "FAIL",
+    "parallel_confirm": "FAIL"
+  },
+  "decision": "ENGRAM_PERF_GAIN_CONFIRMED_QUALITY_OPEN"
+}

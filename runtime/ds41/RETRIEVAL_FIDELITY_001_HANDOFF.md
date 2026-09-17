@@ -23,3 +23,11 @@ Run exactly one target-only M1 API control from the SAME release/source `5bdfed6
 
 Preregister: `reports/DS41-Q2-001/retrieval-fidelity-001/preregister.json`.
 No other generation request is authorized in this checkpoint.
+
+## M1 control terminal
+- Epoch `1789650706117112870`, same `5bdfed6`, target-only M1; no speculative config.
+- Direct paired request exactly once after a frontend-only HTTP503 setup-negative that did not reach the model.
+- 1571 computed/cache0; prefill92.416969s /16.999043 tok/s; TTFT92.535083s; wall98.360220s.
+- FAIL: begin17, middle23, **end41**; files [`__init__.py`,`api.py`,`artifact.json`,`prompt.go`,`test-ds41-prefill-metrics.py`,`envelope_test.go`].
+- K2 rollback FAIL was end29 with a different list. Decision: `K2_NOT_NECESSARY_FOR_FAILURE`; signature is mode-sensitive, so target model/runtime/weights/reference remains open.
+- NEXT: restore K2 `5bdfed6` READY, then inventory only already-available independent references; no new generation until a reference is preregistered.

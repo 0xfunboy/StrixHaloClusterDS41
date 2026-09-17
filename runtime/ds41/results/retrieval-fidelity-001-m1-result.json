@@ -1,0 +1,63 @@
+{
+  "schema": "ds41-retrieval-fidelity-001-m1-result-v1",
+  "source": "5bdfed698ab97b6230db3fe8a7e37ff8e9b3d513",
+  "release": "k2-prefill-5bdfed6",
+  "epoch": "1789650706117112870",
+  "profile": "target-only M1; speculative_config absent; same target weights/tokenizer/TP2/EP2",
+  "setup_negative": {
+    "transport": "gateway18222",
+    "http": 503,
+    "error": "model_not_ready / research run not exposed as K2 serving",
+    "model_request_sent": false
+  },
+  "result": {
+    "prefill_ms": 92416.96875,
+    "prefill_tok_s": 16.99904272179453,
+    "ttft_s": 92.5350832749973,
+    "wall_s": 98.36021969903959,
+    "decode_tps": 10.116873287248323,
+    "prompt_tokens": 1571,
+    "cached": 0,
+    "content": "{\"begin\": 17, \"middle\": 23, \"end\": 41, \"files\": [\"__init__.py\", \"api.py\", \"artifact.json\", \"prompt.go\", \"test-ds41-prefill-metrics.py\", \"envelope_test.go\"]}",
+    "finish_reason": "stop"
+  },
+  "validation": {
+    "status": "FAIL",
+    "expected": {
+      "begin": 17,
+      "middle": 23,
+      "end": 5,
+      "files": [
+        "__init__.py",
+        "api_server.py",
+        "_ds41_artifact.py",
+        "prompt.go",
+        "test-ds41-prefill-metrics.py",
+        "envelope_test.go"
+      ]
+    },
+    "actual": {
+      "begin": 17,
+      "middle": 23,
+      "end": 41,
+      "files": [
+        "__init__.py",
+        "api.py",
+        "artifact.json",
+        "prompt.go",
+        "test-ds41-prefill-metrics.py",
+        "envelope_test.go"
+      ]
+    },
+    "prompt_tokens": 1571,
+    "computed": 1571,
+    "cached": 0,
+    "finish_reason": "stop"
+  },
+  "comparison_to_k2": {
+    "k2_content": "{\"begin\": 17, \"middle\": 23, \"end\": 29, \"files\": [\"__init__.py\", \"api.py\", \"prompt.go\", \"test-ds41-prefill-metrics.py\", \"envelope_test.go\"]}",
+    "content_exact": false,
+    "interpretation": "M1 target-only also fails, but with different end/file signature. K2/speculative decoding is not a necessary cause; exact failure signature is mode-sensitive."
+  },
+  "decision": "K2_NOT_NECESSARY_FOR_FAILURE_TARGET_SCOPE_REMAINS_OPEN"
+}

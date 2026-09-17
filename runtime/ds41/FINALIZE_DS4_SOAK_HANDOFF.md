@@ -1,31 +1,22 @@
 # FINALIZE DS4 SOAK — live handoff
 
-Updated: 2026-09-17 after B2 terminal.
-Phase: MMQ full-model confirmation; B2 complete, same-source OFF control pending.
+Updated: 2026-09-17 after same-source MMQ confirmation.
+Phase: MMQ confirmation closed; CED next.
 
-- Repo `/home/funboy/StrixHaloClusterDS41`, branch `exp/ds41-q2-001`.
-- B2 source/release: `3b12582f868dd922fca2ffe5ebffc10aa922e4a4` / `k2-mmq-arena-3b12582`.
-- B2 epoch `1789632423869537084`; request `mmq-ab-B2-code2k-e1789632423869537084`.
-- Profile: K2/M4, canonical-prefill ON, DS4 MMQ ON, external arena 64 MiB, RuntimeMax=infinity.
-- B2 raw: `reports/DS41-Q2-001/mmq-ab-fullmodel/B2-code2k/`.
-- B2 result: 1588/cache0, HTTP200, prefill 29191.46484375 ms = 54.399463 tok/s, TTFT 29.596120 s, wall 31.989323 s, decode 13.700491 tok/s, natural stop.
-- B2 semantic validator: FAIL. Expected result52 + first `__init__.py` + middle `_ds41_artifact.py` + last `envelope_test.go`; actual JSON result62 + first `__init__.py` + `median_file=build.go` + last `envelope_test.go`.
-- B2 is a valid performance sample, not quality-qualified.
+- Recovery source/release: `3b12582f868dd922fca2ffe5ebffc10aa922e4a4` / `k2-mmq-arena-3b12582`.
+- B2 epoch `1789632423869537084`, request `mmq-ab-B2-code2k-e1789632423869537084`, MMQ ON: 1588/cache0, prefill 29.191465s / 54.399463 tok/s, TTFT 29.596120s, wall 31.989323s, semantic FAIL.
+- Same-source control epoch `1789634721464248154`, request `mmq-control-off-3b12582-code2k-e1789634721464248154`, MMQ OFF: prefill 91.934516s / 17.273164 tok/s, TTFT 92.357583s, wall 95.091196s, semantic FAIL.
+- Same-source MMQ prefill speedup **3.149363x**, time reduction **68.248%**. No decode gain claimed.
+- B1 remains `FAILED_RUNTIME_MEMORY_GUARD`, no valid performance sample. A2 remains preserved historical cross-source control.
+- B2 DS4 aggregate stats unavailable after supported OFF: runtime reports only at Python atexit while systemd OFF uses SIGTERM. No inferred counts. External arena gate remains PASS (64MiB cap; 35,414,272B observed high-water on real T1023 fixture; 0B in-use after call).
+- Registry: `reports/DS41-Q2-001/mmq-ab-fullmodel/registry.json`.
+- Confirmation: `runtime/ds41/results/mmq-fullmodel-samesource-confirmation.{json,md}`.
 
-Preserved history:
-- A2 epoch `1789618441080477567`, source `ff582d652796e5e9fff2b1ecd488f48d0c06acbe`, MMQ OFF, COMPLETE: 96.829711s / 16.399925 tok/s, TTFT97.522224s, wall100.187667s, semantic FAIL. Do not resend.
-- B1 epoch `1789624782020877084`, DS4 ON, `FAILED_RUNTIME_MEMORY_GUARD`; no valid performance sample. Do not replay B1 ID.
-- B2 recovery gate `runtime/ds41/results/mmq-external-arena-gate.{json,md}` PASS on both nodes: T1023 x3 repeats exact, high-water35,414,272B, in-use0B.
-
-Current lifecycle at checkpoint creation:
-- epoch B2 remained READY, ranks/coordinator 200/200/200, pair idle, poison empty.
-- `DS41_DS4_MMQ_STATS` not yet present in live logs; registry marks stats pending lifecycle OFF.
-- Authoritative A/B registry: `reports/DS41-Q2-001/mmq-ab-fullmodel/registry.json`.
-- Compact B2 result: `runtime/ds41/results/mmq-fullmodel-B2.{json,md}`.
+Live at handoff update: same-source MMQ-OFF control remains READY/idle on epoch `1789634721464248154`, source `3b12582`; pair poison empty. Do not resend B2 or control.
 
 Next exact act:
-1. Confirm pair still idle; preserve/copy both rank logs before replacing transient units.
-2. Use normal whole-pair OFF. Collect any terminal DS4 MMQ stats emitted by each rank; do not claim per-request attribution for aggregate counters.
-3. Start same source/release `3b12582` with K2/M4, canonical=1, DS4 MMQ=0, same frozen code-2k request. Record actual order B2→OFF-control; this is not an alternating A/B.
-4. Validate existing control raw, compare same-source timings, and integrate into the already-authorized confirmation. No redundant repetitions.
-5. Continue CED, then Engram; soak remains final and gated.
+1. Read mandate §4 CED and only relevant §36 references.
+2. Implement bounded CED/SWA replay preserving source KV [2,8,14,20], indexer/compressor state, carry mHC, positions and hidden37/38/39; no simplistic last-128 truncation.
+3. Model-free/state gate before a new model load; then one qualified integration measurement.
+4. Continue Engram §5 even if CED independently blocks, using the best admissible predecessor and honest labeling.
+5. Quality/repeated confirmation/release; soak only after gates.

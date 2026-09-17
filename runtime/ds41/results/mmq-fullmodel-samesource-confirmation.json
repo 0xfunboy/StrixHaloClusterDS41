@@ -1,0 +1,145 @@
+{
+  "schema": "ds41-mmq-samesource-confirmation-v1",
+  "status": "MMQ_FULLMODEL_SPEED_ISOLATED / QUALITY_UNQUALIFIED",
+  "source": "3b12582f868dd922fca2ffe5ebffc10aa922e4a4",
+  "candidate_B2": {
+    "state": "COMPLETE",
+    "parent": "B",
+    "parent_state": "FAILED_RUNTIME_MEMORY_GUARD",
+    "reason": "B1 runtime-memory-guard recovery after PASS external arena component gate",
+    "epoch": "1789632423869537084",
+    "source": "3b12582f868dd922fca2ffe5ebffc10aa922e4a4",
+    "release": "k2-mmq-arena-3b12582",
+    "config": "K2/M4 canonical=1 ds4=1 external_pool=64MiB",
+    "request_id": "mmq-ab-B2-code2k-e1789632423869537084",
+    "client_unit": "ds41-mmq-ab-b2-client.service",
+    "gateway_request_sent": true,
+    "out": "reports/DS41-Q2-001/mmq-ab-fullmodel/B2-code2k",
+    "started_at": 1789632778.9337697,
+    "client_started_at": 1789632778.9595227,
+    "completed_at": 1789634622.2112718,
+    "result_summary": {
+      "prefill_ms": 29191.46484375,
+      "prefill_tok_s": 54.3994625997673,
+      "client_ttft_s": 29.596120049012825,
+      "first_final_s": 29.596120049012825,
+      "wall_s": 31.989323389017954,
+      "decode_tps": 13.700491071863599,
+      "prompt_tokens": 1588,
+      "completion_tokens": 34,
+      "prompt_tokens_cached": 0,
+      "content": "{\"result\": 62, \"first_file\": \"__init__.py\", \"last_file\": \"envelope_test.go\", \"median_file\": \"build.go\"}",
+      "finish_reason": "stop"
+    },
+    "validation": {
+      "status": "FAIL",
+      "label": "mmq-ab-B2-code2k",
+      "prompt_tokens_local_manifest": 1588,
+      "prompt_tokens_server": 1588,
+      "expected": {
+        "result": 52,
+        "first_file": "__init__.py",
+        "middle_file": "_ds41_artifact.py",
+        "last_file": "envelope_test.go"
+      },
+      "actual": {
+        "result": 62,
+        "first_file": "__init__.py",
+        "last_file": "envelope_test.go",
+        "median_file": "build.go"
+      },
+      "semantic_pass": false,
+      "cached_zero": true,
+      "computed_present": true,
+      "prefill_present": true,
+      "server_matches_local_token_count": true,
+      "done": true,
+      "finish_reason": "stop"
+    },
+    "stats_state": "UNAVAILABLE_AFTER_NORMAL_OFF_SIGTERM",
+    "same_source_control_state": "COMPLETE",
+    "stats_note": "Runtime exposes DS41_DS4_MMQ_STATS only via Python atexit; normal whole-pair OFF uses SIGTERM and terminal rank logs contain no stats line. No counts inferred."
+  },
+  "control": {
+    "state": "COMPLETE",
+    "order_after": "B2",
+    "comparison_kind": "same-source sequential control, not alternating A/B",
+    "epoch": "1789634721464248154",
+    "source": "3b12582f868dd922fca2ffe5ebffc10aa922e4a4",
+    "release": "k2-mmq-arena-3b12582",
+    "config": "K2/M4 canonical=1 ds4=0",
+    "request_id": "mmq-control-off-3b12582-code2k-e1789634721464248154",
+    "client_unit": "ds41-mmq-samesource-control-client.service",
+    "out": "reports/DS41-Q2-001/mmq-ab-fullmodel/control-3b12582-ds4off-code2k",
+    "started_at": 1789635036.8507705,
+    "frozen_request": {
+      "corpus_sha256": "c162e1102363a8d7dea3891bacac73d18948cde6af8014b92d867cf7e4271993",
+      "reasoning": "none",
+      "max_tokens": 128,
+      "context_tokens": 65536,
+      "temperature": 0,
+      "seed": 1,
+      "prefix_cache": false
+    },
+    "completed_at": 1789635248.5475774,
+    "result_summary": {
+      "prefill_ms": 91934.515625,
+      "prefill_tok_s": 17.273164373622595,
+      "client_ttft_s": 92.35758335597347,
+      "first_final_s": 92.35758335597347,
+      "wall_s": 95.09119557199301,
+      "decode_tps": 15.244089111341703,
+      "prompt_tokens": 1588,
+      "completion_tokens": 43,
+      "prompt_tokens_cached": 0,
+      "content": "{\"result\": 46, \"first_file\": \"__init__.py\", \"last_file\": \"test-ds41-prefill-metrics.py\", \"median_file\": \"app/envelope_test.go\"}",
+      "finish_reason": "stop"
+    },
+    "validation": {
+      "status": "FAIL",
+      "label": "mmq-control-off-3b12582-code2k",
+      "prompt_tokens_local_manifest": 1588,
+      "prompt_tokens_server": 1588,
+      "expected": {
+        "result": 52,
+        "first_file": "__init__.py",
+        "middle_file": "_ds41_artifact.py",
+        "last_file": "envelope_test.go"
+      },
+      "actual": {
+        "result": 46,
+        "first_file": "__init__.py",
+        "last_file": "test-ds41-prefill-metrics.py",
+        "median_file": "app/envelope_test.go"
+      },
+      "semantic_pass": false,
+      "cached_zero": true,
+      "computed_present": true,
+      "prefill_present": true,
+      "server_matches_local_token_count": true,
+      "done": true,
+      "finish_reason": "stop"
+    }
+  },
+  "comparison": {
+    "order": "B2 MMQ ON -> same-source control MMQ OFF",
+    "source": "3b12582f868dd922fca2ffe5ebffc10aa922e4a4",
+    "B2_prefill_ms": 29191.46484375,
+    "control_prefill_ms": 91934.515625,
+    "B2_prefill_tok_s": 54.3994625997673,
+    "control_prefill_tok_s": 17.273164373622595,
+    "prefill_speedup_tps": 3.1493628742883564,
+    "prefill_time_reduction_pct": 68.24754593495473,
+    "ttft_saved_s": 62.76146330696065,
+    "wall_saved_s": 63.10187218297506,
+    "B2_semantic": "FAIL",
+    "control_semantic": "FAIL",
+    "interpretation": "Full-model MMQ prefill acceleration isolated on the same recovery source/config except DS4 switch. Both samples semantic FAIL; no decode gain inferred."
+  },
+  "coverage_stats": {
+    "status": "UNAVAILABLE_AFTER_NORMAL_OFF_SIGTERM",
+    "note": "Runtime exposes DS41_DS4_MMQ_STATS only via Python atexit; normal whole-pair OFF uses SIGTERM and terminal rank logs contain no stats line. No counts inferred.",
+    "arena_component_gate": "PASS, T1023 x3/node, high-water 35414272B, in-use 0B"
+  },
+  "decision": "Proceed to independent CED integration under existing mandate; preserve quality FAIL as open gate. Do not promote MMQ on speed alone."
+}

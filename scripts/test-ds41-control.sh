@@ -125,7 +125,7 @@ expect_fail() {
 }
 
 # 1) Normal start, duplicate start, stop.
-unset DS41_ENGRAM_RANDOM_ADVICE
+unset DS41_ENGRAM_RANDOM_ADVICE DS41_ENGRAM_READ_WORKERS DS41_ENGRAM_PARALLEL_MIN_ROWS
 reset_case
 set_unit local OFF; set_unit peer OFF
 write_owner NONE OFF '' '' '' '' ''
@@ -134,6 +134,10 @@ write_owner NONE OFF '' '' '' '' ''
 [[ $(cat "$TMP/state/local.starts") == 1 && $(cat "$TMP/state/peer.starts") == 1 ]]
 grep -qx -- '--setenv=DS41_ENGRAM_RANDOM_ADVICE=1' "$TMP/state/local.args"
 grep -qx -- '--setenv=DS41_ENGRAM_RANDOM_ADVICE=1' "$TMP/state/peer.args"
+grep -qx -- '--setenv=DS41_ENGRAM_READ_WORKERS=4' "$TMP/state/local.args"
+grep -qx -- '--setenv=DS41_ENGRAM_READ_WORKERS=4' "$TMP/state/peer.args"
+grep -qx -- '--setenv=DS41_ENGRAM_PARALLEL_MIN_ROWS=256' "$TMP/state/local.args"
+grep -qx -- '--setenv=DS41_ENGRAM_PARALLEL_MIN_ROWS=256' "$TMP/state/peer.args"
 "$PAIR" start 1789124999 18210 | grep -q DS41_ALREADY_RUNNING
 [[ $(cat "$TMP/state/local.starts") == 1 && $(cat "$TMP/state/peer.starts") == 1 ]]
 "$PAIR" stop | grep -q DS41_OFF_VERIFIED
@@ -142,6 +146,9 @@ grep -qx -- '--setenv=DS41_ENGRAM_RANDOM_ADVICE=1' "$TMP/state/peer.args"
 # Explicit rollback must reach both ranks. Invalid input cannot change ownership.
 owner_before=$(sha256sum "$DS41_SHARED_STATE/owner.json")
 expect_fail env DS41_ENGRAM_RANDOM_ADVICE=invalid "$PAIR" start 1789124005 18210
+expect_fail env DS41_ENGRAM_READ_WORKERS=0 "$PAIR" start 1789124005 18210
+expect_fail env DS41_ENGRAM_READ_WORKERS=9 "$PAIR" start 1789124005 18210
+expect_fail env DS41_ENGRAM_PARALLEL_MIN_ROWS=0 "$PAIR" start 1789124005 18210
 [[ $(sha256sum "$DS41_SHARED_STATE/owner.json") == "$owner_before" ]]
 [[ $(cat "$TMP/state/local.starts") == 1 && $(cat "$TMP/state/peer.starts") == 1 ]]
 DS41_ENGRAM_RANDOM_ADVICE=0 "$PAIR" start 1789124005 18210 >/dev/null

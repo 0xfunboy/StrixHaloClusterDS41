@@ -8,12 +8,14 @@ requested pages are faulted in.  No model weights are copied or modified.
 from __future__ import annotations
 
 from collections import OrderedDict
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 import json
 import mmap
 import os
 from pathlib import Path
 import struct
+import time
 from typing import Iterable
 
 import numpy as np
@@ -288,6 +290,16 @@ class AffineRowLRU:
         self.hits = 0
         self.misses = 0
         self.rows_read = 0
+        self.lookups = 0
+        self.lookup_wall_ns = 0
+        self.read_wall_ns = 0
+        self.parallel_batches = 0
+        self.read_workers = int(os.environ.get("DS41_ENGRAM_READ_WORKERS", "1"))
+        if self.read_workers < 1 or self.read_workers > 8:
+            raise ValueError("DS41_ENGRAM_READ_WORKERS must be in 1..8")
+        self.parallel_min_rows = int(os.environ.get("DS41_ENGRAM_PARALLEL_MIN_ROWS", "256"))
+        if self.parallel_min_rows < 1:
+            raise ValueError("DS41_ENGRAM_PARALLEL_MIN_ROWS must be positive")
         self._initial_advice_status = None
         if os.environ.get("DS41_ENGRAM_RANDOM_ADVICE", "0") == "1":
             self._initial_advice_status = self.source.set_engram_advice(self.base, "random")
@@ -300,10 +312,43 @@ class AffineRowLRU:
             "status": "not_requested", "errors": [], "ranges": [],
         }
 
+    def _read_missing(self, missing: list[int]) -> dict[int, np.ndarray]:
+        """Read unique rows without changing first-use/LRU order.
+
+        Large miss sets are sorted by source row and split into a bounded number
+        of independent mmap gathers.  The sort improves locality while the
+        workers give NVMe several outstanding faults.  Returned rows are keyed
+        by id so lookup() can still insert them in original first-use order.
+        """
+        if not missing:
+            return {}
+        t0 = time.perf_counter_ns()
+        use_parallel = self.read_workers > 1 and len(missing) >= self.parallel_min_rows
+        if not use_parallel:
+            values = self.source.affine2_rows(self.base, missing)
+            self.read_wall_ns += time.perf_counter_ns() - t0
+            return {i: row for i, row in zip(missing, values, strict=True)}
+
+        ordered = np.asarray(sorted(missing), dtype=np.int64)
+        workers = min(self.read_workers, len(ordered))
+        # Contiguous sorted partitions preserve locality inside each worker.
+        chunks = [chunk for chunk in np.array_split(ordered, workers) if chunk.size]
+        with ThreadPoolExecutor(max_workers=len(chunks), thread_name_prefix="ds41-engram") as pool:
+            parts = list(pool.map(lambda rows: self.source.affine2_rows(self.base, rows), chunks))
+        self.read_wall_ns += time.perf_counter_ns() - t0
+        self.parallel_batches += 1
+        out: dict[int, np.ndarray] = {}
+        for rows, values in zip(chunks, parts, strict=True):
+            out.update((int(i), row) for i, row in zip(rows, values, strict=True))
+        return out
+
     def lookup(self, ids: np.ndarray) -> np.ndarray:
+        lookup_t0 = time.perf_counter_ns()
+        self.lookups += 1
         ids = np.asarray(ids, dtype=np.int64)
         flat = ids.reshape(-1)
-        # Preserve first-use order, then read missing rows in one vectorized mmap gather.
+        # Preserve first-use order and multiplicity. Missing source reads may be
+        # reordered internally, but insertion/scatter remains first-use exact.
         missing: list[int] = []
         seen: set[int] = set()
         for value in flat:
@@ -317,16 +362,20 @@ class AffineRowLRU:
                     missing.append(i)
                     seen.add(i)
         if missing:
-            values = self.source.affine2_rows(self.base, missing)
+            values = self._read_missing(missing)
             self.rows_read += len(missing)
-            for i, row in zip(missing, values, strict=True):
+            for i in missing:
+                row = values[i]
                 self._rows[i] = np.asarray(row, dtype=np.float32)
                 self._rows.move_to_end(i)
                 while len(self._rows) > self.max_rows:
                     self._rows.popitem(last=False)
         if not flat.size:
             width = self.source.entries[self.base + ".weight"].shape[-1] * 16
-            return np.empty((*ids.shape, width), dtype=np.float32)
-        return np.stack([self._rows[int(i)] for i in flat], axis=0).reshape(
-            *ids.shape, -1
-        )
+            result = np.empty((*ids.shape, width), dtype=np.float32)
+        else:
+            result = np.stack([self._rows[int(i)] for i in flat], axis=0).reshape(
+                *ids.shape, -1
+            )
+        self.lookup_wall_ns += time.perf_counter_ns() - lookup_t0
+        return result

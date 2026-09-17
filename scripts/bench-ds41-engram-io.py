@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import argparse,importlib.util,json,os,resource,time,sys
+import argparse,hashlib,importlib.util,json,os,resource,time,sys
 from pathlib import Path
 import numpy as np
 from _ds41_artifact import MODEL_DIR
@@ -40,7 +40,7 @@ def delta(a,b):
             'system_pgmajfault':b['vm'].get('pgmajfault',0)-a['vm'].get('pgmajfault',0)}
 
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument('--layer',type=int,choices=(1,14),required=True); ap.add_argument('--rank',type=int,choices=(0,1),default=0); ap.add_argument('--tokens',type=int,default=1024); a=ap.parse_args()
+    ap=argparse.ArgumentParser(); ap.add_argument('--layer',type=int,choices=(1,14),required=True); ap.add_argument('--rank',type=int,choices=(0,1),default=0); ap.add_argument('--tokens',type=int,default=1024); ap.add_argument('--workers',type=int,choices=range(1,9),default=1); a=ap.parse_args()
     name={1:'model-00047-of-00048.safetensors',14:'model-00048-of-00048.safetensors'}[a.layer]
     p=Path(f'/home/funboy/models/ds41/engram2-tp2/rank{a.rank}')/name
     config=json.load(open(MODEL_DIR/'config.json'))['text_config']
@@ -51,7 +51,7 @@ def main():
     ids=np.empty((a.tokens,12),dtype=np.int64)
     for h,(start,size) in enumerate(zip(offsets,sizes,strict=True)):
         ids[:,h]=start+rng.integers(0,int(size),size=a.tokens,dtype=np.int64)
-    src=SafeTensorMMap(p); cache=AffineRowLRU(src,f'layers.{a.layer}.engram.embed',max_rows=max(65536,a.tokens*12))
+    os.environ['DS41_ENGRAM_READ_WORKERS']=str(a.workers); os.environ.setdefault('DS41_ENGRAM_PARALLEL_MIN_ROWS','256'); src=SafeTensorMMap(p); cache=AffineRowLRU(src,f'layers.{a.layer}.engram.embed',max_rows=max(65536,a.tokens*12))
     advise='unsupported'
     if hasattr(os,'posix_fadvise') and hasattr(os,'POSIX_FADV_DONTNEED'):
         try: os.posix_fadvise(src._fd,0,0,os.POSIX_FADV_DONTNEED); advise='DONTNEED'
@@ -59,8 +59,8 @@ def main():
     b=snap(); t=time.perf_counter(); cold=cache.lookup(ids); cold_s=time.perf_counter()-t; c=snap()
     t=time.perf_counter(); warm=cache.lookup(ids); warm_s=time.perf_counter()-t; w=snap()
     np.testing.assert_array_equal(cold,warm)
-    out={'layer':a.layer,'rank':a.rank,'tokens':a.tokens,'heads_per_rank':12,'rows_requested':int(ids.size),'unique_rows_read':cache.rows_read,
+    out={'layer':a.layer,'rank':a.rank,'tokens':a.tokens,'workers':a.workers,'heads_per_rank':12,'rows_requested':int(ids.size),'unique_rows_read':cache.rows_read,
          'fadvise':advise,'cold_ms':cold_s*1000,'warm_ms':warm_s*1000,'cold':delta(b,c),'warm':delta(c,w),
-         'cache_hits':cache.hits,'cache_misses':cache.misses,'mapped_file_bytes':p.stat().st_size,'output_bytes':cold.nbytes}
+         'cache_hits':cache.hits,'cache_misses':cache.misses,'output_sha256':hashlib.sha256(np.ascontiguousarray(cold).tobytes()).hexdigest(),'parallel_batches':cache.parallel_batches,'read_wall_ms':cache.read_wall_ns/1e6,'lookup_wall_ms':cache.lookup_wall_ns/1e6,'mapped_file_bytes':p.stat().st_size,'output_bytes':cold.nbytes}
     print(json.dumps(out,indent=2)); src.close()
 if __name__=='__main__': main()

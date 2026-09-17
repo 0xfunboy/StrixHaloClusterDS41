@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import json,struct,sys,tempfile
+import json,os,struct,sys,tempfile
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 import numpy as np
@@ -67,7 +67,35 @@ def main():
         y=wkv(x).float().detach().numpy()
         w_expected=wq.astype(np.float32)*.25-.5
         np.testing.assert_allclose(y,np.ones((1,inp),np.float32)@w_expected.T,rtol=.01,atol=2)
-        print({'status':'PASS','embed_shape':tuple(out.shape),'wkv_shape':tuple(wkv.weight.shape),'stats':emb.stats()})
+        # Reader contract gate: parallel source-read order must not change output,
+        # multiplicity, first-use LRU insertion order, repeat hits, or bounded eviction.
+        from runtime.ds41.affine_safetensors import AffineRowLRU, SafeTensorMMap
+        base='layers.1.engram.embed'
+        contract_ids=np.asarray([[5,1,5],[0,4,1]],dtype=np.int64)
+        eviction_ids=np.asarray([[2]],dtype=np.int64)
+        old_workers=os.environ.get('DS41_ENGRAM_READ_WORKERS')
+        old_min=os.environ.get('DS41_ENGRAM_PARALLEL_MIN_ROWS')
+        try:
+            os.environ['DS41_ENGRAM_READ_WORKERS']='1'
+            os.environ['DS41_ENGRAM_PARALLEL_MIN_ROWS']='1'
+            s1=SafeTensorMMap(root/'model-00047-of-00048.safetensors'); c1=AffineRowLRU(s1,base,max_rows=4)
+            y1=c1.lookup(contract_ids); order1=list(c1._rows.keys()); y1_repeat=c1.lookup(contract_ids); e1=c1.lookup(eviction_ids)
+            stats1=(c1.hits,c1.misses,c1.rows_read,list(c1._rows.keys()))
+            os.environ['DS41_ENGRAM_READ_WORKERS']='4'
+            s4=SafeTensorMMap(root/'model-00047-of-00048.safetensors'); c4=AffineRowLRU(s4,base,max_rows=4)
+            y4=c4.lookup(contract_ids); order4=list(c4._rows.keys()); y4_repeat=c4.lookup(contract_ids); e4=c4.lookup(eviction_ids)
+            stats4=(c4.hits,c4.misses,c4.rows_read,list(c4._rows.keys()))
+            np.testing.assert_array_equal(y1,y4); np.testing.assert_array_equal(y1_repeat,y4_repeat); np.testing.assert_array_equal(e1,e4)
+            assert order1==order4 and stats1==stats4, (order1,order4,stats1,stats4)
+            assert len(c4._rows)<=4 and c4.parallel_batches>=1
+            s1.close(); s4.close()
+        finally:
+            if old_workers is None: os.environ.pop('DS41_ENGRAM_READ_WORKERS',None)
+            else: os.environ['DS41_ENGRAM_READ_WORKERS']=old_workers
+            if old_min is None: os.environ.pop('DS41_ENGRAM_PARALLEL_MIN_ROWS',None)
+            else: os.environ['DS41_ENGRAM_PARALLEL_MIN_ROWS']=old_min
+        print({'status':'PASS','embed_shape':tuple(out.shape),'wkv_shape':tuple(wkv.weight.shape),'stats':emb.stats(),
+               'parallel_contract':{'first_use_order':order4,'repeat_stats':stats4,'parallel_batches':c4.parallel_batches}})
         src.close();emb.source.close()
 
 if __name__=='__main__':main()

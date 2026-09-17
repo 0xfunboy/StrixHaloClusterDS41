@@ -1,5 +1,29 @@
 # FINALIZE DS4 SOAK — live handoff
 
+Updated: 2026-09-17 after initial MMQ+Engram full-model request.
+Phase: Engram same-source attribution control next; CED remains blocked.
+
+- Live release: `k2-mmq-engram-9c13117`, source `9c13117f56fd81d03c8c610a5fb0148ccdc603b9`, epoch `1789636073826523275`, READY/idle at last check.
+- Effective profile: K2/M4, canonical=1, MMQ=1, CED=0, MADV_RANDOM=1, Engram workers=4/min_rows=256.
+- Request `mmq-engram-parallel-code2k-e1789636073826523275` COMPLETE: 1588 computed/cache0, prefill `20.848176s / 76.169734 tok/s`, TTFT `21.245709s`, wall `23.618051s`, decode `13.820452 tok/s`, finish=stop.
+- Semantic validator FAIL: expected result52/middle `_ds41_artifact.py`; actual result58/`median_file=artifact.json`; first/last correct.
+- Per-request Engram counters: N/A on this resident load; reader counters are in EngineCore only and no request-scoped export exists. No new profiler/capture was added.
+- Focused real-sidecar gate is authoritative for reader work: 12,288 rows/table/rank at T1024; ~149.8–150.0MB read/arm; serial reader ~3.93s vs parallel4 ~1.01s; output SHA and bytes exact on rank0/rank1 layer1/14. Scoped POSIX_FADV_DONTNEED was used only in the focused gate; the full-model request is NOT labelled SSD-cold.
+- Historical same-source MMQ gate remains OFF `91.934516s / 17.273164 tok/s` vs ON `29.191465s / 54.399463 tok/s`; do not replay it for stats.
+- CED remains `BLOCKED_BY_K2_AUX_HIDDEN_CONTRACT`; do not reopen or disable K2.
+
+Next exact act:
+1. Preserve current result/raw; supported whole-pair OFF once.
+2. Reload the SAME `k2-mmq-engram-9c13117` source with only `DS41_ENGRAM_READ_WORKERS=1` changed; canonical/MMQ/K2/M4/MADV_RANDOM unchanged.
+3. One frozen code-2k request, original validator, then compare same-source serial vs parallel full-model. Record OS page-cache state if observable; do not call either arm SSD-cold without evidence.
+4. Continue compact quality panel on best admissible profile, then residual-cost decision/release gates. Soak only after quality qualification.
+
+---
+
+## Prior handoff history
+
+# FINALIZE DS4 SOAK — live handoff
+
 Updated: 2026-09-17 after same-source MMQ confirmation.
 Phase: MMQ confirmation closed; CED next.
 

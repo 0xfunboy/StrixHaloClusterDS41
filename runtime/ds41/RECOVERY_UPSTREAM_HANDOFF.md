@@ -28,3 +28,9 @@
 - PASS saved sparse-output -> inverse RoPE -> grouped WO_A -> WO_B -> TP2 endpoint. Worst rel-L2 `7.43e-4`, max-abs `0.0078125`; rank targets exact.
 - Evidence: `runtime/ds41/results/recovery-r1b-result.{json,md}`. No model load/capture/service mutation.
 - NEXT: finish R1c limited official/local semantic-contract table. If no causal defect is proved, enter bounded R2 automatically.
+## R1c — semantic contracts terminal
+- `MULTIPLE_CONTRACT_DIFFERENCES_NO_CAUSAL_DEFECT_PROVED`.
+- Aligned/tested: delayed mHC/order, critical F32 params; HF#12 ownership not applicable locally.
+- Non-equivalent: local window/compressed KV `fp8_ds_mla` vs V4.1 QAT reference; local gfx1151 index Q/K FP8 vs V4.1 FP4 QAT contract.
+- Strong model-artifact difference: Engram sidecar is `Vontra/DeepSeek-V4.1-Flash-MLX-2bit-MTP@802f1a0...` affine2 (embedding/WKV), not native FP8 Engram. TP split/parallel reader preserve this local source only.
+- No causal patch from R1c. NEXT R2 same-input window-QAT differential offline on saved code2k1588; no model load yet.

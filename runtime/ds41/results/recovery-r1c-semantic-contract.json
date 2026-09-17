@@ -1,0 +1,84 @@
+{
+  "schema": "ds41-recovery-r1c-semantic-contract-v1",
+  "status": "MULTIPLE_CONTRACT_DIFFERENCES_NO_CAUSAL_DEFECT_PROVED",
+  "capture_source": "d4548014d9903064074c2122bc92b690d366a3b6",
+  "official_reference_context": {
+    "model_source": "DeepSeek-V4.1-Flash official reference; use corrected ownership semantics from HF discussion#12 only where applicable",
+    "transformers_material": "PR48721/head62d7ebd7... tests/reference material; closed non-merged, not installed support"
+  },
+  "local_engram_source": {
+    "repo": "Vontra/DeepSeek-V4.1-Flash-MLX-2bit-MTP",
+    "revision": "802f1a00982705d81b79ad1c83aa0ccc0b863ebc",
+    "layer1_sha256": "e80b0d1481bb8e32196398d5dd670df721604517ecdfdf279485cc92ca6a19d2",
+    "layer14_sha256": "1aee6ffb59d1314d3264c95d61109ec18df61aa48101073b45f1c6730e8d9230",
+    "partition": "lossless row-range copy of this affine2 source; reader parallelism changes I/O only"
+  },
+  "rows": [
+    {
+      "contract": "mHC params/order",
+      "official": "V4.1 single-pass/delayed mHC; critical coeff parameters FP32",
+      "local": "hc fn/scale/base F32; delayed carried-pre_mix path",
+      "status": "ALIGNED_TESTED_LAYER2",
+      "evidence": "R1b PASS both ranks/chunks; coeff max-abs <=7.10e-6; attn_norm worst1 BF16 ULP"
+    },
+    {
+      "contract": "attention sink/router bias precision",
+      "official": "critical sink/bias parameters retained FP32 in reference",
+      "local": "blk.2.attn_sinks F32; blk.2.exp_probs_b F32",
+      "status": "ALIGNED_REPRESENTATION",
+      "evidence": "GGUF capture artifact dtypes"
+    },
+    {
+      "contract": "window KV QAT",
+      "official": "post-norm+RoPE full window-KV quantized FP8 with block32 UE8M0/E8M0 scale contract",
+      "local": "fp8_ds_mla hybrid: NoPE448 FP8 OCP with seven UE8M0 block64 scales; RoPE64 stored BF16",
+      "status": "CONTRACT_DIFFERENCE_EFFECT_UNPROVEN",
+      "evidence": "local fused qnorm/rope/cache and SWA reference; local SWA transform itself PASS"
+    },
+    {
+      "contract": "compressed KV QAT",
+      "official": "compressed latent uses V4.1 FP4 activation quantization with block16 and checkpoint/reference scale contract",
+      "local": "compressed latent written through V4-style fp8_ds_mla hybrid: NoPE448 FP8 block64 UE8M0 + RoPE64 BF16",
+      "status": "CONTRACT_DIFFERENCE_EFFECT_UNPROVEN",
+      "evidence": "compressor.insert_cache -> rope_quant_insert capture pin"
+    },
+    {
+      "contract": "indexer K/Q QAT",
+      "official": "V4.1 index query/key contract uses FP4 block32 QAT/scale metadata in reference tests",
+      "local": "gfx1151 path use_fp4_cache=False: K is per-token FP8 128-wide with one fp32 scale; Q is FP8 per token/head with scalar scale folded into index weights",
+      "status": "CONTRACT_DIFFERENCE_EFFECT_UNPROVEN",
+      "evidence": "indexer_k_store + fused_indexer_q_rope_quant capture pin; runtime log FP8 indexer cache"
+    },
+    {
+      "contract": "index-K ownership/lifetime",
+      "official": "HF discussion#12 fixes mutable shared index_k selector on incomplete compression step",
+      "local": "distinct per-source DeepseekV4IndexerCache; reindexers directly bind source20 cache object; no mutable shared selector",
+      "status": "HF12_NOT_APPLICABLE_PROVED",
+      "evidence": "R1a source-aware ownership reproducer PASS/N/A"
+    },
+    {
+      "contract": "Engram tokenizer/hash",
+      "official": "compressed-vocab mapping, rolling n-gram XOR multipliers, per-head prime buckets/offsets",
+      "local": "vendored V4.1 hash/gating code retained; config compressed_vocab_size=99092, max_ngram4, heads8, layers1/14",
+      "status": "ALIGNED_ALGORITHM_CONFIG_NOT_CROSS_ENGINE_PROVED",
+      "evidence": "local common/engram.py + config"
+    },
+    {
+      "contract": "Engram row/linear precision",
+      "official": "native V4.1 Engram table path stores FP8 rows with UE8M0 per32 scales; reference checkpoint precision is part of model contract",
+      "local": "Vontra MLX 2-bit MTP source: embedding and WKV affine2 U32 + BF16 scales/biases; q/k BF16; dequantized BF16 by DiskAffineEngram. TP2 partition preserves those source bytes/ranges but not native FP8 representation",
+      "status": "STRONG_CONTRACT_DIFFERENCE_CAUSALITY_UNPROVEN",
+      "evidence": "engram2-source receipt + SafeTensor headers + disk_engram.py"
+    }
+  ],
+  "decision": {
+    "causal_fix": "NONE_FROM_R1C",
+    "next": "R2 minimal same-input differential; first quantify official-window-QAT versus local recent-KV representation on saved code2k1588 layer2 packet while holding Q, compressed rows, indices and attention math fixed. Do not call more-precise local format correct by default.",
+    "full_model_load": "NOT_YET"
+  },
+  "limits": [
+    "R1b validates local endpoint arithmetic, not equivalence to official QAT",
+    "Engram reader bit-exact old-vs-new only proves local sidecar preservation",
+    "No native official Engram table is currently local, so native-vs-affine2 row equality cannot be asserted"
+  ]
+}

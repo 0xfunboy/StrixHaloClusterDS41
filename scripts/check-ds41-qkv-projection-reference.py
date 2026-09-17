@@ -25,7 +25,7 @@ def bf16_ulp(a,b):
 def metric(actual,ref,row_shape=None):
  a=actual.float(); r=ref.float(); d=(a-r).abs(); close=torch.isclose(a,r,rtol=BF16_RTOL,atol=BF16_ATOL)
  rel=float((a-r).norm())/max(float(r.norm()),1e-30); flat=int(d.reshape(-1).argmax())
- coord=list(np.unravel_index(flat,d.shape)); ulp=bf16_ulp(actual,ref)
+ coord=[int(v) for v in np.unravel_index(flat,d.shape)]; ulp=bf16_ulp(actual,ref)
  out={'finite':bool(torch.isfinite(a).all() and torch.isfinite(r).all()),'allclose':bool(close.all()),'outside':int((~close).sum()),'numel':a.numel(),'max_abs':float(d.max()),'mean_abs':float(d.mean()),'rel_l2':rel,'worst_coord':coord,'reference':float(r[tuple(coord)]),'actual':float(a[tuple(coord)]),'worst_ulp':int(ulp.max())}
  if row_shape is not None:
   rr=d.reshape(row_shape[0],-1); cr=close.reshape(row_shape[0],-1); ur=ulp.reshape(row_shape[0],-1)
@@ -58,7 +58,7 @@ class Weights:
    for t in r.tensors:
     if t.name==name:
      if t.tensor_type.name!='BF16': raise RuntimeError(f'{name} not BF16: {t.tensor_type.name}')
-     a=t.data.view(np.uint16).reshape(*(int(x) for x in reversed(t.shape)))
+     a=t.data.view(np.uint16).reshape(*(int(x) for x in reversed(t.shape))).copy()
      return torch.from_numpy(a).view(torch.bfloat16), hashlib.sha256(t.data.view(np.uint8).tobytes()).hexdigest()
   raise KeyError(name)
 

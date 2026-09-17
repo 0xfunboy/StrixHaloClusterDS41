@@ -1,0 +1,16 @@
+{
+  "schema": "ds41-final-discriminator-comparison-v1",
+  "candidate_source": "9c13117f56fd81d03c8c610a5fb0148ccdc603b9",
+  "rollback_source": "5bdfed698ab97b6230db3fe8a7e37ff8e9b3d513",
+  "prompt_sha256": "f5543bba60bbf849bb106bf9efa9ca5381b88a4c4c9281cf60de37a767258745",
+  "candidate_content": "{\"begin\": 17, \"middle\": 23, \"end\": 29, \"files\": [\"__init__.py\", \"api.py\", \"prompt.go\", \"test-ds41-prefill-metrics.py\", \"envelope_test.go\"]}",
+  "rollback_content": "{\"begin\": 17, \"middle\": 23, \"end\": 29, \"files\": [\"__init__.py\", \"api.py\", \"prompt.go\", \"test-ds41-prefill-metrics.py\", \"envelope_test.go\"]}",
+  "content_exact": true,
+  "candidate_validation": "FAIL",
+  "rollback_validation": "FAIL",
+  "candidate_prompt_tokens": 1571,
+  "rollback_prompt_tokens": 1571,
+  "candidate_cached": 0,
+  "rollback_cached": 0,
+  "decision": "SHARED_PREEXISTING_QUALITY_FAILURE_NOT_CANDIDATE_REGRESSION"
+}

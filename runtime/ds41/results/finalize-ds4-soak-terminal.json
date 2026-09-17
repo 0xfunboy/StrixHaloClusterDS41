@@ -1,0 +1,22 @@
+{
+  "schema": "ds41-finalize-soak-terminal-v1",
+  "performance_target_met": false,
+  "performance_observed": {
+    "target_prefill_tok_s": 200.0,
+    "best_candidate_prefill_tok_s": 76.16973382525786,
+    "characterized_candidate_prefill_tok_s": 66.74401762774443,
+    "best_candidate_prefill_s": 20.84817578125,
+    "characterized_candidate_prefill_s": 23.79239453125,
+    "mmq_same_source_speedup": 3.149362874,
+    "engram_same_source_prefill_time_reduction_pct": 18.62557401684335
+  },
+  "quality_qualified_scope": false,
+  "quality_reason": "code2k/tail1546/docs2k fail; discriminator failure is exact across optimized candidate and rollback, so it is pre-existing/shared rather than candidate-specific",
+  "delivery_complete": true,
+  "promotion": "NO_PROMOTION_EXPERIMENTAL_PERFORMANCE_ARTIFACTS_PRESERVED",
+  "soak": "NOT_RUN_BLOCKED_BY_QUALITY",
+  "ced": "BLOCKED_BY_K2_AUX_HIDDEN_CONTRACT",
+  "final_operational_release": "k2-prefill-5bdfed6",
+  "final_operational_source": "5bdfed698ab97b6230db3fe8a7e37ff8e9b3d513",
+  "discriminator_decision": "SHARED_PREEXISTING_QUALITY_FAILURE_NOT_CANDIDATE_REGRESSION"
+}

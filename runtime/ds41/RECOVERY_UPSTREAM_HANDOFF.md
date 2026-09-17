@@ -23,3 +23,8 @@
   1. layer2 entry -> delayed/single-pass mHC-pre -> attn_norm;
   2. saved sparse-attention output -> inverse RoPE -> grouped WO_A -> WO_B TP2 reduction.
 - Then R1c limited semantic-contract table (mHC/QAT/cache/Engram), followed automatically by R2 or fix/R3 per mandate.
+## R1b — offline endpoints terminal
+- PASS delayed/single-pass layer2 mHC-pre + attn_norm on both ranks/chunks. Previous-post residual and collapse are bit-exact; coefficient gates pass; attn_norm worst 1 BF16 ULP.
+- PASS saved sparse-output -> inverse RoPE -> grouped WO_A -> WO_B -> TP2 endpoint. Worst rel-L2 `7.43e-4`, max-abs `0.0078125`; rank targets exact.
+- Evidence: `runtime/ds41/results/recovery-r1b-result.{json,md}`. No model load/capture/service mutation.
+- NEXT: finish R1c limited official/local semantic-contract table. If no causal defect is proved, enter bounded R2 automatically.

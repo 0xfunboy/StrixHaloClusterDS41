@@ -1,0 +1,32 @@
+{
+  "schema": "ds41-recovery-r2-window-qat-preregister-v1",
+  "status": "FROZEN_BEFORE_RESULT",
+  "source_capture": "d4548014d9903064074c2122bc92b690d366a3b6",
+  "fixtures": "code2k1588 request0 both ranks, final query chunks0/1",
+  "controlled_change": "from saved pre-cache normalized kv_current_chunk, apply same V4.1 compressed YaRN RoPE then reference window-KV QAT: FP8 E4M3 values, block32 power-of-two UE8M0 scale; replace only128 SWA rows",
+  "held_fixed": [
+    "rank-local q_final",
+    "512 compressed context rows",
+    "combined indices/order",
+    "attention sink",
+    "scale",
+    "FP32 reference attention math"
+  ],
+  "gate": {
+    "atol": 0.02,
+    "rtol": 0.02,
+    "decision": "if alternative-vs-local attention output exceeds prior upstream sparse-attention equivalence gate => MATERIAL_COMPONENT_EFFECT, else EQUIVALENT_AT_ATTENTION_GATE",
+    "no_posthoc_change": true
+  },
+  "sanity": "captured local kernel output must still pass same gate vs local CPU attention reference",
+  "interpretation": {
+    "material": "proves representation choice materially changes this component output; does NOT say official-QAT is correct end-to-end",
+    "equivalent": "do not spend a full-model localization window on window-KV representation alone"
+  },
+  "execution": {
+    "cpu_only": true,
+    "model_load": false,
+    "service_change": false
+  },
+  "script_sha256": "c1439bfd1f51d2f7403ea3447b73b9ae5916c469502b12d50283db4f7c80a64e"
+}

@@ -38,3 +38,7 @@
 - `MATERIAL_COMPONENT_EFFECT`: replacing only SWA128 rows with V4.1 window-QAT emulation changes rank1 chunk1 attention beyond frozen0.02/0.02 gate (3/16384, max-abs0.0703125). Other rank/chunks remain within gate.
 - This proves a representation choice can materially change the saved component output, not which representation is end-to-end correct.
 - NEXT: one bounded full-model localization window with an isolated window-QAT semantic QDQ patch, only if it can be inserted without changing unrelated contracts.
+## R2 decision
+- Window-QAT same-input effect is material, but exact semantic patch is `BLOCKED_BY_LOCAL_CACHE_ABI`: current decomposed path still writes hybrid `fp8_ds_mla`; exact full512/block32 QAT would require page/writer/gather changes and would overlap other non-equivalent contracts.
+- No speculative local patch and no full-model localization window consumed.
+- NEXT R4: isolated `kyuz0/ds4@7d0454b...` V4.1/gfx1151 source/build/help/ABI/resource gates only. No weights/download/service lifecycle until gates pass.

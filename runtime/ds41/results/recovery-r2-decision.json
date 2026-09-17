@@ -1,0 +1,16 @@
+{
+  "schema": "ds41-recovery-r2-decision-v1",
+  "status": "R2_NO_ISOLATED_LOCAL_FIX_PROCEED_R4",
+  "component_result": "MATERIAL_COMPONENT_EFFECT",
+  "exact_patch_feasibility": {
+    "status": "BLOCKED_BY_LOCAL_CACHE_ABI",
+    "reason": "existing decomposed SWA path applies RoPE then quantize_and_insert_k_cache; local cache ABI stores448 NoPE as FP8 block64 UE8M0 plus64 RoPE BF16. Exact V4.1 reference window QAT is full512 FP8 block32; feeding QDQ values through current writer double-quantizes NoPE and does not preserve the tested representation. Preserving exact QAT requires changing cache page format, writer and gather/reader, while compressed/indexer contracts also differ.",
+    "full_model_window_consumed": false
+  },
+  "decision": "Do not apply a speculative/non-equivalent patch. Preserve both full-model localization windows. Enter R4 isolated DS4 V4.1/gfx1151 compatibility/build gates.",
+  "evidence": [
+    "runtime/ds41/results/recovery-r2-window-qat-result.json",
+    "capture release attention.py::_ds41_decomposed_q_rope_kv_insert",
+    "common/ops/cache_utils.py::quantize_and_insert_k_cache"
+  ]
+}

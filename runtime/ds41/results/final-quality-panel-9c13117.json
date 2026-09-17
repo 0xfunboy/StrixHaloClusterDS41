@@ -1,0 +1,56 @@
+{
+  "schema": "ds41-final-quality-panel-v1",
+  "source": "9c13117f56fd81d03c8c610a5fb0148ccdc603b9",
+  "release": "k2-mmq-engram-9c13117",
+  "epoch": "1789639579678586954",
+  "cases": {
+    "code2k": "FAIL_REUSED",
+    "tail1546": "FAIL",
+    "docs2k": "FAIL",
+    "json_none": "PASS",
+    "fresh_marker": "PASS",
+    "multiturn_orbit": "PASS",
+    "coding_c_frame": "NON_VERIFIED_INCOMPLETE_NO_FINAL",
+    "coding_go_session": "NON_VERIFIED_TOOLCHAIN_THEN_INCOMPLETE",
+    "common_prefix_logits": "PASS"
+  },
+  "speed128": {
+    "prompt_tokens": 35,
+    "prefill_s": 5.14722265625,
+    "decode_tps": 16.31415081899055,
+    "ttft_s": 5.415383676008787,
+    "wall_s": 13.204025225015357
+  },
+  "discriminator": {
+    "status": "FAIL",
+    "expected": {
+      "begin": 17,
+      "middle": 23,
+      "end": 5,
+      "files": [
+        "__init__.py",
+        "api_server.py",
+        "_ds41_artifact.py",
+        "prompt.go",
+        "test-ds41-prefill-metrics.py",
+        "envelope_test.go"
+      ]
+    },
+    "actual": {
+      "begin": 17,
+      "middle": 23,
+      "end": 29,
+      "files": [
+        "__init__.py",
+        "api.py",
+        "prompt.go",
+        "test-ds41-prefill-metrics.py",
+        "envelope_test.go"
+      ]
+    },
+    "decision": "context retrieval/attention fidelity remains implicated; do not blame arithmetic alone"
+  },
+  "verdict": "QUALITY_NOT_QUALIFIED",
+  "soak": "BLOCKED",
+  "next": "ONE_ROLLBACK_DISCRIMINATOR_CONTROL_THEN_RESTORE_ROLLBACK"
+}

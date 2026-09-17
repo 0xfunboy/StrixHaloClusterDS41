@@ -1,0 +1,110 @@
+{
+  "schema": "ds41-retrieval-fidelity-001-swa-recent-kv-preregister-v1",
+  "status": "FROZEN_BEFORE_RESULT",
+  "created_at": 1789656254.1903179,
+  "capture": {
+    "root_source": "d4548014d9903064074c2122bc92b690d366a3b6",
+    "campaign": "reports/DS41-Q2-001/m4-layer2-context-d454801",
+    "request_index": 0,
+    "prompt_tokens": 1588,
+    "payload_sha256": "4926fd629b1b2057762c617c985e64211a9853c2678260758ee8ea4e09a364fd",
+    "corpus_sha256": "c162e1102363a8d7dea3891bacac73d18948cde6af8014b92d867cf7e4271993",
+    "note": "code2k1588; NOT discriminator1571"
+  },
+  "inputs": {
+    "rank0": {
+      "path": "reports/DS41-Q2-001/m4-layer2-context-d454801/repeat-rank0-request0.pt",
+      "sha256": "b4c0735336b4b3fac0588bfff9c3b552b4cbcba4b2e3ee74e717650b9809df7f"
+    },
+    "rank1": {
+      "path": "reports/DS41-Q2-001/m4-layer2-context-d454801/repeat-rank1-request0.pt on NODE02",
+      "sha256": "1cb2b6bbb47b42cdcc3095806c1efd4ec0d700086c7cb7f7b47b2453fd39c88d"
+    }
+  },
+  "config": {
+    "path": "/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2-densefix/config.json",
+    "sha256": "8be45ce0476004a3f529fd896115a4a2e800a129ad2d3ec05b16050f52e21879",
+    "layer": 2,
+    "compress_ratio": 2,
+    "sliding_window": 128,
+    "compress_rope_theta": 160000,
+    "rope_scaling": {
+      "rope_type": "yarn",
+      "factor": 16,
+      "beta_fast": 32,
+      "beta_slow": 1,
+      "original_max_position_embeddings": 65536
+    }
+  },
+  "capture_boundary": {
+    "source": "DeepseekV4Attention.forward records layer2_projection immediately after _split_qkv_and_norm; _fused_qnorm_rope_kv_insert is later in _prepare_and_attn",
+    "kv_current_chunk": "post RMS-normalization, pre SWA cache insert, pre RoPE, pre UE8M0 FP8 quantization",
+    "context_rows_swa": "post cache insert, post RoPE, post UE8M0 quantization/dequantization and gather"
+  },
+  "association": {
+    "must_pass_before_math": true,
+    "method": "derive final-query SWA logical rows from valid_context_indices/N/seq_lens/gather_lens, then map through layer2_projection.positions",
+    "precheck": {
+      "rank0": {
+        "chunk0": {
+          "logical": [
+            895,
+            1022
+          ],
+          "source_indices": [
+            895,
+            1022
+          ]
+        },
+        "chunk1": {
+          "logical": [
+            1460,
+            1587
+          ],
+          "source_indices": [
+            437,
+            564
+          ]
+        }
+      },
+      "rank1": "same ranges"
+    },
+    "do_not_assume_minus128_without_check": true
+  },
+  "reference": {
+    "vendor_revision": "0bfb653d3b5161660db9ada0d84c2cdd60961de7",
+    "fused_insert_test": ".vendor/vllm-dsv41/tests/kernels/test_fused_deepseek_v4_qnorm_rope_kv_insert.py",
+    "fused_insert_test_sha256": "f5397a1b8c966731b8b97caabae7ada3633a317711c98c39edd424c71b9215db",
+    "bf16_ulp_helper": ".vendor/vllm-dsv41/tests/kernels/utils.py::bf16_ulp_distance",
+    "utils_sha256": "0a4126b78d3305256da09f319a089da87562e0321c996b8d250beab206987b10",
+    "rope_math": "DeepseekV4ScalingRotaryEmbedding formulas mirrored pure CPU; no vLLM runtime construction",
+    "fp8_encoding": "OCP e4m3fn on gfx1151",
+    "fp8_max": 448.0
+  },
+  "gates": {
+    "finite": "all source/actual finite",
+    "nope448": "per token max_abs <= 16*max UE8M0 scale over seven 64-wide blocks, same upstream definition",
+    "rope64": "max BF16 ULP <=1, same upstream parity gate",
+    "tolerance_changes_after_result": "FORBIDDEN"
+  },
+  "outputs_required": [
+    "association proof each rank/chunk",
+    "NoPE per-token and per-block diagnostics",
+    "RoPE per-token max ULP",
+    "worst coordinates/reference/actual",
+    "no hidden aggregation"
+  ],
+  "decisions": {
+    "PASS": "component conforms on saved code2k1588 layer2 SWA rows only",
+    "FAIL": "comparison discordance; verify association/reference applicability before naming runtime defect or patching",
+    "REFERENCE_INPUT_INCOMPLETE": "record exact missing/inapplicable field; do not widen gate"
+  },
+  "execution": {
+    "cpu_only": true,
+    "model_load": false,
+    "generation": false,
+    "gpu_replay": false,
+    "service_mutation": false,
+    "ranks_separate": true
+  }
+}

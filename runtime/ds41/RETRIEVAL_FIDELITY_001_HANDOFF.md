@@ -45,4 +45,5 @@ No other generation request is authorized in this checkpoint.
 - Decision: `SPARSE_ATTENTION_ARITHMETIC_EXCLUDED_AT_CAPTURED_LAYER2_PACKETS`.
 - Scope limit: ordered Q/KV/sink arithmetic only; selected-context correctness/indexer remains open.
 - K2 rollback restored and READY/idle epoch `1789651304744356945`.
-- NEXT: inspect saved indexer/top-k evidence for an independent selection reference; no new generation until preregistered.
+- Provenance correction: these packets are code2k1588 request0, not discriminator1571; do not transfer token coordinates between them.
+- NEXT: CPU-only SWA recent-KV reference on saved rank0+rank1 code2k1588 packets. Verify logical association and capture boundary before comparison; upstream gates fixed as NoPE448 <=16×per-token max UE8M0 scale and RoPE64 <=1 BF16 ULP. No inference/GPU replay/load/indexer capture.

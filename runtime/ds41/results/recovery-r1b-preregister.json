@@ -1,0 +1,56 @@
+{
+  "schema": "ds41-recovery-r1b-preregister-v1",
+  "status": "FROZEN_BEFORE_RESULT",
+  "capture_source": "d4548014d9903064074c2122bc92b690d366a3b6",
+  "fixture": "code2k1588 request0 rank0+rank1 chunks1023+565",
+  "segments": {
+    "mhc": "layer2 entry -> previous-post collapse -> delayed/single-pass mHC-pre -> attn_norm",
+    "oproj": "saved sparse-attention kernel_output_final -> inverse compressed YaRN RoPE -> rank-local grouped WO_A -> rank-local WO_B -> TP2 sum -> attention_out.x final row"
+  },
+  "gates": {
+    "mhc_coeff": {
+      "atol": 1e-05,
+      "rtol": 0.0001,
+      "source": "vendored upstream test_deepseek_v41_mhc_pre_delayed non-DeepGEMM"
+    },
+    "mhc_bf16_collapse": {
+      "atol": 0.016,
+      "rtol": 0.01,
+      "source": "vendored upstream carried delayed-mHC test"
+    },
+    "attn_norm_bf16": {
+      "atol": 1e-05,
+      "rtol": 0.016,
+      "source": "BF16 dtype tolerance; ULP diagnostic"
+    },
+    "oproj_endpoint": {
+      "rel_l2_max": 0.04,
+      "max_abs": 0.3,
+      "source": "existing independent scripts/test-ds41-layer0-complete-densefix.py WO_B gate"
+    }
+  },
+  "mapping": {
+    "tp": 2,
+    "heads_global": 64,
+    "heads_per_rank": 32,
+    "groups_global": 8,
+    "groups_per_rank": 4,
+    "woa_rows_per_rank": 4096,
+    "wob_input_cols_per_rank": 4096
+  },
+  "source_files": {
+    "model": "9a85f7c20a6cf1c898a3987074db4887dba8f47703d0b2e8bc8b169d7b025484",
+    "rocm": "dbb01aa60bb7dc37f6c25ff455f46cfda622f99723c6516808c2c461305dc131",
+    "mhc_torch": "984e07d0650ddafbfb9b4dd41abdf8ff9c3b1a1477e5f974b39ebc620a3d2aaf"
+  },
+  "decision": {
+    "PASS": "close these saved layer2 endpoint segments only; continue R1c",
+    "FAIL": "recheck mapping/reference then localize only demonstrated interval; no speculative patch"
+  },
+  "execution": {
+    "cpu_only": true,
+    "service_change": false,
+    "new_capture": false,
+    "model_load": false
+  }
+}

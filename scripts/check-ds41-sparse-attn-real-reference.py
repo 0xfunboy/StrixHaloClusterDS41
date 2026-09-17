@@ -46,7 +46,7 @@ def main():
     pack=torch.load(q.input,map_location='cpu',weights_only=False)
     rows=[]
     for chunk in (0,1):
-        x=pack['layer2_attention'][chunk]
+        table=pack['layer2_attention']; key=str(chunk) if str(chunk) in table else chunk; x=table[key]
         ref=ref_one(x['q_final'].cpu(),x['context_rows'].cpu(),float(x['scale']),x['attn_sink'].cpu())
         m=metric(x['kernel_output_final'].cpu(),ref)
         rows.append({"chunk":chunk,"position_start":x['position_start'],"position_end":x['position_end'],"context_rows":int(x['context_rows'].shape[0]),"metric":m})

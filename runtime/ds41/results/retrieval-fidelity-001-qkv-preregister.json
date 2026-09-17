@@ -1,0 +1,121 @@
+{
+  "schema": "ds41-retrieval-fidelity-001-qkv-preregister-v1",
+  "status": "FROZEN_BEFORE_RESULT",
+  "created_at": 1789658416.2065737,
+  "capture": {
+    "release": "k2-layer2diag-d454801",
+    "source_commit": "d4548014d9903064074c2122bc92b690d366a3b6",
+    "prompt": "code2k1588 request0",
+    "payload_sha256": "4926fd629b1b2057762c617c985e64211a9853c2678260758ee8ea4e09a364fd",
+    "rank0": "reports/DS41-Q2-001/m4-layer2-context-d454801/repeat-rank0-request0.pt",
+    "rank1": "reports/DS41-Q2-001/m4-layer2-context-d454801/repeat-rank1-request0.pt on NODE02"
+  },
+  "source_identity": {
+    "artifact_json_sha256": "9db843153feb43c5a1e57743ee1791831e407592844ea45ff56d660a02d949a9",
+    "attention_py_sha256": "3198a63ae610032806b58a68d911646093059ca077fbbb1e436af0003dba10ad",
+    "rocm_py_sha256": "dbb01aa60bb7dc37f6c25ff455f46cfda622f99723c6516808c2c461305dc131",
+    "linear_py_sha256": "e8abe361756f1b3206bf22bc3b03c333c994a479a8a77cf834a4cc47aa5b5b73",
+    "gguf_weight_utils_sha256": "a20d4d6fb959ab0726a4546bce324d9f0cd6ce731510781de3090fdfad68b77a"
+  },
+  "weights": {
+    "artifact": "DeepSeek-V4.1-Flash-MixedQ2-Engram2-densefix",
+    "all_required_qtype": "BF16",
+    "wq_a": {
+      "name": "blk.2.attn_q_a",
+      "shape": [
+        1280,
+        5120
+      ],
+      "data_sha256": "1f69a866b74e93db7293e02368fd8221146bb1e61c54905285df90a3e5699b7c"
+    },
+    "wkv": {
+      "name": "blk.2.attn_kv",
+      "shape": [
+        512,
+        5120
+      ],
+      "data_sha256": "f3ee22da6645cae5e31e5982d4a18b0e75b3c25a2e13cc1b42202ed7f6312c37"
+    },
+    "q_norm": {
+      "name": "blk.2.attn_q_a_norm",
+      "shape": [
+        1280
+      ],
+      "data_sha256": "4e4f37565086588ba7f369cccbda956b622728bb5aab1a1e35c1246d8c028164"
+    },
+    "kv_norm": {
+      "name": "blk.2.attn_kv_a_norm",
+      "shape": [
+        512
+      ],
+      "data_sha256": "b415c277d895e21f5b408c829438af4a11fdb605998a54b11b43072a2089dbd1"
+    },
+    "wq_b": {
+      "name": "blk.2.attn_q_b",
+      "shape": [
+        32768,
+        1280
+      ],
+      "data_sha256": "f54e6dc0e079215c99f2c1a0d4253ae63da5b1f25ca3cf64508c47ba87e3304c",
+      "tp2_rank0_rows": [
+        0,
+        16383
+      ],
+      "tp2_rank1_rows": [
+        16384,
+        32767
+      ]
+    }
+  },
+  "runtime_contract": {
+    "input": "layer2_full[chunk].attn_norm.x",
+    "linear": "GGUF BF16 UNQUANTIZED branch: x @ weight.T",
+    "q_path": "wq_a -> BF16 -> explicit RMSNorm -> BF16 -> rank-local wq_b -> BF16 -> V4.1 compressed YaRN RoPE -> q_final",
+    "kv_path": "wkv -> BF16 -> explicit RMSNorm -> BF16 = kv_current_chunk; no RoPE at this boundary",
+    "q_rows": "final row of each chunk",
+    "kv_rows": "only 128 SWA rows already associated: chunk0 895..1022, chunk1 1460..1587",
+    "no_runtime_operator_reused": true
+  },
+  "reference": {
+    "matmul": "CPU FP32 accumulation on BF16 GGUF bytes, cast BF16 at runtime linear boundaries",
+    "rmsnorm": "explicit FP32 x*rsqrt(mean(x^2)+eps)*weight then BF16",
+    "rope": "pure CPU DeepseekV4ScalingRotaryEmbedding/YaRN formula from capture config, applied exactly once",
+    "eps": 1e-20
+  },
+  "gates": {
+    "finite": "required",
+    "q_final": {
+      "rtol": 0.016,
+      "atol": 1e-05
+    },
+    "kv_normalized": {
+      "rtol": 0.016,
+      "atol": 1e-05
+    },
+    "gate_source": "torch.testing default_tolerances(torch.bfloat16), frozen before fixture result",
+    "diagnostics_not_gates": [
+      "rel_l2",
+      "max_abs",
+      "mean_abs",
+      "BF16 ULP",
+      "per-row/head outliers"
+    ],
+    "historical_same_artifact_layer0_descriptive_only": {
+      "q_b_rel_l2": 0.00019354396210873742,
+      "kv_norm_rel_l2": 2.8231327417509894e-05
+    }
+  },
+  "decisions": {
+    "PASS": "Q/KV endpoint formation conforms for saved layer2 inputs within frozen BF16 gate; hidden input correctness and downstream/full retrieval remain open.",
+    "FAIL": "endpoint discordance; verify mapping and numeric contract first, then localize only input->Q/KV segment before any patch.",
+    "INPUT_INCOMPLETE": "record exact missing/inapplicable field; no new capture/load automatically."
+  },
+  "execution": {
+    "cpu_only": true,
+    "model_load": false,
+    "generation": false,
+    "gpu_replay": false,
+    "service_mutation": false,
+    "rank_local_reference": true
+  }
+}

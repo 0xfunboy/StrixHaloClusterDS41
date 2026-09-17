@@ -55,3 +55,10 @@ No other generation request is authorized in this checkpoint.
 - Same code2k1588 `DISTANT_FACT_END=5` localizes around1490..1498, inside verified final SWA1460..1587.
 - Decision: `SWA_RECENT_KV_CONFORMS_AT_SAVED_CODE2K1588_LAYER2_PACKETS`; component-only, no overall retrieval claim.
 - NEXT: no SWA patch and no automatic indexer capture. Any further discriminator must be derived from this PASS and use saved tensors first or be separately preregistered. K2 service remains READY/idle.
+
+## Q/KV projection reference frozen
+- NEXT from SWA PASS: CPU-only endpoint reference on saved code2k1588 request0, capture source `d4548014...`; no model request/load.
+- Input `layer2_full[*].attn_norm.x`; KV endpoint `kv_current_chunk` after wkv+kv RMSNorm and before RoPE; Q endpoint `q_final` after wq_a+q RMSNorm+rank-local wq_b+RoPE.
+- All required GGUF layer2 tensors are BF16. TP2 Q-b rows: rank0 0..16383, rank1 16384..32767.
+- Frozen gate: finite + BF16 upstream defaults `rtol=0.016, atol=1e-5`; rel-L2/max-abs/ULP diagnostic only.
+- Preregister `runtime/ds41/results/retrieval-fidelity-001-qkv-preregister.{json,md}`. Execute rank0/rank1 CPU-only; persist before any next discriminator.

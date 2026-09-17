@@ -1,0 +1,59 @@
+{
+  "schema": "ds41-mmq-fullmodel-b2-v1",
+  "status": "PERFORMANCE_VALID_SEMANTIC_FAIL_STATS_PENDING",
+  "epoch": "1789632423869537084",
+  "source": "3b12582f868dd922fca2ffe5ebffc10aa922e4a4",
+  "release": "k2-mmq-arena-3b12582",
+  "request_id": "mmq-ab-B2-code2k-e1789632423869537084",
+  "config": "K2/M4 canonical=1 ds4=1 external_pool=64MiB",
+  "result": {
+    "prefill_ms": 29191.46484375,
+    "prefill_tok_s": 54.3994625997673,
+    "client_ttft_s": 29.596120049012825,
+    "first_final_s": 29.596120049012825,
+    "wall_s": 31.989323389017954,
+    "decode_tps": 13.700491071863599,
+    "prompt_tokens": 1588,
+    "completion_tokens": 34,
+    "prompt_tokens_cached": 0,
+    "content": "{\"result\": 62, \"first_file\": \"__init__.py\", \"last_file\": \"envelope_test.go\", \"median_file\": \"build.go\"}",
+    "finish_reason": "stop"
+  },
+  "validation": {
+    "status": "FAIL",
+    "label": "mmq-ab-B2-code2k",
+    "prompt_tokens_local_manifest": 1588,
+    "prompt_tokens_server": 1588,
+    "expected": {
+      "result": 52,
+      "first_file": "__init__.py",
+      "middle_file": "_ds41_artifact.py",
+      "last_file": "envelope_test.go"
+    },
+    "actual": {
+      "result": 62,
+      "first_file": "__init__.py",
+      "last_file": "envelope_test.go",
+      "median_file": "build.go"
+    },
+    "semantic_pass": false,
+    "cached_zero": true,
+    "computed_present": true,
+    "prefill_present": true,
+    "server_matches_local_token_count": true,
+    "done": true,
+    "finish_reason": "stop"
+  },
+  "comparison_to_A2_observed": {
+    "A2_source": "ff582d652796e5e9fff2b1ecd488f48d0c06acbe",
+    "A2_epoch": "1789618441080477567",
+    "prefill_ms_A2": 96829.7109375,
+    "prefill_ms_B2": 29191.46484375,
+    "prefill_tok_s_A2": 16.399925029467404,
+    "prefill_tok_s_B2": 54.3994625997673,
+    "speedup_observed": 3.3170555659262027,
+    "note": "Observed cross-source comparison only; isolate DS4 MMQ with pending same-source control."
+  },
+  "stats": "PENDING_LIFECYCLE_OFF",
+  "next": "Whole-pair OFF after idle, preserve rank logs/stats, then same-source DS4 MMQ OFF control on 3b12582."
+}

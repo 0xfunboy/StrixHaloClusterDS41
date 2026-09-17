@@ -1,0 +1,144 @@
+{
+  "schema": "ds41-engram-parallel-reader-gate-v1",
+  "status": "PASS_ADMIT_FULLMODEL_ENGRAM",
+  "candidate_source": "7b7d55a542b63dca43fe3ae348a52c15cf397da3",
+  "baseline": "existing MADV_RANDOM reader, one worker, same affine2 row cache and files",
+  "candidate": "4 read workers for miss sets >=256 rows; sorted source-row partitions; first-use LRU insertion/scatter unchanged",
+  "memory_contract": {
+    "decoded_lru_rows_unchanged": 65536,
+    "workers": 4,
+    "parallel_min_rows": 256,
+    "new_permanent_row_cache": false,
+    "thread_pool_scope": "one miss lookup"
+  },
+  "correctness": {
+    "fixture_serial_parallel_exact": true,
+    "duplicate_disordered_repeat_exact": true,
+    "first_use_lru_order_equal": true,
+    "bounded_eviction_equal": true,
+    "both_nodes_fixture_pass": true
+  },
+  "real_sidecar": [
+    {
+      "rank": 0,
+      "layer": 1,
+      "tokens": 1024,
+      "rows_requested": 12288,
+      "serial": {
+        "cold_ms": 3949.65951499762,
+        "warm_ms": 6.397869030479342,
+        "read_wall_ms": 3938.363236,
+        "read_bytes": 149962752,
+        "majflt": 36612,
+        "output_sha256": "55b201034c694f12dbd072c8653eb593b1c3323df56c93c2620d9267faed3c8b"
+      },
+      "parallel4": {
+        "cold_ms": 1025.6698009907268,
+        "warm_ms": 10.449310997501016,
+        "read_wall_ms": 1009.42155,
+        "read_bytes": 149962752,
+        "majflt": 36612,
+        "output_sha256": "55b201034c694f12dbd072c8653eb593b1c3323df56c93c2620d9267faed3c8b",
+        "parallel_batches": 1
+      },
+      "cold_speedup": 3.850809988928717,
+      "read_wall_speedup": 3.901604078097996,
+      "warm_ratio": 1.6332486563448974,
+      "bytes_equal": true,
+      "sha_equal": true
+    },
+    {
+      "rank": 0,
+      "layer": 14,
+      "tokens": 1024,
+      "rows_requested": 12288,
+      "serial": {
+        "cold_ms": 3940.9431099775247,
+        "warm_ms": 6.248013989534229,
+        "read_wall_ms": 3929.895489,
+        "read_bytes": 150048768,
+        "majflt": 36633,
+        "output_sha256": "fca1919eba49e5941bb613f45a20444514b7a73f4a6870fdcc5ddb58fed545cd"
+      },
+      "parallel4": {
+        "cold_ms": 1024.2452339734882,
+        "warm_ms": 11.252746975515038,
+        "read_wall_ms": 1007.257889,
+        "read_bytes": 150048768,
+        "majflt": 36633,
+        "output_sha256": "fca1919eba49e5941bb613f45a20444514b7a73f4a6870fdcc5ddb58fed545cd",
+        "parallel_batches": 1
+      },
+      "cold_speedup": 3.8476557949788157,
+      "read_wall_speedup": 3.901578267013206,
+      "warm_ratio": 1.8010118086105464,
+      "bytes_equal": true,
+      "sha_equal": true
+    },
+    {
+      "rank": 1,
+      "layer": 1,
+      "tokens": 1024,
+      "rows_requested": 12288,
+      "serial": {
+        "cold_ms": 3938.8223870191723,
+        "warm_ms": 6.1875960091128945,
+        "read_wall_ms": 3928.440042,
+        "read_bytes": 149893120,
+        "majflt": 36595,
+        "output_sha256": "120ff400e5cae8686f53b68349120300fa282b8157049b1e9e316263f512ee4f"
+      },
+      "parallel4": {
+        "cold_ms": 1021.4991109678522,
+        "warm_ms": 11.018200020771474,
+        "read_wall_ms": 1005.440808,
+        "read_bytes": 149893120,
+        "majflt": 36595,
+        "output_sha256": "120ff400e5cae8686f53b68349120300fa282b8157049b1e9e316263f512ee4f",
+        "parallel_batches": 1
+      },
+      "cold_speedup": 3.855923460655006,
+      "read_wall_speedup": 3.9071818159184963,
+      "warm_ratio": 1.7806915649541792,
+      "bytes_equal": true,
+      "sha_equal": true
+    },
+    {
+      "rank": 1,
+      "layer": 14,
+      "tokens": 1024,
+      "rows_requested": 12288,
+      "serial": {
+        "cold_ms": 3943.98609502241,
+        "warm_ms": 6.036350037902594,
+        "read_wall_ms": 3932.692804,
+        "read_bytes": 149843968,
+        "majflt": 36583,
+        "output_sha256": "12ed8d0e97557307bccc23c828a9f5f097357aa699a243ac9f11557a30f5cd2d"
+      },
+      "parallel4": {
+        "cold_ms": 1026.342045981437,
+        "warm_ms": 10.116905963514,
+        "read_wall_ms": 1008.741364,
+        "read_bytes": 149843968,
+        "majflt": 36583,
+        "output_sha256": "12ed8d0e97557307bccc23c828a9f5f097357aa699a243ac9f11557a30f5cd2d",
+        "parallel_batches": 1
+      },
+      "cold_speedup": 3.842759936090296,
+      "read_wall_speedup": 3.898613603397352,
+      "warm_ratio": 1.6759972334257223,
+      "bytes_equal": true,
+      "sha_equal": true
+    }
+  ],
+  "summary": {
+    "min_cold_speedup": 3.842759936090296,
+    "max_cold_speedup": 3.855923460655006,
+    "mean_cold_speedup": 3.849287295163209,
+    "all_output_sha_equal": true,
+    "all_read_bytes_equal": true
+  },
+  "cold_semantics": "Each arm is a fresh process; exact Engram file is scoped with POSIX_FADV_DONTNEED after mmap creation and MADV_RANDOM is active. This is scoped file-cache preparation, not a claim of physical SSD power-cycle cold.",
+  "decision": "Admit one full-model MMQ+Engram integration measurement. No worker-count sweep and no change to hash IDs, row bytes, multiplicity, n-gram, model math, or LRU capacity."
+}

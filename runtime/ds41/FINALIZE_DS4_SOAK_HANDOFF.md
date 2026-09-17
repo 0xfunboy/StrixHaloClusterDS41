@@ -28,3 +28,12 @@ Next exact act:
 - DS4 `8db1d1d` decoder suffix is admitted only for sweeps >=8192 and uses `1+(39-layer)*127`, not fixed 128 rows/layer. Frozen code-2k chunks 1023+565 do not enter it.
 - Current K2 DSpark consumes target aux hidden `[37,38,39]` for every scheduled target token and precomputes context KV from all those rows. Skipping those deep target rows breaks the qualified K2 state contract; recomputing them removes CED work elimination.
 - Decision: CED OFF/BLOCKED for current K2 profile. Continue Engram on MMQ ON predecessor; label candidate MMQ+Engram.
+
+## Engram model-free gate
+
+- Candidate source `7b7d55a542b63dca43fe3ae348a52c15cf397da3`.
+- `runtime/ds41/results/engram-parallel-reader-gate.{json,md}`: `PASS_ADMIT_FULLMODEL_ENGRAM`.
+- Reader candidate: MADV_RANDOM retained; 4 bounded read workers only when missing rows >=256; source-row sorted partitions; first-use LRU insertion and output scatter remain original order/multiplicity; cache cap remains 65,536 rows.
+- Real 1024-token / 12,288-row sidecar gate on rank0/rank1 and layers1/14: output SHA and physical read bytes exact between serial and candidate. Cold miss-reader speedup range ~3.843x..3.856x; warm remains milliseconds.
+- Fixture contract PASS on both nodes for duplicates, disordered IDs, repeats, first-use LRU and eviction.
+- Pair is OFF/NONE after the completed MMQ-OFF control. Next: package this source with the already-qualified DS4 external-arena library, load MMQ ON + Engram4 once, run frozen code-2k integration and validator.

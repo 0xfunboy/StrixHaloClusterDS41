@@ -1,0 +1,28 @@
+{
+  "schema": "ds41-retrieval-fidelity-001-sparse-reference-preregister-v1",
+  "phase": "RETRIEVAL_FIDELITY_001",
+  "hypothesis": "The ROCm sparse-prefill attention math on saved real code2k packets may violate the independent vendored Torch reference and contribute to retrieval fidelity failure.",
+  "existing_evidence": [
+    "K2 and same-source target-only M1 both fail the frozen extraction discriminator, so speculative decode is not necessary.",
+    "KV metadata control passed observed scheduling/slot/SWA invariants but did not validate numerical attention.",
+    "Prior canonical-topk work fixed repeatability/order sensitivity only and did not establish correctness against independent attention math."
+  ],
+  "single_missing_control": "CPU-only independent Torch sparse-attention reference on already-saved real request0 packets, chunks0+1, both ranks; no model load and no generation.",
+  "reference": ".vendor/vllm-dsv41/tests/kernels/attention/test_rocm_triton_attn_dsv4.py::_ref_sparse_prefill_ragged",
+  "reference_sha256": "43541b6f0d596036e269a35bfb6c9bb00ff422288ab5225f5c7bf16addd08f1e",
+  "gate": {
+    "atol": 0.02,
+    "rtol": 0.02,
+    "source": "vendored upstream test_sparse_attn_prefill_ragged_kernel torch.testing.assert_close"
+  },
+  "inputs": {
+    "rank0": "reports/DS41-Q2-001/m4-layer2-context-d454801/repeat-rank0-request0.pt",
+    "rank1": "reports/DS41-Q2-001/m4-layer2-context-d454801/repeat-rank1-request0.pt on NODE02"
+  },
+  "decision": {
+    "FAIL": "localize a runtime sparse-attention math defect on this saved packet; fix/replay only this path before any model load.",
+    "PASS": "exclude sparse-attention kernel arithmetic at these captured layer2 packets within upstream tolerance; next inspect indexer/selection semantics only if saved logits permit an independent reference."
+  },
+  "scope_limit": "A component PASS does not certify the full model response.",
+  "created_at": 1789651509.241215
+}

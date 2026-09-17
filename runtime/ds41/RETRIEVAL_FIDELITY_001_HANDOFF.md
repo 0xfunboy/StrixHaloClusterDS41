@@ -31,3 +31,10 @@ No other generation request is authorized in this checkpoint.
 - FAIL: begin17, middle23, **end41**; files [`__init__.py`,`api.py`,`artifact.json`,`prompt.go`,`test-ds41-prefill-metrics.py`,`envelope_test.go`].
 - K2 rollback FAIL was end29 with a different list. Decision: `K2_NOT_NECESSARY_FOR_FAILURE`; signature is mode-sensitive, so target model/runtime/weights/reference remains open.
 - NEXT: restore K2 `5bdfed6` READY, then inventory only already-available independent references; no new generation until a reference is preregistered.
+
+## Sparse-attention independent reference frozen
+- Existing full-model independent engine is unavailable without a new build/port, so none is introduced.
+- Vendored vLLM provides `_ref_sparse_prefill_ragged` and upstream gate `atol=rtol=0.02`.
+- Frozen control: saved real code2k request0, chunk0+1, both ranks; CPU-only reference vs captured ROCm kernel output.
+- PASS excludes sparse-attention arithmetic at those packets only; FAIL localizes that component.
+- Preregister: `runtime/ds41/results/retrieval-fidelity-001-sparse-reference-preregister.{json,md}`.

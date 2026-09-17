@@ -62,3 +62,11 @@ No other generation request is authorized in this checkpoint.
 - All required GGUF layer2 tensors are BF16. TP2 Q-b rows: rank0 0..16383, rank1 16384..32767.
 - Frozen gate: finite + BF16 upstream defaults `rtol=0.016, atol=1e-5`; rel-L2/max-abs/ULP diagnostic only.
 - Preregister `runtime/ds41/results/retrieval-fidelity-001-qkv-preregister.{json,md}`. Execute rank0/rank1 CPU-only; persist before any next discriminator.
+
+## Q/KV projection reference terminal
+- PASS on saved code2k1588 request0, rank0+rank1, chunks0/1. Frozen BF16 gate `rtol=0.016, atol=1e-5`, finite required.
+- Boundary: `attn_norm.x` -> BF16 wkv+kv RMSNorm = `kv_current_chunk` on SWA rows895..1022 and1460..1587; final Q via BF16 wq_a+q RMSNorm+rank-local TP2 wq_b+compressed YaRN RoPE = `q_final` at1022/1587.
+- Q: 0/65,536 values outside gate. KV: 0/262,144 outside gate. No runtime operator reused by reference.
+- Decision: `QKV_PROJECTION_ENDPOINTS_CONFORM_AT_SAVED_CODE2K1588_LAYER2_INPUTS`.
+- Scope: input hidden state correctness, downstream layers and full retrieval remain unqualified.
+- Next discriminant NOT_STARTED: test the saved layer2 state-preparation segment `entry -> MHC-pre -> attn_norm` independently using capture-source weights. Hypothesis: if PASS, first unverified boundary moves upstream of layer2 attention input; if FAIL, localize only this segment after mapping/contract check. No new capture/load/request.

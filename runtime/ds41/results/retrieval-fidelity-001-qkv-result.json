@@ -1,0 +1,264 @@
+{
+  "schema": "ds41-retrieval-fidelity-001-qkv-result-v1",
+  "status": "PASS",
+  "decision": "QKV_PROJECTION_ENDPOINTS_CONFORM_AT_SAVED_CODE2K1588_LAYER2_INPUTS",
+  "boundary_and_rows": {
+    "input": "layer2_full[chunk].attn_norm.x",
+    "kv_endpoint": "wkv + kv RMSNorm -> kv_current_chunk, pre-RoPE/cache",
+    "q_endpoint": "wq_a + q RMSNorm + rank-local TP2 wq_b + compressed YaRN RoPE -> q_final",
+    "chunk0": {
+      "positions": [
+        0,
+        1022
+      ],
+      "kv_rows": [
+        895,
+        1022
+      ],
+      "q_position": 1022
+    },
+    "chunk1": {
+      "positions": [
+        1023,
+        1587
+      ],
+      "kv_rows": [
+        1460,
+        1587
+      ],
+      "q_position": 1587
+    }
+  },
+  "gate": {
+    "dtype": "bfloat16",
+    "rtol": 0.016,
+    "atol": 1e-05,
+    "source": "torch.testing default_tolerances(torch.bfloat16); fixed before fixture result"
+  },
+  "totals": {
+    "q_values_checked": 65536,
+    "q_values_outside_gate": 0,
+    "kv_values_checked": 262144,
+    "kv_values_outside_gate": 0
+  },
+  "ranks": [
+    {
+      "rank": 0,
+      "input": "reports/DS41-Q2-001/m4-layer2-context-d454801/repeat-rank0-request0.pt",
+      "input_sha256": "b4c0735336b4b3fac0588bfff9c3b552b4cbcba4b2e3ee74e717650b9809df7f",
+      "chunks": [
+        {
+          "chunk": 0,
+          "status": "PASS",
+          "q_position": 1022,
+          "kv_rows_logical": [
+            895,
+            1022
+          ],
+          "q": {
+            "allclose": true,
+            "outside": 0,
+            "numel": 16384,
+            "max_abs": 4.76837158203125e-07,
+            "mean_abs": 2.9103830456733704e-11,
+            "rel_l2": 2.482743344797914e-09,
+            "worst_ulp": 1,
+            "worst_coord": [
+              3,
+              131
+            ],
+            "reference": 9.250640869140625e-05,
+            "actual": 9.202957153320312e-05
+          },
+          "kv": {
+            "allclose": true,
+            "outside": 0,
+            "numel": 65536,
+            "max_abs": 0.0078125,
+            "mean_abs": 8.840190730552422e-07,
+            "rel_l2": 0.000147148360857166,
+            "worst_ulp": 5,
+            "worst_coord": [
+              26,
+              463
+            ],
+            "reference": 1.171875,
+            "actual": 1.1640625
+          }
+        },
+        {
+          "chunk": 1,
+          "status": "PASS",
+          "q_position": 1587,
+          "kv_rows_logical": [
+            1460,
+            1587
+          ],
+          "q": {
+            "allclose": true,
+            "outside": 0,
+            "numel": 16384,
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "rel_l2": 0.0,
+            "worst_ulp": 0,
+            "worst_coord": [
+              0,
+              0
+            ],
+            "reference": 2.6875,
+            "actual": 2.6875
+          },
+          "kv": {
+            "allclose": true,
+            "outside": 0,
+            "numel": 65536,
+            "max_abs": 0.0078125,
+            "mean_abs": 3.548723270796472e-07,
+            "rel_l2": 9.800308076003472e-05,
+            "worst_ulp": 4,
+            "worst_coord": [
+              10,
+              454
+            ],
+            "reference": -1.109375,
+            "actual": -1.1015625
+          }
+        }
+      ]
+    },
+    {
+      "rank": 1,
+      "input": "/home/funboy/StrixHaloClusterDS41/reports/DS41-Q2-001/m4-layer2-context-d454801/repeat-rank1-request0.pt",
+      "input_sha256": "1cb2b6bbb47b42cdcc3095806c1efd4ec0d700086c7cb7f7b47b2453fd39c88d",
+      "chunks": [
+        {
+          "chunk": 0,
+          "status": "PASS",
+          "q_position": 1022,
+          "kv_rows_logical": [
+            895,
+            1022
+          ],
+          "q": {
+            "allclose": true,
+            "outside": 0,
+            "numel": 16384,
+            "max_abs": 0.0078125,
+            "mean_abs": 5.367037374526262e-07,
+            "rel_l2": 3.805103254164676e-05,
+            "worst_ulp": 2,
+            "worst_coord": [
+              12,
+              214
+            ],
+            "reference": 1.25,
+            "actual": 1.2578125
+          },
+          "kv": {
+            "allclose": true,
+            "outside": 0,
+            "numel": 65536,
+            "max_abs": 0.0078125,
+            "mean_abs": 8.840190730552422e-07,
+            "rel_l2": 0.000147148360857166,
+            "worst_ulp": 5,
+            "worst_coord": [
+              26,
+              463
+            ],
+            "reference": 1.171875,
+            "actual": 1.1640625
+          }
+        },
+        {
+          "chunk": 1,
+          "status": "PASS",
+          "q_position": 1587,
+          "kv_rows_logical": [
+            1460,
+            1587
+          ],
+          "q": {
+            "allclose": true,
+            "outside": 0,
+            "numel": 16384,
+            "max_abs": 0.001953125,
+            "mean_abs": 1.192111085401848e-07,
+            "rel_l2": 8.459032574809239e-06,
+            "worst_ulp": 1,
+            "worst_coord": [
+              4,
+              94
+            ],
+            "reference": 0.48046875,
+            "actual": 0.478515625
+          },
+          "kv": {
+            "allclose": true,
+            "outside": 0,
+            "numel": 65536,
+            "max_abs": 0.0078125,
+            "mean_abs": 3.548723270796472e-07,
+            "rel_l2": 9.800308076003472e-05,
+            "worst_ulp": 4,
+            "worst_coord": [
+              10,
+              454
+            ],
+            "reference": -1.109375,
+            "actual": -1.1015625
+          }
+        }
+      ]
+    }
+  ],
+  "worst": {
+    "q_max_abs": 0.0078125,
+    "q_rank": 1,
+    "q_chunk": 0,
+    "q_detail": {
+      "max_abs": 0.0078125,
+      "mean_abs": 5.367037374526262e-07,
+      "rel_l2": 3.805103254164676e-05,
+      "worst_ulp": 2,
+      "worst_coord": [
+        12,
+        214
+      ],
+      "reference": 1.25,
+      "actual": 1.2578125
+    },
+    "kv_max_abs": 0.0078125,
+    "kv_rank": 1,
+    "kv_chunk": 1,
+    "kv_detail": {
+      "max_abs": 0.0078125,
+      "mean_abs": 3.548723270796472e-07,
+      "rel_l2": 9.800308076003472e-05,
+      "worst_ulp": 4,
+      "worst_coord": [
+        10,
+        454
+      ],
+      "reference": -1.109375,
+      "actual": -1.1015625
+    }
+  },
+  "reference": {
+    "capture_source": "d4548014d9903064074c2122bc92b690d366a3b6",
+    "preregister": "runtime/ds41/results/retrieval-fidelity-001-qkv-preregister.json",
+    "preregister_sha256": "d9480f76ba24ffa46f0236931d6ee47e61faf0163048165e709a1feb77c0fd0c",
+    "script": "scripts/check-ds41-qkv-projection-reference.py",
+    "script_sha256": "90a41aeca0ffe570a96d285134aed5e69c07076b753eb6e7cb6bae6a52d16c17",
+    "math": "direct BF16 GGUF bytes; FP32 matmul accumulation then BF16 cast; explicit FP32 RMSNorm then BF16; rank-local q_b; pure compressed YaRN RoPE",
+    "runtime_operator_reused": false
+  },
+  "interpretation": "Formation of the captured layer2 normalized KV endpoints and final Q endpoints conforms to the independent reference for the saved code2k1588 inputs within the frozen BF16 gate. This does not prove that attn_norm.x itself is semantically correct, nor downstream layers or full-model retrieval.",
+  "next_discriminator": {
+    "hypothesis": "If the retrieval failure is already present before layer2 Q/KV formation, the saved layer2 attention input state may be incorrect even though the local projection path is faithful.",
+    "control": "Use existing saved layer2 entry/attn_mhc_pre/attn_norm boundaries plus the capture-source layer2 MHC/RMS weights to independently replay only entry -> MHC-pre -> attn_norm on the same rows; no new model request/capture.",
+    "decision": "A PASS moves the first unverified boundary upstream of layer2 attention input; a FAIL localizes the endpoint discrepancy to this bounded state-preparation segment after contract/mapping verification.",
+    "execution": "NOT_STARTED"
+  }
+}

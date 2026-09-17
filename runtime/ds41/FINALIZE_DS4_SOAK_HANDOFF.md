@@ -1,5 +1,16 @@
 # FINALIZE DS4 SOAK — live handoff
 
+Updated: 2026-09-17 after same-source Engram serial control.
+Phase: one parallel4 confirmation required for cache-regime attribution.
+
+- Serial control epoch `1789639111974937319`, SAME release/source `k2-mmq-engram-9c13117` / `9c13117f...`, only `DS41_ENGRAM_READ_WORKERS=1`.
+- code-2k COMPLETE: prefill `29.238172s / 54.312561 tok/s`, TTFT `29.606769s`, wall `31.974004s`, cache0; semantic FAIL (`result=47`).
+- Serial pre-request mincore nearly empty: NODE01 ~1.18MB/sidecar, NODE02 ~1.38–1.72MB (<0.012%). Post request ~168.7–196.4MB.
+- Initial parallel4: `20.848176s / 76.169734 tok/s`, observed save `8.389996s`, but pre-request mincore was not captured.
+- Fixed next act: OFF once, SAME release with workers4, capture pre-request mincore, one frozen code-2k confirmation+validator. No worker sweep or MMQ replay.
+
+---
+
 Updated: 2026-09-17 after initial MMQ+Engram full-model request.
 Phase: Engram same-source attribution control next; CED remains blocked.
 

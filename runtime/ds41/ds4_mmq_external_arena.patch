@@ -1,0 +1,145 @@
+diff --git a/cuda/mmq/ds4_ggml_stubs.cu b/cuda/mmq/ds4_ggml_stubs.cu
+index 32212f9..0a94807 100644
+--- a/cuda/mmq/ds4_ggml_stubs.cu
++++ b/cuda/mmq/ds4_ggml_stubs.cu
+@@ -17,6 +17,7 @@
+ #include <cublas_v2.h>
+ #endif
+
++#include <algorithm>
+ #include <chrono>
+ #include <cstdio>
+ #include <cstdlib>
+@@ -119,6 +120,74 @@ int64_t ggml_time_us() {
+
+ namespace {
+
++#if defined(GGML_USE_HIP)
++struct ds4_external_span { size_t off; size_t size; };
++struct ds4_external_arena_state {
++    std::mutex mutex;
++    char *base = nullptr;
++    size_t bytes = 0;
++    size_t in_use = 0;
++    size_t high_water = 0;
++    uint64_t allocs = 0;
++    std::vector<ds4_external_span> free_spans;
++};
++static ds4_external_arena_state g_ds4_external_arena;
++
++static bool ds4_external_arena_enabled() {
++    std::lock_guard<std::mutex> guard(g_ds4_external_arena.mutex);
++    return g_ds4_external_arena.base != nullptr && g_ds4_external_arena.bytes != 0;
++}
++
++static void *ds4_external_arena_alloc(size_t size, size_t *actual_size) {
++    auto &a = g_ds4_external_arena;
++    std::lock_guard<std::mutex> guard(a.mutex);
++    if (!a.base || !a.bytes) return nullptr;
++    const size_t need = (size + 255u) & ~size_t(255u);
++    for (size_t i = 0; i < a.free_spans.size(); ++i) {
++        auto span = a.free_spans[i];
++        const size_t aligned = (span.off + 255u) & ~size_t(255u);
++        const size_t pad = aligned - span.off;
++        if (span.size < pad || span.size - pad < need) continue;
++        const size_t tail_off = aligned + need;
++        const size_t tail_size = (span.off + span.size) - tail_off;
++        a.free_spans.erase(a.free_spans.begin() + (long)i);
++        if (pad) a.free_spans.push_back({span.off, pad});
++        if (tail_size) a.free_spans.push_back({tail_off, tail_size});
++        a.in_use += need;
++        a.high_water = std::max(a.high_water, a.in_use);
++        ++a.allocs;
++        if (actual_size) *actual_size = need;
++        return a.base + aligned;
++    }
++    return nullptr;
++}
++
++static bool ds4_external_arena_free(void *ptr, size_t size) {
++    auto &a = g_ds4_external_arena;
++    std::lock_guard<std::mutex> guard(a.mutex);
++    if (!a.base || !ptr) return false;
++    char *p = static_cast<char *>(ptr);
++    if (p < a.base || p >= a.base + a.bytes) return false;
++    const size_t off = (size_t)(p - a.base);
++    const size_t used = (size + 255u) & ~size_t(255u);
++    if (off + used > a.bytes || used > a.in_use) {
++        fprintf(stderr, "ds4: invalid external arena free off=%zu size=%zu bytes=%zu in_use=%zu\n", off, used, a.bytes, a.in_use);
++        abort();
++    }
++    a.in_use -= used;
++    a.free_spans.push_back({off, used});
++    std::sort(a.free_spans.begin(), a.free_spans.end(), [](const auto &x, const auto &y){ return x.off < y.off; });
++    std::vector<ds4_external_span> merged;
++    merged.reserve(a.free_spans.size());
++    for (const auto &span : a.free_spans) {
++        if (!merged.empty() && merged.back().off + merged.back().size == span.off) merged.back().size += span.size;
++        else merged.push_back(span);
++    }
++    a.free_spans.swap(merged);
++    return true;
++}
++#endif
++
+ /* Thread-local stream that ds4_naive_pool uses for cudaMallocAsync /
+  * cudaFreeAsync.  Defaults to cudaStreamPerThread (preserves prior
+  * behaviour).  Step 8 / CUDA Graphs sets this to the capture stream
+@@ -138,6 +207,34 @@ extern "C" cudaStream_t ds4_pool_get_stream(void) {
+     return t_ds4_pool_stream;
+ }
+
++#if defined(GGML_USE_HIP)
++extern "C" int ds4_pool_set_external_arena(void *ptr, size_t bytes) {
++    auto &a = g_ds4_external_arena;
++    std::lock_guard<std::mutex> guard(a.mutex);
++    if (a.in_use != 0) return -1;
++    a.base = static_cast<char *>(ptr);
++    a.bytes = ptr ? bytes : 0;
++    a.in_use = 0;
++    a.high_water = 0;
++    a.allocs = 0;
++    a.free_spans.clear();
++    if (a.base && a.bytes) a.free_spans.push_back({0, a.bytes});
++    return 0;
++}
++extern "C" size_t ds4_pool_external_arena_high_water(void) {
++    std::lock_guard<std::mutex> guard(g_ds4_external_arena.mutex);
++    return g_ds4_external_arena.high_water;
++}
++extern "C" uint64_t ds4_pool_external_arena_allocs(void) {
++    std::lock_guard<std::mutex> guard(g_ds4_external_arena.mutex);
++    return g_ds4_external_arena.allocs;
++}
++extern "C" size_t ds4_pool_external_arena_in_use(void) {
++    std::lock_guard<std::mutex> guard(g_ds4_external_arena.mutex);
++    return g_ds4_external_arena.in_use;
++}
++#endif
++
+ namespace {
+
+ struct ds4_naive_pool : public ggml_cuda_pool {
+@@ -160,6 +257,14 @@ struct ds4_naive_pool : public ggml_cuda_pool {
+     void * alloc(size_t size, size_t * actual_size) override {
+         ggml_cuda_set_device(device);
+ #if defined(GGML_USE_HIP)
++        if (ds4_external_arena_enabled()) {
++            void *ptr = ds4_external_arena_alloc(size, actual_size);
++            if (!ptr) {
++                fprintf(stderr, "ds4: external MMQ arena exhausted: requested %.2f MiB\n", (double)size / 1048576.0);
++                CUDA_CHECK(hipErrorOutOfMemory);
++            }
++            return ptr;
++        }
+         {
+             std::lock_guard<std::mutex> guard(mutex);
+             size_t best = available.size();
+@@ -203,6 +308,7 @@ struct ds4_naive_pool : public ggml_cuda_pool {
+         if (!ptr) return;
+         ggml_cuda_set_device(device);
+ #if defined(GGML_USE_HIP)
++        if (ds4_external_arena_free(ptr, size)) return;
+         std::lock_guard<std::mutex> guard(mutex);
+         available.push_back({ptr, size, t_ds4_pool_stream});
+ #else

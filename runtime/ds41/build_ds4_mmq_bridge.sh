@@ -13,6 +13,7 @@ cleanup(){ git -C "$SRC" worktree remove --force "$TMP/ds4" >/dev/null 2>&1 || t
 trap cleanup EXIT
 git -C "$SRC" worktree add --detach "$TMP/ds4" "$PIN" >/dev/null
 git -C "$TMP/ds4" apply "$ROOT/runtime/ds41/ds4_mmq_interleaved_w13.patch"
+git -C "$TMP/ds4" apply "$ROOT/runtime/ds41/ds4_mmq_external_arena.patch"
 cd "$TMP/ds4"
 FLAGS=(-O3 -ffast-math -g -fno-finite-math-only -pthread -D__HIP_PLATFORM_AMD__ -Wno-unused-command-line-argument --offload-arch=gfx1151 -std=c++17 -DGGML_USE_HIP -DDS4_HIP_MMQ_Y=64 -Icuda/mmq -fPIC)
 for spec in \

@@ -1,0 +1,41 @@
+{
+  "schema": "ds41-mmq-external-arena-gate-v1",
+  "status": "PASS_RECOVERY_GATE",
+  "purpose": "Bounded component gate after full-model B1 failed before a valid sample because the DS4 standalone ROCm pool reserve guard rejected an internal allocation.",
+  "base_source": "b7a3480574ed443b3c8cfdbc4e5889897fb6e36d",
+  "b1_epoch": "1789624782020877084",
+  "upstream": "antirez/ds4@8db1d1d155cb0400a86a86b9c62d0defb3a6148b",
+  "candidate_library_sha256": "7c19b29e8e1cfd37fe1fc6f8005ac59c64aa9f0b0cd7e0a897fb3a0313ed6756",
+  "candidate_files": {
+    "runtime/ds41/ds4_mmq_external_arena.patch": "d019c35519bc3b886bbf433b51f841463c07c84c49cfe051e7133ce01e596f83",
+    "runtime/ds41/ds4_mmq_runtime.py": "800628909041f41e2c1d7726260b194e33162434df76ac54b21541a915f88304",
+    "runtime/ds41/build_ds4_mmq_bridge.sh": "8dac33fe523d7b0f321108860214f817a11fba423521d6c18306cb22321990c7",
+    "scripts/test-ds41-ds4-external-arena.py": "ed718919d72995856dbb7d642c9b2df571e54000703fa3020779d41cd48bf799"
+  },
+  "fixture": {
+    "rank0": "reports/DS41-Q2-001/blockm-real-fixtures-bc41a35/route-fixture-rank0-call00.pt",
+    "rank1": "reports/DS41-Q2-001/blockm-real-fixtures-bc41a35/route-fixture-rank1-call00.pt",
+    "tokens": 1023,
+    "arena_bytes": 67108864,
+    "repeats": 3
+  },
+  "rank0": {
+    "status": "PASS",
+    "allocs": 24,
+    "high_water_bytes": 35414272,
+    "in_use_bytes": 0,
+    "repeat_exact": true,
+    "finite": true,
+    "ep2_map_exact": true
+  },
+  "rank1": {
+    "status": "PASS",
+    "allocs": 24,
+    "high_water_bytes": 35414272,
+    "in_use_bytes": 0,
+    "repeat_exact": true,
+    "finite": true,
+    "ep2_map_exact": true
+  },
+  "decision": "Admit one new B2 request ID only. Do not replay B1. The recovery changes allocation plumbing, not MMQ math; preserve B1 as a setup/runtime-memory failure and require full-model B2 plus DS4 exit stats before any performance claim."
+}

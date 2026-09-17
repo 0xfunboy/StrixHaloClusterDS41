@@ -1,0 +1,530 @@
+{
+  "schema": "ds41-v41-index-k-ownership-v1",
+  "status": "NOT_APPLICABLE_PROVED",
+  "source": "/home/funboy/.local/share/haloclu-ds41/releases/k2-layer2diag-d454801/.vendor/vllm-dsv41/vllm/models/deepseek_v4_1/attention.py",
+  "source_sha256": "3198a63ae610032806b58a68d911646093059ca077fbbb1e436af0003dba10ad",
+  "hf12_bug_shape": "mutable shared index_k pointer published only when owns_k && latent != None",
+  "local_design": "per-source DeepseekV4IndexerCache objects; non-owning index sources bind directly to latest kv-source cache object in static_forward_context; _produce_k may skip writes but does not select/rebind cache",
+  "checks": {
+    "no_mutable_global_index_k_slot": true,
+    "constructor_binds_indexer_to_cache_object": true,
+    "incomplete_group_does_not_rebind_cache": true,
+    "forward_consumes_bound_indexer_cache": true,
+    "all_index_sources_have_expected_cache_identity": true,
+    "all_full_sources_keep_own_cache_across_frontiers": true,
+    "reindexers_share_source20_cache_by_object_identity": true
+  },
+  "index_cache_identity": {
+    "2": {
+      "role": "FULL_SOURCE",
+      "kv_source": 2,
+      "same_object": true
+    },
+    "8": {
+      "role": "FULL_SOURCE",
+      "kv_source": 8,
+      "same_object": true
+    },
+    "14": {
+      "role": "FULL_SOURCE",
+      "kv_source": 14,
+      "same_object": true
+    },
+    "20": {
+      "role": "FULL_SOURCE",
+      "kv_source": 20,
+      "same_object": true
+    },
+    "24": {
+      "role": "REINDEX",
+      "kv_source": 20,
+      "same_object": true
+    },
+    "28": {
+      "role": "REINDEX",
+      "kv_source": 20,
+      "same_object": true
+    },
+    "32": {
+      "role": "REINDEX",
+      "kv_source": 20,
+      "same_object": true
+    },
+    "36": {
+      "role": "REINDEX",
+      "kv_source": 20,
+      "same_object": true
+    }
+  },
+  "frontier_cases": [
+    {
+      "frontier": 0,
+      "parity": "even",
+      "layer": 2,
+      "latent_present": false,
+      "selected_source": 2,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 0,
+      "parity": "even",
+      "layer": 8,
+      "latent_present": false,
+      "selected_source": 8,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 0,
+      "parity": "even",
+      "layer": 14,
+      "latent_present": false,
+      "selected_source": 14,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 0,
+      "parity": "even",
+      "layer": 20,
+      "latent_present": true,
+      "selected_source": 20,
+      "selected_is_own": true,
+      "selected_is_previous_source20": true
+    },
+    {
+      "frontier": 1,
+      "parity": "odd",
+      "layer": 2,
+      "latent_present": true,
+      "selected_source": 2,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 1,
+      "parity": "odd",
+      "layer": 8,
+      "latent_present": true,
+      "selected_source": 8,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 1,
+      "parity": "odd",
+      "layer": 14,
+      "latent_present": true,
+      "selected_source": 14,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 1,
+      "parity": "odd",
+      "layer": 20,
+      "latent_present": true,
+      "selected_source": 20,
+      "selected_is_own": true,
+      "selected_is_previous_source20": true
+    },
+    {
+      "frontier": 2,
+      "parity": "even",
+      "layer": 2,
+      "latent_present": false,
+      "selected_source": 2,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 2,
+      "parity": "even",
+      "layer": 8,
+      "latent_present": false,
+      "selected_source": 8,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 2,
+      "parity": "even",
+      "layer": 14,
+      "latent_present": false,
+      "selected_source": 14,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 2,
+      "parity": "even",
+      "layer": 20,
+      "latent_present": true,
+      "selected_source": 20,
+      "selected_is_own": true,
+      "selected_is_previous_source20": true
+    },
+    {
+      "frontier": 3,
+      "parity": "odd",
+      "layer": 2,
+      "latent_present": true,
+      "selected_source": 2,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 3,
+      "parity": "odd",
+      "layer": 8,
+      "latent_present": true,
+      "selected_source": 8,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 3,
+      "parity": "odd",
+      "layer": 14,
+      "latent_present": true,
+      "selected_source": 14,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 3,
+      "parity": "odd",
+      "layer": 20,
+      "latent_present": true,
+      "selected_source": 20,
+      "selected_is_own": true,
+      "selected_is_previous_source20": true
+    },
+    {
+      "frontier": 1022,
+      "parity": "even",
+      "layer": 2,
+      "latent_present": false,
+      "selected_source": 2,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 1022,
+      "parity": "even",
+      "layer": 8,
+      "latent_present": false,
+      "selected_source": 8,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 1022,
+      "parity": "even",
+      "layer": 14,
+      "latent_present": false,
+      "selected_source": 14,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 1022,
+      "parity": "even",
+      "layer": 20,
+      "latent_present": true,
+      "selected_source": 20,
+      "selected_is_own": true,
+      "selected_is_previous_source20": true
+    },
+    {
+      "frontier": 1023,
+      "parity": "odd",
+      "layer": 2,
+      "latent_present": true,
+      "selected_source": 2,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 1023,
+      "parity": "odd",
+      "layer": 8,
+      "latent_present": true,
+      "selected_source": 8,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 1023,
+      "parity": "odd",
+      "layer": 14,
+      "latent_present": true,
+      "selected_source": 14,
+      "selected_is_own": true,
+      "selected_is_previous_source20": false
+    },
+    {
+      "frontier": 1023,
+      "parity": "odd",
+      "layer": 20,
+      "latent_present": true,
+      "selected_source": 20,
+      "selected_is_own": true,
+      "selected_is_previous_source20": true
+    }
+  ],
+  "reindex_cases": [
+    {
+      "layer": 24,
+      "source": 20,
+      "same_object_as_source20": true
+    },
+    {
+      "layer": 28,
+      "source": 20,
+      "same_object_as_source20": true
+    },
+    {
+      "layer": 32,
+      "source": 20,
+      "same_object_as_source20": true
+    },
+    {
+      "layer": 36,
+      "source": 20,
+      "same_object_as_source20": true
+    }
+  ],
+  "layer_source_map": [
+    {
+      "layer": 2,
+      "role": "FULL_SOURCE",
+      "kv_source": 2,
+      "index_source": 2
+    },
+    {
+      "layer": 3,
+      "role": "REUSE",
+      "kv_source": 2,
+      "index_source": 2
+    },
+    {
+      "layer": 4,
+      "role": "REUSE",
+      "kv_source": 2,
+      "index_source": 2
+    },
+    {
+      "layer": 5,
+      "role": "REUSE",
+      "kv_source": 2,
+      "index_source": 2
+    },
+    {
+      "layer": 6,
+      "role": "REUSE",
+      "kv_source": 2,
+      "index_source": 2
+    },
+    {
+      "layer": 7,
+      "role": "REUSE",
+      "kv_source": 2,
+      "index_source": 2
+    },
+    {
+      "layer": 8,
+      "role": "FULL_SOURCE",
+      "kv_source": 8,
+      "index_source": 8
+    },
+    {
+      "layer": 9,
+      "role": "REUSE",
+      "kv_source": 8,
+      "index_source": 8
+    },
+    {
+      "layer": 10,
+      "role": "REUSE",
+      "kv_source": 8,
+      "index_source": 8
+    },
+    {
+      "layer": 11,
+      "role": "REUSE",
+      "kv_source": 8,
+      "index_source": 8
+    },
+    {
+      "layer": 12,
+      "role": "REUSE",
+      "kv_source": 8,
+      "index_source": 8
+    },
+    {
+      "layer": 13,
+      "role": "REUSE",
+      "kv_source": 8,
+      "index_source": 8
+    },
+    {
+      "layer": 14,
+      "role": "FULL_SOURCE",
+      "kv_source": 14,
+      "index_source": 14
+    },
+    {
+      "layer": 15,
+      "role": "REUSE",
+      "kv_source": 14,
+      "index_source": 14
+    },
+    {
+      "layer": 16,
+      "role": "REUSE",
+      "kv_source": 14,
+      "index_source": 14
+    },
+    {
+      "layer": 17,
+      "role": "REUSE",
+      "kv_source": 14,
+      "index_source": 14
+    },
+    {
+      "layer": 18,
+      "role": "REUSE",
+      "kv_source": 14,
+      "index_source": 14
+    },
+    {
+      "layer": 19,
+      "role": "REUSE",
+      "kv_source": 14,
+      "index_source": 14
+    },
+    {
+      "layer": 20,
+      "role": "FULL_SOURCE",
+      "kv_source": 20,
+      "index_source": 20
+    },
+    {
+      "layer": 21,
+      "role": "REUSE",
+      "kv_source": 20,
+      "index_source": 20
+    },
+    {
+      "layer": 22,
+      "role": "REUSE",
+      "kv_source": 20,
+      "index_source": 20
+    },
+    {
+      "layer": 23,
+      "role": "REUSE",
+      "kv_source": 20,
+      "index_source": 20
+    },
+    {
+      "layer": 24,
+      "role": "REINDEX",
+      "kv_source": 20,
+      "index_source": 24
+    },
+    {
+      "layer": 25,
+      "role": "REUSE",
+      "kv_source": 20,
+      "index_source": 24
+    },
+    {
+      "layer": 26,
+      "role": "REUSE",
+      "kv_source": 20,
+      "index_source": 24
+    },
+    {
+      "layer": 27,
+      "role": "REUSE",
+      "kv_source": 20,
+      "index_source": 24
+    },
+    {
+      "layer": 28,
+      "role": "REINDEX",
+      "kv_source": 20,
+      "index_source": 28
+    },
+    {
+      "layer": 29,
+      "role": "REUSE",
+      "kv_source": 20,
+      "index_source": 28
+    },
+    {
+      "layer": 30,
+      "role": "REUSE",
+      "kv_source": 20,
+      "index_source": 28
+    },
+    {
+      "layer": 31,
+      "role": "REUSE",
+      "kv_source": 20,
+      "index_source": 28
+    },
+    {
+      "layer": 32,
+      "role": "REINDEX",
+      "kv_source": 20,
+      "index_source": 32
+    },
+    {
+      "layer": 33,
+      "role": "REUSE",
+      "kv_source": 20,
+      "index_source": 32
+    },
+    {
+      "layer": 34,
+      "role": "REUSE",
+      "kv_source": 20,
+      "index_source": 32
+    },
+    {
+      "layer": 35,
+      "role": "REUSE",
+      "kv_source": 20,
+      "index_source": 32
+    },
+    {
+      "layer": 36,
+      "role": "REINDEX",
+      "kv_source": 20,
+      "index_source": 36
+    },
+    {
+      "layer": 37,
+      "role": "REUSE",
+      "kv_source": 20,
+      "index_source": 36
+    },
+    {
+      "layer": 38,
+      "role": "REUSE",
+      "kv_source": 20,
+      "index_source": 36
+    },
+    {
+      "layer": 39,
+      "role": "REUSE",
+      "kv_source": 20,
+      "index_source": 36
+    }
+  ],
+  "scope": "ownership/cache-object selection only; does not validate K values, index scores, or full-model quality"
+}

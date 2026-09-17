@@ -1,0 +1,176 @@
+{
+  "schema": "ds41-retrieval-fidelity-001-swa-recent-kv-result-v1",
+  "status": "PASS",
+  "completed_at": 1789656387.1517136,
+  "packets": {
+    "rank0": "reports/DS41-Q2-001/m4-layer2-context-d454801/repeat-rank0-request0.pt",
+    "rank0_sha256": "b4c0735336b4b3fac0588bfff9c3b552b4cbcba4b2e3ee74e717650b9809df7f",
+    "rank1": "reports/DS41-Q2-001/m4-layer2-context-d454801/repeat-rank1-request0.pt",
+    "rank1_sha256": "1cb2b6bbb47b42cdcc3095806c1efd4ec0d700086c7cb7f7b47b2453fd39c88d",
+    "request_index": 0,
+    "prompt_tokens": 1588,
+    "payload_sha256": "4926fd629b1b2057762c617c985e64211a9853c2678260758ee8ea4e09a364fd",
+    "corpus_sha256": "c162e1102363a8d7dea3891bacac73d18948cde6af8014b92d867cf7e4271993"
+  },
+  "association": {
+    "rank0_chunk0": {
+      "pass": true,
+      "checks": {
+        "combined_len": true,
+        "workspace_region": true,
+        "logical_consecutive": true,
+        "source_tail": true,
+        "source_positions": true
+      },
+      "projection_positions": [
+        0,
+        1022
+      ],
+      "logical_swa": [
+        895,
+        1022
+      ],
+      "source_indices": [
+        895,
+        1022
+      ],
+      "workspace_indices": [
+        33727,
+        33854
+      ],
+      "gather_start": 0,
+      "gather_len": 1023,
+      "topk_len": 511,
+      "swa_len": 128
+    },
+    "rank0_chunk1": {
+      "pass": true,
+      "checks": {
+        "combined_len": true,
+        "workspace_region": true,
+        "logical_consecutive": true,
+        "source_tail": true,
+        "source_positions": true
+      },
+      "projection_positions": [
+        1023,
+        1587
+      ],
+      "logical_swa": [
+        1460,
+        1587
+      ],
+      "source_indices": [
+        437,
+        564
+      ],
+      "workspace_indices": [
+        33396,
+        33523
+      ],
+      "gather_start": 896,
+      "gather_len": 692,
+      "topk_len": 512,
+      "swa_len": 128
+    },
+    "rank1_chunk0": {
+      "pass": true,
+      "checks": {
+        "combined_len": true,
+        "workspace_region": true,
+        "logical_consecutive": true,
+        "source_tail": true,
+        "source_positions": true
+      },
+      "projection_positions": [
+        0,
+        1022
+      ],
+      "logical_swa": [
+        895,
+        1022
+      ],
+      "source_indices": [
+        895,
+        1022
+      ],
+      "workspace_indices": [
+        33727,
+        33854
+      ],
+      "gather_start": 0,
+      "gather_len": 1023,
+      "topk_len": 511,
+      "swa_len": 128
+    },
+    "rank1_chunk1": {
+      "pass": true,
+      "checks": {
+        "combined_len": true,
+        "workspace_region": true,
+        "logical_consecutive": true,
+        "source_tail": true,
+        "source_positions": true
+      },
+      "projection_positions": [
+        1023,
+        1587
+      ],
+      "logical_swa": [
+        1460,
+        1587
+      ],
+      "source_indices": [
+        437,
+        564
+      ],
+      "workspace_indices": [
+        33396,
+        33523
+      ],
+      "gather_start": 896,
+      "gather_len": 692,
+      "topk_len": 512,
+      "swa_len": 128
+    }
+  },
+  "gate_totals": {
+    "rows_checked": 512,
+    "nope_tokens_outside_gate": 0,
+    "rope_tokens_outside_gate": 0,
+    "diagnostic_nope_blocks_outside_own_16x_scale": 0,
+    "worst_rope_ulp": 1,
+    "worst_nope_token_ratio": 1.0,
+    "max_nope_abs": 0.0625
+  },
+  "same_prompt_fact_localization": {
+    "prompt": "code2k1588, not discriminator1571",
+    "fact": "DISTANT_FACT_END=5",
+    "fact_start_token_approx": 1490,
+    "fact_end_token_approx": 1498,
+    "tokens_after_fact_to_full_prompt": 89,
+    "verified_final_swa_logical_range": [
+      1460,
+      1587
+    ],
+    "inside_verified_swa": true,
+    "method": "same DeepseekV41 chat-template/tokenizer path on frozen code-2k corpus; boundary count is diagnostic and not reused from1571"
+  },
+  "reference": {
+    "vendor_revision": "0bfb653d3b5161660db9ada0d84c2cdd60961de7",
+    "fused_insert_test": ".vendor/vllm-dsv41/tests/kernels/test_fused_deepseek_v4_qnorm_rope_kv_insert.py",
+    "fused_insert_test_sha256": "f5397a1b8c966731b8b97caabae7ada3633a317711c98c39edd424c71b9215db",
+    "bf16_ulp_helper": ".vendor/vllm-dsv41/tests/kernels/utils.py::bf16_ulp_distance",
+    "utils_sha256": "0a4126b78d3305256da09f319a089da87562e0321c996b8d250beab206987b10",
+    "rope_math": "DeepseekV4ScalingRotaryEmbedding formulas mirrored pure CPU; no vLLM runtime construction",
+    "fp8_encoding": "OCP e4m3fn on gfx1151",
+    "fp8_max": 448.0
+  },
+  "gates": {
+    "nope448": "per-token max_abs <=16*max UE8M0 scale, FP8_MAX=448",
+    "rope64": "max BF16 ULP <=1"
+  },
+  "decision": "SWA_RECENT_KV_CONFORMS_AT_SAVED_CODE2K1588_LAYER2_PACKETS",
+  "interpretation": "The saved layer2 recent/SWA KV path preserves the mapped code2k1588 rows through RoPE + UE8M0 cache write/gather within pinned upstream gates on both ranks/chunks. This excludes this component path for these packets only; it does not prove full-model retrieval, other layers, discriminator1571, indexer semantics, or model capability.",
+  "next": "No patch and no automatic indexer capture. If diagnosis continues, the next discriminant must be derived from this PASS and use existing saved tensors or be separately preregistered."
+}

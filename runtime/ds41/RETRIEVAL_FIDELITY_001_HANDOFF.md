@@ -47,3 +47,11 @@ No other generation request is authorized in this checkpoint.
 - K2 rollback restored and READY/idle epoch `1789651304744356945`.
 - Provenance correction: these packets are code2k1588 request0, not discriminator1571; do not transfer token coordinates between them.
 - NEXT: CPU-only SWA recent-KV reference on saved rank0+rank1 code2k1588 packets. Verify logical association and capture boundary before comparison; upstream gates fixed as NoPE448 <=16×per-token max UE8M0 scale and RoPE64 <=1 BF16 ULP. No inference/GPU replay/load/indexer capture.
+
+## SWA recent-KV terminal
+- PASS on saved code2k1588 request0, both ranks/chunks; this is not discriminator1571.
+- Association PASS: chunk0 logical895..1022; chunk1 logical1460..1587; source rows are the verified chunk tails on both ranks.
+- 512 rows checked. NoPE448:0 tokens outside frozen16×max-scale gate,0 diagnostic blocks outside own16×scale. RoPE64:0 tokens outside <=1ULP; worst1ULP.
+- Same code2k1588 `DISTANT_FACT_END=5` localizes around1490..1498, inside verified final SWA1460..1587.
+- Decision: `SWA_RECENT_KV_CONFORMS_AT_SAVED_CODE2K1588_LAYER2_PACKETS`; component-only, no overall retrieval claim.
+- NEXT: no SWA patch and no automatic indexer capture. Any further discriminator must be derived from this PASS and use saved tensors first or be separately preregistered. K2 service remains READY/idle.

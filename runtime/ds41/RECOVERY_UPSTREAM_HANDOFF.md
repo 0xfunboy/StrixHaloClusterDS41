@@ -34,3 +34,7 @@
 - Non-equivalent: local window/compressed KV `fp8_ds_mla` vs V4.1 QAT reference; local gfx1151 index Q/K FP8 vs V4.1 FP4 QAT contract.
 - Strong model-artifact difference: Engram sidecar is `Vontra/DeepSeek-V4.1-Flash-MLX-2bit-MTP@802f1a0...` affine2 (embedding/WKV), not native FP8 Engram. TP split/parallel reader preserve this local source only.
 - No causal patch from R1c. NEXT R2 same-input window-QAT differential offline on saved code2k1588; no model load yet.
+## R2 — window-QAT same-input differential
+- `MATERIAL_COMPONENT_EFFECT`: replacing only SWA128 rows with V4.1 window-QAT emulation changes rank1 chunk1 attention beyond frozen0.02/0.02 gate (3/16384, max-abs0.0703125). Other rank/chunks remain within gate.
+- This proves a representation choice can materially change the saved component output, not which representation is end-to-end correct.
+- NEXT: one bounded full-model localization window with an isolated window-QAT semantic QDQ patch, only if it can be inserted without changing unrelated contracts.

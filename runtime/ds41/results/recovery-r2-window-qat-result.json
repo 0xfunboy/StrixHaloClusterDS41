@@ -1,0 +1,200 @@
+{
+  "schema": "ds41-recovery-r2-window-qat-result-v1",
+  "status": "MATERIAL_COMPONENT_EFFECT",
+  "ranks": [
+    {
+      "schema": "ds41-r2-window-qat-differential-v1",
+      "status": "EQUIVALENT_AT_ATTENTION_GATE",
+      "rank": 0,
+      "input": "reports/DS41-Q2-001/m4-layer2-context-d454801/repeat-rank0-request0.pt",
+      "prompt_tokens": 1588,
+      "request_index": 0,
+      "change": "replace only final-query 128 SWA rows with V4.1 reference window FP8 block32 UE8M0 QDQ; Q, compressed rows, indices, sink and attention math fixed",
+      "gate": {
+        "atol": 0.02,
+        "rtol": 0.02,
+        "basis": "same upstream sparse-attention equivalence gate used in prior saved-packet reference"
+      },
+      "chunks": [
+        {
+          "chunk": 0,
+          "logical_swa": [
+            895,
+            1022
+          ],
+          "row_delta_official_qat_vs_local": {
+            "max_abs": 0.125,
+            "mean_abs": 0.0013289740309119225,
+            "rel_l2": 0.017869798279577704,
+            "exact": false
+          },
+          "local_reference_sanity": {
+            "equivalent_gate": true,
+            "outside": 0,
+            "numel": 16384,
+            "max_abs": 0.00390625,
+            "mean_abs": 3.316182119306177e-05,
+            "rel_l2": 0.0011432655370715874,
+            "gate": {
+              "atol": 0.02,
+              "rtol": 0.02
+            }
+          },
+          "attention_delta_official_window_qat_vs_local": {
+            "equivalent_gate": true,
+            "outside": 0,
+            "numel": 16384,
+            "max_abs": 0.03125,
+            "mean_abs": 0.0003642772790044546,
+            "rel_l2": 0.007738090660545257,
+            "gate": {
+              "atol": 0.02,
+              "rtol": 0.02
+            }
+          }
+        },
+        {
+          "chunk": 1,
+          "logical_swa": [
+            1460,
+            1587
+          ],
+          "row_delta_official_qat_vs_local": {
+            "max_abs": 0.125,
+            "mean_abs": 0.0013368837535381317,
+            "rel_l2": 0.017523480897051715,
+            "exact": false
+          },
+          "local_reference_sanity": {
+            "equivalent_gate": true,
+            "outside": 0,
+            "numel": 16384,
+            "max_abs": 0.00390625,
+            "mean_abs": 2.6828523914446123e-05,
+            "rel_l2": 0.0009506403591160295,
+            "gate": {
+              "atol": 0.02,
+              "rtol": 0.02
+            }
+          },
+          "attention_delta_official_window_qat_vs_local": {
+            "equivalent_gate": true,
+            "outside": 0,
+            "numel": 16384,
+            "max_abs": 0.03125,
+            "mean_abs": 0.00032727609504945576,
+            "rel_l2": 0.006658252881869773,
+            "gate": {
+              "atol": 0.02,
+              "rtol": 0.02
+            }
+          }
+        }
+      ],
+      "scope": "component effect only; not correctness or full-model quality",
+      "execution": {
+        "cpu_only": true,
+        "model_load": false,
+        "generation": false
+      }
+    },
+    {
+      "schema": "ds41-r2-window-qat-differential-v1",
+      "status": "MATERIAL_COMPONENT_EFFECT",
+      "rank": 1,
+      "input": "reports/DS41-Q2-001/m4-layer2-context-d454801/repeat-rank1-request0.pt",
+      "prompt_tokens": 1588,
+      "request_index": 0,
+      "change": "replace only final-query 128 SWA rows with V4.1 reference window FP8 block32 UE8M0 QDQ; Q, compressed rows, indices, sink and attention math fixed",
+      "gate": {
+        "atol": 0.02,
+        "rtol": 0.02,
+        "basis": "same upstream sparse-attention equivalence gate used in prior saved-packet reference"
+      },
+      "chunks": [
+        {
+          "chunk": 0,
+          "logical_swa": [
+            895,
+            1022
+          ],
+          "row_delta_official_qat_vs_local": {
+            "max_abs": 0.125,
+            "mean_abs": 0.0013289740309119225,
+            "rel_l2": 0.017869798279577704,
+            "exact": false
+          },
+          "local_reference_sanity": {
+            "equivalent_gate": true,
+            "outside": 0,
+            "numel": 16384,
+            "max_abs": 0.0078125,
+            "mean_abs": 2.7871425118064508e-05,
+            "rel_l2": 0.0009371284169275088,
+            "gate": {
+              "atol": 0.02,
+              "rtol": 0.02
+            }
+          },
+          "attention_delta_official_window_qat_vs_local": {
+            "equivalent_gate": true,
+            "outside": 0,
+            "numel": 16384,
+            "max_abs": 0.0390625,
+            "mean_abs": 0.0003247161512263119,
+            "rel_l2": 0.005956242829440447,
+            "gate": {
+              "atol": 0.02,
+              "rtol": 0.02
+            }
+          }
+        },
+        {
+          "chunk": 1,
+          "logical_swa": [
+            1460,
+            1587
+          ],
+          "row_delta_official_qat_vs_local": {
+            "max_abs": 0.125,
+            "mean_abs": 0.0013368837535381317,
+            "rel_l2": 0.017523480897051715,
+            "exact": false
+          },
+          "local_reference_sanity": {
+            "equivalent_gate": true,
+            "outside": 0,
+            "numel": 16384,
+            "max_abs": 0.00390625,
+            "mean_abs": 3.2209354685619473e-05,
+            "rel_l2": 0.0010524881537334093,
+            "gate": {
+              "atol": 0.02,
+              "rtol": 0.02
+            }
+          },
+          "attention_delta_official_window_qat_vs_local": {
+            "equivalent_gate": false,
+            "outside": 3,
+            "numel": 16384,
+            "max_abs": 0.0703125,
+            "mean_abs": 0.0005040558171458542,
+            "rel_l2": 0.010607725122402573,
+            "gate": {
+              "atol": 0.02,
+              "rtol": 0.02
+            }
+          }
+        }
+      ],
+      "scope": "component effect only; not correctness or full-model quality",
+      "execution": {
+        "cpu_only": true,
+        "model_load": false,
+        "generation": false
+      }
+    }
+  ],
+  "decision": "One bounded full-model localization window is warranted for a window-QAT semantic patch; this component result is not itself a correctness result.",
+  "scope": "same saved code2k1588 Q/context/index/sink with only SWA128 representation changed"
+}

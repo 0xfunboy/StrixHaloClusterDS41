@@ -1,0 +1,116 @@
+{
+  "schema": "ds41-mmq-fullmodel-a-v1",
+  "arm": "A",
+  "source": "ff582d652796e5e9fff2b1ecd488f48d0c06acbe",
+  "epoch": "1789618441080477567",
+  "config": {
+    "k2": true,
+    "block_m": 4,
+    "canonical_prefill": true,
+    "ds4_mmq_prefill": false
+  },
+  "metrics": {
+    "prompt_tokens": 1588,
+    "completion_tokens": 43,
+    "reasoning_tokens": 0,
+    "prompt_tokens_computed": 1588,
+    "prompt_tokens_cached": 0,
+    "prompt_tokens_local_cache": 0,
+    "prompt_tokens_external_cache": 0,
+    "prompt_tokens_cache_creation": 0,
+    "pair_prefill_engine_ms_max": 96829.7109375,
+    "prefill_engine_ms_rank0": 96368.328125,
+    "prefill_engine_tok_s_critical": 16.399925029467404,
+    "engine_time_to_first_token_ms": 96626.15547899622,
+    "engine_queue_time_ms": 4.099632962606847,
+    "client_ttft_any_s": 97.5222240339499,
+    "client_first_final_s": 97.5222240339499,
+    "input_over_client_ttft_tok_s": 16.283467852898617,
+    "decode_tps_engine": 15.38134581752155,
+    "output_wall_tok_s": 0.4291945449712725,
+    "draft_acceptance": 0.7647058823529411,
+    "speculative_decoding": {
+      "acceptance_histogram": [
+        2,
+        4,
+        11
+      ],
+      "draft_acceptance_rate": 0.7647058823529411,
+      "mean_acceptance_length": 2.5294117647058822,
+      "num_accepted_draft_tokens": 26,
+      "num_draft_tokens": 34,
+      "num_spec_steps": 17,
+      "num_spec_tokens": 2,
+      "per_step_accepted": [
+        2,
+        0,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        0,
+        1,
+        1,
+        1
+      ],
+      "per_step_drafted": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    }
+  },
+  "http": {
+    "status": 200,
+    "headers_s": 0.4685384159674868,
+    "wall_s": 100.18766665097792
+  },
+  "output": "{\"result\": 52, \"first_file\": \"__init__.py\", \"last_file\": \"test-ds41-prefill-metrics.py\", \"median_file\": \"app/envelope_test.go\"}",
+  "finish_reason": "stop",
+  "semantic_validation": {
+    "status": "FAIL",
+    "label": "mmq-ab-A2-code2k",
+    "prompt_tokens_local_manifest": 1588,
+    "prompt_tokens_server": 1588,
+    "expected": {
+      "result": 52,
+      "first_file": "__init__.py",
+      "middle_file": "_ds41_artifact.py",
+      "last_file": "envelope_test.go"
+    },
+    "actual": {
+      "result": 52,
+      "first_file": "__init__.py",
+      "last_file": "test-ds41-prefill-metrics.py",
+      "median_file": "app/envelope_test.go"
+    },
+    "semantic_pass": false,
+    "cached_zero": true,
+    "computed_present": true,
+    "prefill_present": true,
+    "server_matches_local_token_count": true,
+    "done": true,
+    "finish_reason": "stop"
+  }
+}

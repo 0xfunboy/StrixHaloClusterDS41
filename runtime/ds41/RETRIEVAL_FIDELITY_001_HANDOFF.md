@@ -38,3 +38,11 @@ No other generation request is authorized in this checkpoint.
 - Frozen control: saved real code2k request0, chunk0+1, both ranks; CPU-only reference vs captured ROCm kernel output.
 - PASS excludes sparse-attention arithmetic at those packets only; FAIL localizes that component.
 - Preregister: `runtime/ds41/results/retrieval-fidelity-001-sparse-reference-preregister.{json,md}`.
+
+## Sparse-attention independent reference terminal
+- PASS rank0+rank1, chunk0+chunk1: 65,536 elements, 0 outside upstream `atol=rtol=0.02`.
+- Worst max-abs `0.0078125`; worst rel-L2 `0.00114327`. CPU-only, no model load/generation/GPU kernel.
+- Decision: `SPARSE_ATTENTION_ARITHMETIC_EXCLUDED_AT_CAPTURED_LAYER2_PACKETS`.
+- Scope limit: ordered Q/KV/sink arithmetic only; selected-context correctness/indexer remains open.
+- K2 rollback restored and READY/idle epoch `1789651304744356945`.
+- NEXT: inspect saved indexer/top-k evidence for an independent selection reference; no new generation until preregistered.

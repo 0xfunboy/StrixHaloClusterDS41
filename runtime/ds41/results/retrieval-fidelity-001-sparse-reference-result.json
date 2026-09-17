@@ -1,0 +1,143 @@
+{
+  "schema": "ds41-retrieval-fidelity-001-sparse-reference-result-v1",
+  "status": "PASS",
+  "reference_source": ".vendor/vllm-dsv41/tests/kernels/attention/test_rocm_triton_attn_dsv4.py::_ref_sparse_prefill_ragged",
+  "gate": {
+    "atol": 0.02,
+    "rtol": 0.02,
+    "source": "vendored upstream test assertion"
+  },
+  "ranks": [
+    {
+      "schema": "ds41-sparse-attn-real-reference-v1",
+      "status": "PASS",
+      "rank": 0,
+      "input": "reports/DS41-Q2-001/m4-layer2-context-d454801/repeat-rank0-request0.pt",
+      "prompt_tokens": 1588,
+      "request_index": 0,
+      "reference_source": ".vendor/vllm-dsv41/tests/kernels/attention/test_rocm_triton_attn_dsv4.py::_ref_sparse_prefill_ragged",
+      "gate": {
+        "atol": 0.02,
+        "rtol": 0.02,
+        "source": "vendored upstream test assertion"
+      },
+      "chunks": [
+        {
+          "chunk": 0,
+          "position_start": 0,
+          "position_end": 1022,
+          "context_rows": 639,
+          "metric": {
+            "shape": [
+              32,
+              512
+            ],
+            "finite": true,
+            "allclose_upstream_gate": true,
+            "not_close": 0,
+            "numel": 16384,
+            "max_abs": 0.00390625,
+            "mean_abs": 3.316182119306177e-05,
+            "rel_l2": 0.0011432655370715874,
+            "atol": 0.02,
+            "rtol": 0.02
+          }
+        },
+        {
+          "chunk": 1,
+          "position_start": 1023,
+          "position_end": 1587,
+          "context_rows": 640,
+          "metric": {
+            "shape": [
+              32,
+              512
+            ],
+            "finite": true,
+            "allclose_upstream_gate": true,
+            "not_close": 0,
+            "numel": 16384,
+            "max_abs": 0.00390625,
+            "mean_abs": 2.6828523914446123e-05,
+            "rel_l2": 0.0009506403591160295,
+            "atol": 0.02,
+            "rtol": 0.02
+          }
+        }
+      ],
+      "model_loaded": false,
+      "generation_requests": 0,
+      "gpu_kernel_launched": false
+    },
+    {
+      "schema": "ds41-sparse-attn-real-reference-v1",
+      "status": "PASS",
+      "rank": 1,
+      "input": "reports/DS41-Q2-001/m4-layer2-context-d454801/repeat-rank1-request0.pt",
+      "prompt_tokens": 1588,
+      "request_index": 0,
+      "reference_source": ".vendor/vllm-dsv41/tests/kernels/attention/test_rocm_triton_attn_dsv4.py::_ref_sparse_prefill_ragged",
+      "gate": {
+        "atol": 0.02,
+        "rtol": 0.02,
+        "source": "vendored upstream test assertion"
+      },
+      "chunks": [
+        {
+          "chunk": 0,
+          "position_start": 0,
+          "position_end": 1022,
+          "context_rows": 639,
+          "metric": {
+            "shape": [
+              32,
+              512
+            ],
+            "finite": true,
+            "allclose_upstream_gate": true,
+            "not_close": 0,
+            "numel": 16384,
+            "max_abs": 0.0078125,
+            "mean_abs": 2.7871425118064508e-05,
+            "rel_l2": 0.0009371284169275088,
+            "atol": 0.02,
+            "rtol": 0.02
+          }
+        },
+        {
+          "chunk": 1,
+          "position_start": 1023,
+          "position_end": 1587,
+          "context_rows": 640,
+          "metric": {
+            "shape": [
+              32,
+              512
+            ],
+            "finite": true,
+            "allclose_upstream_gate": true,
+            "not_close": 0,
+            "numel": 16384,
+            "max_abs": 0.00390625,
+            "mean_abs": 3.2209354685619473e-05,
+            "rel_l2": 0.0010524881537334093,
+            "atol": 0.02,
+            "rtol": 0.02
+          }
+        }
+      ],
+      "model_loaded": false,
+      "generation_requests": 0,
+      "gpu_kernel_launched": false
+    }
+  ],
+  "summary": {
+    "packets_checked": 4,
+    "elements_checked": 65536,
+    "elements_outside_gate": 0,
+    "max_abs_worst": 0.0078125,
+    "max_rel_l2": 0.0011432655370715874
+  },
+  "decision": "SPARSE_ATTENTION_ARITHMETIC_EXCLUDED_AT_CAPTURED_LAYER2_PACKETS",
+  "scope_limit": "This validates arithmetic for the saved ordered Q/KV/sink packets only. It does not validate whether the indexer selected the correct context rows or certify full-model retrieval."
+}

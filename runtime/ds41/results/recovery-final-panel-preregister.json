@@ -1,0 +1,36 @@
+{
+  "schema": "ds41-recovery-final-panel-preregister-v1",
+  "state": "FROZEN_BEFORE_DS4_MODEL_OUTPUT",
+  "profile": {
+    "backend": "DS4 V4.1 gfx1151 TCP/USB4 target-only",
+    "ds4_source": "7d0454b4e32ef1e90235f2b001d6643b5934438c",
+    "model_revision": "dd8a266f7145edc19e2334b46e19b6821f221dc7",
+    "model_sha256": "1ce6a8f8806205c13330d7ca287bd198331dc5ca35ccc5d8a9a92a188a6f6f42",
+    "dspark": false
+  },
+  "rules": [
+    "one request per independent case; no favorable retry",
+    "original comparisons use thinking=false and reasoning_effort=none",
+    "original expected values remain immutable",
+    "coding uses thinking=true and reasoning_effort=low with independent sandbox tests",
+    "quality before performance"
+  ],
+  "development": [
+    {"id":"code2k1588","expected":"original validator result52 + original first/middle/last"},
+    {"id":"tail1546","source":"reports/DS41-Q2-001/prefill-priority-001/code2k-tail-only.txt","expected":{"end":5}},
+    {"id":"discriminator1571","source":"frozen discriminator sha f5543bba...","expected":{"begin":17,"middle":23,"end":5}},
+    {"id":"docs2k","source":"reports/DS41-Q2-001/daily-k2-panel/corpora/docs-2k.txt","expected":"original validator result52 + original first/middle/last"}
+  ],
+  "holdouts_file": "runtime/ds41/recovery-holdouts-v1.json",
+  "function": [
+    {"id":"json_none","expected_json":{"ok":true,"n":7},"thinking":false,"reasoning_effort":"none"},
+    {"id":"fresh_marker","expected_exact":"STABLE-01","thinking":false,"reasoning_effort":"none"},
+    {"id":"multiturn_orbit","expected_exact":"ORBIT-17","thinking":false,"reasoning_effort":"none"},
+    {"id":"coding_c_frame","task_spec":"runtime/ds41/daily-fixtures/c-frame-stream/task.json","thinking":true,"reasoning_effort":"low","max_tokens":8192},
+    {"id":"coding_go_session","task_spec":"runtime/ds41/daily-fixtures/go-session-state/task.json","thinking":true,"reasoning_effort":"low","max_tokens":8192}
+  ],
+  "first_pass_request_budget": 13,
+  "conditional_core_confirmation_requests": 4,
+  "performance_requests_before_quality": 0,
+  "performance_after_quality": {"code2k_prefill_target_tps":200,"pairs_total_if_promising":3,"metrics":["prefill_s","prefill_tps","client_ttft","first_final","decode","wall","memory"]}
+}

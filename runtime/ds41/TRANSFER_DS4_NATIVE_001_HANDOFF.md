@@ -37,3 +37,10 @@ One owner transition: DS4 OFF -> native ON exactly once. Verify unit environment
 
 ## NEXT
 Run frozen max6 L1 runner exactly once. Do not restart/replay an IN_FLIGHT case. L1 PASS -> L3; L1 FAIL -> L2.
+
+## L1 terminal FAIL
+- Exactly2/6 requests used; holdouts/confirms not run.
+- code2k: INCOMPLETE_NO_FINAL, cap2048 all reasoning, prefill21.547s/75.60tok/s, TTFT21.566s, decode16.14tok/s, wall126.99s, K2 acceptance86.72% (1299/1498).
+- docs2k: INCOMPLETE_NO_FINAL, cap2048 all reasoning, prefill17.901s/72.96tok/s, TTFT17.917s, decode16.81tok/s, wall121.86s, K2 acceptance86.60% (1299/1500).
+- L0 input equality remains PASS; speculative path is active/high acceptance. Profile transfer alone does not make DenseFix/Engram2 equivalent to DS4.
+- Decision: L2 Antirez calibrated Q2/native Engram, target-only first. Restore qualified DS4 during L2 preparation.

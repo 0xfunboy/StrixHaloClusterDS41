@@ -1,0 +1,83 @@
+{
+  "schema": "ds41-transfer-ds4-native-001-l1-result-v1",
+  "status": "L1_FAIL_PROFILE_TRANSFER_NOT_SUFFICIENT",
+  "requests_used": 2,
+  "max_requests": 6,
+  "candidate": {
+    "target": "DenseFix + Engram2",
+    "native_source": "4d06da930451897dcf037deb8be8990412c5c807",
+    "profile": "ds4-low-v1",
+    "mmq": true,
+    "canonical_prefill": true,
+    "engram_workers": 4,
+    "dspark_k": 2,
+    "max_tokens": 2048
+  },
+  "cases": [
+    {
+      "id": "native-code2k-v2",
+      "status": "INCOMPLETE_NO_FINAL",
+      "raw_status": "FAIL_SEMANTIC",
+      "semantic_pass": false,
+      "wall_s": 126.98836915998254,
+      "prompt_tokens": 1629,
+      "completion_tokens": 2048,
+      "reasoning_tokens": 2048,
+      "reasoning_chars": 5330,
+      "final_chars": 0,
+      "finish_reason": "length",
+      "prefill_s": 21.54693359375,
+      "prefill_tps": 75.60240499708576,
+      "ttft_s": 21.56572963600047,
+      "decode_tps": 16.14352865325427,
+      "dspark": {
+        "acceptance_rate": 0.8671562082777036,
+        "mean_acceptance_length": 2.734312416555407,
+        "accepted": 1299,
+        "drafted": 1498,
+        "steps": 749
+      }
+    },
+    {
+      "id": "native-docs2k-v2",
+      "status": "INCOMPLETE_NO_FINAL",
+      "raw_status": "FAIL_SEMANTIC",
+      "semantic_pass": false,
+      "wall_s": 121.85553767392412,
+      "prompt_tokens": 1306,
+      "completion_tokens": 2048,
+      "reasoning_tokens": 2048,
+      "reasoning_chars": 6080,
+      "final_chars": 0,
+      "finish_reason": "length",
+      "prefill_s": 17.900806640625,
+      "prefill_tps": 72.95760611346402,
+      "ttft_s": 17.91682476794813,
+      "decode_tps": 16.81195109176702,
+      "dspark": {
+        "acceptance_rate": 0.866,
+        "mean_acceptance_length": 2.732,
+        "accepted": 1299,
+        "drafted": 1500,
+        "steps": 750
+      }
+    }
+  ],
+  "decision": {
+    "quality_pass": false,
+    "holdouts_not_run": true,
+    "reason": "both originals exhausted total cap in reasoning with zero final content",
+    "dspark_blame": false,
+    "profile_input_blame": false,
+    "next": "L2 Antirez calibrated Q2 + native Engram target-only first; restore qualified DS4 during L2 prep"
+  },
+  "historical_ds4_reference": {
+    "code2k_wall_s": 66.1801256070612,
+    "docs2k_wall_s": 45.702877546078525,
+    "document_quality": "6/6 PASS +24/24 soak"
+  },
+  "notes": [
+    "native speculative acceptance is high (~86.6-86.7%) but no correct final exists, so these calls do not enter time-to-correct-answer medians",
+    "raw FAIL_SEMANTIC labels preserved in raw terminal; normalized classification is INCOMPLETE_NO_FINAL"
+  ]
+}

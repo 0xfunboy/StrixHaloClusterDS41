@@ -29,8 +29,14 @@ No semantic retries/repairs.
 - Soak: 2h / >=24 sequential requests only after product PASS.
 - Finalizer owner-bound: failure => K2 rollback; full qualified perimeter => leave DS4 READY.
 
+## Quality checkpoint — originals
+- code2k-v2 LOW PASS exact: cache0, prefill20.478s/79.55tok/s, first final64.349s, decode14.41tok/s, wall66.180s, 657 completion tokens.
+- docs2k-v2 LOW PASS exact: cache0, prefill25.570s/51.08tok/s, first final43.196s, decode15.84tok/s, wall45.703s, 318 completion tokens.
+- Historical NONE FAILs remain unchanged. No prompt/expected/parameter change.
+- Gate opens holdout A/B in the same DS4 load.
+
 ## NEXT
-Publish prereg/PLAN checkpoint, verify K2 still READY and no stale job, then exactly one K2 OFF → DS4 DOCUMENT ON. Run the persistent quality budget; follow its automatic gates without new steering.
+Persistent quality runner is executing holdout A/B under the frozen LOW profile. If both pass it runs the two independent original confirms; otherwise finalizer restores K2.
 
 ## Startup READY
 - DOCUMENT PROFILE 002 first startup reached READY before any document request: coordinator+worker active, API200, ctx16384, 50/50 TCP/USB4, gate5000, target-only/noDSpark, Engram disk-only, planned82.67GiB/rank.

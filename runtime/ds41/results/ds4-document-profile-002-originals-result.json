@@ -1,0 +1,43 @@
+{
+  "schema": "ds4-document-profile-002-originals-result-v1",
+  "status": "ORIGINALS_2_OF_2_PASS_LOW",
+  "profile": {
+    "thinking": true,
+    "reasoning_effort": "low",
+    "resolved_mode": "DS4_THINK_LOW",
+    "numeric_level": null,
+    "max_tokens_total": 2048,
+    "temperature": 0,
+    "seed": 1
+  },
+  "code2k": {
+    "status": "PASS",
+    "prompt_tokens": 1629,
+    "cached_tokens": 0,
+    "completion_tokens": 657,
+    "reasoning_chars": 2127,
+    "first_reasoning_s": 20.856881098006852,
+    "first_final_s": 64.34832832706161,
+    "prefill_s": 20.478,
+    "prefill_tps": 79.55,
+    "decode_tps": 14.41,
+    "wall_s": 66.1801256070612,
+    "finish_reason": "stop"
+  },
+  "docs2k": {
+    "status": "PASS",
+    "prompt_tokens": 1306,
+    "cached_tokens": 0,
+    "completion_tokens": 318,
+    "reasoning_chars": 878,
+    "first_reasoning_s": 25.813512048101984,
+    "first_final_s": 43.19597836805042,
+    "prefill_s": 25.57,
+    "prefill_tps": 51.08,
+    "decode_tps": 15.84,
+    "wall_s": 45.702877546078525,
+    "finish_reason": "stop"
+  },
+  "old_none_failures_preserved": true,
+  "next": "holdout A/B under same frozen LOW profile; no parameter change"
+}

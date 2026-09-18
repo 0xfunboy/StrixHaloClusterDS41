@@ -34,6 +34,8 @@
 - DS4 lifecycle preflight now passes binary identity, USB4, port-bind, K2 ownership and NODE02 asset checks, then fail-closes as BLOCKED_MODEL_MIRROR_NODE01 before any stop/start.
 
 ## Owner-authorized model cleanup (2026-09-18)
+- Cleanup batch2 removed rejected/orphan Qwen W4A16, Qwen3.5 MTP, Flash-Next Q5/Q4 and Coder-Next FP8 as explicitly authorized; freed 334.158 GiB NODE01 / 204.914 GiB NODE02.
+- Antirez Q2 mirror is COMPLETE + full SHA verified on NODE01; exact-size copy remains VERIFIED on NODE02.
 - Removed on BOTH nodes: qwen3.8-27b-q5-xl, qwen3.5-9b-defiant-fable-bf16, qwen3.8-27b-fp8, qwen3-coder-next-80b-a3b-ud-q6-k, and historical broken deepseek-v4.1-flash-mixedq2 original.
 - Freed 286.121 GiB per node. DenseFix/Engram/DSpark preserved and K2 remained READY.
 - NODE01 now satisfies the >=50 GiB post-mirror margin; low-priority resumable USB4 mirror job `ds41-r4-q2-mirror.service` is IN_FLIGHT. Suspend it before measured/model-load windows.

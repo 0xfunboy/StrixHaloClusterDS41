@@ -25,13 +25,13 @@ This is a practical reuse ranking, not a universal intelligence leaderboard: wor
 ## Cleanup candidates for owner review
 
 High confidence:
-- `/home/funboy/models/vllm/qwen3-coder-next-fp8` — ~74.89 GiB/node, ~149.77 GiB total; slower rejected duplicate path.
-- `/home/funboy/models/vllm/qwen3.8-27b-amd-quark-awq-int4-w4a16` — NODE02 ~18.19 GiB plus NODE01 skeleton; branch closed/rejected.
-- `/home/funboy/models/gguf/qwen3.5-9b-defiant-fable-q5-mtp` — ~7.30 GiB/node, ~14.61 GiB total; orphan after owner deleted the BF16 base, no useful qualification in PLAN.
+- `/home/funboy/models/vllm/qwen3-coder-next-fp8` — **DELETED BOTH NODES 2026-09-18**; slower rejected duplicate path.
+- `/home/funboy/models/vllm/qwen3.8-27b-amd-quark-awq-int4-w4a16` — **DELETED BOTH NODES 2026-09-18**; branch closed/rejected.
+- `/home/funboy/models/gguf/qwen3.5-9b-defiant-fable-q5-mtp` — **DELETED BOTH NODES 2026-09-18**; orphan after BF16 base removal.
 
 Likely removable if old Qwen references are no longer wanted:
-- `/home/funboy/models/gguf/qwen3.8-flash-next-unsloth-q5-k-xl` — NODE01 ~147.42 GiB; slower ~18.1 TPS original Q5 path, IQ3/IQ4 are stronger practical keepers.
-- `/home/funboy/models/gguf/qwen3.8-flash-next-original-q4-k-xl` — ~104.53 GiB/node, ~209.06 GiB total; old original/capacity reference. Remove only if that reference is no longer valuable.
+- `/home/funboy/models/gguf/qwen3.8-flash-next-unsloth-q5-k-xl` — **DELETED 2026-09-18** (was NODE01 only); slower ~18.1 TPS original Q5 path.
+- `/home/funboy/models/gguf/qwen3.8-flash-next-original-q4-k-xl` — **DELETED BOTH NODES 2026-09-18**; old original/capacity reference retired.
 
 Conditional / after Recovery closes:
 - NODE01 `/home/funboy/models/ds41/engram2-tp2/rank1` — ~28.70 GiB staging replica; NODE01 live rank uses rank0, NODE02 uses rank1.

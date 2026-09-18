@@ -1,0 +1,15 @@
+{
+  "schema":"ds41-model-cleanup-20260918-batch2-v1",
+  "status":"COMPLETE_BOTH_NODES",
+  "removed":[
+    {"path":"/home/funboy/models/vllm/qwen3.8-27b-amd-quark-awq-int4-w4a16","node01_bytes":22999040,"node02_bytes":19535908864},
+    {"path":"/home/funboy/models/gguf/qwen3.5-9b-defiant-fable-q5-mtp","node01_bytes":7842439168,"node02_bytes":7842439168},
+    {"path":"/home/funboy/models/gguf/qwen3.8-flash-next-unsloth-q5-k-xl","node01_bytes":158286700544,"node02_bytes":0},
+    {"path":"/home/funboy/models/gguf/qwen3.8-flash-next-original-q4-k-xl","node01_bytes":112238698496,"node02_bytes":112238698496},
+    {"path":"/home/funboy/models/vllm/qwen3-coder-next-fp8","node01_bytes":80408088576,"node02_bytes":80408088576}
+  ],
+  "freed":{"node01_bytes":358798917632,"node01_gib":334.15753,"node02_bytes":220025135104,"node02_gib":204.91438},
+  "available_after":{"node01_bytes":531712135168,"node01_gib":495.19551,"node02_bytes":906034610176,"node02_gib":843.81049},
+  "q2_mirror":{"state":"COMPLETE","size":365713686528,"sha256":"1ce6a8f8806205c13330d7ca287bd198331dc5ca35ccc5d8a9a92a188a6f6f42"},
+  "serving_after_cleanup":{"release":"k2-prefill-5bdfed6","state":"READY","epoch":"1789651304744356945","dual_health":200}
+}

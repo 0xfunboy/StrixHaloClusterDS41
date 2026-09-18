@@ -35,8 +35,13 @@ No semantic retries/repairs.
 - Historical NONE FAILs remain unchanged. No prompt/expected/parameter change.
 - Gate opens holdout A/B in the same DS4 load.
 
+## Quality checkpoint — holdouts
+- document-holdout-a PASS exact 10/10: cache0, prefill18.600s/75.75tok/s, first final59.554s, decode15.21tok/s, wall64.087s.
+- document-holdout-b PASS exact 10/10: cache0, prefill22.294s/91.46tok/s, first final65.168s, decode15.73tok/s, wall70.021s.
+- Quality budget is 4/4 PASS with 2 requests remaining.
+
 ## NEXT
-Persistent quality runner is executing holdout A/B under the frozen LOW profile. If both pass it runs the two independent original confirms; otherwise finalizer restores K2.
+Persistent quality runner is executing independent code2k/docs2k confirmations 5/6 and 6/6 under the same LOW profile. Each confirmation requires semantic PASS and cached_tokens<=32.
 
 ## Startup READY
 - DOCUMENT PROFILE 002 first startup reached READY before any document request: coordinator+worker active, API200, ctx16384, 50/50 TCP/USB4, gate5000, target-only/noDSpark, Engram disk-only, planned82.67GiB/rank.

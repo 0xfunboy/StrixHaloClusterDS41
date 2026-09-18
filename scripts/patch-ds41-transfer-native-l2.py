@@ -138,6 +138,30 @@ def main() -> None:
 """,
     )
 
+    # Quantized top-level head/embed tensors produce sibling ``weight_type``
+    # pseudo-weights in the GGUF plugin.  The V4.1 streaming wrapper must
+    # reroot those companions exactly like the corresponding packed weights;
+    # otherwise ``head.weight_type`` leaks outside the sole language_model
+    # group and the fail-closed streaming loader correctly rejects startup.
+    vl_model = target / ".vendor/vllm-dsv41/vllm/models/deepseek_v4_1/amd/vl_model.py"
+    replace_once(
+        vl_model,
+        """        orig_to_new_suffix={
+            "head.weight": "language_model.lm_head.weight",
+            "embed.weight": "embed_tokens.weight",
+            ".ffn.gate.bias": ".ffn.gate.e_score_correction_bias",
+        },
+""",
+        """        orig_to_new_suffix={
+            "head.weight": "language_model.lm_head.weight",
+            "head.weight_type": "language_model.lm_head.weight_type",
+            "embed.weight": "embed_tokens.weight",
+            "embed.weight_type": "embed_tokens.weight_type",
+            ".ffn.gate.bias": ".ffn.gate.e_score_correction_bias",
+        },
+""",
+    )
+
     launcher = target / "runtime/ds41/launch-node.sh"
     replace_once(
         launcher,

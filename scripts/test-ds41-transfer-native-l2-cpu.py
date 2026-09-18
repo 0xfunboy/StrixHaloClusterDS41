@@ -35,6 +35,7 @@ from vllm.models.deepseek_v4_1.common.engram import (
     build_compressed_token_map,
     compute_hash_multipliers,
 )
+from vllm.models.deepseek_v4_1.amd.vl_model import _make_deepseek_v4_vl_weights_mapper
 from vllm_gguf_plugin.gguf_files import GGUFModelFiles
 from vllm_gguf_plugin.weights_adapter.deepseek_v41 import DeepseekV41GGUFAdapter
 
@@ -104,6 +105,34 @@ def main() -> None:
         "native_engram_special": 8,
         "total": len(mapping) + 8,
     }
+
+    # The GGUF iterator emits ``*.weight_type`` companions for packed tensors.
+    # In language-only streaming mode every such name must be rerooted under
+    # ``language_model.`` before the wrapper delegates to the child loader.
+    outer = _make_deepseek_v4_vl_weights_mapper(
+        getattr(text_cfg, "expert_dtype", "fp4"), "weight_scale_inv"
+    )
+    streaming_cases = {
+        "head.weight": "language_model.lm_head.weight",
+        "head.weight_type": "language_model.lm_head.weight_type",
+        "embed.weight": "language_model.model.embed_tokens.weight",
+        "embed.weight_type": "language_model.model.embed_tokens.weight_type",
+        "norm.weight": "language_model.model.norm.weight",
+        "norm.weight_type": "language_model.model.norm.weight_type",
+        "layers.0.attn.wq_a.weight": "language_model.model.layers.0.attn.wq_a.weight",
+        "layers.0.attn.wq_a.weight_type": "language_model.model.layers.0.attn.wq_a.weight_type",
+    }
+    mapped_cases = {}
+    for source_name, expected_name in streaming_cases.items():
+        mapped_name = outer._map_name(source_name)
+        if mapped_name != expected_name:
+            raise AssertionError(
+                f"streaming name map {source_name}: {mapped_name!r} != {expected_name!r}"
+            )
+        if not mapped_name.startswith("language_model."):
+            raise AssertionError(f"streaming name escaped language_model: {mapped_name}")
+        mapped_cases[source_name] = mapped_name
+    result["streaming_name_map"] = {"status": "PASS", "cases": mapped_cases}
 
     import gguf
 

@@ -1,0 +1,55 @@
+{
+  "schema": "ds41-transfer-native-l2-startup-negative-v1",
+  "campaign": "TRANSFER_DS4_NATIVE_001",
+  "phase": "L2_M1_STARTUP",
+  "attempt": 1,
+  "result": "FAIL_BEFORE_REQUEST_LOCALIZED_LOADER_INTEGRATION",
+  "requests_sent": 0,
+  "owner_epoch": "1789761472122549252",
+  "rank0_invocation_id": "0e707e12c9454ed6a02ab50ea9c5ba86",
+  "rank1_invocation_id": "dad9f3d54e16417eb9a9d6ddbb1d847d",
+  "release": "/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001",
+  "target": "Antirez-Q2",
+  "engram": "native-GGUF",
+  "dspark": false,
+  "failure_stage": "GGUF load_weights before model READY",
+  "error": "DS41 streaming loader only accepts the single language_model group, got 'head.weight_type'",
+  "error_observed_on": ["rank0", "rank1"],
+  "cause": {
+    "classification": "localized_name_mapping_integration_fault",
+    "detail": "GGUF quantized top-level head/embed tensors emit sibling *.weight_type pseudo-weights. The V4.1 outer streaming mapper rerooted head.weight/embed.weight but not their weight_type companions, allowing head.weight_type to escape the sole language_model group.",
+    "weights_or_quality_implicated": false
+  },
+  "pre_failure_gates": {
+    "antirez_fast_identity": "PASS",
+    "native_engram_runtime_hash_contract": "PASS",
+    "target_tensor_accounting": "1038+8=1046 PASS"
+  },
+  "recovery": {
+    "failed_pair_off_verified": true,
+    "owner_reconciled_through_pair_controller": true,
+    "qualified_ds4_restored": true,
+    "ds4_state": "READY",
+    "ds4_api_http": 200,
+    "k2_state": "OFF"
+  },
+  "fix": {
+    "scope": "V4.1 outer streaming weight-name mapper only",
+    "added_suffixes": {
+      "head.weight_type": "language_model.lm_head.weight_type",
+      "embed.weight_type": "embed_tokens.weight_type"
+    },
+    "node01_cpu_gate": "PASS",
+    "node02_cpu_gate": "PASS",
+    "mapping_cases": 8,
+    "row264_decode_regression": "PASS"
+  },
+  "retry_admitted": true,
+  "retry_reason": "No model request was sent and the startup blocker is a localized, model-free loader integration defect with both-node CPU regression gates PASS. Retry is the same L2 M1 configuration, not a new model/configuration.",
+  "raw": {
+    "rank0_log": "/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001/reports/DS41-Q2-001/transfer-ds4-native-001-l2-m1/rank0.log",
+    "rank1_log": "/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001/reports/DS41-Q2-001/transfer-ds4-native-001-l2-m1/rank1.log",
+    "node01_fix_gate": "runtime/ds41/transfer-ds4-native-001/l2/cpu-gate-node01-fix1.json",
+    "node02_fix_gate": "runtime/ds41/transfer-ds4-native-001/l2/cpu-gate-node02-fix1.json"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "hash_contract": {
+    "compressed_vocab_size": 99092,
+    "encoding": "e4m3_e8m0_32_row264",
+    "layers": [
+      1,
+      14
+    ],
+    "pad_id": 2,
+    "rows": [
+      384006168,
+      384016682
+    ],
+    "status": "PASS",
+    "token_map_entries": 129280
+  },
+  "header": {
+    "encoding": "e4m3_e8m0_32_row264",
+    "layers": [
+      1,
+      14
+    ],
+    "rows": [
+      384006168,
+      384016682
+    ],
+    "token_map_entries": 129280
+  },
+  "row_decode": [
+    {
+      "bit_exact_bf16_reference": true,
+      "layer": 1,
+      "rows": [
+        0,
+        128002056
+      ],
+      "scale_unique": 2
+    },
+    {
+      "bit_exact_bf16_reference": true,
+      "layer": 14,
+      "rows": [
+        0,
+        128005560
+      ],
+      "scale_unique": 2
+    }
+  ],
+  "schema": "ds41-transfer-l2-cpu-gate-v1",
+  "status": "PASS",
+  "streaming_name_map": {
+    "cases": {
+      "embed.weight": "language_model.model.embed_tokens.weight",
+      "embed.weight_type": "language_model.model.embed_tokens.weight_type",
+      "head.weight": "language_model.lm_head.weight",
+      "head.weight_type": "language_model.lm_head.weight_type",
+      "layers.0.attn.wq_a.weight": "language_model.model.layers.0.attn.wq_a.weight",
+      "layers.0.attn.wq_a.weight_type": "language_model.model.layers.0.attn.wq_a.weight_type",
+      "norm.weight": "language_model.model.norm.weight",
+      "norm.weight_type": "language_model.model.norm.weight_type"
+    },
+    "status": "PASS"
+  },
+  "target_mapping": {
+    "mapped": 1038,
+    "native_engram_special": 8,
+    "total": 1046
+  }
+}

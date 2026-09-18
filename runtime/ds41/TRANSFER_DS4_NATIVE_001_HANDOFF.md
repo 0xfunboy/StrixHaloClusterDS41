@@ -1,11 +1,11 @@
 # TRANSFER DS4 → NATIVE 001 — handoff
 
-updated_at: 2026-09-18T19:29:30+02:00
-phase: L0 COMPLETE / L1 FAIL / L2a CPU PASS / L2 M1 RELEASE PREFLIGHT PASS
-next_action: final live status, then exactly one owner-controlled DS4 OFF -> L2 Antirez M1 start; reconcile startup before sending any document request
+updated_at: 2026-09-18T22:00+02:00
+phase: L0 COMPLETE / L1 FAIL / L2 M1 STARTUP NEGATIVE 001 LOCALIZED / FIX CPU PASS / DS4 READY
+next_action: commit/push the localized streaming weight_type mapper fix and both-node gates, align offline release provenance, then one retry of the SAME L2 target-only M1 startup. No document request until rank0/rank1/paired are READY and live release/env identity passes.
 repo_worktree: /home/funboy/worktrees/ds41-transfer-ds4-native-001
 repo_branch: exp/ds41-transfer-ds4-native-001
-repo_head: 40d0629255f737c90d016208062298d2004295e0 (pushed)
+repo_head: d5fd830f0cf911d4f6aec37b1daa3b02e1032f81 (pushed; fix delta pending commit)
 
 ## Live resident runtime at this checkpoint
 
@@ -126,7 +126,7 @@ MMQ compatibility:
 - existing DS4 MMQ admission contract explicitly requires weight_type=16 and weight_type2=10
 - therefore existing MMQ path is format-compatible for admitted pure target prefill; fallback remains declared elsewhere
 
-## L2 software added, pending freeze/commit
+## L2 software — base frozen/pushed; localized startup fix pending commit
 
 - `runtime/ds41/native_antirez_engram.py`
   - bounded LRU over mmap-backed native GGUF rows
@@ -192,16 +192,26 @@ Verified before any DS4 OFF:
 
 Preflight caught and fixed before load one generator defect: the first generated launcher left `fi DS41_ENGRAM_CACHE_ROWS=...` on one line. Current release is bash-valid on both nodes; the patch generator now emits the correct newline/export. No model was loaded during this correction.
 
-## Active job
+## L2 M1 startup negative 001 — LOCALIZED, ZERO REQUESTS
 
-None.
+First M1 startup terminalized during GGUF `load_weights`, before READY and before any model request.
+- epoch: `1789761472122549252`
+- rank0 InvocationID: `0e707e12c9454ed6a02ab50ea9c5ba86`
+- rank1 InvocationID: `dad9f3d54e16417eb9a9d6ddbb1d847d`
+- rank0 and rank1 exact error: `DS41 streaming loader only accepts the single language_model group, got 'head.weight_type'`
+- pre-failure Antirez identity PASS; native Engram runtime hash contract PASS
+- both failed DS41 units/cgroups verified OFF; stale owner reconciled with the release `pair.sh reconcile`
+- qualified DS4 restored READY HTTP200; K2 OFF
+- requests sent: 0
 
-No L2 request has been dispatched and no DS4 lifecycle transition has occurred
-since the CPU gate. If a later chat sees DS4 READY + native OFF + no L2 runner,
-continue from release freeze/build/preflight; do not rerun L0/L1 or DS4 soak.
+Cause is localized: packed top-level GGUF tensors emit `*.weight_type` companions, while the V4.1 outer streaming mapper rerooted `head.weight`/`embed.weight` but not their companions. The fix adds only:
+- `head.weight_type -> language_model.lm_head.weight_type`
+- `embed.weight_type -> language_model.model.embed_tokens.weight_type` after prefix+suffix mapping
+
+Both-node post-fix CPU gates PASS 8/8 name-map cases, 1038+8=1046 tensor accounting and the existing real-row native Engram decode. Result: `runtime/ds41/results/transfer-ds4-native-001-l2-startup-negative-001.{json,md}`. One retry of the same M1 configuration is admitted because this is a model-free localized integration fault and no request was sent.
 
 ## Persistence
 
-PLAN updated for L2 CPU gate: yes; live /home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md §2 and §17, backup retained
-Git base L2 commit/push: 40d0629255f737c90d016208062298d2004295e0 pushed to origin/exp/ds41-transfer-ds4-native-001
-Pending tracked delta before final consolidation: handoff + patch-generator preflight correction/test-copy only; connector filtered the second git staging/commit call before execution. Four inherited mode-bit changes remain untouched/uncommitted.
+PLAN updated on server through the first L2 startup; §2/§17 require one further localized-negative/fix update before retry.
+Git L2 preflight commit/push: d5fd830f0cf911d4f6aec37b1daa3b02e1032f81 on origin/exp/ds41-transfer-ds4-native-001.
+Pending tracked fix delta: patch generator + CPU mapper regression + startup-negative report + both-node fix gates + this handoff. Four inherited mode-bit changes and unrelated untracked L0 artifacts remain untouched.

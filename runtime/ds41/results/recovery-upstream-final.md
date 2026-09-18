@@ -14,3 +14,7 @@
 Cause status: R1 excluded HF#12 ownership locally and validated local arithmetic endpoints; R2 showed contract differences without a safe exact vLLM patch. R4 demonstrates that an independent V4.1 implementation/checkpoint contract recovers the non-ambiguous retrieval failures. This does not prove one single local vLLM operator was the sole cause.
 
 Final verdict: `performance_target_met=false`; `quality_qualified_scope=false`; `delivery_complete=true`; DS4 `NO_PROMOTION`; restore `k2-prefill-5bdfed6` READY. Preserve DS4 Q2 and all R4 raw evidence for a future specifically authorized coding/profile continuation.
+
+## Final operational receipt
+
+K2 rollback `k2-prefill-5bdfed6` restored on epoch `1789712415010337206`: rank0 HTTP200, rank1 HTTP200, paired backend HTTP200, gateway `/health` HTTP200. Final `reasoning_effort=none` smoke `17*19` returned exactly `323`, finish `stop`, zero reasoning tokens. DS4 coordinator/worker were stopped before K2 restore.

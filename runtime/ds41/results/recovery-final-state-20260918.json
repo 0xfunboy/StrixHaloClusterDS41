@@ -1,0 +1,9 @@
+{
+  "schema":"ds41-recovery-final-state-20260918-v1",
+  "status":"DELIVERY_COMPLETE_K2_RESTORED",
+  "recovery":{"quality_qualified_scope":false,"performance_target_met":false,"delivery_complete":true,"ds4_promotion":"NO_PROMOTION","ds4_quality":"QUALITY_NOT_FULLY_QUALIFIED_BUT_RETRIEVAL_RECOVERED"},
+  "operational":{"release":"k2-prefill-5bdfed6","release_id":"5bdfed698ab97b6230db3fe8a7e37ff8e9b3d513","epoch":"1789712415010337206","state":"READY","rank0_http":200,"rank1_http":200,"paired_backend_http":200,"gateway_http":200,"smoke":{"prompt":"Compute 17*19. Return only the integer.","content":"323","finish_reason":"stop","reasoning_tokens":0}},
+  "storage":{"antirez_q2_both_nodes":"VERIFIED","q2_size":365713686528,"q2_sha256":"1ce6a8f8806205c13330d7ca287bd198331dc5ca35ccc5d8a9a92a188a6f6f42"},
+  "cleanup":{"batch1_freed_gib_per_node_approx":286.121,"batch2_freed_gib":{"node01":334.15753,"node02":204.91438}},
+  "ds4_transport":{"default_gate_timeout_ms":750,"default_result":"FAIL_LAYER35_40MIB_TIMEOUT","recovery_gate_timeout_ms":5000,"recovery_result":"PASS_REMAINING_PANEL_NO_FURTHER_TP_FAILURE"}
+}

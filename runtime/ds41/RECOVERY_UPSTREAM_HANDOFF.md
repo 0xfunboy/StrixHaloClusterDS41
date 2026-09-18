@@ -47,6 +47,12 @@
 - Initial upstream default TP gate750ms failed at layer35 on a40MiB transfer. Preregistered source-supported `DS4_TP_GATE_TIMEOUT_MS=5000` transport-only recovery completed all remaining cases without further TP failure.
 - Strict quality remains unqualified; no performance benchmark or promotion. Restore K2 READY. Evidence `runtime/ds41/results/recovery-r4-ds4-quality-result.{json,md}` and `recovery-upstream-final.md`.
 
+## Terminal operational state (2026-09-18)
+- DS4 R4 stopped after quality decision; no promotion/performance arm.
+- K2 `k2-prefill-5bdfed6` restored READY on epoch `1789712415010337206`; rank0/rank1/paired/gateway HTTP200.
+- Final none-mode smoke returns exact `323`/stop with0 reasoning tokens.
+- Recovery `delivery_complete=true`, `quality_qualified_scope=false`, `performance_target_met=false`.
+
 ## NEXT
 - Recovery terminal: restore and retain `k2-prefill-5bdfed6` READY. DS4 remains an unpromoted alternative with retrieval-recovery evidence; no speed run under this quality result.
 - Start exactly one Internet acquisition on NODE02 with pinned HF revision; persistent registry `NOT_SENT→IN_FLIGHT→COMPLETE/FAILED` and full SHA verification.

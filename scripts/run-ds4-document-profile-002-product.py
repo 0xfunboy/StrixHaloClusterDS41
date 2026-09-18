@@ -141,7 +141,7 @@ def main():
     so,bo=lifecycle(token,'off'); off=wait_lifecycle(token,'OFF',120)
     offchat=exact_chat(token,'Return exactly SHOULD-NOT-RUN.','SHOULD-NOT-RUN')
     controller=json.loads(sh([str(ROOT/'scripts/ds4-document-controller.sh'),'status']).stdout)
-    rows.append({'gate':'off_no_autoload','pass':so==202 and offchat['http']==409 and controller.get('state')=='OFF','off_status':off,'chat':offchat,'controller':controller})
+    rows.append({'gate':'off_no_autoload','pass':so==202 and offchat['http']==503 and controller.get('state')=='OFF','off_status':off,'chat':offchat,'controller':controller,'contract':'gateway returns 503 model_not_ready while lifecycle is OFF; no autoload'})
     sn,bn=lifecycle(token,'on'); on=wait_lifecycle(token,'READY',1300)
     post=exact_chat(token,'Return exactly ON-OK.','ON-OK')
     rows.append({'gate':'on_whole_pair_and_resume','pass':sn==202 and post['pass'],'on_status':on,'chat':post})

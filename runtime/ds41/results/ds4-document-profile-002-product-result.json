@@ -1,0 +1,91 @@
+{
+  "schema": "ds4-document-profile-002-product-result-v1",
+  "status": "PASS_NORMALIZED_SOURCE_CONTRACT",
+  "raw_terminal": "reports/DS41-Q2-001/ds4-document-profile-002/product/terminal.json",
+  "raw_status": "FAIL",
+  "normalization": {
+    "raw_failed_gate": "off_no_autoload",
+    "runner_expected_http": 409,
+    "observed_http": 503,
+    "source_contract": "internal/app/main.go proxyAuthorizedChat returns HTTP503 code=model_not_ready whenever lifecycle is not READY",
+    "lifecycle_observed": "OFF",
+    "controller_observed": "OFF",
+    "autoload_observed": false,
+    "mandate_requirement": "chat rejected while OFF without autoload",
+    "normalized_gate": "PASS"
+  },
+  "gates": [
+    {
+      "gate": "unauthorized_chat",
+      "status": "PASS",
+      "http": 401
+    },
+    {
+      "gate": "lifecycle_ready_auth",
+      "status": "PASS"
+    },
+    {
+      "gate": "gateway_document_code2k",
+      "status": "PASS",
+      "wall_s": 61.225030309055,
+      "usage": {
+        "prompt_tokens": 1629,
+        "completion_tokens": 657
+      }
+    },
+    {
+      "gate": "gateway_document_docs2k",
+      "status": "PASS",
+      "wall_s": 37.57564418006223,
+      "usage": {
+        "prompt_tokens": 1306,
+        "completion_tokens": 318
+      }
+    },
+    {
+      "gate": "nonstream_low",
+      "status": "PASS",
+      "content": "42"
+    },
+    {
+      "gate": "sse_reasoning_final",
+      "status": "PASS",
+      "content": "42",
+      "finish": "stop"
+    },
+    {
+      "gate": "cancel_drain_resume",
+      "status": "PASS",
+      "semantics": "client detach; gateway drains backend before releasing admission lock",
+      "backend_cancel_request_prompt_tokens": 18,
+      "backend_completion_tokens": 2048,
+      "backend_finish": "length",
+      "backend_drain_s": 135.988,
+      "resume_request": "DRAIN-OK PASS",
+      "service_limit": "cancel does not abort backend generation; resume waits for drain"
+    },
+    {
+      "gate": "off_no_autoload",
+      "status": "PASS_NORMALIZED",
+      "http": 503,
+      "code": "model_not_ready",
+      "controller_state": "OFF",
+      "autoload": false
+    },
+    {
+      "gate": "on_whole_pair_and_resume",
+      "status": "PASS",
+      "content": "ON-OK"
+    }
+  ],
+  "max_tokens_audit": {
+    "false_alarm_resolved": true,
+    "arithmetic_nonstream": "prompt15, completion20, natural stop; request cap128 not exceeded",
+    "arithmetic_sse": "prompt15, completion20, natural stop; request cap128 not exceeded",
+    "long_2048_generation": "belongs to preregistered cancel/drain request with max_tokens2048"
+  },
+  "product_scope": "document-low 2K-class, maximum observed qualified document prompt2039; C-off separate; engine ctx16384 not a document-quality claim",
+  "product_qualified": true,
+  "soak_admitted": true,
+  "note": "raw runner FAIL is preserved and not overwritten"
+}

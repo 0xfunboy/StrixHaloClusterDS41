@@ -30,8 +30,8 @@ def req(token,prompt,expected):
 def main():
     OUT.mkdir(parents=True,exist_ok=True)
     if (OUT/'terminal.json').exists():raise SystemExit('replay guard')
-    prod=json.load(open(BASE/'product/terminal.json'))
-    if prod.get('status')!='PASS':raise SystemExit('product gate not PASS')
+    prod=json.load(open(ROOT/'runtime/ds41/results/ds4-document-profile-002-product-result.json'))
+    if not prod.get('product_qualified') or not prod.get('soak_admitted'):raise SystemExit('normalized product gate not PASS')
     token=(STATE/'api-token').read_text().strip()
     code=next(x for x in AUD if x['id']=='code2k-middle-explicit-v2')
     docs=next(x for x in AUD if x['id']=='docs2k-middle-explicit-v2')

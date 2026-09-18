@@ -67,3 +67,10 @@ Persistent quality runner is executing independent code2k/docs2k confirmations 5
 - code4k LOW/cap512 is INCOMPLETE_NO_FINAL: prompt3486, completion512, finish length, first_final absent; prefill30.284s/115.11tok/s. 8K/16K not sent.
 - Per mandate, this limits document quality to the verified 2K-class perimeter (largest passing prompt observed2039) but does not revoke 6/6. Product checks are admitted within that smaller scope.
 - Product gateway now includes the real code2k/docs2k documents through the corrected tokenizer sidecar before service/lifecycle gates.
+
+## Product checkpoint — PASS normalized to source contract
+- Raw product terminal is preserved FAIL only because runner expected HTTP409 for OFF chat. Gateway source intentionally returns HTTP503 `model_not_ready` when lifecycle!=READY; observed lifecycle/controller both OFF and no autoload, so mandate gate PASS.
+- Protected gateway real code2k/docs2k PASS exact; unauthorized401, authenticated lifecycle READY, nonstream LOW PASS, SSE reasoning/final PASS, cancel/drain/resume PASS, whole-pair OFF/ON + ON-OK PASS.
+- The observed 2048-token generation was the preregistered cancel request with max_tokens2048, not either max128 arithmetic request; both arithmetic requests ended naturally after20 tokens.
+- Service limit: client cancellation detaches but gateway drains backend before releasing admission; this run drained ~135.99s before DRAIN-OK.
+- Product qualified for document LOW 2K-class (max observed passing prompt2039); soak admitted. Finalizer false-negative already started K2 rollback; wait K2 READY, then restart DS4 once for soak.

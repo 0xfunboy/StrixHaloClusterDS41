@@ -1,0 +1,50 @@
+{
+  "schema": "ds4-document-profile-002-performance-result-v1",
+  "status": "QUALIFIED_DIAGNOSTIC_PERFORMANCE_BELOW_200_TARGET",
+  "profile": {
+    "thinking": true,
+    "reasoning_effort": "low",
+    "resolved_mode": "DS4_THINK_LOW",
+    "max_tokens_total": 2048
+  },
+  "samples": [
+    {
+      "id": "code2k-original",
+      "semantic_pass": true,
+      "independent": true,
+      "cached_tokens": 0,
+      "prefill_tps": 79.55,
+      "prefill_s": 20.478,
+      "decode_tps": 14.41,
+      "first_final_s": 64.34832832706161,
+      "wall_s": 66.1801256070612
+    },
+    {
+      "id": "code2k-confirm",
+      "semantic_pass": true,
+      "independent": true,
+      "cached_tokens": 0,
+      "prefill_tps": 90.17,
+      "prefill_s": 18.067,
+      "decode_tps": 15.95,
+      "first_final_s": 57.461033639032394,
+      "wall_s": 59.28880111896433
+    },
+    {
+      "id": "code2k-third",
+      "semantic_pass": true,
+      "independent": true,
+      "cached_tokens": 0,
+      "prefill_tps": 91.01,
+      "prefill_s": 17.9,
+      "decode_tps": 16.64,
+      "first_final_s": 55.623740092036314,
+      "wall_s": 57.432590881944634
+    }
+  ],
+  "median_prefill_tps": 90.17,
+  "sample_sd_prefill_tps": 6.387769563783594,
+  "target_prefill_tps": 200,
+  "performance_target_met": false,
+  "attribution_note": "DS4 + Antirez Q2 + native DS4 Engram contract; do not attribute delta to engine alone"
+}

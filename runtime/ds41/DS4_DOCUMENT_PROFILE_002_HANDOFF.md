@@ -56,3 +56,8 @@ Persistent quality runner is executing independent code2k/docs2k confirmations 5
 - Original code/docs PASS, holdout A/B PASS10/10, independent code/docs confirmations PASS with cached_tokens=0.
 - LOW profile only; historical NONE FAILs remain preserved. Main document budget consumed exactly6/6, no retries or repairs.
 - Six-pass admits the preregistered continuation in the same DS4 load: reuse code original+confirm plus one third sample, then 4K→8K→~16K.
+
+## Performance checkpoint
+- Three independent PASS/cache0 code2k LOW samples: prefill79.55 /90.17 /91.01 tok/s; median90.17, sample SD6.39. Decode14.41/15.95/16.64.
+- `performance_target_met=false` versus200 tok/s target. This is DS4+AntirezQ2+native-Engram contract, not engine-only attribution.
+- Context characterization is running 4K→8K→~16K; a larger-context FAIL limits escalation but does not erase 2K qualification.

@@ -5,7 +5,7 @@
   "evidence": "coordinator.log: line3 worker}: command not found",
   "ds4_model_loaded": false,
   "request_sent": false,
-  "automatic_rollback": "K2 start confirmed epoch1789719735837225261; readiness pending at record time",
+  "automatic_rollback": "PASS: K2 READY epoch1789719735837225261 rank0/rank1/paired HTTP200",
   "fix": "remove only literal backslashes before ROLE/CTX/COORD/TP_PORT/API_PORT expansions",
   "fixed_launcher_sha256": "496ff6fb6c1a0b443079b0a63373b43f8d63159cef9de5de78da83b2267cfc87"
 }

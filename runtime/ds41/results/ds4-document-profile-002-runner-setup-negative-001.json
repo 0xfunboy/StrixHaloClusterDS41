@@ -1,0 +1,12 @@
+{
+  "schema": "ds4-document-profile-002-runner-setup-negative-v1",
+  "status": "SETUP_FAIL_BEFORE_HTTP",
+  "cause": "quality runner migrated DOC_AUD from object-with-records to tracked manifest list but rec() still indexed DOC_AUD['records']",
+  "traceback": "TypeError: list indices must be integers or slices, not str",
+  "requests_sent": 0,
+  "budget_consumed": 0,
+  "ds4_state": "READY unchanged",
+  "k2_state": "OFF unchanged",
+  "fix": "rec() and conditional runners now iterate tracked manifest lists directly",
+  "retry_policy": "same model load; no semantic replay because no HTTP request/state/registry was created"
+}

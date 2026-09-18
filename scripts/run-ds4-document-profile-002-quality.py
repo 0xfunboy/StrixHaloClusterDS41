@@ -69,7 +69,7 @@ def run_case(ident:str,prompt:Path,expected:dict,independent_required=False):
     atomic(d/'validation.json',row); return row
 
 def rec(ident):
-    return next(x for x in DOC_AUD['records'] if x['id']==ident)
+    return next(x for x in DOC_AUD if x['id']==ident)
 def hold(ident):
     return next(x for x in HOLDS if x['id']==ident)
 

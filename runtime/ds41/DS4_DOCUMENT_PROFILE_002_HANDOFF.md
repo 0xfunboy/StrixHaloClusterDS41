@@ -35,3 +35,8 @@ Publish prereg/PLAN checkpoint, verify K2 still READY and no stale job, then exa
 ## Startup READY
 - DOCUMENT PROFILE 002 first startup reached READY before any document request: coordinator+worker active, API200, ctx16384, 50/50 TCP/USB4, gate5000, target-only/noDSpark, Engram disk-only, planned82.67GiB/rank.
 - K2 is OFF. NEXT is the frozen max6 document-quality runner.
+
+## Runner setup negative 001
+- First quality unit exited before any HTTP: tracked manifest now exposes `documents` as a list but `rec()` still used the old `DOC_AUD["records"]` shape. TypeError occurred before case state/registry creation.
+- Requests sent=0, budget consumed=0; DS4 remained READY and K2 OFF.
+- Fixed quality + continuation + soak list lookups; py_compile and manifest lookup preflight PASS. Retry stays in the same DS4 load and is not a semantic replay.

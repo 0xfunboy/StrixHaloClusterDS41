@@ -31,7 +31,7 @@ def validate(row,exp):
     cache=r.get('cache') or {};ind=isinstance(cache.get('cached_tokens'),int) and cache['cached_tokens']<=32
     return {'id':row['id'],'status':'PASS' if ok else 'FAIL_SEMANTIC','semantic_pass':ok,'independent':ind,'expected':exp,'actual':got,'wall_s':r.get('wall_s'),'first_final_s':s.get('first_final_s'),'first_reasoning_s':s.get('first_reasoning_s'),'finish_reason':s.get('finish_reason'),'usage':s.get('usage'),'cache':cache,'server':r.get('server'),'resources_before':r.get('resources_before'),'resources_after':r.get('resources_after')}
 
-def rec(ident):return next(x for x in AUD['records'] if x['id']==ident)
+def rec(ident):return next(x for x in AUD if x['id']==ident)
 
 def metric_from_quality(caseid):
     q=json.load(open(Q/'terminal.json'))

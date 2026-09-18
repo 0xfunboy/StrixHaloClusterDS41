@@ -33,8 +33,8 @@ def main():
     prod=json.load(open(BASE/'product/terminal.json'))
     if prod.get('status')!='PASS':raise SystemExit('product gate not PASS')
     token=(STATE/'api-token').read_text().strip()
-    code=next(x for x in AUD['records'] if x['id']=='code2k-middle-explicit-v2')
-    docs=next(x for x in AUD['records'] if x['id']=='docs2k-middle-explicit-v2')
+    code=next(x for x in AUD if x['id']=='code2k-middle-explicit-v2')
+    docs=next(x for x in AUD if x['id']=='docs2k-middle-explicit-v2')
     ha=next(x for x in HOLDS if x['id']=='document-holdout-a')
     hb=next(x for x in HOLDS if x['id']=='document-holdout-b')
     cases=[

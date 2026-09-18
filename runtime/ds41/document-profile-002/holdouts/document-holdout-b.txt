@@ -1,0 +1,154 @@
+DOCUMENT_FACT_HEAD=19
+
+===== FILE runtime/ds41/presets/dspark-k1-gfx1151.md SHA256 d05307bfb96b3a436eeef74165fe4ef66cbd5eb1f0624f22e73180ffe1d5407f =====
+# Experimental DSpark K=1 preset — gfx1151
+
+This preset is **qualified experimentally**, not promoted as the production default. It describes the exact B039 configuration that passed the A040 comparison.
+
+## Reproduce the qualified offline arm
+
+```bash
+cd /home/funboy/StrixHaloClusterDS41
+ATTEMPT=attempt-dspark-k1-repro
+mkdir -p reports/DS41-Q2-001/$ATTEMPT
+cp reports/DS41-Q2-001/attempt039-dspark-k1/prompt-tokens.json reports/DS41-Q2-001/$ATTEMPT/prompt-tokens.json
+EPOCH=$(date +%s%N)
+DS41_RUN_MODE=offline DS41_ATTEMPT_NAME=$ATTEMPT DS41_RUNTIME_MAX_SEC=5400 \
+  runtime/ds41/pair.sh start "$EPOCH" 18210
+systemd-run --user --unit="ds41-$ATTEMPT-supervisor" --collect \
+  --property=RuntimeMaxSec=5500 --property=KillMode=control-group --property=Restart=no \
+  /usr/bin/bash /home/funboy/StrixHaloClusterDS41/scripts/supervise-ds41-offline-attempt.sh \
+  "$ATTEMPT" "$EPOCH" 5450
+```
+
+The frozen `dspark_real.arm=dspark` fixture applies the preset before model construction. No oracle/replay proposer is installed.
+
+## Roll back to M1
+
+Use `dspark_real.arm=m1` / `speculative_config=None` and unset `DS41_DSPARK_MXFP4_BF16`, `DS41_NATIVE_HIP_MOE_ROWWISE`, `DS41_MHC_ROWWISE_BLOCK`, and `DS41_REAL_DSPARK_TELEMETRY`. Keep the promoted target switches enabled. `attempt040-m1-control/prompt-tokens.json` is the frozen rollback/control fixture.
+
+No API/frontend production default is modified by this preset.
+
+===== END FILE runtime/ds41/presets/dspark-k1-gfx1151.md =====
+
+===== FILE runtime/fixtures/README.md SHA256 85da1ec9622a887bd9d8557cb1d8a029c6a7017c7f2a9ad3a779a79eb3c97dd0 =====
+# Operational fixtures
+
+Frozen coding/context test inputs and validators used by HaloClu's benchmark
+operations live in `suite/`. They were relocated from the historical
+STRIX-PRODUCT-001 suite; JSON path metadata and corresponding application pins
+were updated. Task source and test payloads were preserved.
+
+`historical-109-256.json` retains the exact historical request payload from
+GLM-CIRU-OPT-004, including the absence of an explicit reasoning setting.
+Do not reinterpret it as the current interactive profile.
+
+These fixtures remove a live dependency on the retired research repositories.
+They contain test problems and local validators, not model weights, credentials
+or a representative general-intelligence benchmark. The directory named
+`private` holds the validator side of each task, excluded from the model prompt;
+it is not a confidential secret or an externally held-out benchmark.
+
+Generated run evidence belongs in ignored state/report directories. Changing a
+fixture requires deliberate review and new matching pins; do not relax checks
+to make modified fixtures pass.
+
+===== END FILE runtime/fixtures/README.md =====
+
+===== FILE runtime/ds41/api_server.py SHA256 73f8473e0a7210028cf8015ef56899fe4d55604431d6fd57aa8af4a452425e53 =====
+"""DS41 vLLM API entrypoint: register the pinned GGUF plugin before CLI parsing."""
+from __future__ import annotations
+
+import os
+
+from vllm_gguf_plugin import register
+
+register()
+
+if os.environ.get("DS41_NATIVE_HIP_MOE", "0") == "1":
+    from runtime.ds41.native_hip_moe_runtime import ensure_loaded
+
+    ensure_loaded()
+
+if __name__ == "__main__":
+    from vllm.entrypoints.launchers.api_server.entry import main
+
+    main()
+
+===== END FILE runtime/ds41/api_server.py =====
+
+===== FILE .github/pull_request_template.md SHA256 d842977921fafd2f44bbe8f542a26057e7409073ac76fdd16f6032e12efd0a51 =====
+## Change
+
+Describe the user-visible change and the reproducer, if fixing a defect.
+
+## Verification
+
+State which checks ran, their results and any missing prerequisites or skips.
+Separate mocked/CPU-only checks from real model or hardware tests.
+
+- [ ] No credentials, weights, raw conversations or runtime state included.
+- [ ] No isolated rank restart or silent change to qualified inference math.
+- [ ] No expanded correctness/performance claim beyond the recorded evidence.
+
+===== END FILE .github/pull_request_template.md =====
+
+DOCUMENT_FACT_CENTER=11
+
+===== FILE internal/app/envelope_test.go SHA256 811c3b202f27f09deb63e5e98748ffbaf18efff0643df4ce39869735d1fcceab =====
+package app
+
+import "testing"
+
+func TestLosslessEnvelopeNormalizationOnly(t *testing.T) {
+	allowed := map[string]bool{"a.cpp": true}
+	for _, tc := range []struct{ input, normal string }{
+		{`{"files":{"a.cpp":"int main(){}\n"}}`, "none"},
+		{`{"a.cpp":"int main(){}\n"}`, "direct_file_map"},
+		{`{"files":{"a.cpp":"int main(){}\n"}`, "closed_outer_object"},
+	} {
+		files, normal, e := parseFilesEnvelope(tc.input, allowed)
+		if e != nil || normal != tc.normal || string(files["a.cpp"]) != "int main(){}\n" {
+			t.Fatalf("changed source bytes or classification: %q %q %v", files, normal, e)
+		}
+	}
+	for _, input := range []string{
+		`{"files":{"a.cpp":"unfinished`,
+		`{"files":{"a.cpp":"x"`,
+		`{"files":{"a.cpp":"x"},"execute":"bad"}`,
+		`{"files":{"../escape":"x"}`, `{"unknown":"x"}`, `{"files":{}}`,
+		`{"files":{"a.cpp":null}}`,
+	} {
+		if _, _, e := parseFilesEnvelope(input, allowed); e == nil {
+			t.Fatalf("accepted invalid envelope %s", input)
+		}
+	}
+}
+
+===== END FILE internal/app/envelope_test.go =====
+
+===== FILE runtime/ds41/presets/dspark-k3-gfx1151.md SHA256 f172f415a5af0fad2e70a33f716c18c77d0db4a15b12789ba254b4de799e5a57 =====
+# Experimental DSpark K=3 preset — gfx1151
+
+Qualified by attempt043/044. This does **not** replace K2 serving. Use the K3 research fixture only under supervised finite ownership. Rollback chain: K3 -> K2 -> K1 -> M1.
+
+===== END FILE runtime/ds41/presets/dspark-k3-gfx1151.md =====
+
+===== FILE scripts/_ds41_artifact.py SHA256 9d014f5d13a931d406fc4f95a801f6152beaa7f258b98961a1c835fd66dae9d1 =====
+#!/usr/bin/env python3
+"""Shared model path for DS41 scripts; source of truth is runtime/ds41/artifact.json."""
+from __future__ import annotations
+import json
+from pathlib import Path
+
+REPO = Path('/home/funboy/StrixHaloClusterDS41')
+ARTIFACT = json.loads((REPO / 'runtime/ds41/artifact.json').read_text())
+MODEL_DIR = Path(ARTIFACT['model_dir'])
+MODEL_FILE = MODEL_DIR / ARTIFACT['model_file']
+ORIGINAL_MODEL_DIR = Path(ARTIFACT['original_model_dir'])
+
+===== END FILE scripts/_ds41_artifact.py =====
+
+DOCUMENT_FACT_TAIL=6
+
+TASK: Return exactly one JSON object with keys score, section_count, first_file, second_file, middle_file, penultimate_file, last_file, head_fact, center_fact, tail_fact. score must equal (DOCUMENT_FACT_HEAD * 2 + DOCUMENT_FACT_CENTER - DOCUMENT_FACT_TAIL). File fields must be basenames of the corresponding FILE sections in appearance order; middle_file is the unique middle section. Fact fields must copy the integer values found above. No prose.

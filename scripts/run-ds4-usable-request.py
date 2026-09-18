@@ -43,9 +43,11 @@ def proc_snapshot(pid:int, peer=False):
             'VmSwap':vals.get('VmSwap'),'minflt':num(7),'majflt':num(9)}
 
 def resources():
-    lp=unit_pid('ds4-usable-coordinator.service',False)
-    rp=unit_pid('ds4-usable-worker.service',True)
-    return {'unix':time.time(),'node01':proc_snapshot(lp,False),'node02':proc_snapshot(rp,True)}
+    coordinator=os.environ.get('DS4_COORDINATOR_UNIT','ds4-usable-coordinator.service')
+    worker=os.environ.get('DS4_WORKER_UNIT','ds4-usable-worker.service')
+    lp=unit_pid(coordinator,False)
+    rp=unit_pid(worker,True)
+    return {'unix':time.time(),'coordinator_unit':coordinator,'worker_unit':worker,'node01':proc_snapshot(lp,False),'node02':proc_snapshot(rp,True)}
 
 def feed_frame(lines,state,now,start):
     if not lines:return

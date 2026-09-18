@@ -1,0 +1,177 @@
+{
+  "schema": "ds4-document-profile-002-prompt-manifest-v1",
+  "documents": [
+    {
+      "id": "code2k-middle-explicit-v2",
+      "kind": "code",
+      "label": "2k",
+      "source": "reports/DS41-Q2-001/daily-k2-panel/corpora/code-2k.txt",
+      "source_sha256": "c162e1102363a8d7dea3891bacac73d18948cde6af8014b92d867cf7e4271993",
+      "prompt_sha256": "b5d3e857f29626ed9ac7c62c69bcab051b7b09238ea780eb2f69e3a024dd8206",
+      "sections_n": 6,
+      "lower_middle_1based": 3,
+      "offline_lower_middle_basename": "_ds41_artifact.py",
+      "expected": {
+        "result": 52,
+        "first_file": "__init__.py",
+        "middle_file": "_ds41_artifact.py",
+        "last_file": "envelope_test.go"
+      },
+      "only_change": "final task instruction middle_file definition",
+      "old_instruction": "first_file/middle_file/last_file must be the basenames of the first, median-by-order, and last FILE sections actually present.",
+      "new_instruction": "first_file/last_file must be the basenames of the first and last FILE sections actually present. middle_file must be the basename of the lower central FILE section: number the FILE sections from 1 in appearance order; if N is even use section N/2, and if N is odd use section (N+1)/2.",
+      "effective_chat_tokens_nothink": 1635,
+      "prompt_file": "runtime/ds41/document-profile-002/prompts/code2k-middle-explicit-v2.txt"
+    },
+    {
+      "id": "docs2k-middle-explicit-v2",
+      "kind": "docs",
+      "label": "2k",
+      "source": "reports/DS41-Q2-001/daily-k2-panel/corpora/docs-2k.txt",
+      "source_sha256": "bf0838e7ca0f1581ca1145f91bd9327bf55d0fdaf61bf2e448f03b8bba14f560",
+      "prompt_sha256": "0bf1b455709630dacad54a81f12bccce505dedd00abba1ad409f6980bfd8ff19",
+      "sections_n": 4,
+      "lower_middle_1based": 2,
+      "offline_lower_middle_basename": "pull_request_template.md",
+      "expected": {
+        "result": 52,
+        "first_file": "dspark-k3-gfx1151.md",
+        "middle_file": "pull_request_template.md",
+        "last_file": "dspark-k1-gfx1151.md"
+      },
+      "only_change": "final task instruction middle_file definition",
+      "old_instruction": "first_file/middle_file/last_file must be the basenames of the first, median-by-order, and last FILE sections actually present.",
+      "new_instruction": "first_file/last_file must be the basenames of the first and last FILE sections actually present. middle_file must be the basename of the lower central FILE section: number the FILE sections from 1 in appearance order; if N is even use section N/2, and if N is odd use section (N+1)/2.",
+      "effective_chat_tokens_nothink": 1312,
+      "prompt_file": "runtime/ds41/document-profile-002/prompts/docs2k-middle-explicit-v2.txt"
+    },
+    {
+      "id": "code4k-middle-explicit-v2",
+      "kind": "code",
+      "label": "4k",
+      "source": "reports/DS41-Q2-001/daily-k2-panel/corpora/code-4k.txt",
+      "source_sha256": "c0598c15486c6145c84ec0b80d6312bab8a0669e78908d89ea2ebcb5dbeea2d7",
+      "prompt_sha256": "c8d394017133c9cd8ac5d9fca8c44bac7015ed55fb291032f52e6c6b89a647af",
+      "sections_n": 10,
+      "lower_middle_1based": 5,
+      "offline_lower_middle_basename": "test-ds41-prefill-metrics.py",
+      "expected": {
+        "result": 62,
+        "first_file": "__init__.py",
+        "middle_file": "test-ds41-prefill-metrics.py",
+        "last_file": "prompt_test.go"
+      },
+      "only_change": "final task instruction middle_file definition",
+      "old_instruction": "first_file/middle_file/last_file must be the basenames of the first, median-by-order, and last FILE sections actually present.",
+      "new_instruction": "first_file/last_file must be the basenames of the first and last FILE sections actually present. middle_file must be the basename of the lower central FILE section: number the FILE sections from 1 in appearance order; if N is even use section N/2, and if N is odd use section (N+1)/2.",
+      "effective_chat_tokens_nothink": 3492,
+      "prompt_file": "runtime/ds41/document-profile-002/prompts/code4k-middle-explicit-v2.txt"
+    },
+    {
+      "id": "code8k-middle-explicit-v2",
+      "kind": "code",
+      "label": "8k",
+      "source": "reports/DS41-Q2-001/daily-k2-panel/corpora/code-8k.txt",
+      "source_sha256": "315ca93620f95325aef302e11dc40b9b23c9684c27b67e64226dd6f94fe7dd25",
+      "prompt_sha256": "d32183300b74dc08e64e93aabe612296e194a1d77ec0395d66b17cab8ecfac3d",
+      "sections_n": 16,
+      "lower_middle_1based": 8,
+      "offline_lower_middle_basename": "test-ds41-prefill-event-gfx1151.py",
+      "expected": {
+        "result": 72,
+        "first_file": "__init__.py",
+        "middle_file": "test-ds41-prefill-event-gfx1151.py",
+        "last_file": "export-ds41-layer0-moe-input.py"
+      },
+      "only_change": "final task instruction middle_file definition",
+      "old_instruction": "first_file/middle_file/last_file must be the basenames of the first, median-by-order, and last FILE sections actually present.",
+      "new_instruction": "first_file/last_file must be the basenames of the first and last FILE sections actually present. middle_file must be the basename of the lower central FILE section: number the FILE sections from 1 in appearance order; if N is even use section N/2, and if N is odd use section (N+1)/2.",
+      "effective_chat_tokens_nothink": 7323,
+      "prompt_file": "runtime/ds41/document-profile-002/prompts/code8k-middle-explicit-v2.txt"
+    },
+    {
+      "id": "code16k-middle-explicit-v2",
+      "kind": "code",
+      "label": "16k",
+      "source": "reports/DS41-Q2-001/daily-k2-panel/corpora/code-16k.txt",
+      "source_sha256": "0cdd305f9051c03709a086491beb92e2bf0dcc87d95b28063a89153ca8f45a7a",
+      "prompt_sha256": "5a5042f0a8f1bd82ca4bb6c3c6cb17bc25a12f21d2bd2348f5111d319204c29f",
+      "sections_n": 24,
+      "lower_middle_1based": 12,
+      "offline_lower_middle_basename": "preflight-ds41-config.py",
+      "expected": {
+        "result": 86,
+        "first_file": "__init__.py",
+        "middle_file": "preflight-ds41-config.py",
+        "last_file": "test-ds41-engram-tp2.py"
+      },
+      "only_change": "final task instruction middle_file definition",
+      "old_instruction": "first_file/middle_file/last_file must be the basenames of the first, median-by-order, and last FILE sections actually present.",
+      "new_instruction": "first_file/last_file must be the basenames of the first and last FILE sections actually present. middle_file must be the basename of the lower central FILE section: number the FILE sections from 1 in appearance order; if N is even use section N/2, and if N is odd use section (N+1)/2.",
+      "effective_chat_tokens_nothink": 14877,
+      "prompt_file": "runtime/ds41/document-profile-002/prompts/code16k-middle-explicit-v2.txt"
+    }
+  ],
+  "holdouts": [
+    {
+      "id": "document-holdout-a",
+      "prompt_file": "runtime/ds41/document-profile-002/holdouts/document-holdout-a.txt",
+      "sha256": "1644e146d1fb4d15e9cf4d44e524ce902575833c70a7198a5e7ecabdd7701986",
+      "sections": [
+        "envelope_test.go",
+        "__init__.py",
+        "prompt.go",
+        "_ds41_artifact.py",
+        "test-ds41-prefill-metrics.py"
+      ],
+      "fact_positions": {
+        "head": "before section1",
+        "center": "after section3",
+        "tail": "after last section"
+      },
+      "expected": {
+        "score": 65,
+        "section_count": 5,
+        "first_file": "envelope_test.go",
+        "second_file": "__init__.py",
+        "middle_file": "prompt.go",
+        "penultimate_file": "_ds41_artifact.py",
+        "last_file": "test-ds41-prefill-metrics.py",
+        "head_fact": 31,
+        "center_fact": 7,
+        "tail_fact": 4
+      }
+    },
+    {
+      "id": "document-holdout-b",
+      "prompt_file": "runtime/ds41/document-profile-002/holdouts/document-holdout-b.txt",
+      "sha256": "f072aafa390b130b7add40735104a0b5469d60a0ae549b3ecfefa095047a3341",
+      "sections": [
+        "dspark-k1-gfx1151.md",
+        "README.md",
+        "api_server.py",
+        "pull_request_template.md",
+        "envelope_test.go",
+        "dspark-k3-gfx1151.md",
+        "_ds41_artifact.py"
+      ],
+      "fact_positions": {
+        "head": "before section1",
+        "center": "after section4",
+        "tail": "after last section"
+      },
+      "expected": {
+        "score": 43,
+        "section_count": 7,
+        "first_file": "dspark-k1-gfx1151.md",
+        "second_file": "README.md",
+        "middle_file": "pull_request_template.md",
+        "penultimate_file": "dspark-k3-gfx1151.md",
+        "last_file": "_ds41_artifact.py",
+        "head_fact": 19,
+        "center_fact": 11,
+        "tail_fact": 6
+      }
+    }
+  ]
+}

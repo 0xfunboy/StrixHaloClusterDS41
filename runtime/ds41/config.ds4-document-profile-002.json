@@ -1,0 +1,48 @@
+{
+  "listen": "127.0.0.1:18224",
+  "backend": "http://127.0.0.1:8080",
+  "tokenizer_endpoint": "http://127.0.0.1:18223/tokenize",
+  "chat_context_tokens": 4096,
+  "chat_default_output_tokens": 2048,
+  "chat_max_output_tokens": 8192,
+  "thinking_budget_supported": false,
+  "tool_calls_supported": false,
+  "model": "deepseek-v4.1-flash",
+  "state_dir": "/home/funboy/.local/state/ds4-document-profile-002",
+  "workspace_roots": [
+    "/home/funboy/StrixHaloClusterDS41"
+  ],
+  "pair_lock": "/home/funboy/.local/state/ds4-document-profile-002/gateway-admission.lock",
+  "default_profile": "document-low",
+  "profiles": {
+    "document-low": {
+      "reasoning": "low",
+      "context_tokens": 4096,
+      "max_tokens": 2048,
+      "max_repairs": 0
+    },
+    "c-off": {
+      "reasoning": "none",
+      "context_tokens": 16384,
+      "max_tokens": 8192,
+      "max_repairs": 0
+    }
+  },
+  "profile_status": "DS4_DOCUMENT_PROFILE_002_CANDIDATE; LOW_DOCUMENTS; C_OFF_SEPARATE; TARGET_ONLY; NO_DSPARK; CTX16384",
+  "context_format": "json",
+  "max_context_tokens": 16384,
+  "max_files": 300,
+  "max_file_bytes": 262144,
+  "max_repo_bytes": 33554432,
+  "model_timeout": 1800,
+  "sandbox_timeout": 90,
+  "sandbox_memory_bytes": 1073741824,
+  "sandbox_tasks": 64,
+  "remote_ssh": "02-evo-x3-tb",
+  "lifecycle_command": "/home/funboy/StrixHaloClusterDS41/scripts/ds4-document-controller.sh",
+  "lifecycle_preset": "ds4-document-low",
+  "reasoning_modes": [
+    "none",
+    "low"
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "schema": "ds4-document-profile-002-preregister-v1",
+  "state": "FROZEN_BEFORE_MODEL_LOAD",
+  "authority": {
+    "mandate": "DS4_DOCUMENT_PROFILE_002",
+    "usable_release_001_terminal": "5206483a19ba5c8cf0981e843cbd8e4602e3f21d",
+    "recovery_terminal": "ab41ca96c06e0d1308e844e7e75e96bcade37db1",
+    "plan": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md"
+  },
+  "entry_snapshot": {
+    "k2_release": "k2-prefill-5bdfed6",
+    "k2_source": "5bdfed698ab97b6230db3fe8a7e37ff8e9b3d513",
+    "k2_epoch": "1789720948796205781",
+    "k2_state": "READY rank0/rank1/paired HTTP200",
+    "ds4_state": "OFF no stale job",
+    "q2": {
+      "path": "/home/funboy/models/ds41/ds4-v41-q2/DeepSeek-V4.1-Flash-Q2.gguf",
+      "size": 365713686528,
+      "sha256_receipt": "1ce6a8f8806205c13330d7ca287bd198331dc5ca35ccc5d8a9a92a188a6f6f42",
+      "verified_both_nodes": true
+    }
+  },
+  "reuse_without_retest": {
+    "c_thinking_off": "USABLE001 PASS first attempt zero repair; preserve scope",
+    "go_low": "R4 PASS preserve scope",
+    "retrieval_r4": "tail1546 PASS, discriminator1571 exact PASS, holdouts4/4 PASS, JSON/fresh/multiturn3/3 PASS",
+    "no_replay": true
+  },
+  "offline_input_contract": {
+    "status": "PASS",
+    "cli_sidecar_delta_cause": "CLI default system turn <｜System｜>You are a helpful assistant",
+    "exact_extra_token_ids": [
+      128799,
+      3476,
+      477,
+      260,
+      11502,
+      22896
+    ],
+    "server_user_only_injects_default_system": false,
+    "old_usable001_model_input_changed_by_sidecar_fix": false,
+    "sidecar_fix": "render server DeepSeek41 semantics; no fixed subtraction",
+    "exact_id_equivalence": "corrected sidecar == embedded Antirez tokenizer on user/system/multiturn NONE/LOW plus frozen documents/holdouts",
+    "low": {
+      "parser_mode": "DS4_THINK_LOW",
+      "thinking_enabled": true,
+      "numeric_level": null,
+      "ds4_think_mode_level": -1,
+      "effort_system_text": null,
+      "only_prompt_delta_vs_none": "generation prefix final token 128822 </think> -> 128821 <think>"
+    }
+  },
+  "candidate": {
+    "source": "7d0454b4e32ef1e90235f2b001d6643b5934438c",
+    "q2": "Antirez verified",
+    "ctx": 16384,
+    "tp": "two host 50/50 TCP/USB4",
+    "gate_timeout_ms": 5000,
+    "target_only": true,
+    "dspark": false,
+    "document_profile": {
+      "thinking": true,
+      "reasoning_effort": "low",
+      "resolved_mode": "DS4_THINK_LOW",
+      "numeric_level": null,
+      "max_tokens_total": 2048,
+      "temperature": 0,
+      "seed": 1,
+      "ignore_eos": false
+    },
+    "original_prompts": [
+      {
+        "id": "code2k-middle-explicit-v2",
+        "path": "runtime/ds41/document-profile-002/prompts/code2k-middle-explicit-v2.txt",
+        "sha256": "b5d3e857f29626ed9ac7c62c69bcab051b7b09238ea780eb2f69e3a024dd8206",
+        "low_tokens": 1629,
+        "expected": {
+          "result": 52,
+          "first_file": "__init__.py",
+          "middle_file": "_ds41_artifact.py",
+          "last_file": "envelope_test.go"
+        }
+      },
+      {
+        "id": "docs2k-middle-explicit-v2",
+        "path": "runtime/ds41/document-profile-002/prompts/docs2k-middle-explicit-v2.txt",
+        "sha256": "0bf1b455709630dacad54a81f12bccce505dedd00abba1ad409f6980bfd8ff19",
+        "low_tokens": 1306,
+        "expected": {
+          "result": 52,
+          "first_file": "dspark-k3-gfx1151.md",
+          "middle_file": "pull_request_template.md",
+          "last_file": "dspark-k1-gfx1151.md"
+        }
+      }
+    ]
+  },
+  "main_budget": {
+    "max_document_requests": 6,
+    "order": [
+      "1 code2k-v2 LOW max2048",
+      "2 docs2k-v2 LOW max2048",
+      "3 holdout-a iff both originals PASS",
+      "4 holdout-b iff both originals PASS",
+      "5 code2k-v2 confirm iff holdouts PASS; cached_tokens<=32",
+      "6 docs2k-v2 confirm iff holdouts PASS; cached_tokens<=32"
+    ],
+    "no_semantic_retry": true,
+    "no_repair": true,
+    "semantic_fail_first_does_not_cancel_second_original": true,
+    "incomplete_rule": "cap exhausted without final is INCOMPLETE"
+  },
+  "conditional_continuation": {
+    "only_after_six_pass": true,
+    "performance": "reuse code original+confirm as samples 1/2; add one third comparable code sample; median and sample sd; 200 tok/s remains target only",
+    "context": "code4k -> code8k -> code16k, LOW cap512, stop escalation on fail",
+    "product": "protected candidate gateway 18224 + corrected sidecar18223; auth, nonstream, SSE reasoning/final, cancel/drain/resume, OFF no autoload, whole-pair ON",
+    "soak": "2h and >=24 sequential requests only after product PASS; actual start/end, no retroactive count"
+  },
+  "lifecycle": {
+    "owner": "DS4_DOCUMENT_PROFILE_002_20260918",
+    "coordinator_unit": "ds4-document-coordinator.service",
+    "worker_unit": "ds4-document-worker.service",
+    "controller": "scripts/ds4-document-controller.sh",
+    "startup_supervisor": "scripts/supervise-ds4-document-startup.sh",
+    "finalizer": "scripts/finalize-ds4-document-profile-002.sh",
+    "raw_dirs_precreated_both_nodes": true,
+    "launcher_sha256_both_nodes": "496ff6fb6c1a0b443079b0a63373b43f8d63159cef9de5de78da83b2267cfc87",
+    "failure_rule": "if document profile not qualified, stop DS4 and restore K2; if full chosen perimeter qualifies leave DS4 READY/idle"
+  },
+  "prohibitions": [
+    "no download",
+    "no cleanup",
+    "no full GGUF rehash",
+    "no new kernel",
+    "no K2 forensics",
+    "no DSpark",
+    "no RDMA",
+    "no quant change",
+    "no global venv/driver/kernel/network changes"
+  ]
+}

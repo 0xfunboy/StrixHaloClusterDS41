@@ -1,0 +1,283 @@
+{
+  "schema": "ds4-document-profile-002-input-contract-v1",
+  "status": "PASS",
+  "cli_delta": {
+    "cause": "CLI default system turn",
+    "extra_ids": [
+      128799,
+      3476,
+      477,
+      260,
+      11502,
+      22896
+    ],
+    "server_user_only_injects_default_system": false,
+    "model_input_changed_by_sidecar_fix": false
+  },
+  "low_mode": {
+    "parser_mode": "DS4_THINK_LOW",
+    "thinking_enabled": true,
+    "numeric_level": null,
+    "ds4_think_mode_level": -1,
+    "reasoning_effort_system_prefix": null,
+    "generation_prefix_change": "last token 128822 </think> -> 128821 <think>"
+  },
+  "rows": [
+    {
+      "id": "code2k-none",
+      "count": 1629,
+      "first_ids": [
+        0,
+        128803,
+        10525,
+        3286,
+        25842,
+        71588,
+        42921,
+        50
+      ],
+      "last_ids": [
+        8930,
+        20,
+        16,
+        3011,
+        46030,
+        603,
+        128804,
+        128822
+      ],
+      "resolved": {
+        "mode": "none",
+        "thinking_enabled": false,
+        "numeric_level": null
+      },
+      "rendered_file": "reports/DS41-Q2-001/ds4-document-profile-002/offline/code2k-none.server-rendered.txt",
+      "antirez_count": 1629,
+      "exact_antirez_ids": true
+    },
+    {
+      "id": "code2k-low",
+      "count": 1629,
+      "first_ids": [
+        0,
+        128803,
+        10525,
+        3286,
+        25842,
+        71588,
+        42921,
+        50
+      ],
+      "last_ids": [
+        8930,
+        20,
+        16,
+        3011,
+        46030,
+        603,
+        128804,
+        128821
+      ],
+      "resolved": {
+        "mode": "low",
+        "thinking_enabled": true,
+        "numeric_level": null
+      },
+      "rendered_file": "reports/DS41-Q2-001/ds4-document-profile-002/offline/code2k-low.server-rendered.txt",
+      "antirez_count": 1629,
+      "exact_antirez_ids": true
+    },
+    {
+      "id": "docs2k-none",
+      "count": 1306,
+      "first_ids": [
+        0,
+        128803,
+        10525,
+        3286,
+        25842,
+        71588,
+        42921,
+        50
+      ],
+      "last_ids": [
+        8930,
+        20,
+        16,
+        3011,
+        46030,
+        603,
+        128804,
+        128822
+      ],
+      "resolved": {
+        "mode": "none",
+        "thinking_enabled": false,
+        "numeric_level": null
+      },
+      "rendered_file": "reports/DS41-Q2-001/ds4-document-profile-002/offline/docs2k-none.server-rendered.txt",
+      "antirez_count": 1306,
+      "exact_antirez_ids": true
+    },
+    {
+      "id": "docs2k-low",
+      "count": 1306,
+      "first_ids": [
+        0,
+        128803,
+        10525,
+        3286,
+        25842,
+        71588,
+        42921,
+        50
+      ],
+      "last_ids": [
+        8930,
+        20,
+        16,
+        3011,
+        46030,
+        603,
+        128804,
+        128821
+      ],
+      "resolved": {
+        "mode": "low",
+        "thinking_enabled": true,
+        "numeric_level": null
+      },
+      "rendered_file": "reports/DS41-Q2-001/ds4-document-profile-002/offline/docs2k-low.server-rendered.txt",
+      "antirez_count": 1306,
+      "exact_antirez_ids": true
+    },
+    {
+      "id": "holdout-a-none",
+      "count": 1409,
+      "first_ids": [
+        0,
+        128803,
+        100340,
+        84708,
+        14239,
+        13455,
+        65,
+        70489
+      ],
+      "last_ids": [
+        2006,
+        3554,
+        16,
+        3011,
+        46030,
+        603,
+        128804,
+        128822
+      ],
+      "resolved": {
+        "mode": "none",
+        "thinking_enabled": false,
+        "numeric_level": null
+      },
+      "rendered_file": "reports/DS41-Q2-001/ds4-document-profile-002/offline/holdout-a-none.server-rendered.txt",
+      "antirez_count": 1409,
+      "exact_antirez_ids": true
+    },
+    {
+      "id": "holdout-a-low",
+      "count": 1409,
+      "first_ids": [
+        0,
+        128803,
+        100340,
+        84708,
+        14239,
+        13455,
+        65,
+        70489
+      ],
+      "last_ids": [
+        2006,
+        3554,
+        16,
+        3011,
+        46030,
+        603,
+        128804,
+        128821
+      ],
+      "resolved": {
+        "mode": "low",
+        "thinking_enabled": true,
+        "numeric_level": null
+      },
+      "rendered_file": "reports/DS41-Q2-001/ds4-document-profile-002/offline/holdout-a-low.server-rendered.txt",
+      "antirez_count": 1409,
+      "exact_antirez_ids": true
+    },
+    {
+      "id": "holdout-b-none",
+      "count": 2039,
+      "first_ids": [
+        0,
+        128803,
+        100340,
+        84708,
+        14239,
+        13455,
+        65,
+        70489
+      ],
+      "last_ids": [
+        2006,
+        3554,
+        16,
+        3011,
+        46030,
+        603,
+        128804,
+        128822
+      ],
+      "resolved": {
+        "mode": "none",
+        "thinking_enabled": false,
+        "numeric_level": null
+      },
+      "rendered_file": "reports/DS41-Q2-001/ds4-document-profile-002/offline/holdout-b-none.server-rendered.txt",
+      "antirez_count": 2039,
+      "exact_antirez_ids": true
+    },
+    {
+      "id": "holdout-b-low",
+      "count": 2039,
+      "first_ids": [
+        0,
+        128803,
+        100340,
+        84708,
+        14239,
+        13455,
+        65,
+        70489
+      ],
+      "last_ids": [
+        2006,
+        3554,
+        16,
+        3011,
+        46030,
+        603,
+        128804,
+        128821
+      ],
+      "resolved": {
+        "mode": "low",
+        "thinking_enabled": true,
+        "numeric_level": null
+      },
+      "rendered_file": "reports/DS41-Q2-001/ds4-document-profile-002/offline/holdout-b-low.server-rendered.txt",
+      "antirez_count": 2039,
+      "exact_antirez_ids": true
+    }
+  ]
+}

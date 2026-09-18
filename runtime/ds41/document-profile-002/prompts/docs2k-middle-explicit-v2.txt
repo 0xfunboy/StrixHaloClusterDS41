@@ -1,0 +1,86 @@
+DS41 DAILY CORPUS DOCS 2k
+DISTANT_FACT_BEGIN=17
+
+===== FILE runtime/ds41/presets/dspark-k3-gfx1151.md SHA256 f172f415a5af0fad2e70a33f716c18c77d0db4a15b12789ba254b4de799e5a57 =====
+# Experimental DSpark K=3 preset — gfx1151
+
+Qualified by attempt043/044. This does **not** replace K2 serving. Use the K3 research fixture only under supervised finite ownership. Rollback chain: K3 -> K2 -> K1 -> M1.
+
+===== END FILE runtime/ds41/presets/dspark-k3-gfx1151.md =====
+
+===== FILE .github/pull_request_template.md SHA256 d842977921fafd2f44bbe8f542a26057e7409073ac76fdd16f6032e12efd0a51 =====
+## Change
+
+Describe the user-visible change and the reproducer, if fixing a defect.
+
+## Verification
+
+State which checks ran, their results and any missing prerequisites or skips.
+Separate mocked/CPU-only checks from real model or hardware tests.
+
+- [ ] No credentials, weights, raw conversations or runtime state included.
+- [ ] No isolated rank restart or silent change to qualified inference math.
+- [ ] No expanded correctness/performance claim beyond the recorded evidence.
+
+===== END FILE .github/pull_request_template.md =====
+
+===== FILE runtime/fixtures/README.md SHA256 85da1ec9622a887bd9d8557cb1d8a029c6a7017c7f2a9ad3a779a79eb3c97dd0 =====
+# Operational fixtures
+
+Frozen coding/context test inputs and validators used by HaloClu's benchmark
+operations live in `suite/`. They were relocated from the historical
+STRIX-PRODUCT-001 suite; JSON path metadata and corresponding application pins
+were updated. Task source and test payloads were preserved.
+
+`historical-109-256.json` retains the exact historical request payload from
+GLM-CIRU-OPT-004, including the absence of an explicit reasoning setting.
+Do not reinterpret it as the current interactive profile.
+
+These fixtures remove a live dependency on the retired research repositories.
+They contain test problems and local validators, not model weights, credentials
+or a representative general-intelligence benchmark. The directory named
+`private` holds the validator side of each task, excluded from the model prompt;
+it is not a confidential secret or an externally held-out benchmark.
+
+Generated run evidence belongs in ignored state/report directories. Changing a
+fixture requires deliberate review and new matching pins; do not relax checks
+to make modified fixtures pass.
+
+===== END FILE runtime/fixtures/README.md =====
+
+===== FILE runtime/ds41/presets/dspark-k1-gfx1151.md SHA256 d05307bfb96b3a436eeef74165fe4ef66cbd5eb1f0624f22e73180ffe1d5407f =====
+# Experimental DSpark K=1 preset — gfx1151
+
+This preset is **qualified experimentally**, not promoted as the production default. It describes the exact B039 configuration that passed the A040 comparison.
+
+## Reproduce the qualified offline arm
+
+```bash
+cd /home/funboy/StrixHaloClusterDS41
+ATTEMPT=attempt-dspark-k1-repro
+mkdir -p reports/DS41-Q2-001/$ATTEMPT
+cp reports/DS41-Q2-001/attempt039-dspark-k1/prompt-tokens.json reports/DS41-Q2-001/$ATTEMPT/prompt-tokens.json
+EPOCH=$(date +%s%N)
+DS41_RUN_MODE=offline DS41_ATTEMPT_NAME=$ATTEMPT DS41_RUNTIME_MAX_SEC=5400 \
+  runtime/ds41/pair.sh start "$EPOCH" 18210
+systemd-run --user --unit="ds41-$ATTEMPT-supervisor" --collect \
+  --property=RuntimeMaxSec=5500 --property=KillMode=control-group --property=Restart=no \
+  /usr/bin/bash /home/funboy/StrixHaloClusterDS41/scripts/supervise-ds41-offline-attempt.sh \
+  "$ATTEMPT" "$EPOCH" 5450
+```
+
+The frozen `dspark_real.arm=dspark` fixture applies the preset before model construction. No oracle/replay proposer is installed.
+
+## Roll back to M1
+
+Use `dspark_real.arm=m1` / `speculative_config=None` and unset `DS41_DSPARK_MXFP4_BF16`, `DS41_NATIVE_HIP_MOE_ROWWISE`, `DS41_MHC_ROWWISE_BLOCK`, and `DS41_REAL_DSPARK_TELEMETRY`. Keep the promoted target switches enabled. `attempt040-m1-control/prompt-tokens.json` is the frozen rollback/control fixture.
+
+No API/frontend production default is modified by this preset.
+
+===== END FILE runtime/ds41/presets/dspark-k1-gfx1151.md =====
+
+DISTANT_FACT_MIDDLE=23
+
+DISTANT_FACT_END=5
+
+TASK: Using the corpus above, return exactly one JSON object with keys result, first_file, middle_file, last_file. result must equal (DISTANT_FACT_BEGIN * 2 + DISTANT_FACT_MIDDLE - DISTANT_FACT_END). first_file/last_file must be the basenames of the first and last FILE sections actually present. middle_file must be the basename of the lower central FILE section: number the FILE sections from 1 in appearance order; if N is even use section N/2, and if N is odd use section (N+1)/2. No prose.

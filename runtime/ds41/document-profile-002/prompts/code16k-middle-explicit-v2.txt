@@ -1,0 +1,1108 @@
+DS41 DAILY CORPUS CODE 16k
+DISTANT_FACT_BEGIN=29
+
+===== FILE runtime/ds41/__init__.py SHA256 1c198a9b4336338e3d6f7d5c38c377d9b011832851fd15319c43ed886d310d86 =====
+"""DeepSeek V4.1 Strix Halo experimental runtime helpers."""
+
+===== END FILE runtime/ds41/__init__.py =====
+
+===== FILE runtime/ds41/api_server.py SHA256 73f8473e0a7210028cf8015ef56899fe4d55604431d6fd57aa8af4a452425e53 =====
+"""DS41 vLLM API entrypoint: register the pinned GGUF plugin before CLI parsing."""
+from __future__ import annotations
+
+import os
+
+from vllm_gguf_plugin import register
+
+register()
+
+if os.environ.get("DS41_NATIVE_HIP_MOE", "0") == "1":
+    from runtime.ds41.native_hip_moe_runtime import ensure_loaded
+
+    ensure_loaded()
+
+if __name__ == "__main__":
+    from vllm.entrypoints.launchers.api_server.entry import main
+
+    main()
+
+===== END FILE runtime/ds41/api_server.py =====
+
+===== FILE scripts/_ds41_artifact.py SHA256 9d014f5d13a931d406fc4f95a801f6152beaa7f258b98961a1c835fd66dae9d1 =====
+#!/usr/bin/env python3
+"""Shared model path for DS41 scripts; source of truth is runtime/ds41/artifact.json."""
+from __future__ import annotations
+import json
+from pathlib import Path
+
+REPO = Path('/home/funboy/StrixHaloClusterDS41')
+ARTIFACT = json.loads((REPO / 'runtime/ds41/artifact.json').read_text())
+MODEL_DIR = Path(ARTIFACT['model_dir'])
+MODEL_FILE = MODEL_DIR / ARTIFACT['model_file']
+ORIGINAL_MODEL_DIR = Path(ARTIFACT['original_model_dir'])
+
+===== END FILE scripts/_ds41_artifact.py =====
+
+===== FILE internal/app/prompt.go SHA256 73fc9c75c3bee5e263762cc009fc263973d63c42f55e8e4d1438264367e6d108 =====
+package app
+
+import (
+	"encoding/json"
+	"strings"
+)
+
+// Preserve the original JSON source envelope and repair feedback byte for byte.
+func buildCodingPrompt(task string, files map[string]string, allowed []string, feedback string) string {
+	var b strings.Builder
+	b.WriteString("TASK\n" + task + "\nALLOWED PATHS\n" + strings.Join(allowed, "\n") + "\nSELECTED CURRENT SOURCES\n")
+	data, _ := json.Marshal(files)
+	b.Write(data)
+	if feedback != "" {
+		b.WriteString("\nRELEVANT FAILURE FROM PREVIOUS ATTEMPT\n" + feedback + "\nCorrect the current code, provide final JSON. The prior conversation is intentionally omitted.")
+	}
+	return b.String()
+}
+
+===== END FILE internal/app/prompt.go =====
+
+===== FILE scripts/test-ds41-prefill-metrics.py SHA256 40ca3cb9e69f2906c2209666a9e09bebd548b49d229edd0474c52db875502194 =====
+#!/usr/bin/env python3
+from vllm.v1.metrics.stats import RequestStateStats
+from vllm.entrypoints.generate.base.serving import build_per_request_timing_metrics
+s=RequestStateStats()
+s.queued_ts=10.0; s.scheduled_ts=10.1; s.first_token_ts=10.7; s.last_token_ts=11.7
+s.ds41_prefill_engine_ms=500.0
+s.ds41_prompt_tokens_computed=2000
+s.ds41_prompt_tokens_cached=48
+s.ds41_prompt_tokens_local_cache=48
+s.ds41_prompt_tokens_external_cache=0
+s.ds41_prompt_tokens_cache_creation=32
+m=build_per_request_timing_metrics(s, 21)
+d=m.model_dump()
+assert d['time_to_first_token_ms'] > d['prefill_engine_ms']
+assert abs(d['prefill_engine_tokens_per_second']-4000.0)<1e-9
+assert d['prompt_tokens_computed']==2000 and d['prompt_tokens_cached']==48
+assert d['prompt_tokens_local_cache']==48 and d['prompt_tokens_cache_creation']==32
+print('PASS',d)
+
+===== END FILE scripts/test-ds41-prefill-metrics.py =====
+
+===== FILE internal/app/envelope_test.go SHA256 811c3b202f27f09deb63e5e98748ffbaf18efff0643df4ce39869735d1fcceab =====
+package app
+
+import "testing"
+
+func TestLosslessEnvelopeNormalizationOnly(t *testing.T) {
+	allowed := map[string]bool{"a.cpp": true}
+	for _, tc := range []struct{ input, normal string }{
+		{`{"files":{"a.cpp":"int main(){}\n"}}`, "none"},
+		{`{"a.cpp":"int main(){}\n"}`, "direct_file_map"},
+		{`{"files":{"a.cpp":"int main(){}\n"}`, "closed_outer_object"},
+	} {
+		files, normal, e := parseFilesEnvelope(tc.input, allowed)
+		if e != nil || normal != tc.normal || string(files["a.cpp"]) != "int main(){}\n" {
+			t.Fatalf("changed source bytes or classification: %q %q %v", files, normal, e)
+		}
+	}
+	for _, input := range []string{
+		`{"files":{"a.cpp":"unfinished`,
+		`{"files":{"a.cpp":"x"`,
+		`{"files":{"a.cpp":"x"},"execute":"bad"}`,
+		`{"files":{"../escape":"x"}`, `{"unknown":"x"}`, `{"files":{}}`,
+		`{"files":{"a.cpp":null}}`,
+	} {
+		if _, _, e := parseFilesEnvelope(input, allowed); e == nil {
+			t.Fatalf("accepted invalid envelope %s", input)
+		}
+	}
+}
+
+===== END FILE internal/app/envelope_test.go =====
+
+===== FILE internal/app/prompt_timing.go SHA256 fb0efdf2f05bd8f19f71ebf6ffcee666a92550605af72d3b7c00d0669bddcca2 =====
+package app
+
+import (
+	"encoding/json"
+	"net/http"
+	"time"
+)
+
+// Gateway wall-clock intervals, not GPU/kernel timings. Prompt throughput uses
+// dispatch -> first content/reasoning token, including transport and scheduling.
+type PromptTiming struct {
+	PromptTokens     int      `json:"prompt_tokens"`
+	PreparationMS    float64  `json:"preparation_ms"`
+	AdmissionMS      float64  `json:"admission_ms"`
+	TokenizeMS       float64  `json:"tokenize_ms"`
+	DispatchMS       float64  `json:"dispatch_ms"`
+	BackendHeadersMS *float64 `json:"backend_headers_ms,omitempty"`
+	FirstTokenMS     *float64 `json:"first_token_ms,omitempty"`
+}
+
+func elapsedMS(start time.Time) float64 { return float64(time.Since(start).Microseconds()) / 1000 }
+
+func writeChatEvent(w http.ResponseWriter, name string, value any) {
+	b, _ := json.Marshal(value)
+	_ = http.NewResponseController(w).SetWriteDeadline(time.Now().Add(5 * time.Second))
+	_, _ = w.Write(append(append([]byte("event: "+name+"\ndata: "), b...), '\n', '\n'))
+	if f, ok := w.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
+===== END FILE internal/app/prompt_timing.go =====
+
+===== FILE scripts/test-ds41-prefill-event-gfx1151.py SHA256 0567c07213b2d4c1796f09d49a89b98de57b6479c25b9a8d0e642c895b58d427 =====
+#!/usr/bin/env python3
+import json, time, argparse
+import torch
+ap=argparse.ArgumentParser(); ap.add_argument('--rank',type=int,required=True); ap.add_argument('--output',required=True); a=ap.parse_args()
+assert torch.cuda.is_available(); torch.cuda.set_device(0)
+stream=torch.cuda.current_stream(); start=torch.cuda.Event(enable_timing=True); end=torch.cuda.Event(enable_timing=True)
+start.record(stream)
+# Simulate prefill target work and host-side gap between chunks without per-op sync.
+x=torch.randn((1024,1024),device='cuda',dtype=torch.float16); y=x@x
+# Host gap after start event should remain within event-to-event wall/device timeline.
+time.sleep(0.02)
+z=y.relu(); end.record(stream)
+# Simulate sampling after the end marker; one later blocking scalar makes prior event complete.
+w=z.sum(); _=float(w.cpu())
+assert end.query(), 'end event unexpectedly incomplete after later blocking output copy'
+ms=float(start.elapsed_time(end)); assert ms>0
+out={'status':'PASS','rank':a.rank,'device':torch.cuda.get_device_name(0),'gcn':getattr(torch.cuda.get_device_properties(0),'gcnArchName',None),'prefill_event_ms':ms,'end_query_after_later_sync':True,'sampling_order':'end event recorded before post-marker work'}
+open(a.output,'w').write(json.dumps(out,indent=2)+'\n'); print(json.dumps(out))
+
+===== END FILE scripts/test-ds41-prefill-event-gfx1151.py =====
+
+===== FILE internal/app/validation_test.go SHA256 86a600d1a8a62111836adc7ec1f75f16dfe731b514b26d6f6ad8aab71747d544 =====
+package app
+
+import (
+	"encoding/json"
+	"testing"
+)
+
+func TestClientValidationNoMalformedDispatch(t *testing.T) {
+	for _, raw := range []string{`null`, `{}`, `{"messages":[]}`, `{"messages":[{"role":"user","content":"x"}],"stream":"yes"}`, `{"messages":[{"role":"user","content":"x"}],"max_tokens":-1}`, `{"messages":[{"role":"root","content":"x"}]}`, `{"messages":[{"role":"user","content":"x"}],"n":2}`} {
+		var p map[string]any
+		_ = json.Unmarshal([]byte(raw), &p)
+		if validateChat(p) == nil {
+			t.Errorf("accepted invalid %s", raw)
+		}
+	}
+	var good map[string]any
+	_ = json.Unmarshal([]byte(`{"messages":[{"role":"user","content":"Hello"}],"stream":true,"max_tokens":128}`), &good)
+	if e := validateChat(good); e != nil {
+		t.Fatal(e)
+	}
+}
+
+func TestNoIgnoredThinkingOrInvalidStops(t *testing.T) {
+	for _, extra := range []string{`"enable_thinking":false`, `"thinking":{"type":"disabled"}`, `"reasoning":{"effort":"none"}`, `"extra_body":{}`, `"stop":42`, `"stop":[""]`, `"stop":[1]`, `"stream_options":{"include_usage":"yes"}`, `"reasoning_effort":false`, `"model":42`, `"top_k":0`, `"top_p":0`, `"response_format":{"type":"json_object"}`} {
+		var p map[string]any
+		json.Unmarshal([]byte(`{"messages":[{"role":"user","content":"hi"}],`+extra+`}`), &p)
+		if validateChat(p) == nil {
+			t.Errorf("accepted ignored/invalid control %s", extra)
+		}
+	}
+}
+
+===== END FILE internal/app/validation_test.go =====
+
+===== FILE internal/app/prompt_test.go SHA256 81e3404f64f1c9dd88f61ff71464591320395957800608c3f4fe34ea0e24fb2f =====
+package app
+
+import "testing"
+
+func TestJSONPromptHistoricalDefaultUnchanged(t *testing.T) {
+	p := buildCodingPrompt("fix", map[string]string{"a.cpp": "x\ny"}, []string{"a.cpp"}, "")
+	if p != "TASK\nfix\nALLOWED PATHS\na.cpp\nSELECTED CURRENT SOURCES\n{\"a.cpp\":\"x\\ny\"}" {
+		t.Fatal(p)
+	}
+}
+
+func TestJSONPromptHistoricalRepairUnchanged(t *testing.T) {
+	p := buildCodingPrompt("fix", map[string]string{"a.cpp": "x\ny"}, []string{"a.cpp"}, "compiler error")
+	want := "TASK\nfix\nALLOWED PATHS\na.cpp\nSELECTED CURRENT SOURCES\n{\"a.cpp\":\"x\\ny\"}\nRELEVANT FAILURE FROM PREVIOUS ATTEMPT\ncompiler error\nCorrect the current code, provide final JSON. The prior conversation is intentionally omitted."
+	if p != want {
+		t.Fatalf("historical repair prompt changed:\n%s", p)
+	}
+}
+
+func TestCodingHonorsSelectedProfileUnlessExplicit(t *testing.T) {
+	a := &App{cfg: Config{DefaultProfile: "fast", MaxContextTokens: 50000, Profiles: map[string]Profile{
+		"fast":     {Reasoning: "low", ContextTokens: 8192, MaxTokens: 4096, MaxRepairs: 2},
+		"balanced": {Reasoning: "high", ContextTokens: 16384, MaxTokens: 8192, MaxRepairs: 2},
+	}}}
+	a.preferred.Store("balanced")
+	p, e := a.resolveProfile(TaskSpec{})
+	if e != nil || p.Reasoning != "high" {
+		t.Fatalf("selected profile ignored: %+v %v", p, e)
+	}
+	p, e = a.resolveProfile(TaskSpec{Profile: "fast"})
+	if e != nil || p.Reasoning != "low" {
+		t.Fatalf("explicit profile overridden: %+v %v", p, e)
+	}
+}
+
+===== END FILE internal/app/prompt_test.go =====
+
+===== FILE scripts/test-ds41-gguf-zero-copy.py SHA256 f6187a66167de291954443c3db1348bd050d6205e0482e898aab13ec6f744d60 =====
+#!/usr/bin/env python3
+"""Prove the DS41 GGUF iterator exposes the large routed tensor as an mmap view."""
+from __future__ import annotations
+
+import gc
+from pathlib import Path
+from _ds41_artifact import MODEL_FILE
+
+from vllm_gguf_plugin.weight_utils import gguf_quant_weights_iterator_multi
+
+MODEL = MODEL_FILE
+RAW = 'blk.0.ffn_gate_exps'
+MAPPED = 'layers.0.ffn.experts.0.w1.weight'
+
+
+def anon_kib() -> int:
+    for line in Path('/proc/self/status').read_text().splitlines():
+        if line.startswith('RssAnon:'):
+            return int(line.split()[1])
+    raise RuntimeError('RssAnon missing')
+
+
+def main() -> None:
+    gc.collect()
+    before = anon_kib()
+    got = None
+    it = gguf_quant_weights_iterator_multi([str(MODEL)], {RAW: MAPPED})
+    for name, tensor in it:
+        if name == MAPPED:
+            got = tensor
+            break
+    assert got is not None
+    # This tensor is >1 GiB logically; a clone would raise RssAnon by roughly that amount.
+    logical = got.numel() * got.element_size()
+    after = anon_kib()
+    delta = max(0, after - before) * 1024
+    assert logical > 1_000_000_000, logical
+    assert delta < 128 * 1024 * 1024, (logical, delta)
+    assert got.device.type == 'cpu' and str(got.dtype) == 'torch.uint8'
+    print({
+        'status': 'PASS',
+        'tensor': RAW,
+        'shape': tuple(got.shape),
+        'logical_bytes': logical,
+        'rss_anon_delta_bytes': delta,
+        'ratio': delta / logical,
+    })
+
+
+if __name__ == '__main__':
+    main()
+
+===== END FILE scripts/test-ds41-gguf-zero-copy.py =====
+
+===== FILE scripts/preflight-ds41-config.py SHA256 48e57027a527cdd845a7309e37c62b002471a177d6f627e29ab9b061d66773b2 =====
+#!/usr/bin/env python3
+"""Construct DS41 vLLM config only. No model allocation or inference."""
+from vllm_gguf_plugin import register
+register()
+from pathlib import Path
+import json
+from vllm.engine.arg_utils import EngineArgs
+REPO=Path('/home/funboy/StrixHaloClusterDS41')
+ART=json.loads((REPO/'runtime/ds41/artifact.json').read_text())
+ROOT=ART['model_dir']
+MODEL=str(Path(ROOT)/ART['model_file'])
+a=EngineArgs(model=MODEL,hf_config_path=ROOT,tokenizer=ROOT,config_format='gguf',load_format='gguf',quantization='gguf',dtype='bfloat16',tensor_parallel_size=2,pipeline_parallel_size=1,distributed_executor_backend='external_launcher',enable_expert_parallel=True,max_model_len=4096,block_size=128,max_num_seqs=1,max_num_batched_tokens=1024,kv_cache_memory_bytes=1073741824,enable_prefix_caching=False,enable_chunked_prefill=True,enforce_eager=True,seed=1)
+c=a.create_engine_config(); m=c.model_config
+result={'architecture':m.architecture,'model_type':m.hf_config.model_type,'text_model_type':m.hf_text_config.model_type,'quantization':m.quantization,'load_format':str(c.load_config.load_format),'tp':c.parallel_config.tensor_parallel_size,'pp':c.parallel_config.pipeline_parallel_size,'ep':c.parallel_config.enable_expert_parallel,'max_model_len':m.max_model_len,'block_size':c.cache_config.block_size,'engram_layers':m.hf_text_config.engram_layer_ids,'nextn':m.hf_text_config.num_nextn_predict_layers,'speculative':c.speculative_config is not None}
+print(result)
+assert result['architecture']=='DeepseekV41ForCausalLM'
+assert result['model_type']=='deepseek_v41' and result['quantization']=='gguf'
+assert result['tp']==2 and result['pp']==1 and result['ep'] and result['block_size']==128
+assert result['engram_layers']==[1,14] and not result['speculative']
+print('CONFIG_PREFLIGHT=PASS')
+
+===== END FILE scripts/preflight-ds41-config.py =====
+
+===== FILE web/tests/prompt-meter.test.mjs SHA256 7358bf0fd426e4260376407303aa18e9d8215a65779f5ba07315edecc13a8cbc =====
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {promptMeasurement} from '../prompt-meter.mjs';
+
+test('prefill wait is live but total prompt tokens are never treated as already processed',()=>{
+  const timing={prompt_tokens:1000,dispatch_ms:100};
+  const a=promptMeasurement({timing,elapsedMS:200}),b=promptMeasurement({timing,elapsedMS:500});
+  assert.equal(a.rate,null);assert.equal(b.rate,null);
+  assert.equal(a.phase,'waiting');assert.equal(b.waitMS,500);
+});
+test('observed prompt throughput and first-token time freeze independently of decode',()=>{
+  const timing={prompt_tokens:1000,dispatch_ms:100,first_token_ms:600,preparation_ms:0,tokenize_ms:12};
+  const a=promptMeasurement({timing,elapsedMS:600,firstTokenMS:630});
+  const b=promptMeasurement({timing,elapsedMS:10000,firstTokenMS:630,metrics:{queue_time_ms:0,time_to_first_token_ms:400}});
+  assert.equal(a.rate,2000);assert.equal(b.rate,a.rate);assert.equal(a.waitMS,600);assert.equal(b.waitMS,600);
+  assert.equal(b.engine,400);assert.equal(b.queue,0);assert.equal(a.preparation,0);
+  assert.equal(a.browser,false);
+  const saved=promptMeasurement({metrics:{prompt_timing:timing,raw:{queue_time_ms:0,time_to_first_token_ms:400}},stopped:true});
+  assert.equal(saved.rate,b.rate);assert.equal(saved.waitMS,b.waitMS);
+});
+test('missing, invalid and interrupted prefill measurements never produce a speed or completion',()=>{
+  assert.equal(promptMeasurement({stopped:true,elapsedMS:200}).phase,'unavailable');
+  assert.equal(promptMeasurement({metrics:{prompt_tokens:1000,server_ttft_ms:50},stopped:true}).rate,null);
+  for(const timing of [{prompt_tokens:1000,dispatch_ms:100,first_token_ms:100},{prompt_tokens:-1,dispatch_ms:100,first_token_ms:200},{prompt_tokens:1000,dispatch_ms:Infinity,first_token_ms:200}])assert.equal(promptMeasurement({timing}).rate,null);
+});
+
+===== END FILE web/tests/prompt-meter.test.mjs =====
+
+===== FILE scripts/test-ds41-expert-map-cpu.py SHA256 470b697f440ee369c487ecda6b830228b2f06ced0dc9b1682e999bbd3e173aff =====
+#!/usr/bin/env python3
+"""Verify scalar EP weight-loading lookups never synchronize the device map."""
+from __future__ import annotations
+import time
+import torch
+from vllm.model_executor.layers.fused_moe.config import FusedMoEParallelConfig
+from vllm.model_executor.layers.fused_moe.expert_map_manager import ExpertMapManager
+
+def make(rank: int) -> ExpertMapManager:
+    pc=FusedMoEParallelConfig(
+        tp_size=1,pcp_size=1,dp_size=1,ep_size=2,
+        tp_rank=0,pcp_rank=0,dp_rank=0,ep_rank=rank,sp_size=1,
+        use_ep=True,all2all_backend='allgather_reducescatter',enable_eplb=False,
+    )
+    with torch.device('cuda'):
+        return ExpertMapManager(
+            max_num_batched_tokens=1024,top_k=6,global_num_experts=384,
+            num_redundant_experts=0,num_expert_group=None,
+            moe_parallel_config=pc,placement_strategy='linear',enable_eplb=False,
+            rocm_aiter_enabled=False,
+        )
+
+def main() -> None:
+    results=[]
+    for rank in (0,1):
+        m=make(rank)
+        assert m.expert_map is not None and m.expert_map.device.type == 'cuda'
+        assert m._expert_map_cpu is not None and m._expert_map_cpu.device.type == 'cpu'
+        expected=(-1,0,191) if rank else (0,191,-1)
+        actual=(m.map_global_to_local(0 if rank==0 else 191),
+                m.map_global_to_local(192 if rank else 191),
+                m.map_global_to_local(383 if rank else 192))
+        assert actual==expected,(rank,actual,expected)
+        ids=list(range(384))*120
+        torch.cuda.synchronize(); t0=time.perf_counter(); checksum=0
+        for expert_id in ids: checksum += m.map_global_to_local(expert_id)
+        elapsed=time.perf_counter()-t0
+        assert elapsed < 2.0, elapsed
+        results.append({'rank':rank,'lookups':len(ids),'seconds':elapsed,'checksum':checksum})
+    print({'status':'PASS','results':results})
+if __name__=='__main__': main()
+
+===== END FILE scripts/test-ds41-expert-map-cpu.py =====
+
+===== FILE internal/app/workspace_bridge.go SHA256 6f67471c2df8f55519bae33238982351d3850bb55d4766522dbef182a8b77121 =====
+package app
+
+import (
+	"crypto/subtle"
+	"net"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+)
+
+// Each Pi process receives only this ephemeral generation capability. It does
+// not receive the application's bearer token or administrative API access.
+func (s *PiWorkspaceSession) startBridge() error {
+	if s.bridgeServer != nil {
+		return nil
+	}
+	dir, e := os.MkdirTemp("", "strixglm-pi-")
+	if e != nil {
+		return e
+	}
+	s.bridgeDir = dir
+	listener, e := net.Listen("unix", filepath.Join(dir, "api.sock"))
+	if e != nil {
+		return e
+	}
+	s.bridgeToken = id() + id()
+	if e = os.Chmod(filepath.Join(dir, "api.sock"), 0600); e != nil {
+		_ = listener.Close()
+		return e
+	}
+	// Rewritten by the in-namespace launcher once its internal loopback listener
+	// chooses a free port. The host exposes only this private Unix socket.
+	s.bridgeURL = "http://127.0.0.1:1"
+	s.bridgeServer = &http.Server{ReadHeaderTimeout: 5 * time.Second, Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		supplied := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+		if subtle.ConstantTimeCompare([]byte(supplied), []byte(s.bridgeToken)) != 1 {
+			jsonReply(w, 401, map[string]string{"error": "session capability required"})
+			return
+		}
+		if r.Method == "GET" && r.URL.Path == "/v1/models" {
+			jsonReply(w, 200, map[string]any{"object": "list", "data": []map[string]string{{"id": s.manager.app.cfg.Model, "object": "model"}}})
+			return
+		}
+		if r.Method != "POST" || r.URL.Path != "/v1/chat/completions" {
+			jsonReply(w, 403, map[string]string{"error": "Pi capability is limited to chat completions and model discovery"})
+			return
+		}
+		s.manager.mu.Lock()
+		ready, reason, closing := s.manager.ready, s.manager.reason, s.manager.closing
+		s.manager.mu.Unlock()
+		s.mu.Lock()
+		active := s.State == "RUNNING" || s.State == "ABORTING"
+		s.mu.Unlock()
+		if !ready || closing || !active {
+			jsonReply(w, 409, map[string]string{"error": "explicit active Pi prompt required; " + reason})
+			return
+		}
+		r.Header.Del("Authorization")
+		s.manager.app.proxyAuthorizedChat(w, r)
+	})}
+	go func() { _ = s.bridgeServer.Serve(listener) }()
+	return nil
+}
+
+===== END FILE internal/app/workspace_bridge.go =====
+
+===== FILE scripts/export-ds41-layer0-moe-input.py SHA256 69ea165d71c3bd46d350348261b6731e023828a9718ce8eb05c5c49c28bbbe45 =====
+#!/usr/bin/env python3
+"""Capture real layer0 routed-MoE inputs from the already-qualified DenseFix gate."""
+from __future__ import annotations
+import importlib.util
+import json
+from pathlib import Path
+import numpy as np
+
+ROOT = Path('/home/funboy/StrixHaloClusterDS41')
+SRC = ROOT / 'scripts/test-ds41-layer0-complete-densefix.py'
+OUT = ROOT / 'reports/DS41-Q2-001/perf/native-hip/layer0-moe-input.npz'
+META = ROOT / 'reports/DS41-Q2-001/perf/native-hip/layer0-moe-input.json'
+
+spec = importlib.util.spec_from_file_location('ds41_l0_capture', SRC)
+mod = importlib.util.module_from_spec(spec)
+assert spec.loader is not None
+spec.loader.exec_module(mod)
+
+original = mod.GGUFMoEMethod.apply
+state = {'captured': False}
+
+class Captured(RuntimeError):
+    pass
+
+def intercept(self, layer, x, topk_weights, topk_ids, shared_experts, shared_experts_input):
+    if not state['captured']:
+        state['captured'] = True
+        xb = x.detach().cpu().contiguous().view(mod.torch.uint16).numpy().copy()
+        ids = topk_ids.detach().cpu().numpy().astype(np.int32, copy=True)
+        weights = topk_weights.detach().cpu().numpy().astype(np.float32, copy=True)
+        OUT.parent.mkdir(parents=True, exist_ok=True)
+        np.savez(OUT, x_bf16_bits=xb, topk_ids=ids, topk_weights=weights)
+        META.write_text(json.dumps({
+            'status':'PASS',
+            'source_gate':str(SRC),
+            'prompt_file':str(mod.PROMPT),
+            'shape_x':list(x.shape),
+            'shape_topk_ids':list(topk_ids.shape),
+            'dtype_x':str(x.dtype),
+            'dtype_topk_ids':str(topk_ids.dtype),
+            'dtype_topk_weights':str(topk_weights.dtype),
+            'last_token_ids':ids[-1].tolist(),
+            'last_token_weights':[float(v) for v in weights[-1]],
+            'x_norm_last':float(x[-1].float().norm()),
+        },indent=2)+'\n')
+        raise Captured('fixture captured before routed MoE')
+    return original(self, layer, x, topk_weights, topk_ids, shared_experts, shared_experts_input)
+
+mod.GGUFMoEMethod.apply = intercept
+try:
+    mod.main()
+except Captured:
+    pass
+finally:
+    mod.GGUFMoEMethod.apply = original
+
+if not state['captured'] or not OUT.is_file():
+    raise SystemExit('capture failed')
+print(META.read_text(), end='')
+print(f'FIXTURE={OUT}')
+
+===== END FILE scripts/export-ds41-layer0-moe-input.py =====
+
+===== FILE runtime/ds41/dspark_telemetry.py SHA256 6fb63cbcfe01a86d3ec8a2a39096c91a9ce09482fc0b0888ea033a67bd1f85b8 =====
+"""Minimal request-scoped timing/capture for real DSpark proposals."""
+from __future__ import annotations
+import time
+from typing import Any
+import torch
+
+_installed = False
+_active = False
+_capture_tokens = False
+_records: list[dict[str, Any]] = []
+
+
+def install() -> None:
+    global _installed
+    if _installed:
+        return
+    from vllm.v1.worker.gpu.spec_decode.dspark.speculator import DSparkSpeculator
+    orig = DSparkSpeculator.propose
+
+    def wrapped(self, *args, **kwargs):
+        if not _active:
+            return orig(self, *args, **kwargs)
+        start_evt = torch.cuda.Event(enable_timing=True)
+        end_evt = torch.cuda.Event(enable_timing=True)
+        start_evt.record()
+        t0 = time.perf_counter()
+        out = orig(self, *args, **kwargs)
+        cpu_enqueue_ms = (time.perf_counter() - t0) * 1000.0
+        end_evt.record()
+        rec: dict[str, Any] = {
+            "start": start_evt,
+            "end": end_evt,
+            "cpu_enqueue_ms": cpu_enqueue_ms,
+            "shape": list(out.shape),
+        }
+        if _capture_tokens:
+            # Functional diagnostic only; never enabled for timed performance runs.
+            rec["draft_token_ids"] = out.detach().to("cpu").tolist()
+        _records.append(rec)
+        return out
+
+    DSparkSpeculator.propose = wrapped
+    _installed = True
+
+
+def begin(*, capture_tokens: bool = False) -> int:
+    global _active, _capture_tokens
+    start = len(_records)
+    _capture_tokens = capture_tokens
+    _active = True
+    return start
+
+
+def end(start: int) -> dict[str, Any]:
+    global _active, _capture_tokens
+    _active = False
+    _capture_tokens = False
+    rows = _records[start:]
+    if rows:
+        torch.cuda.synchronize()
+    gpu_ms = [float(r["start"].elapsed_time(r["end"])) for r in rows]
+    cpu_ms = [float(r["cpu_enqueue_ms"]) for r in rows]
+    return {
+        "proposal_calls": len(rows),
+        "gpu_stream_ms_total": sum(gpu_ms),
+        "gpu_stream_ms_mean": sum(gpu_ms) / len(gpu_ms) if gpu_ms else 0.0,
+        "cpu_enqueue_ms_total": sum(cpu_ms),
+        "cpu_enqueue_ms_mean": sum(cpu_ms) / len(cpu_ms) if cpu_ms else 0.0,
+        "draft_token_ids_by_call": [r.get("draft_token_ids") for r in rows if "draft_token_ids" in r],
+        "note": "No synchronize occurs inside performance requests; GPU events are resolved after client wall timing. CPU enqueue and GPU span may overlap and are not added together.",
+    }
+
+===== END FILE runtime/ds41/dspark_telemetry.py =====
+
+DISTANT_FACT_MIDDLE=41
+
+===== FILE scripts/test-ds41-cache-discard.py SHA256 b4a2e1e48021925f85c6aa83c06475e62bf5f9ee79cf98bba4f44867386551bd =====
+#!/usr/bin/env python3
+"""Verify DS41 clean GGUF mmap discard on a real MixedQ2 tensor.
+
+This is a component test only: it touches 512 MiB of one verified shard,
+keeps a 4 MiB ROCm copy, discards only the shard's clean mmap/page-cache,
+and proves both file bytes and the device copy remain unchanged.
+"""
+from __future__ import annotations
+
+import gc
+import hashlib
+import mmap
+import os
+from pathlib import Path
+from _ds41_artifact import MODEL_FILE
+
+import gguf
+import torch
+
+MODEL = MODEL_FILE
+
+
+def rss_bytes() -> int:
+    for line in Path("/proc/self/status").read_text().splitlines():
+        if line.startswith("VmRSS:"):
+            return int(line.split()[1]) * 1024
+    raise RuntimeError("VmRSS unavailable")
+
+
+def main() -> None:
+    assert torch.cuda.is_available(), "ROCm device required"
+    assert hasattr(mmap, "MADV_DONTNEED")
+    assert hasattr(os, "posix_fadvise") and hasattr(os, "POSIX_FADV_DONTNEED")
+
+    reader = gguf.GGUFReader(str(MODEL))
+    tensor = next(t for t in reader.tensors if t.name == "blk.0.ffn_gate_exps")
+    view = tensor.data.reshape(-1)
+    touched = view[: 512 * 1024 * 1024]
+    sample_view = view[: 4 * 1024 * 1024]
+
+    rss0 = rss_bytes()
+    before = hashlib.sha256(memoryview(sample_view)).hexdigest()
+    stride_sum = int(touched[::4096].sum(dtype="uint64"))
+    rss1 = rss_bytes()
+
+    sample = torch.from_numpy(sample_view).to("cuda")
+    torch.cuda.synchronize()
+    device_before = sample.cpu().numpy().tobytes()
+
+    reader.data._mmap.madvise(mmap.MADV_DONTNEED)
+    fd = os.open(MODEL, os.O_RDONLY)
+    try:
+        os.posix_fadvise(fd, 0, 0, os.POSIX_FADV_DONTNEED)
+    finally:
+        os.close(fd)
+    gc.collect()
+    rss2 = rss_bytes()
+
+    after = hashlib.sha256(memoryview(sample_view)).hexdigest()
+    device_after = sample.cpu().numpy().tobytes()
+    torch.cuda.synchronize()
+
+    result = {
+        "status": "PASS",
+        "tensor": tensor.name,
+        "touched_bytes": int(touched.nbytes),
+        "rss_before": rss0,
+        "rss_after_touch": rss1,
+        "rss_after_discard": rss2,
+        "rss_touch_delta": rss1 - rss0,
+        "rss_discard_delta": rss2 - rss1,
+        "stride_sum": stride_sum,
+        "checksum_before": before,
+        "checksum_after": after,
+        "file_bytes_equal": before == after,
+        "device_copy_equal": device_before == device_after,
+    }
+    assert before == after
+    assert device_before == device_after
+    assert rss2 < rss1, result
+    print(result)
+
+
+if __name__ == "__main__":
+    main()
+
+===== END FILE scripts/test-ds41-cache-discard.py =====
+
+===== FILE web/tests/downloads.test.mjs SHA256 0518732633b502817a10ef4c644386077d43a24f38427b02bd955e7029533a7d =====
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { downloadJobActions, downloadProgress } from '../downloads.mjs';
+
+test('Download actions preserve explicit start/resume and never imply deletion', () => {
+  assert.deepEqual(downloadJobActions('PLANNED'), ['start', 'cancel']);
+  for (const status of ['PAUSED', 'FAILED', 'CANCELLED']) assert.deepEqual(downloadJobActions(status), ['resume']);
+  for (const status of ['RUNNING', 'VERIFYING']) assert.deepEqual(downloadJobActions(status), ['pause', 'cancel']);
+  for (const status of ['COMPLETE', 'PAUSING', 'CANCELLING', undefined]) assert.deepEqual(downloadJobActions(status), []);
+});
+
+test('Download progress uses server byte counters, not fabricated transfer speed', () => {
+  assert.deepEqual(downloadProgress({ bytes: 30, total_bytes: 100 }), { bytes: 30, total: 100, fraction: .3 });
+  assert.equal(downloadProgress({ bytes: 150, total_bytes: 100 }).fraction, 1);
+  assert.equal(downloadProgress({ bytes: 0, total_bytes: 0, status: 'PLANNED' }).fraction, 0);
+  assert.equal(downloadProgress({ bytes: 0, total_bytes: 0, status: 'COMPLETE' }).fraction, 1);
+  assert.equal(downloadProgress({}).total, null);
+});
+
+test('Native downloader UI has no execution, unsafe HTML, secret persistence or automatic transfer', async () => {
+  const source = await readFile(new URL('../downloads.mjs', import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /innerHTML|outerHTML|insertAdjacentHTML|localStorage|sessionStorage|\beval\(/);
+  assert.match(source, /window\.confirm/);
+  assert.match(source, /body: \{ confirm: true \}/);
+  assert.match(source, /!panel\.hidden && !document\.hidden/);
+  assert.match(source, /No model will be loaded or switched/);
+  assert.match(source, /No automatic retry/);
+});
+
+test('Models keeps acquisition outside the catalog renderer and gates both sections on authentication', async () => {
+  const source = await readFile(new URL('../downloads.mjs', import.meta.url), 'utf8');
+  const app = await readFile(new URL('../app.js', import.meta.url), 'utf8');
+  assert.match(source, /panel\.insertBefore\(section, document\.getElementById\('models-catalog'\)\)/);
+  assert.match(source, /n\.disabled = !isAuthenticated\(\) \|\| state\.busy/);
+  assert.match(source, /if \(!isAuthenticated\(\)\) \{ disconnect\(\); return; \}/);
+  assert.match(app, /isAuthenticated: \(\) => state\.authenticated/);
+  assert.match(app, /Promise\.all\(\[refreshCatalog\(\), downloader\.refresh\(\)\]\)/);
+  assert.match(app, /\$\('models-list'\)\.replaceChildren/);
+  assert.doesNotMatch(app, /\$\('panel-models'\)\.(replaceChildren|innerHTML|textContent)/);
+});
+
+===== END FILE web/tests/downloads.test.mjs =====
+
+===== FILE scripts/test-ds41-affine-safetensors.py SHA256 43dfb95384b943e0e7b226b4e01145f11692eaaa95ade7861395522eea11d7c9 =====
+#!/usr/bin/env python3
+from __future__ import annotations
+import json,struct,tempfile,sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import numpy as np
+from runtime.ds41.affine_safetensors import (
+    AffineRowLRU, SafeTensorMMap, float32_to_bf16_words,
+)
+
+
+def pack2(q: np.ndarray) -> np.ndarray:
+    q=np.asarray(q,dtype=np.uint32)
+    assert q.shape[-1] % 16 == 0
+    x=q.reshape(*q.shape[:-1],-1,16)
+    shifts=np.arange(0,32,2,dtype=np.uint32)
+    return np.bitwise_or.reduce(x << shifts, axis=-1).astype('<u4')
+
+
+def write_fixture(path: Path, q, scales, biases):
+    tensors=[]; offset=0; header={}
+    for name,dtype,arr in [
+        ('layer.embed.weight','U32',pack2(q)),
+        ('layer.embed.scales','BF16',float32_to_bf16_words(scales)),
+        ('layer.embed.biases','BF16',float32_to_bf16_words(biases)),
+    ]:
+        raw=np.ascontiguousarray(arr).tobytes()
+        header[name]={'dtype':dtype,'shape':list(arr.shape),'data_offsets':[offset,offset+len(raw)]}
+        tensors.append(raw);offset+=len(raw)
+    header['__metadata__']={'format':'mlx'}
+    raw=json.dumps(header,separators=(',',':')).encode()
+    raw += b' ' * ((8-len(raw)%8)%8)
+    with path.open('wb') as f:
+        f.write(struct.pack('<Q',len(raw)));f.write(raw)
+        for blob in tensors:f.write(blob)
+
+
+def main():
+    rows,width=5,256
+    q=(np.arange(rows*width,dtype=np.uint32).reshape(rows,width)%4)
+    scales=np.array([[0.25,0.5,1,2],[1,1.5,2,2.5],[.125,.25,.5,1],[2,1,.5,.25],[.75,.5,.25,.125]],np.float32)
+    biases=np.array([[-1,-2,-3,-4],[0,1,2,3],[1,1,1,1],[-2,-1,0,1],[.5,.25,0,-.25]],np.float32)
+    # Expected values must use BF16-rounded scale/bias, exactly as the file does.
+    s32=(float32_to_bf16_words(scales).astype(np.uint32)<<16).view(np.float32)
+    b32=(float32_to_bf16_words(biases).astype(np.uint32)<<16).view(np.float32)
+    expected=q.astype(np.float32)*np.repeat(s32,64,axis=-1)+np.repeat(b32,64,axis=-1)
+    with tempfile.TemporaryDirectory() as td:
+        p=Path(td)/'fixture.safetensors';write_fixture(p,q,scales,biases)
+        st=SafeTensorMMap(p)
+        got=st.affine2_rows('layer.embed',[4,0,2])
+        np.testing.assert_array_equal(got,expected[[4,0,2]])
+        cache=AffineRowLRU(st,'layer.embed',max_rows=4)
+        a=cache.lookup(np.array([[0,2],[4,2]]))
+        np.testing.assert_array_equal(a,expected[[[0,2],[4,2]]])
+        b=cache.lookup(np.array([2,0]))
+        np.testing.assert_array_equal(b,expected[[2,0]])
+        assert cache.rows_read==3 and cache.hits==2
+        print({'status':'PASS','rows_read':cache.rows_read,'hits':cache.hits,'misses':cache.misses,'shape':got.shape})
+        st.close()
+
+if __name__=='__main__':main()
+
+===== END FILE scripts/test-ds41-affine-safetensors.py =====
+
+===== FILE scripts/test-ds41-mhc-profile-equivalence.py SHA256 9525876d3924dff1f19f906bdcdbad2eba349b2d1474914424ec8d417172b62c =====
+#!/usr/bin/env python3
+"""Model-free bitwise gate for DS41 detailed mHC profile wrappers."""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import torch
+
+from runtime.ds41.perf_profile import DS41PerfCollector
+import vllm.models.deepseek_v4_1.amd.model as model_mod
+
+ROOT = Path('/home/funboy/StrixHaloClusterDS41')
+OUT = ROOT / 'reports/DS41-Q2-001/perf/mhc-profile-equivalence.json'
+H = 5120
+HC = 4
+MIX = (2 + HC) * HC
+EPS = 1e-6
+RMS_EPS = 1e-20
+REPEATS = 20
+
+
+def clone_tuple(xs):
+    return tuple(x.detach().clone() for x in xs)
+
+
+def exact(a, b):
+    return all(torch.equal(x, y) for x, y in zip(a, b, strict=True))
+
+
+def run_case(tokens: int, delayed: bool):
+    g = torch.Generator(device='cuda').manual_seed(9100 + tokens + int(delayed))
+    residual = torch.randn((tokens, HC, H), device='cuda', dtype=torch.bfloat16, generator=g)
+    fn = (torch.randn((MIX, HC * H), device='cuda', dtype=torch.float32, generator=g) * 0.002).contiguous()
+    scale = torch.tensor([0.7, 0.8, 0.3], device='cuda', dtype=torch.float32)
+    base = (torch.randn((MIX,), device='cuda', dtype=torch.float32, generator=g) * 0.01).contiguous()
+    pre_mix = torch.sigmoid(torch.randn((tokens, HC), device='cuda', dtype=torch.float32, generator=g)) if delayed else None
+
+    collector = DS41PerfCollector()
+    collector.install()
+    # inactive path delegates to the original pinned implementation
+    ref = clone_tuple(model_mod.mhc_pre_delayed_torch(
+        residual, fn, scale, base, RMS_EPS, EPS, EPS, 2.0, REPEATS,
+        pre_mix=pre_mix,
+    ))
+    collector.enable()
+    cand = clone_tuple(model_mod.mhc_pre_delayed_torch(
+        residual, fn, scale, base, RMS_EPS, EPS, EPS, 2.0, REPEATS,
+        pre_mix=pre_mix,
+    ))
+    collector.disable()
+    torch.cuda.synchronize()
+    if not exact(ref, cand):
+        raise AssertionError(f'mhc_pre mismatch tokens={tokens} delayed={delayed}')
+
+    x = torch.randn((tokens, H), device='cuda', dtype=torch.bfloat16, generator=g)
+    post_ref = model_mod.mhc_post_torch(x, residual, ref[0], ref[1]).detach().clone()
+    collector.enable()
+    post_cand = model_mod.mhc_post_torch(x, residual, ref[0], ref[1]).detach().clone()
+    collector.disable()
+    torch.cuda.synchronize()
+    if not torch.equal(post_ref, post_cand):
+        raise AssertionError(f'mhc_post mismatch tokens={tokens} delayed={delayed}')
+
+    return {
+        'tokens': tokens,
+        'delayed': delayed,
+        'pre_bitwise': True,
+        'post_bitwise': True,
+        'pre_shapes': [list(x.shape) for x in ref],
+        'post_shape': list(post_ref.shape),
+    }
+
+
+def main():
+    assert torch.cuda.is_available()
+    rows = [run_case(1, False), run_case(1, True), run_case(7, True)]
+    out = {'status': 'PASS', 'sinkhorn_repeat': REPEATS, 'cases': rows}
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    OUT.write_text(json.dumps(out, indent=2) + '\n')
+    print(json.dumps(out, indent=2))
+
+
+if __name__ == '__main__':
+    main()
+
+===== END FILE scripts/test-ds41-mhc-profile-equivalence.py =====
+
+===== FILE scripts/validate-ds41-optimization-ab.py SHA256 52e1453d22324bff10d89146ac4019321862ca37cc767c8e6be97700e76116b7 =====
+#!/usr/bin/env python3
+"""Post-run validator for DS41 same-load EP skip-remote A/B."""
+from __future__ import annotations
+import argparse, importlib.util, json
+from pathlib import Path
+
+
+def result_map(doc): return {r['label']:r for r in doc.get('results',[])}
+
+def mean(xs): return sum(xs)/len(xs) if xs else None
+
+def load_code_validator():
+    p=Path(__file__).with_name('validate-ds41-offline-suite.py')
+    spec=importlib.util.spec_from_file_location('ds41_suite_validator',p)
+    mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+    return mod.validate_code
+
+def main():
+    ap=argparse.ArgumentParser(); ap.add_argument('--rank0',required=True); ap.add_argument('--rank1',required=True); ap.add_argument('--output',required=True); a=ap.parse_args()
+    d0=json.load(open(a.rank0)); d1=json.load(open(a.rank1)); r0=result_map(d0); r1=result_map(d1)
+    labels=sorted(set(r0)|set(r1)); identity={lab:(lab in r0 and lab in r1 and r0[lab].get('token_ids')==r1[lab].get('token_ids')) for lab in labels}
+    speed_labels=['ab-baseline-1','ab-baseline-2','ab-candidate-1','ab-candidate-2']
+    same_workload=all(r0[x]['token_ids']==r0[speed_labels[0]]['token_ids'] for x in speed_labels if x in r0)
+    def perf(prefix):
+        rows=[]
+        for i in (1,2):
+            x=r0[f'ab-{prefix}-{i}']; rows.append({'label':x['label'],'completion_tokens':x['completion_token_count'],'tps':x['derived']['decode_tps_first_to_last'],'ttft_s':x['client']['ttft_s'],'wall_s':x['client']['wall_s']})
+        return {'runs':rows,'decode_tps_mean':mean([x['tps'] for x in rows]),'ttft_s_mean':mean([x['ttft_s'] for x in rows]),'wall_s_mean':mean([x['wall_s'] for x in rows])}
+    baseline=perf('baseline'); candidate=perf('candidate')
+    gain=(candidate['decode_tps_mean']/baseline['decode_tps_mean']-1)*100
+    smoke=r0['ab-candidate-smoke']; smoke_pass=smoke.get('finished') and smoke.get('text','').strip()=='323'
+    coding=load_code_validator()(r0['ab-candidate-coding'].get('text',''))
+    try:
+        obj=json.loads(r0['ab-candidate-json'].get('text','')); json_pass=(obj=={'total':17,'valid_ids':['a','c']}); json_result={'status':'PASS' if json_pass else 'FAIL','parsed':obj}
+    except Exception as e:
+        json_pass=False; json_result={'status':'FAIL','error':f'{type(e).__name__}: {e}'}
+    ok=(d0.get('status')=='OPTIMIZATION_AB_COMPLETE' and d1.get('status')=='OPTIMIZATION_AB_COMPLETE' and all(identity.values()) and same_workload and smoke_pass and coding.get('status')=='PASS' and json_pass)
+    out={'status':'PASS' if ok else 'FAIL','rank_token_identity':identity,'speed_baseline_candidate_token_identity':same_workload,'baseline':baseline,'candidate':candidate,'decode_tps_gain_pct':gain,'smoke':{'pass':smoke_pass,'text':smoke.get('text'),'tokens':smoke.get('completion_token_count'),'ttft_s':smoke.get('client',{}).get('ttft_s'),'wall_s':smoke.get('client',{}).get('wall_s')},'coding':coding,'json':json_result}
+    Path(a.output).write_text(json.dumps(out,indent=2,ensure_ascii=False)+'\n'); print(json.dumps(out,indent=2,ensure_ascii=False)); raise SystemExit(0 if ok else 1)
+if __name__=='__main__': main()
+
+===== END FILE scripts/validate-ds41-optimization-ab.py =====
+
+===== FILE runtime/ds41/mhc_projection_rms.py SHA256 5e17cdaa2a555785a7e69db8ef0b3f92341fd00a777446e56c9f072081dd2733 =====
+"""Qualified DS41 M=1 mHC FP32 projection+RMS path for gfx1151.
+
+This module reuses the pinned vLLM TileLang prenorm GEMV helper.  It replaces
+only the reference sequence
+
+    xf = input_bf16.float()
+    projected = xf @ fn.t()
+    rms = rsqrt(mean(xf * xf) + eps)
+    mixes = projected * rms
+
+for the qualified M=1 shapes.  Coefficient/Sinkhorn, delayed collapse and every
+subsequent model operation remain unchanged.
+"""
+from __future__ import annotations
+
+from collections import defaultdict
+from typing import Any
+
+import torch
+
+_STATS = {
+    "tilelang_calls": 0,
+    "tilelang_tokens": 0,
+    "fallback_calls": 0,
+    "fallback_reasons": defaultdict(int),
+}
+_FIRST_LOGGED = False
+
+
+def reset_stats() -> None:
+    global _FIRST_LOGGED
+    _STATS["tilelang_calls"] = 0
+    _STATS["tilelang_tokens"] = 0
+    _STATS["fallback_calls"] = 0
+    _STATS["fallback_reasons"].clear()
+    _FIRST_LOGGED = False
+
+
+def stats() -> dict[str, Any]:
+    return {
+        "tilelang_calls": int(_STATS["tilelang_calls"]),
+        "tilelang_tokens": int(_STATS["tilelang_tokens"]),
+        "fallback_calls": int(_STATS["fallback_calls"]),
+        "fallback_reasons": dict(_STATS["fallback_reasons"]),
+    }
+
+
+def record_fallback(reason: str) -> None:
+    _STATS["fallback_calls"] += 1
+    _STATS["fallback_reasons"][reason] += 1
+
+
+def contract(source: torch.Tensor, fn: torch.Tensor) -> tuple[bool, str]:
+    if source.ndim != 2 or source.shape[0] != 1:
+        return False, "tokens_not_1"
+    if source.dtype != torch.bfloat16:
+        return False, "input_not_bfloat16"
+    if not source.is_contiguous():
+        return False, "input_not_contiguous"
+    if fn.ndim != 2 or fn.shape[0] != 24:
+        return False, "fn_shape"
+    if fn.dtype != torch.float32:
+        return False, "fn_not_float32"
+    if not fn.is_contiguous():
+        return False, "fn_not_contiguous"
+    k = int(source.shape[1])
+    if k not in (5120, 20480):
+        return False, "input_width"
+    if tuple(fn.shape) != (24, k):
+        return False, "fn_input_width"
+    return True, "qualified"
+
+
+def projection_rms_tilelang(
+    source: torch.Tensor,
+    fn: torch.Tensor,
+    rms_eps: float,
+) -> torch.Tensor:
+    """Return FP32 normalized 24-way mHC projection for a qualified M=1 input."""
+    global _FIRST_LOGGED
+    ok, reason = contract(source, fn)
+    if not ok:
+        raise RuntimeError(f"unqualified DS41 mHC projection/RMS TileLang call: {reason}")
+
+    from vllm.model_executor.kernels.mhc.tilelang import _tilelang_hc_prenorm_gemm
+
+    k = int(source.shape[1])
+    out = torch.empty((1, 1, 24), dtype=torch.float32, device=source.device)
+    sqrsum = torch.empty((1, 1), dtype=torch.float32, device=source.device)
+    _tilelang_hc_prenorm_gemm(source, fn, out, sqrsum, k, 1)
+    rms_factor = torch.rsqrt(sqrsum[0].view(1, 1) / k + float(rms_eps))
+    mixes = out[0] * rms_factor
+
+    _STATS["tilelang_calls"] += 1
+    _STATS["tilelang_tokens"] += 1
+    if not _FIRST_LOGGED:
+        _FIRST_LOGGED = True
+        print(
+            "DS41_MHC_PROJECTION_RMS_TILELANG_EXECUTE "
+            f"shape={tuple(source.shape)} fn={tuple(fn.shape)} dtype={source.dtype}",
+            flush=True,
+        )
+    return mixes
+
+===== END FILE runtime/ds41/mhc_projection_rms.py =====
+
+===== FILE scripts/test-ds41-engram-tp2.py SHA256 3d4463f38c5032715d09380902b3ffd46d923a273a4428424cd5c4fceb9f7974 =====
+#!/usr/bin/env python3
+"""Real-row TP2 equivalence test for the verified DS41 Engram2 sidecars."""
+from __future__ import annotations
+import importlib.util,json,sys
+from pathlib import Path
+import numpy as np
+from _ds41_artifact import MODEL_DIR
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+from runtime.ds41.affine_safetensors import SafeTensorMMap
+
+ROOT=Path('/home/funboy/models/ds41')
+SRC=ROOT/'engram2-source'; TP=ROOT/'engram2-tp2'
+CFG=MODEL_DIR/'config.json'
+LAYER_FILE={1:'model-00047-of-00048.safetensors',14:'model-00048-of-00048.safetensors'}
+spec=importlib.util.spec_from_file_location('partition',Path(__file__).with_name('partition-ds41-engram2.py')); mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+cfg=json.load(open(CFG))['text_config']; layouts=mod.layouts(cfg); receipt=json.load(open(TP/'partition-receipt.json'))
+results=[]
+for layer in cfg['engram_layer_ids']:
+    name=LAYER_FILE[layer]; base=f'layers.{layer}.engram.embed'
+    source=SafeTensorMMap(SRC/name); parts=[SafeTensorMMap(TP/f'rank{r}'/name) for r in range(2)]
+    try:
+        sizes=layouts[layer]; offsets=np.cumsum([0,*sizes[:-1]],dtype=np.int64)
+        assert len(sizes)==24
+        # One real row from every hash column, preserving global head order.
+        global_ids=np.array([int(o)+min(7,int(s)-1) for o,s in zip(offsets,sizes,strict=True)],dtype=np.int64)
+        full=source.affine2_rows(base,global_ids)
+        reconstructed=[]
+        for rank in range(2):
+            rr=receipt['layers'][str(layer)][str(rank)]; start=int(rr['vocab_start']); end=int(rr['vocab_end'])
+            expected_start=int(sum(sizes[:rank*12])); expected_end=int(sum(sizes[:min((rank+1)*12,24)]))
+            assert (start,end)==(expected_start,expected_end)
+            assert parts[rank].metadata['ds41_vocab_start']==str(start)
+            assert parts[rank].metadata['ds41_vocab_end']==str(end)
+            ids=global_ids[rank*12:(rank+1)*12]
+            got=parts[rank].affine2_rows(base,ids-start)
+            direct=source.affine2_rows(base,ids)
+            np.testing.assert_array_equal(got,direct)
+            reconstructed.append(got)
+            # q/k are replicated; WKV is replicated and checked on real rows.
+            for key in ('q_weight','k_weight'):
+                np.testing.assert_array_equal(parts[rank].bf16(f'layers.{layer}.engram.{key}'), source.bf16(f'layers.{layer}.engram.{key}'))
+            wbase=f'layers.{layer}.engram.wkv'; wrows=np.array([0,17,source.entries[wbase+'.weight'].shape[0]-1])
+            np.testing.assert_array_equal(parts[rank].affine2_rows(wbase,wrows),source.affine2_rows(wbase,wrows))
+        recomposed=np.concatenate(reconstructed,axis=0)
+        np.testing.assert_array_equal(recomposed,full)
+        results.append({'layer':layer,'heads':24,'rank0_rows':int(receipt['layers'][str(layer)]['0']['vocab_end']),'rank1_rows':int(receipt['layers'][str(layer)]['1']['vocab_end'])-int(receipt['layers'][str(layer)]['1']['vocab_start']),'checked_global_ids':global_ids.tolist(),'shape':list(full.shape),'status':'PASS'})
+    finally:
+        source.close(); [p.close() for p in parts]
+print(json.dumps({'status':'PASS','layers':results},indent=2))
+
+===== END FILE scripts/test-ds41-engram-tp2.py =====
+
+DISTANT_FACT_END=13
+
+TASK: Using the corpus above, return exactly one JSON object with keys result, first_file, middle_file, last_file. result must equal (DISTANT_FACT_BEGIN * 2 + DISTANT_FACT_MIDDLE - DISTANT_FACT_END). first_file/last_file must be the basenames of the first and last FILE sections actually present. middle_file must be the basename of the lower central FILE section: number the FILE sections from 1 in appearance order; if N is even use section N/2, and if N is odd use section (N+1)/2. No prose.

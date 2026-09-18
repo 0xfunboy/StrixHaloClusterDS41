@@ -1,0 +1,157 @@
+{
+  "schema": "ds4-document-profile-002-token-contract-v1",
+  "status": "PASS",
+  "rows": [
+    {
+      "id": "user_none",
+      "sidecar_count": 5,
+      "antirez_count": 5,
+      "exact_ids": true,
+      "resolved": {
+        "mode": "none",
+        "thinking_enabled": false,
+        "numeric_level": null
+      }
+    },
+    {
+      "id": "user_low",
+      "sidecar_count": 5,
+      "antirez_count": 5,
+      "exact_ids": true,
+      "resolved": {
+        "mode": "low",
+        "thinking_enabled": true,
+        "numeric_level": null
+      }
+    },
+    {
+      "id": "system_none",
+      "sidecar_count": 8,
+      "antirez_count": 8,
+      "exact_ids": true,
+      "resolved": {
+        "mode": "none",
+        "thinking_enabled": false,
+        "numeric_level": null
+      }
+    },
+    {
+      "id": "system_low",
+      "sidecar_count": 8,
+      "antirez_count": 8,
+      "exact_ids": true,
+      "resolved": {
+        "mode": "low",
+        "thinking_enabled": true,
+        "numeric_level": null
+      }
+    },
+    {
+      "id": "multiturn_none",
+      "sidecar_count": 11,
+      "antirez_count": 11,
+      "exact_ids": true,
+      "resolved": {
+        "mode": "none",
+        "thinking_enabled": false,
+        "numeric_level": null
+      }
+    },
+    {
+      "id": "multiturn_low",
+      "sidecar_count": 11,
+      "antirez_count": 11,
+      "exact_ids": true,
+      "resolved": {
+        "mode": "low",
+        "thinking_enabled": true,
+        "numeric_level": null
+      }
+    },
+    {
+      "id": "code2k-middle-explicit-v2-none",
+      "sidecar_count": 1629,
+      "resolved": {
+        "mode": "none",
+        "thinking_enabled": false,
+        "numeric_level": null
+      },
+      "first_ids": [
+        0,
+        128803,
+        10525,
+        3286
+      ],
+      "last_ids": [
+        46030,
+        603,
+        128804,
+        128822
+      ]
+    },
+    {
+      "id": "code2k-middle-explicit-v2-low",
+      "sidecar_count": 1629,
+      "resolved": {
+        "mode": "low",
+        "thinking_enabled": true,
+        "numeric_level": null
+      },
+      "first_ids": [
+        0,
+        128803,
+        10525,
+        3286
+      ],
+      "last_ids": [
+        46030,
+        603,
+        128804,
+        128821
+      ]
+    },
+    {
+      "id": "docs2k-middle-explicit-v2-none",
+      "sidecar_count": 1306,
+      "resolved": {
+        "mode": "none",
+        "thinking_enabled": false,
+        "numeric_level": null
+      },
+      "first_ids": [
+        0,
+        128803,
+        10525,
+        3286
+      ],
+      "last_ids": [
+        46030,
+        603,
+        128804,
+        128822
+      ]
+    },
+    {
+      "id": "docs2k-middle-explicit-v2-low",
+      "sidecar_count": 1306,
+      "resolved": {
+        "mode": "low",
+        "thinking_enabled": true,
+        "numeric_level": null
+      },
+      "first_ids": [
+        0,
+        128803,
+        10525,
+        3286
+      ],
+      "last_ids": [
+        46030,
+        603,
+        128804,
+        128821
+      ]
+    }
+  ],
+  "finding": "CLI +6 is exactly the implicit default system turn; server user-only does not inject it. Sidecar corrected to server renderer semantics."
+}

@@ -74,3 +74,9 @@ Persistent quality runner is executing independent code2k/docs2k confirmations 5
 - The observed 2048-token generation was the preregistered cancel request with max_tokens2048, not either max128 arithmetic request; both arithmetic requests ended naturally after20 tokens.
 - Service limit: client cancellation detaches but gateway drains backend before releasing admission; this run drained ~135.99s before DRAIN-OK.
 - Product qualified for document LOW 2K-class (max observed passing prompt2039); soak admitted. Finalizer false-negative already started K2 rollback; wait K2 READY, then restart DS4 once for soak.
+
+## Soak IN_FLIGHT
+- Product gate is qualified after source-contract normalization; raw 409-vs503 false negative preserved.
+- Soak unit `ds4-document-soak.service` invocation `8d11fc92446740aebbc36cde819fae1c` started at1789728308.9057333; requirement7200s/24 sequential requests.
+- Request1 code2k PASS exact, HTTP200, wall72.961s, cache0, natural stop. DS4 READY, K2 OFF.
+- Runner terminal behavior: any FAIL -> owner-bound K2 rollback; PASS -> finalizer QUALIFIED and DS4 remains READY.

@@ -1,0 +1,13 @@
+{
+  "schema":"ds4-document-profile-002-soak-start-v1",
+  "owner":"DS4_DOCUMENT_PROFILE_002_20260918",
+  "state":"IN_FLIGHT",
+  "unit":"ds4-document-soak.service",
+  "invocation_id":"8d11fc92446740aebbc36cde819fae1c",
+  "started_unix":1789728308.9057333,
+  "required_seconds":7200,
+  "required_requests":24,
+  "first_case":{"index":1,"case":"code2k","http":200,"pass":true,"wall_s":72.96071705804206,"prompt_tokens":1629,"completion_tokens":657,"cached_tokens":0,"finish_reason":"stop"},
+  "runtime":{"ds4":"READY","k2":"OFF","gateway":"active","tokenizer_sidecar":"active"},
+  "terminal_behavior":{"pass":"finalizer QUALIFIED leaves DS4 READY","fail":"finalizer NOT_QUALIFIED stops DS4 and restores K2"}
+}

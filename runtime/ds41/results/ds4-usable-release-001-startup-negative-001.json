@@ -1,0 +1,11 @@
+{
+  "schema": "ds4-usable-release-001-startup-negative-v1",
+  "status": "SETUP_FAIL_BEFORE_MODEL_LOAD",
+  "cause": "launcher retained literal backslashes before five shell parameter expansions; ROLE line exposed |worker} as a shell pipeline",
+  "evidence": "coordinator.log: line3 worker}: command not found",
+  "ds4_model_loaded": false,
+  "request_sent": false,
+  "automatic_rollback": "K2 start confirmed epoch1789719735837225261; readiness pending at record time",
+  "fix": "remove only literal backslashes before ROLE/CTX/COORD/TP_PORT/API_PORT expansions",
+  "fixed_launcher_sha256": "496ff6fb6c1a0b443079b0a63373b43f8d63159cef9de5de78da83b2267cfc87"
+}

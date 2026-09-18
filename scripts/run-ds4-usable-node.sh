@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
-ROLE=\${1:?coordinator|worker}
+ROLE=${1:?coordinator|worker}
 ROOT=/home/funboy/StrixHaloClusterDS41
 DS4=$ROOT/.vendor/ds4-v41-halo-7d0454b
 MODEL=/home/funboy/models/ds41/ds4-v41-q2/DeepSeek-V4.1-Flash-Q2.gguf
-CTX=\${DS4_USABLE_CTX:-16384}
-COORD=\${DS4_USABLE_COORD:-10.55.0.1}
-TP_PORT=\${DS4_USABLE_TP_PORT:-9911}
-API_PORT=\${DS4_USABLE_API_PORT:-8080}
+CTX=${DS4_USABLE_CTX:-16384}
+COORD=${DS4_USABLE_COORD:-10.55.0.1}
+TP_PORT=${DS4_USABLE_TP_PORT:-9911}
+API_PORT=${DS4_USABLE_API_PORT:-8080}
 VENV=/home/funboy/StrixHaloClusterGLM/.engine/venv
 site=$($VENV/bin/python -c 'import site; print(site.getsitepackages()[0])')
 core="$site/_rocm_sdk_core"; devel="$site/_rocm_sdk_devel"; libs="$site/_rocm_sdk_libraries"; torchlib="$site/torch/lib"

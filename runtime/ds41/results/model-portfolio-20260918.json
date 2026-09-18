@@ -1,0 +1,22 @@
+{
+  "schema":"strix-model-portfolio-20260918-v1",
+  "note":"Practical reuse priority; not a universal cross-model intelligence benchmark.",
+  "top":[
+    {"model":"GLM-5.3-Flash CIRU + DFlash2 k5","decode_tps":24.851,"status":"KEEP_PRODUCT_QUALIFIED"},
+    {"model":"Qwen3.8-Flash-Next IQ3_XXS original","target_tps":23.49,"reasoning_median_tps":29.20,"utility_tps_range":[33.49,45.42],"status":"KEEP_HIGH_EFFICIENCY_WITH_QUALITY_LIMITS"},
+    {"model":"Qwen3.8-Flash-Next IQ4_XS uncensored","decode_tps":34.771,"status":"KEEP_FAST_DISTINCT_CHECKPOINT"},
+    {"model":"Qwen3-Coder-Next 80B Q6 GGUF","decode_tps":48.7048,"status":"HISTORICAL_OWNER_DELETED"},
+    {"model":"Qwen3.8-27B Q5 local MTP5","decode_tps":38.89698,"status":"HISTORICAL_OWNER_DELETED"}
+  ],
+  "research":[
+    {"model":"DeepSeek V4.1 DenseFix DSpark K2","decode_tps":19.43181587,"status":"KEEP_RECOVERY_QUALITY_NOT_QUALIFIED"},
+    {"model":"DeepSeek V4.1 Antirez Q2 DS4","status":"R4_PENDING_LOCAL_PANEL"}
+  ],
+  "cleanup_candidates":[
+    {"path":"/home/funboy/models/vllm/qwen3-coder-next-fp8","saving_gib_total_approx":149.77,"confidence":"HIGH"},
+    {"path":"/home/funboy/models/vllm/qwen3.8-27b-amd-quark-awq-int4-w4a16","saving_gib_total_approx":18.22,"confidence":"HIGH"},
+    {"path":"/home/funboy/models/gguf/qwen3.5-9b-defiant-fable-q5-mtp","saving_gib_total_approx":14.61,"confidence":"HIGH"},
+    {"path":"/home/funboy/models/gguf/qwen3.8-flash-next-unsloth-q5-k-xl","saving_gib_total_approx":147.42,"confidence":"MEDIUM_HIGH"},
+    {"path":"/home/funboy/models/gguf/qwen3.8-flash-next-original-q4-k-xl","saving_gib_total_approx":209.06,"confidence":"MEDIUM"}
+  ]
+}

@@ -31,6 +31,7 @@
 - Addendum pin d12db970... and acquired pin dd8a266f... resolve to the same HF file oid/LFS oid/size; no re-download.
 - NODE01 mirror is BLOCKED_MARGIN: 372.8501 GiB available before mirror, 32.2527 GiB projected after, deficit 17.7473 GiB versus required 50 GiB. No alternate large filesystem.
 - No deletion/mirror performed; K2 remains READY/idle. Continue only model-free recovery preparation until space reclamation is authorized.
+- DS4 lifecycle preflight now passes binary identity, USB4, port-bind, K2 ownership and NODE02 asset checks, then fail-closes as BLOCKED_MODEL_MIRROR_NODE01 before any stop/start.
 
 ## NEXT
 - Start exactly one Internet acquisition on NODE02 with pinned HF revision; persistent registry `NOT_SENT→IN_FLIGHT→COMPLETE/FAILED` and full SHA verification.

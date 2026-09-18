@@ -1,0 +1,18 @@
+{
+  "schema":"ds41-recovery-r4-lifecycle-preflight-v1",
+  "status":"BLOCKED_MODEL_MIRROR_NODE01",
+  "exit_code":21,
+  "checks":{
+    "binary_identity":"PASS",
+    "usb4_ping":"PASS",
+    "ports_9911_8080_bind":"PASS",
+    "node02_model_size":"PASS",
+    "k2_live_ready":"PASS",
+    "node01_model_size":"MISSING"
+  },
+  "model":{
+    "path":"/home/funboy/models/ds41/ds4-v41-q2/DeepSeek-V4.1-Flash-Q2.gguf",
+    "expected_size":365713686528
+  },
+  "safety":"No start/stop/model load performed. Preflight is read-only and fail-closed."
+}

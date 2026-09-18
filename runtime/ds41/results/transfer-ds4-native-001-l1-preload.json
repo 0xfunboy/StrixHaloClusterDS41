@@ -1,0 +1,19 @@
+{
+  "schema":"ds41-transfer-ds4-native-001-l1-preload-v1",
+  "status":"PASS",
+  "release":"/home/funboy/.local/share/haloclu-ds41/releases/native-ds4low-k2-transfer001",
+  "source_commit":"4d06da930451897dcf037deb8be8990412c5c807",
+  "base_release":"k2-mmq-engram-9c13117",
+  "base_source":"9c13117f56fd81d03c8c610a5fb0148ccdc603b9",
+  "nodes":{"node01":"release present","node02":"release present; tokenizer hashes identical"},
+  "artifact_verify_fast":{"rank0":"PASS","rank1":"PASS","full_rehash":false},
+  "mmq":{"enabled":true,"library_sha256":"7c19b29e8e1cfd37fe1fc6f8005ac59c64aa9f0b0cd7e0a897fb3a0313ed6756","abi_runtime_ld_path":"PASS both nodes"},
+  "engram":{"workers":4,"parallel_min_rows":256,"rank0_seal":"PASS","rank1_seal":"PASS"},
+  "canonical_prefill":true,
+  "dspark_k":2,
+  "ced":false,
+  "tokenizer":{"node01_full_l0":"PASS 7 DS4 refs + 5 historical + 6 rejects","node02_smoke":"PASS","profile":"ds4-low-v1"},
+  "infra":{"pair_service":"active","rank0":"inactive","rank1":"inactive","launcher_shell":"PASS both nodes"},
+  "entry_owner":{"ds4":"READY qualified fallback","k2":"OFF"},
+  "next":"stop DS4 via owner controller; native-on exactly once; verify environment and READY; run max6 L1"
+}

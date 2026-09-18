@@ -21,3 +21,11 @@ DenseFix + Engram2, TP2/EP2, MMQ prefill ON, Engram workers4/min_rows256, canoni
 
 ## NEXT
 Commit/push L0. Prepare isolated native release on both nodes and run all model-free release/path/ABI checks. Then stop DS4 through its owner controller and execute one L1 native load + max6 runner. L1 PASS → L3; L1 FAIL → L2.
+
+## L1 pre-load PASS
+- Isolated release `native-ds4low-k2-transfer001` materialized on both nodes from accelerated base release + only the two candidate tokenizer files.
+- artifact verify-fast rank0/rank1 PASS, no full rehash; MMQ ABI/hash PASS; Engram seals PASS; release tokenizer gates PASS; pair service active, native ranks OFF; DS4 qualified fallback remains READY.
+- Candidate controller explicitly enables MMQ, canonical-prefill, Engram4/256 and K2=2; CED off.
+
+## NEXT
+One owner transition: DS4 OFF -> native ON exactly once. Verify unit environment and READY, then execute frozen max6 L1 quality runner.

@@ -1,0 +1,11 @@
+{
+  "schema":"ds41-recovery-r4-ds4-lifecycle-preregister-v1",
+  "state":"FROZEN_BEFORE_K2_STOP",
+  "ds4_source":"7d0454b4e32ef1e90235f2b001d6643b5934438c",
+  "model":{"path":"/home/funboy/models/ds41/ds4-v41-q2/DeepSeek-V4.1-Flash-Q2.gguf","bytes":365713686528,"sha256":"1ce6a8f8806205c13330d7ca287bd198331dc5ca35ccc5d8a9a92a188a6f6f42","both_nodes_verified":true},
+  "runtime":{"backend":"rocm","transport":"tcp","coordinator":"10.55.0.1:9911","api":"127.0.0.1:8080","ctx":16384,"batched_session":1,"dspark":false},
+  "rocm":"reuse StrixHaloClusterGLM .engine venv ROCm SDK libraries through process-local LD_LIBRARY_PATH only",
+  "safety":{"k2_before":"READY epoch 1789651304744356945","stop":"serve-controller off whole pair","lifecycle_lock":"coordinator holds existing compute.lock","startup_failure":"stop both DS4 units then restore k2-prefill-5bdfed6 and require READY","public_exposure":false},
+  "quality_panel":"runtime/ds41/results/recovery-final-panel-preregister.json",
+  "performance_before_quality":0
+}

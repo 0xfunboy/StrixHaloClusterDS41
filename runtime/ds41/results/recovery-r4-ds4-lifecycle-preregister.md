@@ -1,0 +1,2 @@
+# DS41 Recovery R4 DS4 lifecycle preregister
+Frozen before stopping K2. Target-only DS4 V4.1/gfx1151 pair, TCP over private USB4, ctx16384, coordinator local API127.0.0.1:8080, no DSpark. ROCm libraries come only from the already-qualified GLM venv via process-local LD_LIBRARY_PATH. Coordinator holds the existing cluster compute lock. Any incomplete startup is cleaned on both nodes before restoring K2. Quality panel runs before performance.

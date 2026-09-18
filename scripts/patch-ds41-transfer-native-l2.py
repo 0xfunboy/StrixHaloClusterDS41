@@ -29,6 +29,7 @@ def main() -> None:
         "runtime/ds41/native_antirez_engram.py",
         "runtime/ds41/antirez_artifact_identity.py",
         "runtime/ds41/results/ds4-document-profile-002-preregister.json",
+        "scripts/test-ds41-transfer-native-l2-cpu.py",
     ):
         dst = target / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
@@ -170,14 +171,15 @@ done
     )
     replace_once(
         launcher,
-        'export DS41_ENGRAM2_DIR="$ENGRAM_DIR"',
+        'export DS41_ENGRAM2_DIR="$ENGRAM_DIR" DS41_ENGRAM_CACHE_ROWS="${DS41_ENGRAM_CACHE_ROWS:-65536}"',
         '''if [[ -f "$L2_MARKER" ]]; then
   unset DS41_ENGRAM2_DIR
   export DS41_ANTIREZ_Q2=1 DS41_ANTIREZ_ENGRAM_GGUF="$MODEL_FILE"
 else
   export DS41_ENGRAM2_DIR="$ENGRAM_DIR"
   unset DS41_ANTIREZ_Q2 DS41_ANTIREZ_ENGRAM_GGUF
-fi''',
+fi
+export DS41_ENGRAM_CACHE_ROWS="${DS41_ENGRAM_CACHE_ROWS:-65536}"''',
     )
     replace_once(
         launcher,

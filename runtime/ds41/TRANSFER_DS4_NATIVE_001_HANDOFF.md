@@ -1,11 +1,11 @@
 # TRANSFER DS4 → NATIVE 001 — handoff
 
-updated_at: 2026-09-18T19:17:33+02:00
-phase: L0 COMPLETE / L1 FAIL / L2a PREPARED CPU GATE PASS
-next_action: freeze/commit L2 software, build isolated Antirez-M1 release on both nodes, then lifecycle switch DS4 -> L2 M1 only after release preflight
+updated_at: 2026-09-18T19:29:30+02:00
+phase: L0 COMPLETE / L1 FAIL / L2a CPU PASS / L2 M1 RELEASE PREFLIGHT PASS
+next_action: final live status, then exactly one owner-controlled DS4 OFF -> L2 Antirez M1 start; reconcile startup before sending any document request
 repo_worktree: /home/funboy/worktrees/ds41-transfer-ds4-native-001
 repo_branch: exp/ds41-transfer-ds4-native-001
-repo_head_before_l2_commit: 11c802775988d9a099afd62526bd057e935d3250
+repo_head: 40d0629255f737c90d016208062298d2004295e0 (pushed)
 
 ## Live resident runtime at this checkpoint
 
@@ -176,6 +176,22 @@ L2 M1 release properties:
 - RuntimeMax: infinity for the session
 - model API max context for this phase: 16384
 
+## L2 M1 release preflight — PASS before lifecycle
+
+Release materialized on both nodes:
+`/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001`
+
+Verified before any DS4 OFF:
+- release `launch-node.sh`: bash syntax PASS on NODE01 and NODE02
+- L2 Python overlay: py_compile PASS on NODE01 and NODE02
+- Antirez fast identity rank0 PASS and rank1 PASS
+- both identities bind the frozen 365713686528-byte Q2 and SHA receipt `1ce6a8f8806205c13330d7ca287bd198331dc5ca35ccc5d8a9a92a188a6f6f42`
+- NODE01 full CPU L2 contract remains PASS: 1038+8 tensor accounting, exact hash metadata/token map, bit-exact row264 decode
+- rsync created a new NODE02 release; no existing release was overwritten
+- launcher hash observed on both nodes after sync: `488886315e485a8ea5bfc7f05ab6d320c9144c0474ee51765668b970d97d3d65`
+
+Preflight caught and fixed before load one generator defect: the first generated launcher left `fi DS41_ENGRAM_CACHE_ROWS=...` on one line. Current release is bash-valid on both nodes; the patch generator now emits the correct newline/export. No model was loaded during this correction.
+
 ## Active job
 
 None.
@@ -186,5 +202,6 @@ continue from release freeze/build/preflight; do not rerun L0/L1 or DS4 soak.
 
 ## Persistence
 
-PLAN updated for L2 CPU gate: pending in this checkpoint
-Git commit/push for L2 software: pending
+PLAN updated for L2 CPU gate: yes; live /home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md §2 and §17, backup retained
+Git base L2 commit/push: 40d0629255f737c90d016208062298d2004295e0 pushed to origin/exp/ds41-transfer-ds4-native-001
+Pending tracked delta before final consolidation: handoff + patch-generator preflight correction/test-copy only; connector filtered the second git staging/commit call before execution. Four inherited mode-bit changes remain untouched/uncommitted.

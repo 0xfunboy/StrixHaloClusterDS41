@@ -40,7 +40,7 @@
       "max_repairs": 0
     }
   },
-  "profile_status": "DS4_USABLE_RELEASE_001_CANDIDATE; TARGET_ONLY; NO_DSPARK; CTX16384; CHAT_RETRIEVAL_QUALITY_PENDING",
+  "profile_status": "NOT_ADMITTED_DOCUMENT_QUALITY_FAIL; DO_NOT_DEPLOY; TARGET_ONLY; NO_DSPARK; CTX16384",
   "context_format": "json",
   "max_context_tokens": 16384,
   "max_files": 300,

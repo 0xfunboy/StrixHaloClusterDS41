@@ -41,7 +41,12 @@
 - Live prompt counts1629/1306/597 are exactly6 below preload CLI estimates1635/1312/603; preserve this audit mismatch and do not use CLI-matched tokenizer sidecar as product equivalence evidence.
 - Document gate FAIL: performance P1/P2/P3, context4K→16K, product gateway and soak NOT_ADMITTED. C-off qualification remains specific and does not rewrite old C-low INCOMPLETE.
 
+## Terminal operational state
+- DS4 coordinator/worker OFF. No DS4 profile promoted.
+- K2 5bdfed6 restored READY on epoch 1789720948796205781; rank0/rank1/paired HTTP200, gateway HTTP200.
+- Final none-mode smoke returns exact 323, finish stop, no reasoning.
+- DS4_USABLE_RELEASE_001: delivery_complete=true, quality_qualified_scope=false, performance_target_met=false, coding_c_thinking_off_qualified=true.
+- Antirez Q2 remains verified/preserved on both nodes; candidate gateway/tokenizer remains prepared but NOT_ADMITTED/NOT_STARTED.
+
 ## NEXT
-1. Stop DS4 whole pair and restore K2 5bdfed6 via controller.
-2. Require K2 READY rank0/rank1/paired HTTP200 and final none-mode 323 smoke.
-3. Persist terminal delivery: quality_qualified_scope=false, coding_c_thinking_off_qualified=true, performance_target_met=false, DS4_USABLE_RELEASE_001 NO_PROMOTION.
+- STOP / delivery complete for this mandate. Any future DS4 continuation starts from this terminal result and must not rewrite the preserved code/docs failures or historical Recovery.

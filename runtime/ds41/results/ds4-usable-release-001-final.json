@@ -1,0 +1,145 @@
+{
+  "schema": "ds4-usable-release-001-final-v1",
+  "status": "DELIVERY_COMPLETE_NO_DS4_PROMOTION_K2_RESTORED",
+  "verdicts": {
+    "performance_target_met": false,
+    "quality_qualified_scope": false,
+    "delivery_complete": true,
+    "ds4_usable_release_promoted": false,
+    "coding_c_thinking_off_qualified": true,
+    "document_profile_qualified": false
+  },
+  "recovery_history": "ab41ca9 remains terminal and unchanged",
+  "ds4_profile": {
+    "source": "7d0454b4e32ef1e90235f2b001d6643b5934438c",
+    "q2_size": 365713686528,
+    "q2_sha256_receipt": "1ce6a8f8806205c13330d7ca287bd198331dc5ca35ccc5d8a9a92a188a6f6f42",
+    "ctx": 16384,
+    "transport": "50/50 TP TCP/USB4",
+    "gate_timeout_ms": 5000,
+    "target_only": true,
+    "dspark": false,
+    "final_state": "OFF"
+  },
+  "startup": {
+    "negative_001": "literal escaped shell parameter expansions; pre-model-load; automatic rollback PASS",
+    "negative_002": "NODE02 StandardOutput parent missing; worker never exec; automatic rollback PASS",
+    "successful_start": "coordinator+worker active, API200, planned 82.67GiB/rank"
+  },
+  "quality": {
+    "inherited_retrieval_evidence": "R4 tail1546 PASS, discriminator1571 exact PASS, holdouts4/4 PASS, JSON/fresh/multiturn3/3 PASS, same DS4/Q2/target-only/gate5000 scope; not rerun",
+    "code2k_v2": {
+      "status": "FAIL_SEMANTIC",
+      "expected": {
+        "result": 52,
+        "first_file": "__init__.py",
+        "middle_file": "_ds41_artifact.py",
+        "last_file": "envelope_test.go"
+      },
+      "actual": {
+        "result": 52,
+        "first_file": "__init__.py",
+        "middle_file": "prompt.go",
+        "last_file": "test-ds41-prefill-metrics.py"
+      }
+    },
+    "docs2k_v2": {
+      "status": "FAIL_SEMANTIC",
+      "expected": {
+        "result": 52,
+        "first_file": "dspark-k3-gfx1151.md",
+        "middle_file": "pull_request_template.md",
+        "last_file": "dspark-k1-gfx1151.md"
+      },
+      "actual": {
+        "result": 52,
+        "first_file": "dspark-k3-gfx1151.md",
+        "middle_file": "README.md",
+        "last_file": "dspark-k1-gfx1151.md"
+      }
+    },
+    "coding_c_off": {
+      "status": "PASS",
+      "attempts": 1,
+      "repairs": 0,
+      "thinking": false,
+      "reasoning_effort": "none",
+      "reasoning_chars": 0,
+      "build_rc": 0,
+      "test_rc": 0
+    },
+    "go_low": "R4 PASS preserved; not regenerated"
+  },
+  "mandatory_call_diagnostics": {
+    "code2k": {
+      "prompt_tokens": 1629,
+      "cached_tokens": 0,
+      "prefill_s": 18.339,
+      "prefill_tps": 88.83,
+      "first_final_s": 18.59875414898852,
+      "decode_tps": 8.26,
+      "wall_s": 23.321661943977233,
+      "completion_tokens": 40
+    },
+    "docs2k": {
+      "prompt_tokens": 1306,
+      "cached_tokens": 0,
+      "prefill_s": 28.086,
+      "prefill_tps": 46.5,
+      "first_final_s": 28.81320113700349,
+      "decode_tps": 15.18,
+      "wall_s": 31.756437194999307,
+      "completion_tokens": 46
+    },
+    "c_off": {
+      "prompt_tokens": 597,
+      "cached_tokens": 0,
+      "prefill_s": 11.843,
+      "prefill_tps": 50.41,
+      "first_final_s": 11.960903283965308,
+      "decode_tps": 14.83,
+      "wall_s": 31.573123418958858,
+      "completion_tokens": 292
+    }
+  },
+  "not_admitted": {
+    "performance_three_sample": "blocked by preregistered code/docs quality gate",
+    "context_4k_8k_16k": "blocked by 2K document gate",
+    "protected_gateway_service_tests": "blocked by document quality gate",
+    "soak_2h_24": "blocked by product perimeter gate"
+  },
+  "token_template_audit": {
+    "preload_cli": {
+      "code2k": 1635,
+      "docs2k": 1312,
+      "c": 603
+    },
+    "live_server": {
+      "code2k": 1629,
+      "docs2k": 1306,
+      "c": 597
+    },
+    "finding": "CLI estimates consistently +6; candidate tokenizer sidecar/config NOT_ADMITTED as live-equivalence proof"
+  },
+  "operational_final": {
+    "release": "k2-prefill-5bdfed6",
+    "release_id": "5bdfed698ab97b6230db3fe8a7e37ff8e9b3d513",
+    "epoch": "1789720948796205781",
+    "state": "READY",
+    "rank0_http": 200,
+    "rank1_http": 200,
+    "paired_http": 200,
+    "gateway_http": 200,
+    "smoke": {
+      "content": "323",
+      "finish_reason": "stop",
+      "reasoning": null
+    },
+    "rollback_job_exec_main_status": 0
+  },
+  "assets_preserved": {
+    "antirez_q2_both_nodes": true,
+    "no_new_download_cleanup_or_full_rehash": true,
+    "ds4_candidate_gateway": "prepared but NOT_ADMITTED/NOT_STARTED"
+  }
+}

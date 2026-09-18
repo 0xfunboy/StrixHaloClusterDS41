@@ -51,3 +51,8 @@ Persistent quality runner is executing independent code2k/docs2k confirmations 5
 - First quality unit exited before any HTTP: tracked manifest now exposes `documents` as a list but `rec()` still used the old `DOC_AUD["records"]` shape. TypeError occurred before case state/registry creation.
 - Requests sent=0, budget consumed=0; DS4 remained READY and K2 OFF.
 - Fixed quality + continuation + soak list lookups; py_compile and manifest lookup preflight PASS. Retry stays in the same DS4 load and is not a semantic replay.
+
+## Document quality terminal — 6/6 PASS
+- Original code/docs PASS, holdout A/B PASS10/10, independent code/docs confirmations PASS with cached_tokens=0.
+- LOW profile only; historical NONE FAILs remain preserved. Main document budget consumed exactly6/6, no retries or repairs.
+- Six-pass admits the preregistered continuation in the same DS4 load: reuse code original+confirm plus one third sample, then 4K→8K→~16K.

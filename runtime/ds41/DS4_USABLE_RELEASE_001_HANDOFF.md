@@ -36,3 +36,7 @@
 4. If code/docs PASS: diagnostic P1/P2/P3, docs confirmation, then 4K→8K→16K dependent characterization.
 5. If chat/document candidate remains qualified/useful: protected gateway candidate service gates, then conditional soak.
 6. Leave DS4 only on full chosen-perimeter delivery; otherwise rollback K2.
+
+## Startup READY
+- Third startup, with both setup fixes, is READY: coordinator+worker active, API200, 50/50 TCP/USB4, gate5000, ctx16384, target-only/noDSpark, Engram disk-only, planned memory82.67GiB/rank.
+- K2 is OFF. No USABLE quality request had been sent at this checkpoint.

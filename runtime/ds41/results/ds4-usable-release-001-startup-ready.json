@@ -1,0 +1,17 @@
+{
+  "schema": "ds4-usable-release-001-startup-ready-v1",
+  "status": "READY",
+  "coordinator_invocation": "6a5de3efc90d4fdcba079c26878cbd68",
+  "worker_invocation": "feb450f9a7594588978cc01a2faee39a",
+  "api_http": 200,
+  "source": "7d0454b4e32ef1e90235f2b001d6643b5934438c",
+  "model": "DeepSeek-V4.1-Flash-Q2",
+  "ctx": 16384,
+  "tp": "50/50 expert split TCP/USB4",
+  "gate_timeout_ms": 5000,
+  "target_only": true,
+  "dspark": false,
+  "engram": "native DS4 disk-only",
+  "planned_memory_gib_per_rank": 82.67,
+  "k2_state": "OFF"
+}

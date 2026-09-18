@@ -1,0 +1,15 @@
+{
+  "schema":"ds41-model-cleanup-20260918-v1",
+  "status":"COMPLETE_BOTH_NODES",
+  "authorized_by_owner":true,
+  "removed":[
+    {"path":"/home/funboy/models/gguf/qwen3.8-27b-q5-xl","node01_bytes":22246592512,"node02_bytes":22246547456},
+    {"path":"/home/funboy/models/vllm/qwen3.5-9b-defiant-fable-bf16","node01_bytes":19357655040,"node02_bytes":19357655040},
+    {"path":"/home/funboy/models/vllm/qwen3.8-27b-fp8","node01_bytes":30890291200,"node02_bytes":30890389504},
+    {"path":"/home/funboy/models/gguf/qwen3-coder-next-80b-a3b-ud-q6-k","node01_bytes":65789116416,"node02_bytes":65789120512},
+    {"path":"/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2","node01_bytes":168936402944,"node02_bytes":168936394752,"reason":"historical publisher MixedQ2 has corrupted FP8-derived dense BF16 tensors; superseded by validated DenseFix"}
+  ],
+  "freed":{"node01_bytes":307220058112,"node01_gib":286.12098,"node02_bytes":307220107264,"node02_gib":286.12102},
+  "preserved":["/home/funboy/models/gguf/deepseek-v4.1-flash-mixedq2-densefix","/home/funboy/models/ds41/engram2-tp2","/home/funboy/models/ds41/dspark-v41-mtp-2bc89ac"],
+  "serving_after_cleanup":{"release":"k2-prefill-5bdfed6","state":"READY","epoch":"1789651304744356945","dual_health":200}
+}

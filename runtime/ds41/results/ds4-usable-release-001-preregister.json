@@ -1,0 +1,181 @@
+{
+  "schema": "ds4-usable-release-001-preregister-v1",
+  "state": "FROZEN_BEFORE_MODEL_LOAD",
+  "authority": {
+    "mandate": "DS4_USABLE_RELEASE_001",
+    "recovery_terminal": "ab41ca96c06e0d1308e844e7e75e96bcade37db1",
+    "plan": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md"
+  },
+  "profile": {
+    "ds4_source": "7d0454b4e32ef1e90235f2b001d6643b5934438c",
+    "model_path": "/home/funboy/models/ds41/ds4-v41-q2/DeepSeek-V4.1-Flash-Q2.gguf",
+    "model_size": 365713686528,
+    "model_sha256_receipt": "1ce6a8f8806205c13330d7ca287bd198331dc5ca35ccc5d8a9a92a188a6f6f42",
+    "q2_receipts_verified_both_nodes": true,
+    "ctx": 16384,
+    "transport": "TCP/USB4",
+    "tp": "50/50 expert split two hosts",
+    "gate_timeout_ms": 5000,
+    "target_only": true,
+    "dspark": false
+  },
+  "preserved_history": {
+    "old_code2k": "FAIL frozen middle_file ambiguity",
+    "old_docs2k": "FAIL frozen middle_file ambiguity",
+    "old_c_low": "INCOMPLETE_NO_FINAL at 8192 reasoning tokens",
+    "old_tp750": "FAIL layer35 kind3 40MiB timeout",
+    "r4_retrieval": [
+      "tail1546 PASS",
+      "discriminator1571 PASS",
+      "holdouts 4/4 PASS",
+      "JSON/fresh/multiturn 3/3 PASS",
+      "Go low PASS"
+    ]
+  },
+  "frozen_prompts": {
+    "code2k": {
+      "id": "code2k-middle-explicit-v2",
+      "sha256": "b5d3e857f29626ed9ac7c62c69bcab051b7b09238ea780eb2f69e3a024dd8206",
+      "tokens": 1635,
+      "sections": 6,
+      "lower_middle_1based": 3,
+      "expected": {
+        "result": 52,
+        "first_file": "__init__.py",
+        "middle_file": "_ds41_artifact.py",
+        "last_file": "envelope_test.go"
+      }
+    },
+    "docs2k": {
+      "id": "docs2k-middle-explicit-v2",
+      "sha256": "0bf1b455709630dacad54a81f12bccce505dedd00abba1ad409f6980bfd8ff19",
+      "tokens": 1312,
+      "sections": 4,
+      "lower_middle_1based": 2,
+      "expected": {
+        "result": 52,
+        "first_file": "dspark-k3-gfx1151.md",
+        "middle_file": "pull_request_template.md",
+        "last_file": "dspark-k1-gfx1151.md"
+      }
+    },
+    "code4k": {
+      "sha256": "c8d394017133c9cd8ac5d9fca8c44bac7015ed55fb291032f52e6c6b89a647af",
+      "tokens": 3492
+    },
+    "code8k": {
+      "sha256": "d32183300b74dc08e64e93aabe612296e194a1d77ec0395d66b17cab8ecfac3d",
+      "tokens": 7323
+    },
+    "code16k": {
+      "sha256": "5a5042f0a8f1bd82ca4bb6c3c6cb17bc25a12f21d2bd2348f5111d319204c29f",
+      "tokens": 14877
+    },
+    "coding_c_off": {
+      "id": "coding-c-frame-thinking-off-v2",
+      "sha256": "84ceb172785f0a9068e7f7500468d57b65b0a7802416b2ddb2bff88e53e921e2",
+      "tokens": 603,
+      "thinking": false,
+      "reasoning_effort": "none",
+      "max_tokens": 8192
+    }
+  },
+  "preload_gates": {
+    "collector_simulated": "SSE_PASS TIMEOUT_PASS CANCEL_PASS",
+    "fixture_c": "BUGGY_FAIL_GOLDEN_PASS",
+    "tokenizer_sidecar": "PASS exact token IDs on all six frozen v2 prompts",
+    "controller": "OFF with K2 READY",
+    "no_new_download_cleanup_rehash": true
+  },
+  "quality_order": [
+    "Q1 code2k-middle-explicit-v2 thinking-off max128",
+    "Q2 docs2k-middle-explicit-v2 thinking-off max128",
+    "Q3 coding-c-frame-thinking-off-v2 max8192; max1 repair only malformed envelope or executed-test feedback"
+  ],
+  "quality_gates": {
+    "documents_admit_performance": "Q1 PASS and Q2 PASS",
+    "coding_scope": "C PASS adds C qualification; C non-PASS does not block chat/document diagnostics",
+    "no_expected_change_after_output": true
+  },
+  "performance_if_documents_pass": {
+    "warmup": "one excluded short direct reset/smoke after startup",
+    "order": [
+      "RESET-P1 excluded",
+      "P1 code2k-v2",
+      "RESET-P2 excluded",
+      "P2 code2k-v2",
+      "RESET-P3 excluded",
+      "P3 code2k-v2"
+    ],
+    "settings": {
+      "thinking": false,
+      "reasoning_effort": "none",
+      "temperature": 0,
+      "seed": 1,
+      "max_tokens": 128,
+      "ignore_eos": false
+    },
+    "independence_gate": "record cached_tokens/cache_write_tokens; any large prefix hit remains visible and is not treated as independent",
+    "metrics": [
+      "server prefill seconds/tokens_per_second",
+      "client headers/first reasoning/first final/wall",
+      "usage prompt/completion/reasoning",
+      "decode avg/interval",
+      "cache read/write",
+      "rank RSS/HWM/swap/minflt/majflt",
+      "TCP errors/timeouts",
+      "effective CED source contract"
+    ],
+    "summary": [
+      "all three samples",
+      "median",
+      "sample dispersion"
+    ],
+    "target_prefill_tps": 200
+  },
+  "conditional_confirmation_and_context": {
+    "only_if_2k_documents_pass": true,
+    "core_confirmation": [
+      "P1 is independent code2k confirmation",
+      "docs2k-confirm independent second request"
+    ],
+    "context_progression": [
+      {
+        "id": "code4k-middle-explicit-v2",
+        "tokens": 3492,
+        "cap": 128
+      },
+      {
+        "id": "code8k-middle-explicit-v2",
+        "tokens": 7323,
+        "cap": 128
+      },
+      {
+        "id": "code16k-middle-explicit-v2",
+        "tokens": 14877,
+        "cap": 128
+      }
+    ],
+    "stop_dependent_escalation_on_fail": true,
+    "no_32k_64k": true
+  },
+  "product_if_chat_documents_candidate": {
+    "candidate_gateway": "127.0.0.1:18224",
+    "backend": "127.0.0.1:8080",
+    "tokenizer_sidecar": "127.0.0.1:18223",
+    "protected_state": "/home/funboy/.local/state/ds4-usable-release-001",
+    "config": "runtime/ds41/config.ds4-usable-release-001.json",
+    "lifecycle": "scripts/ds4-usable-controller.sh",
+    "gates": [
+      "auth",
+      "nonstream",
+      "SSE",
+      "reasoning/final separation",
+      "cancel/drain then new request",
+      "OFF no autoload",
+      "ON whole-pair"
+    ],
+    "soak": "2h / >=24 sequential mixed requests only after product perimeter PASS and useful declared performance"
+  },
+  "final_state_rule": "leave DS4 READY/idle via protected gateway only if chosen chat/document perimeter including service/stability qualifies; otherwise restore K2 5bdfed6"
+}

@@ -31,3 +31,7 @@ No semantic retries/repairs.
 
 ## NEXT
 Publish prereg/PLAN checkpoint, verify K2 still READY and no stale job, then exactly one K2 OFF → DS4 DOCUMENT ON. Run the persistent quality budget; follow its automatic gates without new steering.
+
+## Startup READY
+- DOCUMENT PROFILE 002 first startup reached READY before any document request: coordinator+worker active, API200, ctx16384, 50/50 TCP/USB4, gate5000, target-only/noDSpark, Engram disk-only, planned82.67GiB/rank.
+- K2 is OFF. NEXT is the frozen max6 document-quality runner.

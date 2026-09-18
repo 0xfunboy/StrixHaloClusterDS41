@@ -1,82 +1,40 @@
-# DS4 DOCUMENT PROFILE 002 — handoff
+# DS4 DOCUMENT PROFILE 002 — terminal handoff
 
-## Authority
-- Starts from terminal USABLE RELEASE 001 `5206483`; Recovery `ab41ca9` stays terminal.
-- Truth: `/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md`.
+## Authority and final state
+- Terminal decision: **QUALIFIED / LEFT READY** on 2026-09-18.
+- Lifecycle owner: `DS4_DOCUMENT_PROFILE_002_20260918`.
+- DS4: `READY`, coordinator active, worker active, backend API HTTP200.
+- K2: `OFF`.
+- Finalizer receipt: `QUALIFIED_LEFT_READY`.
+- Terminal evidence: `reports/DS41-Q2-001/ds4-document-profile-002/soak/terminal.json` and `finalizer.json`.
+- Detailed closure: `runtime/ds41/results/finalize-ds4-soak-terminal.md`.
+- Long-form plan truth: `/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md`.
 
-## Entry
-- K2 `5bdfed6` READY epoch `1789720948796205781`, 200/200/200.
-- DS4 OFF; no stale document job.
-- Antirez Q2 receipt/SHA already verified on both nodes; no rehash/download.
+## Product entry point
+- Use the protected local gateway at `127.0.0.1:18224`; Bearer auth is required.
+- Tokenizer sidecar: `127.0.0.1:18223`; direct DS4 backend: `127.0.0.1:8080`.
+- Post-terminal verification: unauthenticated `/v1/models` HTTP401; authenticated `/health`, `/v1/lifecycle`, `/v1/models` HTTP200; tokenizer `/health` HTTP200.
+- Default profile is `document-low`. The separate coding profile is `c-off`.
 
-## Offline input closure
-- CLI/old-sidecar +6 cause is exactly `<｜System｜>You are a helpful assistant` = IDs `[128799,3476,477,260,11502,22896]`.
-- Server OpenAI user-only does not inject this system turn. Old USABLE001 direct-backend inputs were already correct; sidecar fix changes counting/admission only.
-- Corrected sidecar exact-ID matches Antirez embedded tokenizer for user/system/multiturn NONE/LOW and actual frozen prompts.
-- LOW = named `DS4_THINK_LOW`, thinking enabled, numeric level absent (`-1`), no Reasoning Effort system text; versus NONE only generation-prefix token changes `128822 -> 128821`.
-- Original LOW counts: code1629, docs1306. Holdouts: A1409, B2039.
+## Qualified scope
+- Documents: `document-low` / `DS4_THINK_LOW`, frozen 2K-class quality panel **6/6 PASS**. Original code2k/docs2k, holdout A/B, and independent code/docs confirmations all passed with cache0.
+- Stability: **24/24 sequential soak requests PASS**, HTTP200, cache0, over **8185.734s** real elapsed time. Requirement was >=7200s and >=24 requests.
+- Largest document prompt actually quality-qualified: **2039 tokens**. Do not turn the configured context ceiling into a larger quality claim.
+- C thinking-OFF qualification from the previous release is preserved and reused; Go LOW / R4 qualification is preserved and reused. They were not rerun in DOCUMENT PROFILE 002.
+- Historical document NONE failures remain unchanged.
 
-## Frozen main budget
-1. code2k-v2 LOW / cap2048
-2. docs2k-v2 LOW / cap2048
-3-4. holdouts only if originals PASS
-5-6. independent original confirms only if holdouts PASS
-No semantic retries/repairs.
+## Limits
+- Engine context ceiling: `16384` tokens.
+- Gateway default context/output: `4096` / `2048` tokens; absolute gateway max output `8192`.
+- `document-low`: context `4096`, max output `2048`.
+- `c-off`: context `16384`, max output `8192`.
+- 4K document characterization: `INCOMPLETE_NO_FINAL` with prompt `3486`, cap `512`, finish `length`, no final answer. The prompt was processed; this is not evidence of a hard 2K model/context limit. 8K/16K were not sent.
+- Prefill performance target remains unmet: median code2k LOW/cache0 **90.17 tok/s** vs target `200 tok/s`; decode samples **14.41/15.95/16.64 tok/s**.
+- End-to-end latency is therefore chat-slow: first code2k quality sample wall **66.180s**; terminal soak wall range **34.109..76.101s**, mean **53.562s**.
+- Cancel semantics: client detach followed by backend drain; observed drain about `135.99s` before a new request was admitted.
+- OFF chat contract: HTTP503 `model_not_ready`, no autoload.
 
-## Prepared continuation
-- Six-pass only: reuse code quality samples + one third comparable perf request; then 4K→8K→16K LOW cap512.
-- Product gate: protected gateway18224 + corrected tokenizer18223; auth/SSE/cancel-drain/OFF-no-autoload/whole-pair lifecycle.
-- Soak: 2h / >=24 sequential requests only after product PASS.
-- Finalizer owner-bound: failure => K2 rollback; full qualified perimeter => leave DS4 READY.
-
-## Quality checkpoint — originals
-- code2k-v2 LOW PASS exact: cache0, prefill20.478s/79.55tok/s, first final64.349s, decode14.41tok/s, wall66.180s, 657 completion tokens.
-- docs2k-v2 LOW PASS exact: cache0, prefill25.570s/51.08tok/s, first final43.196s, decode15.84tok/s, wall45.703s, 318 completion tokens.
-- Historical NONE FAILs remain unchanged. No prompt/expected/parameter change.
-- Gate opens holdout A/B in the same DS4 load.
-
-## Quality checkpoint — holdouts
-- document-holdout-a PASS exact 10/10: cache0, prefill18.600s/75.75tok/s, first final59.554s, decode15.21tok/s, wall64.087s.
-- document-holdout-b PASS exact 10/10: cache0, prefill22.294s/91.46tok/s, first final65.168s, decode15.73tok/s, wall70.021s.
-- Quality budget is 4/4 PASS with 2 requests remaining.
-
-## NEXT
-Persistent quality runner is executing independent code2k/docs2k confirmations 5/6 and 6/6 under the same LOW profile. Each confirmation requires semantic PASS and cached_tokens<=32.
-
-## Startup READY
-- DOCUMENT PROFILE 002 first startup reached READY before any document request: coordinator+worker active, API200, ctx16384, 50/50 TCP/USB4, gate5000, target-only/noDSpark, Engram disk-only, planned82.67GiB/rank.
-- K2 is OFF. NEXT is the frozen max6 document-quality runner.
-
-## Runner setup negative 001
-- First quality unit exited before any HTTP: tracked manifest now exposes `documents` as a list but `rec()` still used the old `DOC_AUD["records"]` shape. TypeError occurred before case state/registry creation.
-- Requests sent=0, budget consumed=0; DS4 remained READY and K2 OFF.
-- Fixed quality + continuation + soak list lookups; py_compile and manifest lookup preflight PASS. Retry stays in the same DS4 load and is not a semantic replay.
-
-## Document quality terminal — 6/6 PASS
-- Original code/docs PASS, holdout A/B PASS10/10, independent code/docs confirmations PASS with cached_tokens=0.
-- LOW profile only; historical NONE FAILs remain preserved. Main document budget consumed exactly6/6, no retries or repairs.
-- Six-pass admits the preregistered continuation in the same DS4 load: reuse code original+confirm plus one third sample, then 4K→8K→~16K.
-
-## Performance checkpoint
-- Three independent PASS/cache0 code2k LOW samples: prefill79.55 /90.17 /91.01 tok/s; median90.17, sample SD6.39. Decode14.41/15.95/16.64.
-- `performance_target_met=false` versus200 tok/s target. This is DS4+AntirezQ2+native-Engram contract, not engine-only attribution.
-- Context characterization is running 4K→8K→~16K; a larger-context FAIL limits escalation but does not erase 2K qualification.
-
-## Context scope decision
-- Performance median prefill90.17tok/s; 200tok/s target not met.
-- code4k LOW/cap512 is INCOMPLETE_NO_FINAL: prompt3486, completion512, finish length, first_final absent; prefill30.284s/115.11tok/s. 8K/16K not sent.
-- Per mandate, this limits document quality to the verified 2K-class perimeter (largest passing prompt observed2039) but does not revoke 6/6. Product checks are admitted within that smaller scope.
-- Product gateway now includes the real code2k/docs2k documents through the corrected tokenizer sidecar before service/lifecycle gates.
-
-## Product checkpoint — PASS normalized to source contract
-- Raw product terminal is preserved FAIL only because runner expected HTTP409 for OFF chat. Gateway source intentionally returns HTTP503 `model_not_ready` when lifecycle!=READY; observed lifecycle/controller both OFF and no autoload, so mandate gate PASS.
-- Protected gateway real code2k/docs2k PASS exact; unauthorized401, authenticated lifecycle READY, nonstream LOW PASS, SSE reasoning/final PASS, cancel/drain/resume PASS, whole-pair OFF/ON + ON-OK PASS.
-- The observed 2048-token generation was the preregistered cancel request with max_tokens2048, not either max128 arithmetic request; both arithmetic requests ended naturally after20 tokens.
-- Service limit: client cancellation detaches but gateway drains backend before releasing admission; this run drained ~135.99s before DRAIN-OK.
-- Product qualified for document LOW 2K-class (max observed passing prompt2039); soak admitted. Finalizer false-negative already started K2 rollback; wait K2 READY, then restart DS4 once for soak.
-
-## Soak IN_FLIGHT
-- Product gate is qualified after source-contract normalization; raw 409-vs503 false negative preserved.
-- Soak unit `ds4-document-soak.service` invocation `8d11fc92446740aebbc36cde819fae1c` started at1789728308.9057333; requirement7200s/24 sequential requests.
-- Request1 code2k PASS exact, HTTP200, wall72.961s, cache0, natural stop. DS4 READY, K2 OFF.
-- Runner terminal behavior: any FAIL -> owner-bound K2 rollback; PASS -> finalizer QUALIFIED and DS4 remains READY.
+## Rollback and next action
+- Manual rollback command: `scripts/ds4-document-controller.sh rollback-k2`.
+- Do not rerun the completed soak. Do not reinterpret the 4K cap512 result as a hard context failure.
+- Next work, only if explicitly requested: a separately preregistered 4K+ document budget/latency campaign or performance optimization. The current 2K-class product scope is terminally qualified and should remain stable.

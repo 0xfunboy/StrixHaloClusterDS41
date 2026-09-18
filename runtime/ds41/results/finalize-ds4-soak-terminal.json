@@ -1,22 +1,145 @@
 {
-  "schema": "ds41-finalize-soak-terminal-v1",
-  "performance_target_met": false,
-  "performance_observed": {
-    "target_prefill_tok_s": 200.0,
-    "best_candidate_prefill_tok_s": 76.16973382525786,
-    "characterized_candidate_prefill_tok_s": 66.74401762774443,
-    "best_candidate_prefill_s": 20.84817578125,
-    "characterized_candidate_prefill_s": 23.79239453125,
-    "mmq_same_source_speedup": 3.149362874,
-    "engram_same_source_prefill_time_reduction_pct": 18.62557401684335
+  "schema": "ds41-finalize-ds4-soak-terminal-v2",
+  "generated_at": "2026-09-18T15:37:44+02:00",
+  "owner": "DS4_DOCUMENT_PROFILE_002_20260918",
+  "status": "QUALIFIED",
+  "soak": {
+    "status": "PASS",
+    "started_unix": 1789728308.9057333,
+    "finished_unix": 1789736494.6398356,
+    "elapsed_s": 8185.7341022491455,
+    "required_seconds": 7200,
+    "required_requests": 24,
+    "completed_requests": 24,
+    "sequential_indices": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "sequential_passes": 24,
+    "all_cached_tokens_zero": true,
+    "wall_s": {
+      "min": 34.10939678491559,
+      "mean": 53.561928707000334,
+      "max": 76.10142146097496
+    },
+    "last_result": {
+      "http": 200,
+      "wall_s": 34.17463076801505,
+      "pass": true,
+      "actual": {
+        "result": 52,
+        "first_file": "dspark-k3-gfx1151.md",
+        "middle_file": "pull_request_template.md",
+        "last_file": "dspark-k1-gfx1151.md"
+      },
+      "expected": {
+        "result": 52,
+        "first_file": "dspark-k3-gfx1151.md",
+        "middle_file": "pull_request_template.md",
+        "last_file": "dspark-k1-gfx1151.md"
+      },
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 1306,
+        "completion_tokens": 318,
+        "total_tokens": 1624,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 1306
+        }
+      },
+      "index": 24,
+      "case": "docs2k-confirm",
+      "finished_unix": 1789736494.6254165
+    }
   },
-  "quality_qualified_scope": false,
-  "quality_reason": "code2k/tail1546/docs2k fail; discriminator failure is exact across optimized candidate and rollback, so it is pre-existing/shared rather than candidate-specific",
-  "delivery_complete": true,
-  "promotion": "NO_PROMOTION_EXPERIMENTAL_PERFORMANCE_ARTIFACTS_PRESERVED",
-  "soak": "NOT_RUN_BLOCKED_BY_QUALITY",
-  "ced": "BLOCKED_BY_K2_AUX_HIDDEN_CONTRACT",
-  "final_operational_release": "k2-prefill-5bdfed6",
-  "final_operational_source": "5bdfed698ab97b6230db3fe8a7e37ff8e9b3d513",
-  "discriminator_decision": "SHARED_PREEXISTING_QUALITY_FAILURE_NOT_CANDIDATE_REGRESSION"
+  "finalizer": {
+    "owner": "DS4_DOCUMENT_PROFILE_002_20260918",
+    "state": "QUALIFIED_LEFT_READY",
+    "rollback_available": "scripts/ds4-document-controller.sh rollback-k2"
+  },
+  "live_state_verified": {
+    "ds4": "READY",
+    "owner": "DS4_DOCUMENT_PROFILE_002_20260918",
+    "coordinator": "active",
+    "worker": "active",
+    "backend_api_http": 200,
+    "k2": "OFF",
+    "protected_gateway": "127.0.0.1:18224",
+    "gateway_unauth_v1_models_http": 401,
+    "gateway_auth_health_http": 200,
+    "gateway_auth_lifecycle_http": 200,
+    "gateway_auth_v1_models_http": 200,
+    "tokenizer_sidecar": "127.0.0.1:18223",
+    "tokenizer_health_http": 200
+  },
+  "qualified_scope": {
+    "documents": "document-low / DS4_THINK_LOW, frozen 2K-class panel PASS 6/6 plus terminal soak 24/24 sequential PASS",
+    "max_verified_document_prompt_tokens": 2039,
+    "max_verified_document_total_tokens_observed": 2789,
+    "c_off": "previous C thinking-off qualification preserved; reused, not rerun by DOCUMENT PROFILE 002",
+    "go_low": "previous Go-low R4 qualification preserved; reused, not rerun by DOCUMENT PROFILE 002",
+    "historical_document_none": "historical NONE document failures remain failures; no promotion of NONE document mode"
+  },
+  "configured_limits": {
+    "engine_context_tokens": 16384,
+    "gateway_chat_context_tokens": 4096,
+    "gateway_default_output_tokens": 2048,
+    "gateway_max_output_tokens": 8192,
+    "document_low_context_tokens": 4096,
+    "document_low_max_tokens": 2048,
+    "c_off_context_tokens": 16384,
+    "c_off_max_tokens": 8192,
+    "note": "configured ceilings are not equivalent to quality qualification beyond the verified scope"
+  },
+  "known_limits": {
+    "performance_target_met": false,
+    "target_prefill_tok_s": 200,
+    "median_prefill_tok_s": 90.17,
+    "code2k_decode_tok_s": [
+      14.41,
+      15.95,
+      16.64
+    ],
+    "code4k": {
+      "status": "INCOMPLETE_NO_FINAL",
+      "prompt_tokens": 3486,
+      "completion_tokens": 512,
+      "cached_tokens": 0,
+      "prefill_s": 30.284,
+      "prefill_tps": 115.11,
+      "first_reasoning_s": 30.52451138291508,
+      "first_final_s": null,
+      "decode_tps": 15.89,
+      "wall_s": 62.54970754694659,
+      "finish_reason": "length"
+    },
+    "code8k": "NOT_RUN_DEPENDENT_STOP",
+    "code16k": "NOT_RUN_DEPENDENT_STOP",
+    "cancel": "client cancellation detaches stream but backend drains before admission is released; observed product test drain about 135.99s",
+    "off_chat": "HTTP 503 model_not_ready while OFF is the gateway source contract and does not autoload the model"
+  },
+  "rollback_command": "scripts/ds4-document-controller.sh rollback-k2"
 }

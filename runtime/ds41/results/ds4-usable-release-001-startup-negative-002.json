@@ -11,5 +11,5 @@
   "request_sent": false,
   "cause": "controller did not create the NODE02 raw/log directory before systemd-run configured StandardOutput=append",
   "fix": "create RAW directory on NODE01 and NODE02 before starting either DS4 unit",
-  "automatic_rollback": "K2 epoch1789720141923773729 STARTING at record time"
+  "automatic_rollback": "PASS: K2 READY epoch1789720141923773729 rank0/rank1/paired HTTP200"
 }

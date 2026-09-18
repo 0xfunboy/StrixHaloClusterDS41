@@ -28,11 +28,10 @@
 ## Startup negative 002
 - Second ON reached coordinator launch but NODE02 worker never exec'd: systemd failed at STDOUT setup (status209) because the raw/log parent directory did not exist on NODE02.
 - Coordinator was killed by supervisor after ~0.4s; pair never READY and no request was sent.
-- Fix is controller-only: create RAW directory on both nodes before systemd-run. Automatic K2 rollback epoch 1789720141923773729 is in progress; no further ON until READY.
+- Fix is controller-only: create RAW directory on both nodes before systemd-run. Automatic K2 rollback PASS: epoch 1789720141923773729 READY with rank0/rank1/paired HTTP200.
 
 ## NEXT
-1. Wait for K2 rollback epoch 1789720141923773729 READY; no lifecycle starts meanwhile.
-2. Publish controller directory-preparation fix, then perform exactly one new K2 OFF → DS4 USABLE ON.
+1. K2 rollback epoch 1789720141923773729 is READY; perform one new whole-pair K2 OFF → DS4 USABLE ON with both setup fixes.
 3. Run code2k-v2, docs2k-v2, C-off in frozen order.
 4. If code/docs PASS: diagnostic P1/P2/P3, docs confirmation, then 4K→8K→16K dependent characterization.
 5. If chat/document candidate remains qualified/useful: protected gateway candidate service gates, then conditional soak.

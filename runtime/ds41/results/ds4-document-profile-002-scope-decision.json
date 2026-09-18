@@ -1,0 +1,29 @@
+{
+  "schema": "ds4-document-profile-002-scope-decision-v1",
+  "document_quality": "PASS_6_OF_6_AT_2K_CLASS",
+  "max_verified_document_prompt_tokens": 2039,
+  "max_verified_document_total_tokens_observed": 2789,
+  "context_characterization": {
+    "code4k": {
+      "status": "INCOMPLETE_NO_FINAL",
+      "prompt_tokens": 3486,
+      "completion_tokens": 512,
+      "cached_tokens": 0,
+      "prefill_s": 30.284,
+      "prefill_tps": 115.11,
+      "first_reasoning_s": 30.52451138291508,
+      "first_final_s": null,
+      "decode_tps": 15.89,
+      "wall_s": 62.54970754694659,
+      "finish_reason": "length"
+    },
+    "code8k": "NOT_RUN_DEPENDENT_STOP",
+    "code16k": "NOT_RUN_DEPENDENT_STOP"
+  },
+  "scope_rule": "4K failure limits context but does not revoke smaller verified document perimeter",
+  "product_admitted": true,
+  "product_scope": "document-low quality verified for frozen 2K-class documents up to observed2039 prompt tokens; gateway engine context4096 is an allocation/admission ceiling, not a 4K quality claim",
+  "performance_target_met": false,
+  "continuation_script_raw_product_admitted": false,
+  "normalization_note": "raw continuation product_admitted was over-restrictive; mandate explicitly says larger-context failure limits perimeter without retroactively cancelling smaller verified contexts"
+}

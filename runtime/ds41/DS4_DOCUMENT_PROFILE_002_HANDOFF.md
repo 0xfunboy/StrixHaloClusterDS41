@@ -61,3 +61,9 @@ Persistent quality runner is executing independent code2k/docs2k confirmations 5
 - Three independent PASS/cache0 code2k LOW samples: prefill79.55 /90.17 /91.01 tok/s; median90.17, sample SD6.39. Decode14.41/15.95/16.64.
 - `performance_target_met=false` versus200 tok/s target. This is DS4+AntirezQ2+native-Engram contract, not engine-only attribution.
 - Context characterization is running 4K→8K→~16K; a larger-context FAIL limits escalation but does not erase 2K qualification.
+
+## Context scope decision
+- Performance median prefill90.17tok/s; 200tok/s target not met.
+- code4k LOW/cap512 is INCOMPLETE_NO_FINAL: prompt3486, completion512, finish length, first_final absent; prefill30.284s/115.11tok/s. 8K/16K not sent.
+- Per mandate, this limits document quality to the verified 2K-class perimeter (largest passing prompt observed2039) but does not revoke 6/6. Product checks are admitted within that smaller scope.
+- Product gateway now includes the real code2k/docs2k documents through the corrected tokenizer sidecar before service/lifecycle gates.

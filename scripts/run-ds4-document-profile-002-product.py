@@ -11,6 +11,7 @@ CFG=ROOT/'runtime/ds41/config.ds4-document-profile-002.json'
 BIN=Path('/home/funboy/.local/share/haloclu-ds41/current/bin/strixglm')
 STATE=Path('/home/funboy/.local/state/ds4-document-profile-002')
 OWNER='DS4_DOCUMENT_PROFILE_002_20260918'
+MANIFEST=json.load(open(ROOT/'runtime/ds41/document-profile-002/prompt-manifest.json'))
 
 def atomic(p,o):
     p.parent.mkdir(parents=True,exist_ok=True);q=p.with_suffix(p.suffix+'.tmp');q.write_text(json.dumps(o,indent=2,ensure_ascii=False)+'\n');os.replace(q,p)
@@ -84,12 +85,22 @@ def exact_chat(token,text,expected,profile='document-low'):
     s,o,_=req('POST','/v1/chat/completions',body,token)
     content=((o.get('choices') or [{}])[0].get('message') or {}).get('content','') if isinstance(o,dict) else ''
     return {'http':s,'content':content,'expected':expected,'pass':s==200 and content.strip()==expected}
+def document_chat(token,record):
+    text=(ROOT/record['prompt_file']).read_text()
+    body={'model':'deepseek-v4.1-flash','profile':'document-low','messages':[{'role':'user','content':text}],'temperature':0,'seed':1,'max_tokens':2048,'stream':False}
+    t=time.monotonic();s,o,_=req('POST','/v1/chat/completions',body,token);wall=time.monotonic()-t
+    msg=((o.get('choices') or [{}])[0].get('message') or {}) if isinstance(o,dict) else {}
+    content=msg.get('content') or ''
+    try: actual=json.loads(content); ok=(s==200 and actual==record['expected'])
+    except Exception: actual=None; ok=False
+    return {'http':s,'pass':ok,'expected':record['expected'],'actual':actual,'wall_s':wall,'reasoning_chars':len(msg.get('reasoning') or msg.get('reasoning_content') or ''),'final_chars':len(content),'finish_reason':((o.get('choices') or [{}])[0].get('finish_reason') if isinstance(o,dict) else None),'usage':o.get('usage') if isinstance(o,dict) else None}
 def main():
     OUT.mkdir(parents=True,exist_ok=True)
     if (OUT/'terminal.json').exists():raise SystemExit('replay guard')
     qt=json.load(open(BASE/'quality/terminal.json'))
     ct=json.load(open(BASE/'continuation/terminal.json'))
-    if not qt.get('six_pass') or not ct.get('product_admitted'):raise SystemExit('product gate not admitted')
+    scope=json.load(open(ROOT/'runtime/ds41/results/ds4-document-profile-002-scope-decision.json'))
+    if not qt.get('six_pass') or not scope.get('product_admitted'):raise SystemExit('product gate not admitted for verified scope')
     STATE.mkdir(parents=True,exist_ok=True);os.chmod(STATE,0o700)
     # Start corrected CPU tokenizer.
     sh(['systemctl','--user','reset-failed','ds4-document-tokenizer.service'],check=False)
@@ -109,6 +120,10 @@ def main():
     s,o,_=req('POST','/v1/chat/completions',{'messages':[{'role':'user','content':'x'}]},None,30)
     rows.append({'gate':'unauthorized_chat','pass':s==401,'http':s})
     s,l=lifecycle(token);rows.append({'gate':'lifecycle_ready_auth','pass':s==200 and l.get('state')=='READY','http':s,'body':l})
+    code=next(x for x in MANIFEST['documents'] if x['id']=='code2k-middle-explicit-v2')
+    docs=next(x for x in MANIFEST['documents'] if x['id']=='docs2k-middle-explicit-v2')
+    dx=document_chat(token,code);rows.append({'gate':'gateway_document_code2k','pass':dx['pass'],'detail':dx})
+    dy=document_chat(token,docs);rows.append({'gate':'gateway_document_docs2k','pass':dy['pass'],'detail':dy})
     x=exact_chat(token,'Compute 23+19. Return only the integer.','42');rows.append({'gate':'nonstream_low','pass':x['pass'],'detail':x})
     sb={'model':'deepseek-v4.1-flash','profile':'document-low','messages':[{'role':'user','content':'Compute 31+11. Return only the integer.'}],'temperature':0,'seed':1,'max_tokens':128,'stream':True}
     sx=stream_once(sb,token);rows.append({'gate':'sse_reasoning_final','pass':sx['http']==200 and sx['content'].strip()=='42' and sx['finish']=='stop','detail':sx})

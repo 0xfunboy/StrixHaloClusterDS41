@@ -25,8 +25,14 @@
 - Startup supervisor rollback PASS: K2 epoch 1789719735837225261 returned READY with rank0/rank1/paired HTTP200.
 - Fix is launcher-only: remove the five literal escapes; bash syntax + invalid-role no-load guard PASS and fixed launcher replicated byte-identically to NODE02 (SHA256 `496ff6fb...`).
 
+## Startup negative 002
+- Second ON reached coordinator launch but NODE02 worker never exec'd: systemd failed at STDOUT setup (status209) because the raw/log parent directory did not exist on NODE02.
+- Coordinator was killed by supervisor after ~0.4s; pair never READY and no request was sent.
+- Fix is controller-only: create RAW directory on both nodes before systemd-run. Automatic K2 rollback epoch 1789720141923773729 is in progress; no further ON until READY.
+
 ## NEXT
-1. K2 rollback epoch 1789719735837225261 is READY; whole-pair K2 OFF through controller, then DS4 USABLE ON exactly once with fixed launcher and poll readiness.
+1. Wait for K2 rollback epoch 1789720141923773729 READY; no lifecycle starts meanwhile.
+2. Publish controller directory-preparation fix, then perform exactly one new K2 OFF → DS4 USABLE ON.
 3. Run code2k-v2, docs2k-v2, C-off in frozen order.
 4. If code/docs PASS: diagnostic P1/P2/P3, docs confirmation, then 4K→8K→16K dependent characterization.
 5. If chat/document candidate remains qualified/useful: protected gateway candidate service gates, then conditional soak.

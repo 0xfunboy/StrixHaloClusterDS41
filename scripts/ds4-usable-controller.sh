@@ -25,6 +25,8 @@ on(){
  if [[ "$kstate" == READY ]]; then DS41_ROOT="$REL" "$REL/runtime/ds41/serve-controller.sh" off >"$RAW/k2-off-before-usable.json"
  elif [[ "$kstate" != OFF ]]; then echo "K2 state $kstate not startable" >&2; exit 6
  fi
+ mkdir -p "$RAW"
+ "${PEER[@]}" mkdir -p "$RAW"
  systemctl --user reset-failed ds4-usable-coordinator.service 2>/dev/null || true
  systemd-run --user --unit=ds4-usable-coordinator --collect --property=KillMode=control-group --property=Restart=no --property=TimeoutStopSec=30 --property="StandardOutput=append:$RAW/coordinator.log" --property="StandardError=append:$RAW/coordinator.log" "$ROOT/scripts/run-ds4-usable-node.sh" coordinator
  "${PEER[@]}" "systemctl --user reset-failed ds4-usable-worker.service 2>/dev/null || true; systemd-run --user --unit=ds4-usable-worker --collect --property=KillMode=control-group --property=Restart=no --property=TimeoutStopSec=30 --property='StandardOutput=append:$RAW/worker.log' --property='StandardError=append:$RAW/worker.log' '$ROOT/scripts/run-ds4-usable-node.sh' worker"

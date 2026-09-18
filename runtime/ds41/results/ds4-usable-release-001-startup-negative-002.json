@@ -1,0 +1,15 @@
+{
+  "schema": "ds4-usable-release-001-startup-negative-v2",
+  "status": "SETUP_FAIL_WORKER_STDOUT_BEFORE_EXEC",
+  "evidence": {
+    "node02_journal": "Failed to set up standard output: No such file or directory; status=209/STDOUT",
+    "missing_path": "/home/funboy/StrixHaloClusterDS41/reports/DS41-Q2-001/ds4-usable-release-001",
+    "coordinator_lifetime_seconds_approx": 0.392
+  },
+  "worker_exec_reached": false,
+  "ds4_pair_ready": false,
+  "request_sent": false,
+  "cause": "controller did not create the NODE02 raw/log directory before systemd-run configured StandardOutput=append",
+  "fix": "create RAW directory on NODE01 and NODE02 before starting either DS4 unit",
+  "automatic_rollback": "K2 epoch1789720141923773729 STARTING at record time"
+}

@@ -26,6 +26,12 @@
 - Disk gate PASS recorded: NODE02 post-download user margin ~353.0 GiB; NODE01 post-mirror user margin ~32.3 GiB (~125.4 GiB free incl. reserved). Single payload only; no historical weights deleted.
 - USB4 TCP link: NODE01 `10.55.0.1`, NODE02 `10.55.0.2`.
 
+## Acquisition reconcile (2026-09-18)
+- NODE02 Q2 Internet acquisition is already COMPLETE and full SHA verified: 365713686528 B / 1ce6a8f8....
+- Addendum pin d12db970... and acquired pin dd8a266f... resolve to the same HF file oid/LFS oid/size; no re-download.
+- NODE01 mirror is BLOCKED_MARGIN: 372.8501 GiB available before mirror, 32.2527 GiB projected after, deficit 17.7473 GiB versus required 50 GiB. No alternate large filesystem.
+- No deletion/mirror performed; K2 remains READY/idle. Continue only model-free recovery preparation until space reclamation is authorized.
+
 ## NEXT
 - Start exactly one Internet acquisition on NODE02 with pinned HF revision; persistent registry `NOT_SENT→IN_FLIGHT→COMPLETE/FAILED` and full SHA verification.
 - Only after COMPLETE: resumable USB4 mirror to NODE01, verify size/SHA there, then packaging/lifecycle preregistration before stopping K2.

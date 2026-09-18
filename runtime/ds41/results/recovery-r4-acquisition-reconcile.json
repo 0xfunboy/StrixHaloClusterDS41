@@ -1,0 +1,42 @@
+{
+  "schema": "ds41-recovery-r4-acquisition-reconcile-v1",
+  "status": "NODE02_VERIFIED_NODE01_MIRROR_BLOCKED_MARGIN",
+  "artifact": {
+    "repo": "antirez/deepseek-v4.1-flash-gguf",
+    "file": "DeepSeek-V4.1-Flash-Q2.gguf",
+    "addendum_revision": "d12db97071f9631f428ef4c3454d2587c0046089",
+    "acquired_revision": "dd8a266f7145edc19e2334b46e19b6821f221dc7",
+    "size": 365713686528,
+    "sha256": "1ce6a8f8806205c13330d7ca287bd198331dc5ca35ccc5d8a9a92a188a6f6f42",
+    "revision_equivalence": {
+      "proved": true,
+      "hf_tree_oid_both": "321988d029cd2eff1145d07c452289708af9c13f",
+      "hf_lfs_oid_both": "1ce6a8f8806205c13330d7ca287bd198331dc5ca35ccc5d8a9a92a188a6f6f42",
+      "hf_size_both": 365713686528
+    }
+  },
+  "node02": {
+    "path": "/home/funboy/models/ds41/ds4-v41-q2/DeepSeek-V4.1-Flash-Q2.gguf",
+    "state": "VERIFIED",
+    "download_registry": "COMPLETE",
+    "verified_size": 365713686528,
+    "verified_sha256": "1ce6a8f8806205c13330d7ca287bd198331dc5ca35ccc5d8a9a92a188a6f6f42",
+    "available_gib_after_download": 352.7753
+  },
+  "node01": {
+    "destination": "/home/funboy/models/ds41/ds4-v41-q2/DeepSeek-V4.1-Flash-Q2.gguf",
+    "state": "BLOCKED_MARGIN",
+    "available_gib_before_mirror": 372.8501,
+    "projected_available_gib_after_mirror": 32.2527,
+    "required_margin_gib": 50,
+    "deficit_gib": 17.7473,
+    "alternate_large_filesystem": false
+  },
+  "serving": {
+    "release": "k2-prefill-5bdfed6",
+    "epoch": "1789651304744356945",
+    "state": "READY",
+    "mutated": false
+  },
+  "decision": "Do not mirror and do not delete automatically. Continue model-free recovery preparation. Owner authorization is required for any space-reclamation mutation."
+}

@@ -29,3 +29,11 @@ Commit/push L0. Prepare isolated native release on both nodes and run all model-
 
 ## NEXT
 One owner transition: DS4 OFF -> native ON exactly once. Verify unit environment and READY, then execute frozen max6 L1 quality runner.
+
+## L1 READY before requests
+- Native candidate epoch `1789741568937110518` READY: rank0/rank1/paired HTTP200.
+- Live unit env proves release root `native-ds4low-k2-transfer001`, release ID `4d06da9...`, MMQ=1, canonical=1, Engram workers4/min_rows256, K2=2, M4.
+- DS4 is OFF due owner transition; terminal qualification remains fallback. Requests sent=0 at this receipt.
+
+## NEXT
+Run frozen max6 L1 runner exactly once. Do not restart/replay an IN_FLIGHT case. L1 PASS -> L3; L1 FAIL -> L2.

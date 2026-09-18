@@ -1,0 +1,16 @@
+{
+  "schema":"ds41-transfer-ds4-native-001-l1-ready-v1",
+  "status":"READY_BEFORE_L1_REQUESTS",
+  "release":"native-ds4low-k2-transfer001",
+  "release_id":"4d06da930451897dcf037deb8be8990412c5c807",
+  "epoch":"1789741568937110518",
+  "rank0_invocation":"4a8767b9bc014c778a2d1544a7f5bb35",
+  "rank1_invocation":"84248a3560b041138e00dffe008b9689",
+  "rank0_http":200,
+  "rank1_http":200,
+  "paired_http":200,
+  "live_env":{"mmq_prefill":1,"canonical_prefill":1,"engram_workers":4,"engram_parallel_min_rows":256,"dspark_k":2,"block_m":4,"ced":false},
+  "profile":"ds4-low-v1",
+  "ds4_reference_state":"OFF after owner transition; qualification/fallback preserved",
+  "requests_sent":0
+}

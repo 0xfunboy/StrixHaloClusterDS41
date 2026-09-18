@@ -1,46 +1,190 @@
 # TRANSFER DS4 → NATIVE 001 — handoff
 
-## Phase
-L0 COMPLETE / L1 PREPARED, before native model load.
+updated_at: 2026-09-18T19:17:33+02:00
+phase: L0 COMPLETE / L1 FAIL / L2a PREPARED CPU GATE PASS
+next_action: freeze/commit L2 software, build isolated Antirez-M1 release on both nodes, then lifecycle switch DS4 -> L2 M1 only after release preflight
+repo_worktree: /home/funboy/worktrees/ds41-transfer-ds4-native-001
+repo_branch: exp/ds41-transfer-ds4-native-001
+repo_head_before_l2_commit: 11c802775988d9a099afd62526bd057e935d3250
 
-## Reference/fallback
-DS4 DOCUMENT PROFILE 002 terminal PASS: 24/24 soak, 8185.734s, finalizer QUALIFIED_LEFT_READY. DS4 is currently the qualified resident reference; K2 old rollback is not the automatic fallback.
+## Live resident runtime at this checkpoint
 
-## L0 result
-- isolated repo worktree: `/home/funboy/worktrees/ds41-transfer-ds4-native-001`, branch `exp/ds41-transfer-ds4-native-001`;
-- candidate vendor starts from exact existing 25-file MMQ/Engram/K2 overlay;
-- opt-in `ds4-low-v1` modifies only V4.1 tokenizer/encoding;
-- actual DeepseekV4Renderer full-ID equality vs DS4: 7/7 PASS;
-- historical native profiles unchanged: 5/5 PASS;
-- fail-closed invalid combinations: 6/6 PASS;
-- target/DSpark single canonical prompt source contract PASS;
-- patch fresh-apply: 27/27 byte-identical.
+- DS4 owner: `DS4_DOCUMENT_PROFILE_002_20260918`
+- DS4 state: READY, coordinator active, worker active, API HTTP200
+- DS4 backend/model: DS4 / DeepSeek-V4.1-Flash-Q2
+- DS4 target-only: true; DSpark: false
+- Native DS41: OFF, owner NONE/OFF, rank0/rank1 OFF, paired backend OFF
+- Old K2: OFF
+- No TRANSFER model-bearing systemd unit is active.
+- Do not perturb DS4 while L2 release/software preparation is incomplete.
 
-## L1 frozen candidate
-DenseFix + Engram2, TP2/EP2, MMQ prefill ON, Engram workers4/min_rows256, canonical-prefill ON, K2=2, CED OFF, profile ds4-low-v1, cap2048, temp0/seed1, prefix cache OFF. Max6 document requests.
+## Qualified fallback
 
-## NEXT
-Commit/push L0. Prepare isolated native release on both nodes and run all model-free release/path/ABI checks. Then stop DS4 through its owner controller and execute one L1 native load + max6 runner. L1 PASS → L3; L1 FAIL → L2.
+DS4 DOCUMENT PROFILE 002 is terminal PASS:
+- document panel 6/6 PASS
+- soak 24/24 PASS
+- real soak elapsed 8185.734 s
+- finalizer QUALIFIED_LEFT_READY
+- qualified document scope: document-low / DS4_THINK_LOW, max observed qualified input 2039 tokens
+- controller: /home/funboy/StrixHaloClusterDS41/scripts/ds4-document-controller.sh
+- Q2 path on both nodes:
+  /home/funboy/models/ds41/ds4-v41-q2/DeepSeek-V4.1-Flash-Q2.gguf
+- verified size: 365713686528
+- frozen SHA256 receipt:
+  1ce6a8f8806205c13330d7ca287bd198331dc5ca35ccc5d8a9a92a188a6f6f42
+- no repeat DS4 soak; no automatic restore of historical K2
 
-## L1 pre-load PASS
-- Isolated release `native-ds4low-k2-transfer001` materialized on both nodes from accelerated base release + only the two candidate tokenizer files.
-- artifact verify-fast rank0/rank1 PASS, no full rehash; MMQ ABI/hash PASS; Engram seals PASS; release tokenizer gates PASS; pair service active, native ranks OFF; DS4 qualified fallback remains READY.
-- Candidate controller explicitly enables MMQ, canonical-prefill, Engram4/256 and K2=2; CED off.
+## L0 result — COMPLETE
 
-## NEXT
-One owner transition: DS4 OFF -> native ON exactly once. Verify unit environment and READY, then execute frozen max6 L1 quality runner.
+Commit: 4d06da930451897dcf037deb8be8990412c5c807
 
-## L1 READY before requests
-- Native candidate epoch `1789741568937110518` READY: rank0/rank1/paired HTTP200.
-- Live unit env proves release root `native-ds4low-k2-transfer001`, release ID `4d06da9...`, MMQ=1, canonical=1, Engram workers4/min_rows256, K2=2, M4.
-- DS4 is OFF due owner transition; terminal qualification remains fallback. Requests sent=0 at this receipt.
+`ds4-low-v1` is opt-in and preserves thinking ON while suppressing only the
+numeric renderer-generated Reasoning Effort prefix used by the pinned vLLM LOW.
 
-## NEXT
-Run frozen max6 L1 runner exactly once. Do not restart/replay an IN_FLIGHT case. L1 PASS -> L3; L1 FAIL -> L2.
+Verified:
+- actual DeepseekV4Renderer full token-ID parity with DS4: 7/7 PASS
+- historical NONE/LOW/HIGH/MAX behavior unchanged: 5/5 PASS
+- contradictory/invalid profile combinations fail closed: 6/6 PASS
+- target and DSpark consume one canonical serialization: PASS
+- fresh patch generation: 27/27 byte-identical
+- no count-minus-6 workaround
 
-## L1 terminal FAIL
-- Exactly2/6 requests used; holdouts/confirms not run.
-- code2k: INCOMPLETE_NO_FINAL, cap2048 all reasoning, prefill21.547s/75.60tok/s, TTFT21.566s, decode16.14tok/s, wall126.99s, K2 acceptance86.72% (1299/1498).
-- docs2k: INCOMPLETE_NO_FINAL, cap2048 all reasoning, prefill17.901s/72.96tok/s, TTFT17.917s, decode16.81tok/s, wall121.86s, K2 acceptance86.60% (1299/1500).
-- L0 input equality remains PASS; speculative path is active/high acceptance. Profile transfer alone does not make DenseFix/Engram2 equivalent to DS4.
-- Decision: L2 Antirez calibrated Q2/native Engram, target-only first. Restore qualified DS4 during L2 preparation.
+## L1 result — TERMINAL FAIL
+
+Terminal commit: 11c802775988d9a099afd62526bd057e935d3250
+Candidate:
+- existing DenseFix target + Engram2
+- MMQ prefill ON
+- canonical-prefill ON
+- DSpark K2 real, three-stage path retained
+- `ds4-low-v1`, thinking ON, cap total 2048, temp0, seed1
+- prefix cache OFF
+
+Exactly 2/6 main requests were used:
+1. code2k-v2: INCOMPLETE_NO_FINAL
+   - HTTP200
+   - prompt 1629 tokens
+   - completion 2048/2048 reasoning tokens
+   - final chars 0
+   - finish_reason=length
+   - prefill 21.547 s / 75.60 tok/s
+   - wall 126.99 s
+   - K2 draft acceptance 86.72% (1299/1498)
+2. docs2k-v2: INCOMPLETE_NO_FINAL
+   - HTTP200
+   - prompt 1306 tokens
+   - completion 2048/2048 reasoning tokens
+   - final chars 0
+   - finish_reason=length
+   - prefill 17.901 s / 72.96 tok/s
+   - wall 121.86 s
+   - K2 draft acceptance 86.60% (1299/1500)
+
+Holdouts and confirms were not sent. L1 is not to be replayed.
+Decision per mandate: L1 FAIL -> L2 Antirez Q2 + native Engram, target M1 first.
+
+## L2 recovered/prepared evidence
+
+Recovered from the prior chat:
+- `runtime/ds41/transfer-ds4-native-001/l2/antirez-header-inventory.json`
+- Antirez GGUF tensor_count: 1046
+- no model request or L2 model load was already in flight
+
+Current CPU-only L2 gate on NODE01:
+- result: PASS
+- raw:
+  `runtime/ds41/transfer-ds4-native-001/l2/cpu-gate-node01.raw`
+- normalized result:
+  `runtime/ds41/transfer-ds4-native-001/l2/cpu-gate-node01.json`
+- stderr:
+  `runtime/ds41/transfer-ds4-native-001/l2/cpu-gate-node01.stderr`
+
+Verified contracts:
+- target mapping: 1038 ordinary target tensors + 8 native Engram tensors = 1046/1046 accounted
+- Antirez llama.cpp `.weight/.bias` normalization is sufficient for target names
+- no unknown target tensor is silently skipped
+- native Engram encoding: e4m3_e8m0_32_row264
+- Engram layers: 1, 14
+- Engram rows: 384006168, 384016682
+- token map exact parity: 129280 entries
+- compressed vocab exact: 99092
+- compressed pad exact: 2
+- primes exact
+- hash multipliers exact
+- row264 decoder bit-exact with independent scalar DS4 formula on real rows
+- non-uniform E8M0 scale bytes exercised on both Engram layers
+
+Antirez native Engram tensor contracts:
+- q norm: F32, data shape (4, 5120)
+- k norm: F32, data shape (4, 5120)
+- WKV: F16, data shape (25600, 6144)
+- table: I8 row264, mmap-backed; no whole-table expansion
+
+MMQ compatibility:
+- Antirez expert gate/up tensor type is IQ2_XXS (GGML type 16)
+- Antirez expert down tensor type is Q2_K (GGML type 10)
+- existing DS4 MMQ admission contract explicitly requires weight_type=16 and weight_type2=10
+- therefore existing MMQ path is format-compatible for admitted pure target prefill; fallback remains declared elsewhere
+
+## L2 software added, pending freeze/commit
+
+- `runtime/ds41/native_antirez_engram.py`
+  - bounded LRU over mmap-backed native GGUF rows
+  - exact DS4 E4M3/E8M0 decode + BF16 RNE
+  - native q/k/WKV source from same Antirez GGUF
+  - no Engram2 mixing
+- `runtime/ds41/antirez_artifact_identity.py`
+  - read-only fast identity gate using the already-frozen both-node SHA receipt + live size/header contract
+  - no full rehash
+- `runtime/ds41/transfer-ds4-native-001/l2/deepseek_v41_antirez_adapter.py`
+  - fail-closed 1046-tensor accounting
+- `scripts/patch-ds41-transfer-native-l2.py`
+  - isolated release overlay only
+- `scripts/test-ds41-transfer-native-l2-cpu.py`
+- `scripts/transfer-ds4-native-001-l2-controller.sh`
+  - exact release/attempt ownership checks
+  - whole-pair ON/OFF
+  - fallback target is qualified DS4, not old K2
+- `scripts/run-ds41-transfer-native-l2-m1.py`
+  - max six requests, same frozen document order/gates
+  - persistent registry and replay guard
+- `scripts/finalize-ds41-transfer-native-l2-m1.sh`
+  - PASS leaves owned M1 READY
+  - FAIL returns whole pair to qualified DS4 and waits for READY
+
+## L2 release contract to build next
+
+Planned isolated release:
+`/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001`
+
+Base release:
+`native-ds4low-k2-transfer001`
+
+L2 M1 release properties:
+- target weights: verified Antirez calibrated Q2
+- config/tokenizer source: existing local V4.1 config/tokenizer used by L0 parity
+- Engram: native GGUF, not Engram2
+- DSpark: OFF for M1
+- MMQ prefill: ON only under existing type/shape admission contract
+- canonical-prefill: ON
+- TP2 / EP2 / BLOCK_M4 retained
+- prompt profile: ds4-low-v1
+- total output cap: 2048
+- temperature: 0
+- seed: 1
+- no download, no re-quantization, no DenseFix application to Antirez Q2
+- RuntimeMax: infinity for the session
+- model API max context for this phase: 16384
+
+## Active job
+
+None.
+
+No L2 request has been dispatched and no DS4 lifecycle transition has occurred
+since the CPU gate. If a later chat sees DS4 READY + native OFF + no L2 runner,
+continue from release freeze/build/preflight; do not rerun L0/L1 or DS4 soak.
+
+## Persistence
+
+PLAN updated for L2 CPU gate: pending in this checkpoint
+Git commit/push for L2 software: pending

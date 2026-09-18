@@ -1,0 +1,11 @@
+{
+  "schema":"ds41-recovery-r4-ds4-tcp-timeout-preregister-v1",
+  "state":"FROZEN_BEFORE_RESTART",
+  "observed_failure":{"case":"holdout-early-batch","layer":35,"kind":3,"bytes":41943040,"default_gate_timeout_ms":750,"worker":"terminal","http_followups":"500 before semantic output"},
+  "source_support":"ds4_tp.c reads DS4_TP_GATE_TIMEOUT_MS, accepts 1..60000ms",
+  "candidate":{"DS4_TP_GATE_TIMEOUT_MS":5000},
+  "scope":"transport fail-fast timeout only; no model math, precision, scheduling, prompt or expected changes",
+  "resume_cases":["holdout-early-batch","holdout-odd-sections","holdout-counterfactual-a","holdout-counterfactual-b","json_none","fresh_marker","multiturn_orbit","coding_c_frame","coding_go_session"],
+  "do_not_repeat":["code2k1588","tail1546","discriminator1571","docs2k"],
+  "performance_before_quality":0
+}

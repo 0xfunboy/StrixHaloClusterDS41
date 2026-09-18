@@ -1,0 +1,2 @@
+# R4 DS4 TCP timeout recovery preregister
+The first holdout died during layer35 TP transfer of 40 MiB with the port's default 750 ms gate timeout; worker exited and subsequent HTTP requests returned 500 before semantic output. The source already exposes `DS4_TP_GATE_TIMEOUT_MS`. Restart exactly once with 5000 ms on both ranks, preserving all model/scheduling/prompt settings. Resume only cases that produced no semantic output. Never overwrite or reinterpret the original transport failures.

@@ -1,0 +1,120 @@
+{
+  "schema": "ds4-usable-release-001-quality-result-v1",
+  "status": "DOCUMENT_QUALITY_FAIL_C_THINKING_OFF_PASS",
+  "profile": {
+    "source": "7d0454b4e32ef1e90235f2b001d6643b5934438c",
+    "q2_sha_receipt": "1ce6a8f8806205c13330d7ca287bd198331dc5ca35ccc5d8a9a92a188a6f6f42",
+    "ctx": 16384,
+    "tp": "50/50 TCP/USB4",
+    "gate_timeout_ms": 5000,
+    "target_only": true,
+    "dspark": false
+  },
+  "preserved_history": {
+    "code2k_old": "FAIL",
+    "docs2k_old": "FAIL",
+    "c_low_old": "INCOMPLETE_NO_FINAL",
+    "r4_retrieval": "tail+discriminator+holdouts PASS"
+  },
+  "code2k_v2": {
+    "status": "FAIL_SEMANTIC",
+    "expected": {
+      "result": 52,
+      "first_file": "__init__.py",
+      "middle_file": "_ds41_artifact.py",
+      "last_file": "envelope_test.go"
+    },
+    "actual": {
+      "result": 52,
+      "first_file": "__init__.py",
+      "middle_file": "prompt.go",
+      "last_file": "test-ds41-prefill-metrics.py"
+    },
+    "prompt_tokens": 1629,
+    "cached_tokens": 0,
+    "prefill_s": 18.339,
+    "prefill_tps": 88.83,
+    "first_final_s": 18.59875414898852,
+    "decode_tps": 8.26,
+    "wall_s": 23.321661943977233,
+    "completion_tokens": 40,
+    "finish_reason": "stop"
+  },
+  "docs2k_v2": {
+    "status": "FAIL_SEMANTIC",
+    "expected": {
+      "result": 52,
+      "first_file": "dspark-k3-gfx1151.md",
+      "middle_file": "pull_request_template.md",
+      "last_file": "dspark-k1-gfx1151.md"
+    },
+    "actual": {
+      "result": 52,
+      "first_file": "dspark-k3-gfx1151.md",
+      "middle_file": "README.md",
+      "last_file": "dspark-k1-gfx1151.md"
+    },
+    "prompt_tokens": 1306,
+    "cached_tokens": 0,
+    "prefill_s": 28.086,
+    "prefill_tps": 46.5,
+    "first_final_s": 28.81320113700349,
+    "decode_tps": 15.18,
+    "wall_s": 31.756437194999307,
+    "completion_tokens": 46,
+    "finish_reason": "stop"
+  },
+  "coding_c_thinking_off": {
+    "status": "PASS",
+    "attempts": 1,
+    "repairs_used": 0,
+    "thinking": false,
+    "reasoning_effort": "none",
+    "reasoning_chars": 0,
+    "prompt_tokens": 597,
+    "cached_tokens": 0,
+    "prefill_s": 11.843,
+    "prefill_tps": 50.41,
+    "first_final_s": 11.960903283965308,
+    "decode_tps": 14.83,
+    "wall_s": 31.573123418958858,
+    "completion_tokens": 292,
+    "finish_reason": "stop",
+    "validation": {
+      "build_rc": 0,
+      "test_rc": 0,
+      "status": "PASS"
+    }
+  },
+  "token_count_audit": {
+    "preload_cli_estimates": {
+      "code2k": 1635,
+      "docs2k": 1312,
+      "c": 603
+    },
+    "live_server_usage": {
+      "code2k": 1629,
+      "docs2k": 1306,
+      "c": 597
+    },
+    "status": "PRELOAD_CLI_ESTIMATE_PLUS6_VS_LIVE_SERVER",
+    "implication": "do not use the previously CLI-matched tokenizer sidecar as product-equivalence evidence without correcting server-template semantics"
+  },
+  "gates": {
+    "document_quality_pass": false,
+    "coding_c_thinking_off_pass": true,
+    "performance_admitted": false,
+    "performance_reason": "preregister requires code2k-v2 + docs2k-v2 PASS; both failed",
+    "context_progression_admitted": false,
+    "product_gateway_admitted": false,
+    "soak_admitted": false
+  },
+  "verdicts": {
+    "quality_qualified_scope": false,
+    "coding_c_thinking_off_qualified": true,
+    "performance_target_met": false,
+    "ds4_usable_release_promoted": false,
+    "delivery_complete": false
+  },
+  "next": "stop DS4 and restore K2 5bdfed6 READY; then terminal receipt"
+}

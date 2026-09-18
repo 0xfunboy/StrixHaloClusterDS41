@@ -30,13 +30,18 @@
 - Coordinator was killed by supervisor after ~0.4s; pair never READY and no request was sent.
 - Fix is controller-only: create RAW directory on both nodes before systemd-run. Automatic K2 rollback PASS: epoch 1789720141923773729 READY with rank0/rank1/paired HTTP200.
 
-## NEXT
-1. K2 rollback epoch 1789720141923773729 is READY; perform one new whole-pair K2 OFF → DS4 USABLE ON with both setup fixes.
-3. Run code2k-v2, docs2k-v2, C-off in frozen order.
-4. If code/docs PASS: diagnostic P1/P2/P3, docs confirmation, then 4K→8K→16K dependent characterization.
-5. If chat/document candidate remains qualified/useful: protected gateway candidate service gates, then conditional soak.
-6. Leave DS4 only on full chosen-perimeter delivery; otherwise rollback K2.
-
 ## Startup READY
 - Third startup, with both setup fixes, is READY: coordinator+worker active, API200, 50/50 TCP/USB4, gate5000, ctx16384, target-only/noDSpark, Engram disk-only, planned memory82.67GiB/rank.
-- K2 is OFF. No USABLE quality request had been sent at this checkpoint.
+- K2 is OFF at startup-quality checkpoint.
+
+## Quality terminal
+- code2k lower-middle v2 FAIL: result52 and first correct, but middle=prompt.go and last=test-ds41-prefill-metrics.py; frozen expected unchanged.
+- docs2k lower-middle v2 FAIL: result52 + first/last correct, middle=README.md instead of lower-center pull_request_template.md.
+- C thinking-off PASS first attempt, zero repair: thinking=false + effort=none, 0 reasoning chars, natural stop; sanitizer/private tests PASS.
+- Live prompt counts1629/1306/597 are exactly6 below preload CLI estimates1635/1312/603; preserve this audit mismatch and do not use CLI-matched tokenizer sidecar as product equivalence evidence.
+- Document gate FAIL: performance P1/P2/P3, context4K→16K, product gateway and soak NOT_ADMITTED. C-off qualification remains specific and does not rewrite old C-low INCOMPLETE.
+
+## NEXT
+1. Stop DS4 whole pair and restore K2 5bdfed6 via controller.
+2. Require K2 READY rank0/rank1/paired HTTP200 and final none-mode 323 smoke.
+3. Persist terminal delivery: quality_qualified_scope=false, coding_c_thinking_off_qualified=true, performance_target_met=false, DS4_USABLE_RELEASE_001 NO_PROMOTION.

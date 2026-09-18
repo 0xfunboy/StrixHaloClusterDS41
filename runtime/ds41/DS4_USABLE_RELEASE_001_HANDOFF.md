@@ -18,6 +18,7 @@
 - Request collector simulated SSE/timeout/cancel PASS.
 - CPU tokenizer sidecar reproduces pinned DS4 token IDs exactly on all six frozen v2 prompts.
 - C fixture buggy FAIL / golden PASS.
+- Frozen quality/performance runners are published before the next load. Perf independence gate: cached_tokens<=32; larger hits remain recorded and do not enter the independent median.
 
 ## Startup negative 001
 - First USABLE ON attempt failed before any DS4 model load/request: generated launcher retained literal backslashes before five shell parameter expansions; shell reported `worker}: command not found` at line3.

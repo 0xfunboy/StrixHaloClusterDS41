@@ -115,7 +115,7 @@
       "max_tokens": 128,
       "ignore_eos": false
     },
-    "independence_gate": "record cached_tokens/cache_write_tokens; any large prefix hit remains visible and is not treated as independent",
+    "independence_gate": "cached_tokens <=32 and prompt_tokens present; any larger prefix hit remains visible and is excluded from independent-sample median without replacement/cherry-pick",
     "metrics": [
       "server prefill seconds/tokens_per_second",
       "client headers/first reasoning/first final/wall",

@@ -1,0 +1,192 @@
+{
+  "schema": "ds41-recovery-r4-ds4-quality-result-v1",
+  "status": "QUALITY_NOT_FULLY_QUALIFIED_BUT_RETRIEVAL_RECOVERED",
+  "profile": {
+    "engine": "kyuz0/ds4",
+    "source": "7d0454b4e32ef1e90235f2b001d6643b5934438c",
+    "model": "antirez DeepSeek-V4.1-Flash-Q2.gguf",
+    "sha256": "1ce6a8f8806205c13330d7ca287bd198331dc5ca35ccc5d8a9a92a188a6f6f42",
+    "tp": "2 hosts 50/50 experts TCP USB4",
+    "ctx": 16384,
+    "dspark": false,
+    "gate_timeout_ms": 5000
+  },
+  "transport": {
+    "default_750ms": "FAIL at first holdout layer35 kind3 41943040B; worker terminated",
+    "recovery_5000ms": "PASS remaining frozen requests without further TP failure",
+    "classification": "transport-only recovery; source-supported env, no model math change"
+  },
+  "development": {
+    "code2k1588": {
+      "status": "FROZEN_EXPECTED_FAIL_EVEN_MIDDLE_AMBIGUITY",
+      "semantic_pass": false,
+      "actual_detail": "expected={'result': 52, 'first_file': '__init__.py', 'middle_file': '_ds41_artifact.py', 'last_file': 'envelope_test.go'} actual={'result': 52, 'first_file': '__init__.py', 'middle_file': 'prompt.go', 'last_file': 'envelope_test.go'}",
+      "wall_s": 24.689899373042863,
+      "substance": "result52 + first/last correct; only frozen middle differs"
+    },
+    "tail1546": {
+      "status": "PASS",
+      "detail": "expected={'end': 5} actual={'end': 5}",
+      "wall_s": 17.61337623995496
+    },
+    "discriminator1571": {
+      "status": "PASS",
+      "detail": "expected={'begin': 17, 'middle': 23, 'end': 5, 'files': ['__init__.py', 'api_server.py', '_ds41_artifact.py', 'prompt.go', 'test-ds41-prefill-metrics.py', 'envelope_test.go']} actual={'begin': 17, 'middle': 23, 'end': 5, 'files': ['__init__.py', 'api_server.py', '_ds41_artifact.py', 'prompt.go', 'test-ds41-prefill-metrics.py', 'envelope_test.go']}",
+      "wall_s": 21.110855256032664
+    },
+    "docs2k": {
+      "status": "FROZEN_EXPECTED_FAIL_EVEN_MIDDLE_AMBIGUITY",
+      "semantic_pass": false,
+      "actual_detail": "expected={'result': 52, 'first_file': 'dspark-k3-gfx1151.md', 'middle_file': 'pull_request_template.md', 'last_file': 'dspark-k1-gfx1151.md'} actual={'result': 52, 'first_file': 'dspark-k3-gfx1151.md', 'middle_file': 'README.md', 'last_file': 'dspark-k1-gfx1151.md'}",
+      "wall_s": 18.475023336010054,
+      "substance": "result52 + first/last correct; only frozen middle differs"
+    }
+  },
+  "holdouts": [
+    {
+      "id": "holdout-early-batch",
+      "state": "COMPLETE",
+      "semantic_pass": true,
+      "wall_s": 13.139671804034151,
+      "detail": "expected='AURORA-731942' actual='AURORA-731942'"
+    },
+    {
+      "id": "holdout-odd-sections",
+      "state": "COMPLETE",
+      "semantic_pass": true,
+      "wall_s": 12.425362700945698,
+      "detail": "expected='lattice' actual='lattice'"
+    },
+    {
+      "id": "holdout-counterfactual-a",
+      "state": "COMPLETE",
+      "semantic_pass": true,
+      "wall_s": 43.444112752971705,
+      "detail": "expected='42817' actual='42817'"
+    },
+    {
+      "id": "holdout-counterfactual-b",
+      "state": "COMPLETE",
+      "semantic_pass": true,
+      "wall_s": 13.49799472297309,
+      "detail": "expected='51903' actual='51903'"
+    }
+  ],
+  "functions": [
+    {
+      "id": "json_none",
+      "state": "COMPLETE",
+      "semantic_pass": true,
+      "wall_s": 1.9372711229952984,
+      "detail": "expected={'ok': True, 'n': 7} actual={'ok': True, 'n': 7}"
+    },
+    {
+      "id": "fresh_marker",
+      "state": "COMPLETE",
+      "semantic_pass": true,
+      "wall_s": 0.9289888110361062,
+      "detail": "expected='STABLE-01' actual='STABLE-01'"
+    },
+    {
+      "id": "multiturn_orbit",
+      "state": "COMPLETE",
+      "semantic_pass": true,
+      "wall_s": 1.9970785859622993,
+      "detail": "expected='ORBIT-17' actual='ORBIT-17'"
+    }
+  ],
+  "coding": [
+    {
+      "id": "coding_c_frame",
+      "status": "INCOMPLETE_NO_FINAL",
+      "raw_state": {
+        "id": "coding_c_frame",
+        "state": "FAILED",
+        "started_unix": 1789711578.9377651,
+        "max_tokens": 8192,
+        "reasoning_effort": "low",
+        "http_status": 200,
+        "wall_s": 551.7647933309781,
+        "finish_reason": "length",
+        "usage": {
+          "prompt_tokens": 597,
+          "completion_tokens": 8192,
+          "total_tokens": 8789,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "cache_write_tokens": 597
+          }
+        },
+        "content_chars": 0,
+        "reasoning_chars": 30149,
+        "validation_status": "FAIL_ENVELOPE",
+        "finished_unix": 1789712130.706216
+      },
+      "validation": {
+        "status": "FAIL_ENVELOPE",
+        "error": "invalid JSON envelope: Expecting value: line 1 column 1 (char 0)"
+      }
+    },
+    {
+      "id": "coding_go_session",
+      "status": "PASS",
+      "raw_state": {
+        "id": "coding_go_session",
+        "state": "COMPLETE",
+        "started_unix": 1789712130.7069507,
+        "max_tokens": 8192,
+        "reasoning_effort": "low",
+        "http_status": 200,
+        "wall_s": 152.28010121901752,
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 411,
+          "completion_tokens": 2234,
+          "total_tokens": 2645,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "cache_write_tokens": 411
+          }
+        },
+        "content_chars": 834,
+        "reasoning_chars": 7855,
+        "validation_status": "PASS",
+        "finished_unix": 1789712288.9234726
+      },
+      "validation": {
+        "status": "PASS",
+        "path": "session/manager.go",
+        "build_rc": 0,
+        "test_rc": 0,
+        "seconds": 5.921600101981312,
+        "build_output_tail": "ok  \tdaily/sessioncase/session\t1.009s\n",
+        "test_output_tail": "",
+        "replacement_bytes": 715
+      }
+    }
+  ],
+  "strict_decision": {
+    "quality_qualified_scope": false,
+    "reasons": [
+      "frozen code2k/docs2k middle_file validators remain FAIL as written",
+      "coding_c_frame INCOMPLETE_NO_FINAL at 8192 completion tokens"
+    ],
+    "retrieval_failure_recovered": true,
+    "evidence": [
+      "tail1546 PASS end=5",
+      "discriminator1571 exact PASS all facts and six files",
+      "4/4 preregistered independent retrieval holdouts PASS"
+    ],
+    "performance_status": "NOT_RUN_BLOCKED_BY_QUALITY",
+    "performance_target_met": false,
+    "promotion": "NO_PROMOTION",
+    "next_operational_state": "restore k2-prefill-5bdfed6 READY"
+  },
+  "diagnostic_not_benchmark": {
+    "code2k_server_prefill_s": 22.24,
+    "code2k_server_prefill_tps": 71.51,
+    "code2k_decode_tps": 14.3,
+    "note": "observed during quality request; not a qualified performance arm"
+  },
+  "created_unix": 1789712394.6525478
+}

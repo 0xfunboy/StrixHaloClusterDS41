@@ -40,6 +40,14 @@
 - Freed 286.121 GiB per node. DenseFix/Engram/DSpark preserved and K2 remained READY.
 - NODE01 now satisfies the >=50 GiB post-mirror margin; low-priority resumable USB4 mirror job `ds41-r4-q2-mirror.service` is IN_FLIGHT. Suspend it before measured/model-load windows.
 
+## R4 DS4 quality terminal (2026-09-18)
+- DS4 target-only 50/50 TCP recovered the non-ambiguous retrieval defect: tail1546 PASS, discriminator1571 exact PASS, four frozen independent retrieval holdouts 4/4 PASS.
+- Frozen code2k/docs2k remain FAIL only on `middle_file`; both have even FILE-section counts (6/4), so the previously documented median-by-order ambiguity is isolated without changing expected values. Arithmetic result52 and first/last are correct.
+- Function JSON/fresh/multiturn 3/3 PASS. Go coding PASS under frozen `go test -race`; C coding INCOMPLETE_NO_FINAL after 8192 reasoning tokens / zero final content.
+- Initial upstream default TP gate750ms failed at layer35 on a40MiB transfer. Preregistered source-supported `DS4_TP_GATE_TIMEOUT_MS=5000` transport-only recovery completed all remaining cases without further TP failure.
+- Strict quality remains unqualified; no performance benchmark or promotion. Restore K2 READY. Evidence `runtime/ds41/results/recovery-r4-ds4-quality-result.{json,md}` and `recovery-upstream-final.md`.
+
 ## NEXT
+- Recovery terminal: restore and retain `k2-prefill-5bdfed6` READY. DS4 remains an unpromoted alternative with retrieval-recovery evidence; no speed run under this quality result.
 - Start exactly one Internet acquisition on NODE02 with pinned HF revision; persistent registry `NOT_SENT→IN_FLIGHT→COMPLETE/FAILED` and full SHA verification.
 - Only after COMPLETE: resumable USB4 mirror to NODE01, verify size/SHA there, then packaging/lifecycle preregistration before stopping K2.

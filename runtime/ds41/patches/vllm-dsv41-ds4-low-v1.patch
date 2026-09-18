@@ -1,0 +1,121 @@
+diff --git a/vllm/tokenizers/deepseek_v41.py b/vllm/tokenizers/deepseek_v41.py
+index 3a57717..d4aa11f 100644
+--- a/vllm/tokenizers/deepseek_v41.py
++++ b/vllm/tokenizers/deepseek_v41.py
+@@ -17,6 +17,25 @@ from .hf import HfTokenizer, get_cached_tokenizer
+ from .protocol import TokenizerLike
+ 
+ 
++DS41_PROMPT_PROFILE_DS4_LOW_V1 = "ds4-low-v1"
++
++
++def _validate_ds4_low_v1_input(
++    messages: list[ChatCompletionMessageParam],
++    tools: list[dict[str, Any]] | None,
++) -> None:
++    if tools:
++        raise ValueError("ds4-low-v1 is validated for text-only chat without tools")
++    for message in messages:
++        role = message.get("role")
++        if role not in ("system", "developer", "user", "assistant"):
++            raise ValueError(f"ds4-low-v1 does not support role {role!r}")
++        if not isinstance(message.get("content"), str):
++            raise ValueError("ds4-low-v1 is validated for text message content only")
++        if message.get("tool_calls"):
++            raise ValueError("ds4-low-v1 does not support tool calls")
++
++
+ def _normalize_messages(
+     messages: list[ChatCompletionMessageParam],
+ ) -> list[dict[str, Any]]:
+@@ -55,10 +74,18 @@ def get_deepseek_v41_tokenizer(tokenizer: HfTokenizer) -> HfTokenizer:
+             self,
+             messages: list[ChatCompletionMessageParam],
+             tools: list[dict[str, Any]] | None = None,
++            ds41_prompt_profile: str | None = None,
+             **kwargs,
+         ) -> str | list[int]:
+             # The generic renderer's conversation has already flattened text
+             # parts with '\n'. V4.1 encodes the original messages with '\n\n'.
++            if ds41_prompt_profile is not None:
++                if ds41_prompt_profile != DS41_PROMPT_PROFILE_DS4_LOW_V1:
++                    raise ValueError(
++                        "DeepSeek V4.1 ds41_prompt_profile must be "
++                        f"{DS41_PROMPT_PROFILE_DS4_LOW_V1!r}"
++                    )
++                _validate_ds4_low_v1_input(messages, tools)
+             conversation = _normalize_messages(messages)
+             if tools:
+                 system = next((m for m in conversation if m["role"] == "system"), None)
+@@ -85,11 +112,18 @@ def get_deepseek_v41_tokenizer(tokenizer: HfTokenizer) -> HfTokenizer:
+                     "or an integer within [1, 100] in chat_template_kwargs"
+                 )
+ 
++            ds4_low_compat = ds41_prompt_profile == DS41_PROMPT_PROFILE_DS4_LOW_V1
++            if ds4_low_compat and (not thinking or effort != "low"):
++                raise ValueError(
++                    "ds4-low-v1 requires thinking enabled and reasoning_effort='low'"
++                )
++
+             prompt = encode_messages(
+                 conversation,
+                 thinking_mode="thinking" if thinking else "chat",
+                 drop_thinking=kwargs.get("drop_thinking", True),
+                 reasoning_effort=effort,
++                emit_reasoning_effort_prefix=not ds4_low_compat,
+             )
+             if kwargs.get("tokenize", True):
+                 tokenizer_kwargs = {
+diff --git a/vllm/tokenizers/deepseek_v41_encoding.py b/vllm/tokenizers/deepseek_v41_encoding.py
+index 841de38..0d21e50 100644
+--- a/vllm/tokenizers/deepseek_v41_encoding.py
++++ b/vllm/tokenizers/deepseek_v41_encoding.py
+@@ -194,8 +194,11 @@ def render_reasoning_effort(
+     index: int,
+     thinking_mode: str,
+     effort: Union[str, int, None],
++    emit_prefix: bool = True,
+ ) -> str:
+-    """Render the V4.1 numeric reasoning effort prefix (thinking mode, index 0 only)."""
++    """Render the optional V4.1 numeric reasoning-effort prefix."""
++    if not emit_prefix:
++        return ""
+     if effort is None:
+         effort = DEFAULT_REASONING_EFFORT
+     assert (
+@@ -312,6 +315,7 @@ def render_message(
+     thinking_mode: str,
+     drop_thinking: bool = True,
+     reasoning_effort: Union[str, int, None] = None,
++    emit_reasoning_effort_prefix: bool = True,
+ ) -> str:
+     """
+     Render a single message at the given index into its V4.1 encoded string form.
+@@ -339,7 +343,10 @@ def render_message(
+ 
+     # Reasoning effort prefix (thinking mode, index 0 only)
+     reasoning_effort_prompt = render_reasoning_effort(
+-        index, thinking_mode, reasoning_effort
++        index,
++        thinking_mode,
++        reasoning_effort,
++        emit_prefix=emit_reasoning_effort_prefix,
+     )
+     # System token leads the conversation when there is a reasoning effort prompt
+     # or the first message is a system message.
+@@ -537,6 +544,7 @@ def encode_messages(
+     drop_thinking: bool = True,
+     add_default_bos_token: bool = True,
+     reasoning_effort: Union[str, int, None] = None,
++    emit_reasoning_effort_prefix: bool = True,
+ ) -> str:
+     """Encode preprocessed (text-only) messages into the V4.1 prompt format."""
+     context = context if context else []
+@@ -572,6 +580,7 @@ def encode_messages(
+             thinking_mode=thinking_mode,
+             drop_thinking=effective_drop_thinking,
+             reasoning_effort=reasoning_effort,
++            emit_reasoning_effort_prefix=emit_reasoning_effort_prefix,
+         )
+ 
+     return prompt

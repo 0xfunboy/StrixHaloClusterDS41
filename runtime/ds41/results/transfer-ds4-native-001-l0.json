@@ -1,0 +1,162 @@
+{
+  "schema": "ds41-transfer-ds4-native-001-l0-result-v1",
+  "status": "PASS",
+  "base": {
+    "repo_branch": "exp/ds41-transfer-ds4-native-001",
+    "base_checkpoint": "1a25897a5c6f39f4b877db7a73acefb049d1b755",
+    "native_accelerated_source": "9c13117f56fd81d03c8c610a5fb0148ccdc603b9",
+    "vllm_pin": "0bfb653d3b5161660db9ada0d84c2cdd60961de7"
+  },
+  "ds4_reference": {
+    "source": "7d0454b4e32ef1e90235f2b001d6643b5934438c",
+    "document_profile_002": "QUALIFIED 24/24 soak, 8185.734s, left READY",
+    "fallback": "scripts/ds4-document-controller.sh rollback-k2"
+  },
+  "implementation": {
+    "profile": "ds4-low-v1",
+    "interface": "chat_template_kwargs.ds41_prompt_profile",
+    "files": [
+      "vllm/tokenizers/deepseek_v41.py",
+      "vllm/tokenizers/deepseek_v41_encoding.py"
+    ],
+    "behavior": "thinking ON + LOW without synthesized numeric Reasoning Effort prefix; historical profiles unchanged",
+    "patch": "runtime/ds41/patches/vllm-dsv41-ds4-low-v1.patch",
+    "patch_sha256": "a649da97ce77b14167bb0256246deb7413579a085c05c9451f86ce463d508154"
+  },
+  "tests": {
+    "schema": "ds41-transfer-ds4-native-001-l0-test-v2",
+    "status": "PASS",
+    "renderer": "DeepseekV4Renderer",
+    "profile": "ds4-low-v1",
+    "full_id_rows": [
+      {
+        "id": "user-only",
+        "count": 5,
+        "sha256_ids": "3bc0472dcbbc18f8f758e89cea9bdd2257cf07cdbaf1a3fb268a5db9bea165f5",
+        "exact_ds4_ids": true,
+        "exact_ds4_rendered_text": true
+      },
+      {
+        "id": "system-explicit",
+        "count": 8,
+        "sha256_ids": "60b8300e4579a8d64c9b357d5e336bca48ba2fbe4cf3d98d83205e1472e3a155",
+        "exact_ds4_ids": true,
+        "exact_ds4_rendered_text": true
+      },
+      {
+        "id": "multi-turn",
+        "count": 11,
+        "sha256_ids": "bf327fd0e6a80e1321fd594f275a72e9d5bd0708e535410dbf4650a7a678f2f0",
+        "exact_ds4_ids": true,
+        "exact_ds4_rendered_text": true
+      },
+      {
+        "id": "code2k-middle-explicit-v2",
+        "count": 1629,
+        "sha256_ids": "d1834b8ac1bda51a981b8600d07dcb5d6e5abb2da682ed5f1bb1331539ee848c",
+        "exact_ds4_ids": true,
+        "exact_ds4_rendered_text": true
+      },
+      {
+        "id": "docs2k-middle-explicit-v2",
+        "count": 1306,
+        "sha256_ids": "5f16ac8222e02266bd1919db324f93a6a2761246bdb52015e8e1316365c6955e",
+        "exact_ds4_ids": true,
+        "exact_ds4_rendered_text": true
+      },
+      {
+        "id": "document-holdout-a",
+        "count": 1409,
+        "sha256_ids": "7a6836f8675872dacee29bde8f968f51f2c6ca0959a0a2f84c898c6b2018c8b5",
+        "exact_ds4_ids": true,
+        "exact_ds4_rendered_text": true
+      },
+      {
+        "id": "document-holdout-b",
+        "count": 2039,
+        "sha256_ids": "ff8d2ad93b30fb51d02897c960bc19655eaeadc7493eb24774875da810f8649a",
+        "exact_ds4_ids": true,
+        "exact_ds4_rendered_text": true
+      }
+    ],
+    "historical_profiles_unchanged": [
+      {
+        "id": "user-low",
+        "count": 31,
+        "sha256_ids": "8f706b388831f4269d81a615a72cee7ed23d9bb4c65485cd5e67f65a39a6f264",
+        "sha256_rendered": "f95ae04694fe43e93fbbc658352f99270bb1badc2815f15603b6fa8127f103db"
+      },
+      {
+        "id": "user-none",
+        "count": 5,
+        "sha256_ids": "f47e43378418b48103b4c0187b208e8742aba77e163a7e10c9aef07d1692836d",
+        "sha256_rendered": "5ec6ff56a432b916c342465ba509744d13252c6c92ff10b28157b8213b4d4699"
+      },
+      {
+        "id": "user-high",
+        "count": 31,
+        "sha256_ids": "048aa891f3f3eafb5a2a251cb64fefb4d9abe8905da94eb1fd9732094d1d1398",
+        "sha256_rendered": "4a4c217cc112c9e0869350ef19d683f861f284f9f0660d172256360a393a531f"
+      },
+      {
+        "id": "system-low",
+        "count": 33,
+        "sha256_ids": "634dc3694667d4e28cab7438ac74f8a91b0363c8190742dcd15395ab61abbc84",
+        "sha256_rendered": "de5e839fa53c94e43484f6de7ed1164a6c80239c2da4de75315a5e03cf72d09c"
+      },
+      {
+        "id": "multi-low",
+        "count": 37,
+        "sha256_ids": "9446695e5aec25b55cecdb89f3db76f754a1d814e00539bf2191b3eca5963268",
+        "sha256_rendered": "76052ec024b968e3864e9b0c5ce6fcf0e34e453c2fc497fb1b22a0a9ecf1d6cf"
+      }
+    ],
+    "rejects": [
+      "off",
+      "none",
+      "high",
+      "unknown",
+      "content-list",
+      "tools"
+    ],
+    "canonical_prompt_source_contract": {
+      "renderer_forwards_chatparams_directly": true,
+      "scheduled_prefill_ids": true,
+      "single_req_state_ingest": true,
+      "streaming_prompt_passthrough": true,
+      "model_runner_passes_input_batch_to_speculator": true,
+      "dspark_inherits_dflash": true,
+      "dflash_propose_uses_input_batch": true,
+      "dspark_no_chat_template": true,
+      "dspark_no_tokenizer": true,
+      "dflash_no_chat_template": true,
+      "dflash_no_tokenizer": true
+    }
+  },
+  "fresh_apply": {
+    "status": "PASS",
+    "base_overlay_paths": 25,
+    "total_candidate_paths": 27,
+    "mismatches": 0
+  },
+  "api_contract": {
+    "renderer": "DeepseekV4Renderer",
+    "chatparams_forwarding": "PASS",
+    "full_id_cases": 7,
+    "historical_profiles_unchanged": 5,
+    "fail_closed_cases": 6
+  },
+  "target_drafter_contract": {
+    "status": "PASS",
+    "single_canonical_prefill_ids": true,
+    "dspark_second_templating": false
+  },
+  "l1_prepared": {
+    "base_release": "k2-mmq-engram-9c13117",
+    "release_builder": "scripts/prepare-ds41-transfer-native-release.sh",
+    "controller": "scripts/transfer-ds4-native-001-controller.sh",
+    "quality_runner": "scripts/run-ds41-transfer-native-l1.py",
+    "max_requests": 6
+  },
+  "next": "commit L0; build/verify isolated native release on both nodes; stop qualified DS4 via owner controller; run one native L1 load max6"
+}

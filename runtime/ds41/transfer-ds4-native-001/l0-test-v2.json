@@ -1,0 +1,110 @@
+{
+  "schema": "ds41-transfer-ds4-native-001-l0-test-v2",
+  "status": "PASS",
+  "renderer": "DeepseekV4Renderer",
+  "profile": "ds4-low-v1",
+  "full_id_rows": [
+    {
+      "id": "user-only",
+      "count": 5,
+      "sha256_ids": "3bc0472dcbbc18f8f758e89cea9bdd2257cf07cdbaf1a3fb268a5db9bea165f5",
+      "exact_ds4_ids": true,
+      "exact_ds4_rendered_text": true
+    },
+    {
+      "id": "system-explicit",
+      "count": 8,
+      "sha256_ids": "60b8300e4579a8d64c9b357d5e336bca48ba2fbe4cf3d98d83205e1472e3a155",
+      "exact_ds4_ids": true,
+      "exact_ds4_rendered_text": true
+    },
+    {
+      "id": "multi-turn",
+      "count": 11,
+      "sha256_ids": "bf327fd0e6a80e1321fd594f275a72e9d5bd0708e535410dbf4650a7a678f2f0",
+      "exact_ds4_ids": true,
+      "exact_ds4_rendered_text": true
+    },
+    {
+      "id": "code2k-middle-explicit-v2",
+      "count": 1629,
+      "sha256_ids": "d1834b8ac1bda51a981b8600d07dcb5d6e5abb2da682ed5f1bb1331539ee848c",
+      "exact_ds4_ids": true,
+      "exact_ds4_rendered_text": true
+    },
+    {
+      "id": "docs2k-middle-explicit-v2",
+      "count": 1306,
+      "sha256_ids": "5f16ac8222e02266bd1919db324f93a6a2761246bdb52015e8e1316365c6955e",
+      "exact_ds4_ids": true,
+      "exact_ds4_rendered_text": true
+    },
+    {
+      "id": "document-holdout-a",
+      "count": 1409,
+      "sha256_ids": "7a6836f8675872dacee29bde8f968f51f2c6ca0959a0a2f84c898c6b2018c8b5",
+      "exact_ds4_ids": true,
+      "exact_ds4_rendered_text": true
+    },
+    {
+      "id": "document-holdout-b",
+      "count": 2039,
+      "sha256_ids": "ff8d2ad93b30fb51d02897c960bc19655eaeadc7493eb24774875da810f8649a",
+      "exact_ds4_ids": true,
+      "exact_ds4_rendered_text": true
+    }
+  ],
+  "historical_profiles_unchanged": [
+    {
+      "id": "user-low",
+      "count": 31,
+      "sha256_ids": "8f706b388831f4269d81a615a72cee7ed23d9bb4c65485cd5e67f65a39a6f264",
+      "sha256_rendered": "f95ae04694fe43e93fbbc658352f99270bb1badc2815f15603b6fa8127f103db"
+    },
+    {
+      "id": "user-none",
+      "count": 5,
+      "sha256_ids": "f47e43378418b48103b4c0187b208e8742aba77e163a7e10c9aef07d1692836d",
+      "sha256_rendered": "5ec6ff56a432b916c342465ba509744d13252c6c92ff10b28157b8213b4d4699"
+    },
+    {
+      "id": "user-high",
+      "count": 31,
+      "sha256_ids": "048aa891f3f3eafb5a2a251cb64fefb4d9abe8905da94eb1fd9732094d1d1398",
+      "sha256_rendered": "4a4c217cc112c9e0869350ef19d683f861f284f9f0660d172256360a393a531f"
+    },
+    {
+      "id": "system-low",
+      "count": 33,
+      "sha256_ids": "634dc3694667d4e28cab7438ac74f8a91b0363c8190742dcd15395ab61abbc84",
+      "sha256_rendered": "de5e839fa53c94e43484f6de7ed1164a6c80239c2da4de75315a5e03cf72d09c"
+    },
+    {
+      "id": "multi-low",
+      "count": 37,
+      "sha256_ids": "9446695e5aec25b55cecdb89f3db76f754a1d814e00539bf2191b3eca5963268",
+      "sha256_rendered": "76052ec024b968e3864e9b0c5ce6fcf0e34e453c2fc497fb1b22a0a9ecf1d6cf"
+    }
+  ],
+  "rejects": [
+    "off",
+    "none",
+    "high",
+    "unknown",
+    "content-list",
+    "tools"
+  ],
+  "canonical_prompt_source_contract": {
+    "renderer_forwards_chatparams_directly": true,
+    "scheduled_prefill_ids": true,
+    "single_req_state_ingest": true,
+    "streaming_prompt_passthrough": true,
+    "model_runner_passes_input_batch_to_speculator": true,
+    "dspark_inherits_dflash": true,
+    "dflash_propose_uses_input_batch": true,
+    "dspark_no_chat_template": true,
+    "dspark_no_tokenizer": true,
+    "dflash_no_chat_template": true,
+    "dflash_no_tokenizer": true
+  }
+}

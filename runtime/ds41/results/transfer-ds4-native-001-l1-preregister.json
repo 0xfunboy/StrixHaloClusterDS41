@@ -1,0 +1,58 @@
+{
+  "schema": "ds41-transfer-ds4-native-001-l1-preregister-v1",
+  "state": "FROZEN_BEFORE_NATIVE_LOAD",
+  "candidate": {
+    "target": "existing DenseFix + Engram2",
+    "native_base": "9c13117 accelerated overlay",
+    "mmq_prefill": true,
+    "engram_workers": 4,
+    "engram_parallel_min_rows": 256,
+    "canonical_prefill": true,
+    "dspark_k": 2,
+    "ced": false,
+    "tp": 2,
+    "ep": true,
+    "profile": "ds4-low-v1",
+    "thinking": true,
+    "reasoning_effort": "low",
+    "numeric_effort_prefix": false,
+    "max_tokens": 2048,
+    "temperature": 0,
+    "seed": 1,
+    "prefix_cache": false
+  },
+  "quality_order": [
+    "code2k-v2",
+    "docs2k-v2",
+    "holdout-a iff originals PASS",
+    "holdout-b iff originals PASS",
+    "code2k confirm iff holdouts PASS",
+    "docs2k confirm iff holdouts PASS"
+  ],
+  "max_main_requests": 6,
+  "semantic_retries": 0,
+  "seed_sweep": false,
+  "prompt_change": false,
+  "metrics": [
+    "wall",
+    "response metrics prefill seconds/TPS",
+    "TTFT if exposed",
+    "reasoning/final token counts",
+    "decode",
+    "DSpark acceptance/proposed/accepted if exposed",
+    "cache",
+    "memory receipts"
+  ],
+  "l1_decision": {
+    "pass": "go directly L3; do not import Antirez recipe",
+    "fail": "preserve negative and proceed L2 Antirez/native-Engram transfer; do not blame individual component"
+  },
+  "promotion_criterion_frozen_before_measurement": {
+    "quality_required": true,
+    "median_end_to_end_gain_vs_contemporary_ds4_pct_min": 10.0,
+    "per_task_regression": "none beyond measured control noise",
+    "prefill_200_tps": "target remains not promise",
+    "context_only_gain": "may be separate capacity mode, not acceleration"
+  },
+  "fallback": "qualified DS4 DOCUMENT PROFILE 002 remains reference/fallback"
+}

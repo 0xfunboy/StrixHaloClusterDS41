@@ -1,0 +1,36 @@
+{
+  "schema": "ds41-native-historical-tokenizer-baseline-v1",
+  "source": "live pinned vLLM tokenizer before ds4-low-v1 patch",
+  "rows": [
+    {
+      "id": "user-low",
+      "count": 31,
+      "sha256_ids": "8f706b388831f4269d81a615a72cee7ed23d9bb4c65485cd5e67f65a39a6f264",
+      "sha256_rendered": "f95ae04694fe43e93fbbc658352f99270bb1badc2815f15603b6fa8127f103db"
+    },
+    {
+      "id": "user-none",
+      "count": 5,
+      "sha256_ids": "f47e43378418b48103b4c0187b208e8742aba77e163a7e10c9aef07d1692836d",
+      "sha256_rendered": "5ec6ff56a432b916c342465ba509744d13252c6c92ff10b28157b8213b4d4699"
+    },
+    {
+      "id": "user-high",
+      "count": 31,
+      "sha256_ids": "048aa891f3f3eafb5a2a251cb64fefb4d9abe8905da94eb1fd9732094d1d1398",
+      "sha256_rendered": "4a4c217cc112c9e0869350ef19d683f861f284f9f0660d172256360a393a531f"
+    },
+    {
+      "id": "system-low",
+      "count": 33,
+      "sha256_ids": "634dc3694667d4e28cab7438ac74f8a91b0363c8190742dcd15395ab61abbc84",
+      "sha256_rendered": "de5e839fa53c94e43484f6de7ed1164a6c80239c2da4de75315a5e03cf72d09c"
+    },
+    {
+      "id": "multi-low",
+      "count": 37,
+      "sha256_ids": "9446695e5aec25b55cecdb89f3db76f754a1d814e00539bf2191b3eca5963268",
+      "sha256_rendered": "76052ec024b968e3864e9b0c5ce6fcf0e34e453c2fc497fb1b22a0a9ecf1d6cf"
+    }
+  ]
+}

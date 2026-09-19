@@ -1,0 +1,99 @@
+{
+  "schema": "ds41-transfer-native-l2-startup-negative-004-v1",
+  "campaign": "TRANSFER_DS4_NATIVE_001",
+  "phase": "L2_M1",
+  "status": "LOAD_COMPLETE_WARMUP_FORMAT_FAIL_RESTORED_DS4",
+  "observed_at": "2026-09-19T03:57:01+02:00",
+  "release": "/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-anon1",
+  "attempt": "transfer-ds4-native-001-l2-m1-anon1",
+  "source_checkpoint": "beb6ca9dbffcbac7c3cf36770cac038f278b0fd8",
+  "owner_epoch": "1789782496195400259",
+  "rank0_invocation_id": "d8cad43f1ecb408eb7738eae608d9003",
+  "rank1_invocation_id": "f9ac3bc8cf3f4ac0a2f3a497cd046fb6",
+  "requests_sent": 0,
+  "memory_contract": {
+    "anonymous_staging": "PASS_IN_LIVE_LOAD",
+    "node01_svm_mapping_failures": 0,
+    "node02_svm_mapping_failures": 0,
+    "rank0_load_weights_seconds": 217.229,
+    "rank1_load_weights_seconds": 203.232,
+    "rank0_total_load_seconds": 232.222,
+    "rank1_total_load_seconds": 229.72,
+    "reported_model_memory_gib_per_rank": 77.14,
+    "conclusion": "The anonymous staging fix crosses the previous SVM residency failure and completes load/process_weights on both ranks. The terminal failure is not memory/SVM."
+  },
+  "failure": {
+    "stage": "initial warmup/profile forward after model load",
+    "both_ranks_same_error": true,
+    "exception": "RuntimeError",
+    "message": "shape '[4, 1024, 4096]' is invalid for input of size 17825792",
+    "stack_path": [
+      "deepseek_v4_1/attention.py::_o_proj",
+      "deepseek_v4_1/amd/rocm.py::_o_proj",
+      "rocm_aiter_mla_sparse.py::rocm_inv_rope_einsum",
+      "rocm_aiter_mla_sparse.py::_get_cached_wo_a_bf16"
+    ],
+    "failing_operation": "wo_a.weight.view(n_local_groups, o_lora_rank, hidden_dim).to(torch.bfloat16)"
+  },
+  "wo_a_contract": {
+    "count": 40,
+    "antirez_logical_shape": [
+      4096,
+      8192
+    ],
+    "antirez_packed_data_shape": [
+      8192,
+      4352
+    ],
+    "antirez_ggml_type": 8,
+    "antirez_ggml_type_name": "Q8_0",
+    "antirez_bytes_per_tensor": 35651584,
+    "tp2_rank_packed_numel": 17825792,
+    "expected_tp2_logical_numel": 16777216,
+    "expected_view": [
+      4,
+      1024,
+      4096
+    ],
+    "q8_0_block_size": 32,
+    "q8_0_type_size": 34,
+    "dequant_logical_rank_shape": [
+      4096,
+      4096
+    ],
+    "old_densefix_logical_shape": [
+      4096,
+      8192
+    ],
+    "old_densefix_ggml_type": 30,
+    "old_densefix_type_name": "BF16",
+    "old_densefix_bytes_per_tensor": 67108864,
+    "source_logical_shape_matches_old_target": true
+  },
+  "scoped_audit": {
+    "direct_weight_view_bypasses_found_in_v41_rocm_path": 1,
+    "location": ".vendor/vllm-dsv41/vllm/v1/attention/ops/rocm_aiter_mla_sparse.py::_get_cached_wo_a_bf16",
+    "existing_plugin_dequant_helper": "vllm_gguf_plugin.ops.ggml_dequantize",
+    "q8_0_is_existing_dequant_type": true,
+    "conclusion": "The normal GGUF linear path already supports Q8_0. Only the cached ROCm WO_A fast path bypasses the registered GGUF quant method."
+  },
+  "recovery": {
+    "ds41_units": "OFF_VERIFIED",
+    "owner_reconcile": "CLUSTER_OFF_RECONCILED",
+    "ds4_state": "READY",
+    "ds4_api_http": "200",
+    "k2_state": "OFF",
+    "ds4_coordinator_invocation": "1178a56893b44accabcb4c508062f5ef",
+    "ds4_worker_invocation": "d8935559cfe9449d81a258fcdb861c74"
+  },
+  "next_intervention": {
+    "scope": "one ROCm WO_A cache helper only",
+    "action": "For GGUF-quantized WO_A only, obtain weight_type, compute logical shape from GGML_QUANT_SIZES, fail closed on shape mismatch, reuse vllm_gguf_plugin.ops.ggml_dequantize to BF16 once, reshape to [n_local_groups,o_lora_rank,hidden_dim], cache it, and preserve existing BF16/FP8 branches unchanged.",
+    "new_kernel": false,
+    "weight_change": false,
+    "quantization_change": false,
+    "driver_change": false,
+    "retry_admitted": true,
+    "stop_rule": "If another unrelated GGUF-format bypass appears after this single scoped compatibility fix, close L2 target instead of opening broad format forensics."
+  }
+}

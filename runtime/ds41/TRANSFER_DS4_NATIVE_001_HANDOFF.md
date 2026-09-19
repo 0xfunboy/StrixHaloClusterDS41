@@ -1,11 +1,11 @@
 # TRANSFER DS4 → NATIVE 001 — handoff
 
-updated_at: 2026-09-19T03:48+02:00
-phase: L0 COMPLETE / L1 FAIL / L2 M1 ANON1 FINAL STARTUP RETRY IN_FLIGHT — ZERO REQUESTS
-next_action: reconcile only epoch `1789782496195400259`; do not restart and do not dispatch quality until rank0/rank1/paired HTTP200 plus exact anon1 release/attempt identity. Any terminal memory-contract failure closes L2 native target and restores DS4.
+updated_at: 2026-09-19T03:57+02:00
+phase: L0 COMPLETE / L1 FAIL / L2 M1 STARTUP NEGATIVE 004 / WO_A Q8_0 FAST-PATH FIX PREP
+next_action: while DS4 remains READY, model-free qualify exactly one WO_A compatibility fix that reuses the existing GGUF dequantizer for quantized WO_A in the ROCm cache helper. Existing BF16/FP8 paths must remain unchanged. Only after a NEW isolated release passes both-node preflight may one localized startup retry occur; a further unrelated format bypass closes L2.
 repo_worktree: /home/funboy/worktrees/ds41-transfer-ds4-native-001
 repo_branch: exp/ds41-transfer-ds4-native-001
-repo_head: 6e48dde (pushed pre-switch checkpoint)
+repo_head: beb6ca9 (pushed anon1 startup-ID checkpoint; negative004/WO_A delta pending)
 
 ## Live resident runtime at this checkpoint
 
@@ -303,22 +303,35 @@ Before switch: native OFF/NONE, qualified DS4 READY HTTP200, K2 OFF. Evidence: `
 
 This is the final startup retry admitted for the localized mmap/SVM contract. If anon1 cannot reach READY, close L2 native target as memory-contract blocked and keep DS4 rather than modifying driver/BIOS/infra.
 
-## Active job — anon1 final M1 startup retry
+## L2 M1 startup negative 004 — LOAD COMPLETE / WO_A Q8_0 FAST-PATH FORMAT FAIL / ZERO REQUESTS
 
-- state: IN_FLIGHT / STARTING; L2 requests sent `0/6`
-- owner: `DS41`, state `RUNNING`
-- epoch: `1789782496195400259`
-- release: `/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-anon1`
-- attempt: `transfer-ds4-native-001-l2-m1-anon1`
-- rank0 InvocationID: `d8cad43f1ecb408eb7738eae608d9003`
-- rank1 InvocationID: `f9ac3bc8cf3f4ac0a2f3a497cd046fb6`
-- first health: rank0 `000`, rank1 `000`, paired `503`
-- DS4 OFF only for this authorized window; K2 `RESEARCH_BUSY` only because DS41 owns the pair
+Anon1 conclusively solved the mmap/SVM blocker: both ranks completed GGUF `load_weights` + `process_weights`, vLLM reported 77.14 GiB model memory/rank, and kernel SVM-failure count during this startup was 0 on both nodes. The terminal failure happened only in the first warmup/profile forward.
 
-Do not restart this load if the client/chat disappears. Reconcile these exact units/InvocationIDs and epoch first.
+Startup:
+- epoch `1789782496195400259`
+- rank0 InvocationID `d8cad43f1ecb408eb7738eae608d9003`
+- rank1 InvocationID `f9ac3bc8cf3f4ac0a2f3a497cd046fb6`
+- requests sent `0/6`
+- rank0 load_weights 217.229s / total load 232.222s
+- rank1 load_weights 203.232s / total load 229.720s
+
+Both ranks fail identically at `rocm_inv_rope_einsum -> _get_cached_wo_a_bf16`:
+`RuntimeError: shape '[4, 1024, 4096]' is invalid for input of size 17825792`.
+
+All 40 Antirez WO_A tensors share logical GGUF shape 4096x8192 but Q8_0 packed storage 8192x4352, type8, 35651584B/tensor. The old DenseFix target has the same logical shape but BF16 storage. Under TP2 the packed Q8_0 rank parameter has17825792 storage elements; Q8_0 block32/type34 dequantizes to logical4096x4096 = exactly4x1024x4096.
+
+Scoped static audit found only this one direct `.weight.view(...)` bypass in the V4.1 ROCm path. The normal GGUF linear method already supports Q8_0 via `vllm_gguf_plugin.ops.ggml_dequantize`; no new kernel is required. NEXT is one fail-closed compatibility branch in `_get_cached_wo_a_bf16`: detect GGUF quantized WO_A, derive/validate logical shape from `GGML_QUANT_SIZES`, dequantize once to BF16 with the existing plugin helper, reshape/cache. Preserve BF16/FP8 branches unchanged.
+
+After failure both DS41 units were OFF_VERIFIED; stale owner reconciled with `CLUSTER_OFF_RECONCILED`. Qualified DS4 DOCUMENT PROFILE002 is restored READY/HTTP200, K2 OFF. DS4 restore InvocationIDs: coordinator `1178a56893b44accabcb4c508062f5ef`, worker `d8935559cfe9449d81a258fcdb861c74`.
+
+Evidence: `runtime/ds41/results/transfer-ds4-native-001-l2-startup-negative-004.{json,md}`.
+
+## Active job
+
+None. Qualified DS4 is resident READY; L2 quality requests sent remain `0/6`.
 
 ## Persistence
 
-PLAN updated through anon1 startup identity. Git pre-switch checkpoint `6e48dde`; startup-ID handoff update pending scoped commit/push.
-Git negative003 `f18a038`; staging loader `c8e93a2`; anon1 preflight/controller/raw `55cf9db`, all pushed.
+PLAN needs negative004/WO_A NEXT update before another lifecycle switch.
+Git last pushed checkpoint `beb6ca9`; negative004 report/handoff and WO_A compatibility delta are pending scoped commit/push.
 Four inherited mode-bit changes and unrelated untracked L0 artifacts remain untouched.

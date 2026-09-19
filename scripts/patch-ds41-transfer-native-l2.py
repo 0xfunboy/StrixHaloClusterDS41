@@ -31,6 +31,7 @@ def main() -> None:
         "runtime/ds41/gguf_stream_cache.py",
         "runtime/ds41/results/ds4-document-profile-002-preregister.json",
         "scripts/test-ds41-transfer-native-l2-cpu.py",
+        "scripts/test-ds41-transfer-native-l2-woa.py",
     ):
         dst = target / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
@@ -160,6 +161,75 @@ def main() -> None:
             "embed.weight_type": "embed_tokens.weight_type",
             ".ffn.gate.bias": ".ffn.gate.e_score_correction_bias",
         },
+""",
+    )
+
+    rocm_sparse = target / ".vendor/vllm-dsv41/vllm/v1/attention/ops/rocm_aiter_mla_sparse.py"
+    replace_once(
+        rocm_sparse,
+        """    # Emulated MXFP8 kernels can replace the original one-byte weight with an
+    # already-dequantized BF16 tensor while retaining the scale attribute for
+    # metadata. Applying that retained scale again would double-dequantize the
+    # weight. Block scaling is only valid while the one-byte FP8 storage remains.
+    if wo_a_scale_param is not None and wo_a.weight.element_size() == 1:
+""",
+        """    # GGUF packed linear weights carry an explicit sibling weight_type.
+    # WO_A normally flows through the GGUF linear method, but this ROCm fast
+    # path directly consumes the parameter and must therefore materialize the
+    # logical matrix first.  Reuse the plugin's qualified dequantizer and fail
+    # closed on geometry mismatches; BF16/F16/F32 GGUF weights fall through to
+    # the historical path unchanged.
+    gguf_weight_type_param = getattr(wo_a, "weight_type", None)
+    gguf_weight_type = getattr(gguf_weight_type_param, "weight_type", None)
+    gguf_quantized = False
+    if gguf_weight_type is not None:
+        from vllm_gguf_plugin.quantization.utils import UNQUANTIZED_TYPES
+
+        gguf_quantized = int(gguf_weight_type) not in {
+            int(qtype) for qtype in UNQUANTIZED_TYPES
+        }
+    if gguf_quantized:
+        import gguf
+        from vllm_gguf_plugin import ops as gguf_ops
+
+        qtype = int(gguf_weight_type)
+        try:
+            block_size, type_size = gguf.GGML_QUANT_SIZES[qtype]
+        except KeyError as exc:
+            raise RuntimeError(f"unsupported GGUF WO_A weight type {qtype}") from exc
+        if wo_a.weight.ndim != 2 or wo_a.weight.shape[1] % type_size:
+            raise RuntimeError(
+                "invalid packed GGUF WO_A geometry: "
+                f"shape={tuple(wo_a.weight.shape)} type={qtype} type_size={type_size}"
+            )
+        logical_rows = int(wo_a.weight.shape[0])
+        logical_cols = int(wo_a.weight.shape[1] // type_size * block_size)
+        expected_rows = int(n_local_groups * o_lora_rank)
+        if (logical_rows, logical_cols) != (expected_rows, hidden_dim):
+            raise RuntimeError(
+                "GGUF WO_A logical geometry mismatch: "
+                f"packed={tuple(wo_a.weight.shape)} qtype={qtype} "
+                f"logical={(logical_rows, logical_cols)} "
+                f"expected={(expected_rows, hidden_dim)}"
+            )
+        dense = gguf_ops.ggml_dequantize(
+            wo_a.weight,
+            qtype,
+            logical_rows,
+            logical_cols,
+            torch.bfloat16,
+        )
+        if tuple(dense.shape) != (logical_rows, logical_cols):
+            raise RuntimeError(
+                "GGUF WO_A dequantizer shape mismatch: "
+                f"got={tuple(dense.shape)} expected={(logical_rows, logical_cols)}"
+            )
+        cached = dense.view(n_local_groups, o_lora_rank, hidden_dim)
+    # Emulated MXFP8 kernels can replace the original one-byte weight with an
+    # already-dequantized BF16 tensor while retaining the scale attribute for
+    # metadata. Applying that retained scale again would double-dequantize the
+    # weight. Block scaling is only valid while the one-byte FP8 storage remains.
+    elif wo_a_scale_param is not None and wo_a.weight.element_size() == 1:
 """,
     )
 
@@ -326,6 +396,7 @@ fi''',
         "mmq_prefill": True,
         "canonical_prefill": True,
         "target_tensor_staging": "anonymous-cpu-one-tensor-v1",
+        "wo_a_q8_0_compat": "plugin-dequantize-bf16-cache-v1",
     }
     (target / "runtime/ds41/transfer-ds4-native-001-l2-release.json").write_text(
         json.dumps(marker, indent=2, sort_keys=True) + "\n"

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-REL=/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-anon1
+REL=/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-woa1
 DS4CTL=/home/funboy/StrixHaloClusterDS41/scripts/ds4-document-controller.sh
 PAIR="$REL/runtime/ds41/pair.sh"
 OWNER=/home/funboy/.local/state/strix-cluster/owner.json
-ATTEMPT=transfer-ds4-native-001-l2-m1-anon1
+ATTEMPT=transfer-ds4-native-001-l2-m1-woa1
 RANK_PORT=18220
 PAIR_URL=http://127.0.0.1:18221
 PEER=(ssh -o IdentityAgent=none -o BatchMode=yes -o ConnectTimeout=5 02-evo-x3-tb)

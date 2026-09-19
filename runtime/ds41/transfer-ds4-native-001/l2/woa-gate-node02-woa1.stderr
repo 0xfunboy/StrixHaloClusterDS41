@@ -1,0 +1,3 @@
+/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-woa1/.vendor/vllm-dsv41/vllm/__init__.py:7: RuntimeWarning: Failed to read commit hash:
+No module named 'vllm._version'
+  from .version import __version__, __version_tuple__  # isort:skip

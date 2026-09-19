@@ -1,11 +1,11 @@
 # TRANSFER DS4 → NATIVE 001 — handoff
 
-updated_at: 2026-09-19T03:57+02:00
-phase: L0 COMPLETE / L1 FAIL / L2 M1 STARTUP NEGATIVE 004 / WO_A Q8_0 FAST-PATH FIX PREP
-next_action: while DS4 remains READY, model-free qualify exactly one WO_A compatibility fix that reuses the existing GGUF dequantizer for quantized WO_A in the ROCm cache helper. Existing BF16/FP8 paths must remain unchanged. Only after a NEW isolated release passes both-node preflight may one localized startup retry occur; a further unrelated format bypass closes L2.
+updated_at: 2026-09-19T04:22+02:00
+phase: L0 COMPLETE / L1 FAIL / L2 M1 WO_A1 PREFLIGHT PASS
+next_action: commit/push controller + woa1 preflight and update PLAN, then exactly one owner-controlled DS4 OFF -> woa1 Antirez M1 start. Reconcile startup before any request; quality dispatch is forbidden until rank0/rank1/paired HTTP200 and exact live release/attempt identity PASS.
 repo_worktree: /home/funboy/worktrees/ds41-transfer-ds4-native-001
 repo_branch: exp/ds41-transfer-ds4-native-001
-repo_head: beb6ca9 (pushed anon1 startup-ID checkpoint; negative004/WO_A delta pending)
+repo_head: 9fe0496398aae695c9d2486ad7b234a8ee0fde80 (pushed WO_A fix; controller/preflight checkpoint pending)
 
 ## Live resident runtime at this checkpoint
 
@@ -326,12 +326,21 @@ After failure both DS41 units were OFF_VERIFIED; stale owner reconciled with `CL
 
 Evidence: `runtime/ds41/results/transfer-ds4-native-001-l2-startup-negative-004.{json,md}`.
 
+## L2 woa1 release preflight — PASS on both nodes
+
+New isolated release:
+`/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-woa1`
+
+Code provenance `9fe0496398aae695c9d2486ad7b234a8ee0fde80`; controller attempt `transfer-ds4-native-001-l2-m1-woa1`.
+
+Both nodes PASS launcher syntax, py_compile, the full L2 CPU gate, fast Antirez identity and the new WO_A gate. The WO_A gate proves Q8_0 packed geometry 4x34 -> logical 4x32, calls the existing plugin dequantizer once into BF16, caches the result, rejects bad geometry and preserves the plain BF16 path exactly. Cross-node hashes match for launcher, ROCm sparse helper, GGUF weight_utils and staging helper. Evidence: `runtime/ds41/results/transfer-ds4-native-001-l2-woa1-preflight.{json,md}` plus the NODE01/NODE02 raw gates under `runtime/ds41/transfer-ds4-native-001/l2/`.
+
 ## Active job
 
-None. Qualified DS4 is resident READY; L2 quality requests sent remain `0/6`.
+None. Qualified DS4 is resident READY/HTTP200; native OFF; K2 OFF; L2 quality requests sent remain `0/6`.
 
 ## Persistence
 
-PLAN needs negative004/WO_A NEXT update before another lifecycle switch.
-Git last pushed checkpoint `beb6ca9`; negative004 report/handoff and WO_A compatibility delta are pending scoped commit/push.
+PLAN update for negative004/woa1 preflight: pending before switch.
+Git WO_A fix/negative004 pushed at `9fe0496398aae695c9d2486ad7b234a8ee0fde80`; controller + woa1 preflight/handoff checkpoint pending scoped commit/push.
 Four inherited mode-bit changes and unrelated untracked L0 artifacts remain untouched.

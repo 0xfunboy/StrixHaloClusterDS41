@@ -1,0 +1,72 @@
+{
+  "schema": "ds41-transfer-native-l2-woa1-preflight-v1",
+  "campaign": "TRANSFER_DS4_NATIVE_001",
+  "phase": "L2_M1",
+  "status": "PASS",
+  "created_at": "2026-09-19T04:22:46+02:00",
+  "source_commit": "9fe0496398aae695c9d2486ad7b234a8ee0fde80",
+  "release": "/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-woa1",
+  "attempt": "transfer-ds4-native-001-l2-m1-woa1",
+  "target": "Antirez calibrated Q2",
+  "engram": "native GGUF",
+  "dspark": false,
+  "gates": {
+    "node01": {
+      "launcher_syntax": "PASS",
+      "py_compile": "PASS",
+      "full_l2_cpu": "PASS",
+      "wo_a_q8_0": "PASS",
+      "antirez_identity": "PASS"
+    },
+    "node02": {
+      "launcher_syntax": "PASS",
+      "py_compile": "PASS",
+      "full_l2_cpu": "PASS",
+      "wo_a_q8_0": "PASS",
+      "antirez_identity": "PASS"
+    }
+  },
+  "wo_a_gate": {
+    "qtype": "Q8_0",
+    "packed_fixture": [
+      4,
+      34
+    ],
+    "logical_fixture": [
+      4,
+      32
+    ],
+    "plugin_dequantizer_reused": true,
+    "dequant_dtype": "bfloat16",
+    "cache_once": true,
+    "invalid_geometry_fail_closed": true,
+    "bf16_regression": "PASS"
+  },
+  "l2_cpu_contract": {
+    "target_mapping": "1038 ordinary + 8 native Engram = 1046/1046",
+    "anonymous_staging": "PASS",
+    "progressive_cache_drop": "PASS",
+    "native_engram_hash_contract": "PASS",
+    "row264_decode": "PASS",
+    "largest_ordinary_target_bytes": 1486356480
+  },
+  "cross_node_sha256": {
+    "runtime/ds41/launch-node.sh": "507e1782a9cf6664520e36b48979cb47c8584e735e9173ad656fb70df4e99bc4",
+    ".vendor/vllm-dsv41/vllm/v1/attention/ops/rocm_aiter_mla_sparse.py": "de03f58da44774faf7d216c0195d7a0d6db7488106f99bedd0d3e2d73d78b8a4",
+    ".vendor/gguf-plugin/vllm_gguf_plugin/weight_utils.py": "5c991c5055bc1615745d4c644f93ce6d6ec69e4e22cb4c0d89f488e1ed727742",
+    "runtime/ds41/gguf_stream_cache.py": "6f28c0bb5d9794ed2051f6c1f35406820d4dd13617490d2012ed436cb82a3962"
+  },
+  "marker": {
+    "source_commit": "9fe0496398aae695c9d2486ad7b234a8ee0fde80",
+    "target_mode": "M1",
+    "dspark_k": 0,
+    "target_tensor_staging": "anonymous-cpu-one-tensor-v1",
+    "wo_a_q8_0_compat": "plugin-dequantize-bf16-cache-v1"
+  },
+  "live_before_switch": {
+    "ds4": "READY HTTP200",
+    "native": "OFF",
+    "k2": "OFF"
+  },
+  "next": "Commit controller/preflight, update PLAN/handoff, then one woa1 M1 startup. No quality request before rank0/rank1/paired HTTP200 and live release/attempt identity PASS."
+}

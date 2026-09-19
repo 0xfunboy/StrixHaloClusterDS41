@@ -1,0 +1,1 @@
+{'status': 'PASS', 'q8_0_packed_shape': [4, 34], 'q8_0_logical_shape': [4, 32], 'q8_0_branch_cached': True, 'bad_geometry_fail_closed': True, 'bf16_regression': 'PASS'}

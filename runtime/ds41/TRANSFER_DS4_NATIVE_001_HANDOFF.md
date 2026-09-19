@@ -1,8 +1,8 @@
 # TRANSFER DS4 → NATIVE 001 — handoff
 
-updated_at: 2026-09-19T04:22+02:00
-phase: L0 COMPLETE / L1 FAIL / L2 M1 WO_A1 PREFLIGHT PASS
-next_action: commit/push controller + woa1 preflight and update PLAN, then exactly one owner-controlled DS4 OFF -> woa1 Antirez M1 start. Reconcile startup before any request; quality dispatch is forbidden until rank0/rank1/paired HTTP200 and exact live release/attempt identity PASS.
+updated_at: 2026-09-19T04:33+02:00
+phase: L0 COMPLETE / L1 FAIL / L2 M1 WOA1 READY / REQUEST-CONTRACT FIXED — ACCEPTED REQUESTS 0/6
+next_action: dispatch distinct persistent run `l2-m1-run2` exactly once through the transient M1 paired coordinator; preserve raw `l2-m1` HTTP400 terminal as setup evidence. M1 PASS -> same-target DSpark K2; actual M1 quality FAIL -> qualified DS4 fallback.
 repo_worktree: /home/funboy/worktrees/ds41-transfer-ds4-native-001
 repo_branch: exp/ds41-transfer-ds4-native-001
 repo_head: 9fe0496398aae695c9d2486ad7b234a8ee0fde80 (pushed WO_A fix; controller/preflight checkpoint pending)
@@ -335,9 +335,21 @@ Code provenance `9fe0496398aae695c9d2486ad7b234a8ee0fde80`; controller attempt `
 
 Both nodes PASS launcher syntax, py_compile, the full L2 CPU gate, fast Antirez identity and the new WO_A gate. The WO_A gate proves Q8_0 packed geometry 4x34 -> logical 4x32, calls the existing plugin dequantizer once into BF16, caches the result, rejects bad geometry and preserves the plain BF16 path exactly. Cross-node hashes match for launcher, ROCm sparse helper, GGUF weight_utils and staging helper. Evidence: `runtime/ds41/results/transfer-ds4-native-001-l2-woa1-preflight.{json,md}` plus the NODE01/NODE02 raw gates under `runtime/ds41/transfer-ds4-native-001/l2/`.
 
-## Active job
+## Active runtime / next job
 
-None. Qualified DS4 is resident READY/HTTP200; native OFF; K2 OFF; L2 quality requests sent remain `0/6`.
+WOA1 L2 M1 is READY; L2 quality requests remain `0/6`.
+- owner `DS41`, state `RUNNING`, epoch `1789784656721184713`
+- release `/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-woa1`
+- attempt `transfer-ds4-native-001-l2-m1-woa1`
+- rank0 InvocationID `207f08f41a984002bc0c87a32da90ba5`, HTTP200
+- rank1 InvocationID `0de289f6c7b9401999272244df71049f`, HTTP200
+- paired HTTP200
+- both ranks loaded 77.14GiB and completed warmup/profile
+- DS4 remains OFF only for this authorized M1 window
+
+The first runner unit `ds41-transfer-l2-m1-quality.service` InvocationID `b4ae782c39c84b288265aff2e3f4a085` terminalized two HTTP400 `unknown model` cases before inference because the generic paired coordinator still advertised/injected the old K2 model. Raw `l2-m1` registry/terminal are preserved; accepted model requests remain `0/6`.
+
+Control-plane correction is active without rank reload: original K2 config is untouched and original `ds41-haloclu-pair.service` is stopped; transient `ds41-transfer-l2-pair.service` InvocationID `f0019e8e735b46378e6940e639e73455` owns 18221, health ok/busy=false, both ranks true, model identity `DeepSeek-V4.1-Flash-Q2-Native-M1`. NEXT job uses distinct namespace `l2-m1-run2` and distinct X-Request-IDs.
 
 ## Persistence
 

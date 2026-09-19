@@ -8,11 +8,14 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "reports/DS41-Q2-001/transfer-ds4-native-001/l2-m1"
+RUN_ID = os.environ.get("DS41_TRANSFER_L2_RUN_ID", "l2-m1")
+if not RUN_ID or any(ch not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-" for ch in RUN_ID):
+    raise RuntimeError(f"invalid DS41_TRANSFER_L2_RUN_ID: {RUN_ID!r}")
+OUT = ROOT / "reports/DS41-Q2-001/transfer-ds4-native-001" / RUN_ID
 MAN = json.load(open(ROOT / "runtime/ds41/document-profile-002/prompt-manifest.json"))
 HOST = "127.0.0.1"
 PORT = 18221
-MODEL = "DeepSeek-V4.1-Flash-Q2-Native-M1"
+MODEL = os.environ.get("DS41_TRANSFER_L2_MODEL", "DeepSeek-V4.1-Flash-Q2-Native-M1")
 MAX_REQUESTS = 6
 
 
@@ -59,7 +62,7 @@ def request(case_id: str, rec, independent_required: bool = False):
             "ds41_prompt_profile": "ds4-low-v1",
         },
     }
-    client_request_id = f"transfer001-l2m1-{case_id}"
+    client_request_id = f"transfer001-{RUN_ID}-{case_id}"
     atomic(
         state_path,
         {
@@ -200,6 +203,8 @@ def main() -> None:
             registry_path,
             {
                 "schema": "ds41-transfer-native-l2-m1-v1",
+                "run_id": RUN_ID,
+                "model": MODEL,
                 "requests_used": len(rows),
                 "max_requests": MAX_REQUESTS,
                 "cases": rows,
@@ -238,6 +243,8 @@ def main() -> None:
     six_pass = len(rows) == 6 and all(row["status"] == "PASS" for row in rows)
     term = {
         "schema": "ds41-transfer-native-l2-m1-terminal-v1",
+        "run_id": RUN_ID,
+        "model": MODEL,
         "status": "L2_M1_PASS" if six_pass else "L2_M1_FAIL",
         "requests_used": len(rows),
         "six_pass": six_pass,

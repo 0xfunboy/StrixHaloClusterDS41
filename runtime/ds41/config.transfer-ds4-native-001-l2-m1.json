@@ -1,0 +1,57 @@
+{
+  "listen": "127.0.0.1:18222",
+  "backend": "http://127.0.0.1:18221",
+  "tokenizer_endpoint": "http://10.55.0.1:18220/tokenize",
+  "chat_context_tokens": 4096,
+  "chat_default_output_tokens": 4096,
+  "chat_max_output_tokens": 8192,
+  "thinking_budget_supported": false,
+  "tool_calls_supported": false,
+  "model": "DeepSeek-V4.1-Flash-Q2-Native-M1",
+  "state_dir": "/home/funboy/.local/state/haloclu-ds41",
+  "workspace_roots": [
+    "/home/funboy/StrixHaloClusterDS41"
+  ],
+  "pair_lock": "/home/funboy/.local/state/haloclu-ds41/gateway-admission.lock",
+  "default_profile": "low",
+  "profiles": {
+    "low": {
+      "reasoning": "low",
+      "context_tokens": 4096,
+      "max_tokens": 4096,
+      "max_repairs": 2
+    },
+    "high": {
+      "reasoning": "high",
+      "context_tokens": 4096,
+      "max_tokens": 4096,
+      "max_repairs": 2
+    },
+    "max": {
+      "reasoning": "max",
+      "context_tokens": 4096,
+      "max_tokens": 4096,
+      "max_repairs": 2
+    }
+  },
+  "profile_status": "TRANSFER_DS4_NATIVE_001_L2_M1_EXPERIMENTAL",
+  "context_format": "json",
+  "max_context_tokens": 65536,
+  "max_files": 300,
+  "max_file_bytes": 262144,
+  "max_repo_bytes": 33554432,
+  "model_timeout": 1800,
+  "sandbox_timeout": 90,
+  "sandbox_memory_bytes": 1073741824,
+  "sandbox_tasks": 64,
+  "remote_ssh": "02-evo-x3-tb",
+  "lifecycle_command": "/home/funboy/.local/share/haloclu-ds41/current/runtime/ds41/serve-controller.sh",
+  "lifecycle_preset": "dspark-k2-gfx1151",
+  "cluster_config_path": "runtime/cluster.ds41-k2.json",
+  "reasoning_modes": [
+    "none",
+    "low",
+    "high",
+    "max"
+  ]
+}

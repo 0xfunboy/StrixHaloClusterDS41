@@ -1,0 +1,56 @@
+{
+  "schema": "ds41-transfer-native-l2-m1-request-contract-negative-001-v1",
+  "campaign": "TRANSFER_DS4_NATIVE_001",
+  "phase": "L2_M1",
+  "status": "SETUP_NEGATIVE_NO_MODEL_REQUEST_ACCEPTED",
+  "observed_at": "2026-09-19T04:33:41+02:00",
+  "runner_unit": "ds41-transfer-l2-m1-quality.service",
+  "runner_invocation_id": "b4ae782c39c84b288265aff2e3f4a085",
+  "raw_run_id": "l2-m1",
+  "raw_terminal": "L2_M1_FAIL",
+  "raw_requests_used": 2,
+  "accepted_model_requests": 0,
+  "cases": [
+    {
+      "id": "l2m1-code2k-v2",
+      "http": 400,
+      "error": "unknown model",
+      "wall_s": 0.006504875025711954,
+      "usage_present": false
+    },
+    {
+      "id": "l2m1-docs2k-v2",
+      "http": 400,
+      "error": "unknown model",
+      "wall_s": 0.0003755920333787799,
+      "usage_present": false
+    }
+  ],
+  "cause": {
+    "rank0_model": "DeepSeek-V4.1-Flash-Q2-Native-M1",
+    "rank1_model": "DeepSeek-V4.1-Flash-Q2-Native-M1",
+    "paired_model_before_fix": "DeepSeek-V4.1-Flash-MixedQ2-DSpark-K2",
+    "explanation": "The resident generic paired coordinator validated and rewrote the request model using stale K2 config before forwarding. Both requests were rejected at the paired control plane; neither reached model inference."
+  },
+  "correction": {
+    "original_k2_config_modified": false,
+    "original_pair_service_stopped_cleanly": true,
+    "transient_pair_unit": "ds41-transfer-l2-pair.service",
+    "transient_pair_invocation_id": "f0019e8e735b46378e6940e639e73455",
+    "paired_model_after_fix": "DeepSeek-V4.1-Flash-Q2-Native-M1",
+    "health": "ok",
+    "busy": false,
+    "ranks": [
+      true,
+      true
+    ],
+    "run2_id": "l2-m1-run2",
+    "request_ids_distinct": true
+  },
+  "budget_normalization": {
+    "semantic_budget_consumed": 0,
+    "reason": "HTTP400 control-plane rejection before inference, zero usage/reasoning/final",
+    "preserve_raw_terminal": true,
+    "reset_raw_registry": false
+  }
+}

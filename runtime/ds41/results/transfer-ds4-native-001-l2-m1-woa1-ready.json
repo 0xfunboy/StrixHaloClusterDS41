@@ -1,0 +1,46 @@
+{
+  "schema": "ds41-transfer-native-l2-m1-woa1-ready-v1",
+  "campaign": "TRANSFER_DS4_NATIVE_001",
+  "phase": "L2_M1",
+  "status": "READY_BEFORE_REQUESTS",
+  "epoch": "1789784656721184713",
+  "release": "/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-woa1",
+  "source_commit": "9fe0496398aae695c9d2486ad7b234a8ee0fde80",
+  "controller_checkpoint_commit": "477b177",
+  "attempt": "transfer-ds4-native-001-l2-m1-woa1",
+  "rank0": {
+    "invocation_id": "207f08f41a984002bc0c87a32da90ba5",
+    "http": 200,
+    "active": true,
+    "load_weights_s": 199.567,
+    "model_loading_s": 224.029268,
+    "model_memory_gib": 77.14
+  },
+  "rank1": {
+    "invocation_id": "0de289f6c7b9401999272244df71049f",
+    "http": 200,
+    "active": true,
+    "load_weights_s": 196.361,
+    "model_loading_s": 231.958793,
+    "model_memory_gib": 77.14
+  },
+  "paired_http": 200,
+  "warmup_profile": {
+    "rank0_s": 56.14,
+    "rank1_s": 48.39,
+    "status": "PASS"
+  },
+  "identity": {
+    "target": "Antirez-Q2",
+    "engram": "native-GGUF",
+    "dspark": false,
+    "prompt_profile": "ds4-low-v1",
+    "api_max_model_len": 16384,
+    "canonical_prefill": true,
+    "mmq_prefill": true,
+    "prefix_cache": false
+  },
+  "requests_sent": 0,
+  "ds4_state": "OFF for authorized M1 window",
+  "next": "Dispatch the frozen persistent max6 L2 M1 document runner exactly once; do not replay existing case state."
+}

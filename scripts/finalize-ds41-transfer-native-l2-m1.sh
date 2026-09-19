@@ -2,8 +2,10 @@
 set -Eeuo pipefail
 
 ROOT=/home/funboy/worktrees/ds41-transfer-ds4-native-001
-TERM="$ROOT/reports/DS41-Q2-001/transfer-ds4-native-001/l2-m1/terminal.json"
-OUT="$ROOT/reports/DS41-Q2-001/transfer-ds4-native-001/l2-m1/finalizer.json"
+RUN_ID=${DS41_TRANSFER_L2_RUN_ID:-l2-m1}
+[[ "$RUN_ID" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "invalid L2 run id: $RUN_ID" >&2; exit 2; }
+TERM="$ROOT/reports/DS41-Q2-001/transfer-ds4-native-001/$RUN_ID/terminal.json"
+OUT="$ROOT/reports/DS41-Q2-001/transfer-ds4-native-001/$RUN_ID/finalizer.json"
 CTL="$ROOT/scripts/transfer-ds4-native-001-l2-controller.sh"
 DS4CTL=/home/funboy/StrixHaloClusterDS41/scripts/ds4-document-controller.sh
 

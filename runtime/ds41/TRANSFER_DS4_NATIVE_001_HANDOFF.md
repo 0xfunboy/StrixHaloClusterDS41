@@ -1,8 +1,8 @@
 # TRANSFER DS4 → NATIVE 001 — handoff
 
-updated_at: 2026-09-19T03:20+02:00
-phase: L0 COMPLETE / L1 FAIL / L2 M1 CACHE1 PREFLIGHT PASS — BEFORE SWITCH
-next_action: exactly one owner-controlled DS4 OFF -> cache1 Antirez M1 startup. Do not dispatch quality until rank0/rank1/paired HTTP200 and live release/env identity PASS.
+updated_at: 2026-09-19T03:22+02:00
+phase: L0 COMPLETE / L1 FAIL / L2 M1 CACHE1 STARTING — ZERO REQUESTS
+next_action: reconcile only epoch `1789780947338481919`; do not restart and do not dispatch quality until rank0/rank1/paired HTTP200 and live release/env identity PASS.
 repo_worktree: /home/funboy/worktrees/ds41-transfer-ds4-native-001
 repo_branch: exp/ds41-transfer-ds4-native-001
 repo_head: c00e9d3 (pushed cache1 preflight/controller checkpoint)
@@ -250,12 +250,22 @@ Cross-node hashes are identical:
 
 Controller now targets this release with attempt `transfer-ds4-native-001-l2-m1-cache1`. Before switch: native OFF/NONE, DS4 READY HTTP200, K2 OFF. Evidence: `runtime/ds41/results/transfer-ds4-native-001-l2-cache1-preflight.{json,md}` plus `runtime/ds41/transfer-ds4-native-001/l2/cpu-gate-node0{1,2}-cache1.*`.
 
-## Active job
+## Active job — cache1 M1 startup
 
-None. DS4 is the resident qualified fallback. No model request has been sent in L2.
+- state: IN_FLIGHT / STARTING; L2 requests sent `0/6`
+- owner: `DS41`, state `RUNNING`
+- epoch: `1789780947338481919`
+- release: `/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-cache1`
+- attempt: `transfer-ds4-native-001-l2-m1-cache1`
+- rank0 InvocationID: `d56b8c975dce4322832e0f79e2911ef3`
+- rank1 InvocationID: `b3607ceea15b4650a63925859c3f5217`
+- first health: rank0 `000`, rank1 `000`, paired `503`
+- DS4 OFF only for this authorized window; K2 `RESEARCH_BUSY` only because DS41 owns the pair
+
+Do not restart this load if the client/chat disappears. Reconcile these exact units/InvocationIDs and epoch first.
 
 ## Persistence
 
-PLAN is updated through cache1 preflight; lifecycle switch is the next exact action.
-Git cache-residency fix/evidence is `d5a8964`; cache1 controller/preflight/raw checkpoint is pushed at `c00e9d3`.
+PLAN updated through cache1 startup identity. Git pre-switch checkpoint is `bb8c1e9`; startup-ID handoff update pending commit/push.
+Git cache-residency fix/evidence is `d5a8964`; cache1 controller/preflight/raw checkpoint is `c00e9d3`.
 Four inherited mode-bit changes and unrelated untracked L0 artifacts remain untouched.

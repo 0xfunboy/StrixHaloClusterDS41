@@ -1,0 +1,56 @@
+{
+  "frozen_before_model_results": true,
+  "holdouts": [
+    {
+      "expected": {
+        "center_fact": 13,
+        "first_file": "api_server.py",
+        "head_fact": 23,
+        "last_file": "dspark-k3-gfx1151.md",
+        "middle_file": "pull_request_template.md",
+        "penultimate_file": "__init__.py",
+        "score": 51,
+        "second_file": "prompt.go",
+        "section_count": 5,
+        "tail_fact": 8
+      },
+      "id": "attention-parity-002-holdout-c",
+      "prompt_file": "runtime/ds41/attention-parity-002/holdouts/attention-parity-002-holdout-c.txt",
+      "sections": [
+        "api_server.py",
+        "prompt.go",
+        "pull_request_template.md",
+        "__init__.py",
+        "dspark-k3-gfx1151.md"
+      ],
+      "sha256": "2818590e9679d8ad94401b185ef47c974d96fc0afd01d0958ef71e3d55b30463"
+    },
+    {
+      "expected": {
+        "center_fact": 5,
+        "first_file": "test-ds41-prefill-metrics.py",
+        "head_fact": 17,
+        "last_file": "api_server.py",
+        "middle_file": "envelope_test.go",
+        "penultimate_file": "prompt.go",
+        "score": 30,
+        "second_file": "README.md",
+        "section_count": 7,
+        "tail_fact": 9
+      },
+      "id": "attention-parity-002-holdout-d",
+      "prompt_file": "runtime/ds41/attention-parity-002/holdouts/attention-parity-002-holdout-d.txt",
+      "sections": [
+        "test-ds41-prefill-metrics.py",
+        "README.md",
+        "_ds41_artifact.py",
+        "envelope_test.go",
+        "dspark-k1-gfx1151.md",
+        "prompt.go",
+        "api_server.py"
+      ],
+      "sha256": "c810628f9378565a5def862de23e4d60f706d1b4b549cc230bc95a62ab006df4"
+    }
+  ],
+  "schema": "ds41-v41-attention-parity-002-new-holdouts-v1"
+}

@@ -1,0 +1,178 @@
+DOCUMENT_FACT_HEAD=17
+
+===== FILE scripts/test-ds41-prefill-metrics.py SHA256 40ca3cb9e69f2906c2209666a9e09bebd548b49d229edd0474c52db875502194 =====
+#!/usr/bin/env python3
+from vllm.v1.metrics.stats import RequestStateStats
+from vllm.entrypoints.generate.base.serving import build_per_request_timing_metrics
+s=RequestStateStats()
+s.queued_ts=10.0; s.scheduled_ts=10.1; s.first_token_ts=10.7; s.last_token_ts=11.7
+s.ds41_prefill_engine_ms=500.0
+s.ds41_prompt_tokens_computed=2000
+s.ds41_prompt_tokens_cached=48
+s.ds41_prompt_tokens_local_cache=48
+s.ds41_prompt_tokens_external_cache=0
+s.ds41_prompt_tokens_cache_creation=32
+m=build_per_request_timing_metrics(s, 21)
+d=m.model_dump()
+assert d['time_to_first_token_ms'] > d['prefill_engine_ms']
+assert abs(d['prefill_engine_tokens_per_second']-4000.0)<1e-9
+assert d['prompt_tokens_computed']==2000 and d['prompt_tokens_cached']==48
+assert d['prompt_tokens_local_cache']==48 and d['prompt_tokens_cache_creation']==32
+print('PASS',d)
+
+===== END FILE scripts/test-ds41-prefill-metrics.py =====
+
+===== FILE runtime/fixtures/README.md SHA256 85da1ec9622a887bd9d8557cb1d8a029c6a7017c7f2a9ad3a779a79eb3c97dd0 =====
+# Operational fixtures
+
+Frozen coding/context test inputs and validators used by HaloClu's benchmark
+operations live in `suite/`. They were relocated from the historical
+STRIX-PRODUCT-001 suite; JSON path metadata and corresponding application pins
+were updated. Task source and test payloads were preserved.
+
+`historical-109-256.json` retains the exact historical request payload from
+GLM-CIRU-OPT-004, including the absence of an explicit reasoning setting.
+Do not reinterpret it as the current interactive profile.
+
+These fixtures remove a live dependency on the retired research repositories.
+They contain test problems and local validators, not model weights, credentials
+or a representative general-intelligence benchmark. The directory named
+`private` holds the validator side of each task, excluded from the model prompt;
+it is not a confidential secret or an externally held-out benchmark.
+
+Generated run evidence belongs in ignored state/report directories. Changing a
+fixture requires deliberate review and new matching pins; do not relax checks
+to make modified fixtures pass.
+
+===== END FILE runtime/fixtures/README.md =====
+
+===== FILE scripts/_ds41_artifact.py SHA256 9d014f5d13a931d406fc4f95a801f6152beaa7f258b98961a1c835fd66dae9d1 =====
+#!/usr/bin/env python3
+"""Shared model path for DS41 scripts; source of truth is runtime/ds41/artifact.json."""
+from __future__ import annotations
+import json
+from pathlib import Path
+
+REPO = Path('/home/funboy/StrixHaloClusterDS41')
+ARTIFACT = json.loads((REPO / 'runtime/ds41/artifact.json').read_text())
+MODEL_DIR = Path(ARTIFACT['model_dir'])
+MODEL_FILE = MODEL_DIR / ARTIFACT['model_file']
+ORIGINAL_MODEL_DIR = Path(ARTIFACT['original_model_dir'])
+
+===== END FILE scripts/_ds41_artifact.py =====
+
+===== FILE internal/app/envelope_test.go SHA256 811c3b202f27f09deb63e5e98748ffbaf18efff0643df4ce39869735d1fcceab =====
+package app
+
+import "testing"
+
+func TestLosslessEnvelopeNormalizationOnly(t *testing.T) {
+	allowed := map[string]bool{"a.cpp": true}
+	for _, tc := range []struct{ input, normal string }{
+		{`{"files":{"a.cpp":"int main(){}\n"}}`, "none"},
+		{`{"a.cpp":"int main(){}\n"}`, "direct_file_map"},
+		{`{"files":{"a.cpp":"int main(){}\n"}`, "closed_outer_object"},
+	} {
+		files, normal, e := parseFilesEnvelope(tc.input, allowed)
+		if e != nil || normal != tc.normal || string(files["a.cpp"]) != "int main(){}\n" {
+			t.Fatalf("changed source bytes or classification: %q %q %v", files, normal, e)
+		}
+	}
+	for _, input := range []string{
+		`{"files":{"a.cpp":"unfinished`,
+		`{"files":{"a.cpp":"x"`,
+		`{"files":{"a.cpp":"x"},"execute":"bad"}`,
+		`{"files":{"../escape":"x"}`, `{"unknown":"x"}`, `{"files":{}}`,
+		`{"files":{"a.cpp":null}}`,
+	} {
+		if _, _, e := parseFilesEnvelope(input, allowed); e == nil {
+			t.Fatalf("accepted invalid envelope %s", input)
+		}
+	}
+}
+
+===== END FILE internal/app/envelope_test.go =====
+
+
+DOCUMENT_FACT_CENTER=5
+
+===== FILE runtime/ds41/presets/dspark-k1-gfx1151.md SHA256 d05307bfb96b3a436eeef74165fe4ef66cbd5eb1f0624f22e73180ffe1d5407f =====
+# Experimental DSpark K=1 preset — gfx1151
+
+This preset is **qualified experimentally**, not promoted as the production default. It describes the exact B039 configuration that passed the A040 comparison.
+
+## Reproduce the qualified offline arm
+
+```bash
+cd /home/funboy/StrixHaloClusterDS41
+ATTEMPT=attempt-dspark-k1-repro
+mkdir -p reports/DS41-Q2-001/$ATTEMPT
+cp reports/DS41-Q2-001/attempt039-dspark-k1/prompt-tokens.json reports/DS41-Q2-001/$ATTEMPT/prompt-tokens.json
+EPOCH=$(date +%s%N)
+DS41_RUN_MODE=offline DS41_ATTEMPT_NAME=$ATTEMPT DS41_RUNTIME_MAX_SEC=5400 \
+  runtime/ds41/pair.sh start "$EPOCH" 18210
+systemd-run --user --unit="ds41-$ATTEMPT-supervisor" --collect \
+  --property=RuntimeMaxSec=5500 --property=KillMode=control-group --property=Restart=no \
+  /usr/bin/bash /home/funboy/StrixHaloClusterDS41/scripts/supervise-ds41-offline-attempt.sh \
+  "$ATTEMPT" "$EPOCH" 5450
+```
+
+The frozen `dspark_real.arm=dspark` fixture applies the preset before model construction. No oracle/replay proposer is installed.
+
+## Roll back to M1
+
+Use `dspark_real.arm=m1` / `speculative_config=None` and unset `DS41_DSPARK_MXFP4_BF16`, `DS41_NATIVE_HIP_MOE_ROWWISE`, `DS41_MHC_ROWWISE_BLOCK`, and `DS41_REAL_DSPARK_TELEMETRY`. Keep the promoted target switches enabled. `attempt040-m1-control/prompt-tokens.json` is the frozen rollback/control fixture.
+
+No API/frontend production default is modified by this preset.
+
+===== END FILE runtime/ds41/presets/dspark-k1-gfx1151.md =====
+
+===== FILE internal/app/prompt.go SHA256 73fc9c75c3bee5e263762cc009fc263973d63c42f55e8e4d1438264367e6d108 =====
+package app
+
+import (
+	"encoding/json"
+	"strings"
+)
+
+// Preserve the original JSON source envelope and repair feedback byte for byte.
+func buildCodingPrompt(task string, files map[string]string, allowed []string, feedback string) string {
+	var b strings.Builder
+	b.WriteString("TASK\n" + task + "\nALLOWED PATHS\n" + strings.Join(allowed, "\n") + "\nSELECTED CURRENT SOURCES\n")
+	data, _ := json.Marshal(files)
+	b.Write(data)
+	if feedback != "" {
+		b.WriteString("\nRELEVANT FAILURE FROM PREVIOUS ATTEMPT\n" + feedback + "\nCorrect the current code, provide final JSON. The prior conversation is intentionally omitted.")
+	}
+	return b.String()
+}
+
+===== END FILE internal/app/prompt.go =====
+
+===== FILE runtime/ds41/api_server.py SHA256 73f8473e0a7210028cf8015ef56899fe4d55604431d6fd57aa8af4a452425e53 =====
+"""DS41 vLLM API entrypoint: register the pinned GGUF plugin before CLI parsing."""
+from __future__ import annotations
+
+import os
+
+from vllm_gguf_plugin import register
+
+register()
+
+if os.environ.get("DS41_NATIVE_HIP_MOE", "0") == "1":
+    from runtime.ds41.native_hip_moe_runtime import ensure_loaded
+
+    ensure_loaded()
+
+if __name__ == "__main__":
+    from vllm.entrypoints.launchers.api_server.entry import main
+
+    main()
+
+===== END FILE runtime/ds41/api_server.py =====
+
+
+DOCUMENT_FACT_TAIL=9
+
+
+TASK: Return exactly one JSON object with keys score, section_count, first_file, second_file, middle_file, penultimate_file, last_file, head_fact, center_fact, tail_fact. score must equal (DOCUMENT_FACT_HEAD * 2 + DOCUMENT_FACT_CENTER - DOCUMENT_FACT_TAIL). File fields must be basenames of the corresponding FILE sections in appearance order; middle_file is the unique middle section. Fact fields must copy the integer values found above. No prose.

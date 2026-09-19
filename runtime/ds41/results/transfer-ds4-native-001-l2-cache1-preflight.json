@@ -1,0 +1,61 @@
+{
+  "schema": "ds41-transfer-native-l2-cache1-preflight-v1",
+  "campaign": "TRANSFER_DS4_NATIVE_001",
+  "phase": "L2_M1",
+  "status": "PASS",
+  "observed_at": "2026-09-19T03:16:23+02:00",
+  "release": "/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-cache1",
+  "base_release": "/home/funboy/.local/share/haloclu-ds41/releases/native-ds4low-k2-transfer001",
+  "release_source_commit": "d5a8964",
+  "attempt": "transfer-ds4-native-001-l2-m1-cache1",
+  "target": "Antirez-Q2",
+  "engram": "native-GGUF",
+  "dspark": false,
+  "progressive_cache_policy": "per-consumed-tensor-dontneed-v1",
+  "node01": {
+    "cpu_gate": "PASS",
+    "antirez_identity": "PASS"
+  },
+  "node02": {
+    "cpu_gate": "PASS",
+    "antirez_identity": "PASS"
+  },
+  "cpu_contract": {
+    "streaming_name_map": "PASS",
+    "progressive_cache_drop": "PASS",
+    "target_mapping": {
+      "ordinary": 1038,
+      "native_engram_special": 8,
+      "total": 1046
+    },
+    "largest_ordinary_target_tensor": {
+      "name": "blk.0.ffn_down_exps.weight",
+      "bytes": 1486356480,
+      "gib": 1.38427734375
+    },
+    "native_engram_tables_skipped_by_target_iterator": true,
+    "hash_contract": "PASS",
+    "row264_decode": "PASS"
+  },
+  "release_hashes": {
+    "launch_node_sh": "de90f4955623330b8de7274e75fa5ff8ede17edec535accc63ca9ed4d9eb9e68",
+    "weight_utils_py": "a29544c271c230a07090a24849d6359bdb0bfd08ca1b9f9dc56f8c89c57ff55b",
+    "gguf_stream_cache_py": "deb7b8af94a76cffca8778d5b93d5c4956e9d7a5d0addba8dc85b18996297ef6",
+    "match_across_nodes": true
+  },
+  "q2_identity": {
+    "size": 365713686528,
+    "sha256_receipt": "1ce6a8f8806205c13330d7ca287bd198331dc5ca35ccc5d8a9a92a188a6f6f42",
+    "verified_both_nodes_receipt": true
+  },
+  "lifecycle_before_switch": {
+    "native": "OFF",
+    "owner": "NONE/OFF",
+    "ds4": "READY",
+    "ds4_api_http": "200",
+    "k2": "OFF"
+  },
+  "model_requests_sent": 0,
+  "model_load_performed_by_preflight": false,
+  "next": "Commit/push controller + preflight evidence, update PLAN/handoff, then one owner-controlled DS4 OFF -> cache1 M1 startup. No quality request before rank0/rank1/paired HTTP200 and live release/env identity."
+}

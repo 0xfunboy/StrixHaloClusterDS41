@@ -1,11 +1,11 @@
 # TRANSFER DS4 → NATIVE 001 — handoff
 
-updated_at: 2026-09-19T03:16+02:00
-phase: L0 COMPLETE / L1 FAIL / L2 M1 STARTUP NEGATIVE 002 / PROGRESSIVE CACHE FIX PREP
-next_action: finish model-free gate for progressive per-consumed-tensor GGUF cache eviction, freeze a NEW isolated L2 release, then allow one same-configuration startup retry. Do not dispatch quality until rank0/rank1/paired HTTP200 and live release/env identity PASS.
+updated_at: 2026-09-19T03:20+02:00
+phase: L0 COMPLETE / L1 FAIL / L2 M1 CACHE1 PREFLIGHT PASS — BEFORE SWITCH
+next_action: commit/push cache1 controller + preflight evidence, then exactly one owner-controlled DS4 OFF -> cache1 Antirez M1 startup. Do not dispatch quality until rank0/rank1/paired HTTP200 and live release/env identity PASS.
 repo_worktree: /home/funboy/worktrees/ds41-transfer-ds4-native-001
 repo_branch: exp/ds41-transfer-ds4-native-001
-repo_head: 2ba0b7534e2e4fa328925bc1243f162148aadd41 (pushed; progressive-cache delta pending)
+repo_head: d5a8964 (pushed cache-residency fix; cache1 preflight/controller delta pending)
 
 ## Live resident runtime at this checkpoint
 
@@ -228,12 +228,34 @@ The single Antirez GGUF is 365713686528 bytes and the existing loader only drops
 
 After NODE02 failed, rank0 remained active under the same owner receipt. The whole-pair lifecycle stopped it and returned `DS41_OFF_VERIFIED`; qualified DS4 DOCUMENT PROFILE 002 is restored READY/HTTP200 and K2 remains OFF. Evidence: `runtime/ds41/results/transfer-ds4-native-001-l2-startup-negative-002.{json,md}`.
 
+## L2 M1 cache1 preflight — PASS on both nodes
+
+New isolated release:
+`/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-cache1`
+
+Release source: `d5a8964`; cache policy: `per-consumed-tensor-dontneed-v1`.
+Both nodes PASS:
+- streaming name-map and previous weight_type fix
+- 1038 ordinary target + 8 native Engram = 1046/1046
+- native hash/token-map contract and row264 decode
+- real temporary-mmap MADV_DONTNEED + POSIX_FADV_DONTNEED gate
+- native Engram tables excluded from ordinary iterator
+- largest ordinary target tensor 1486356480 B / 1.38427734375 GiB
+- fast Antirez Q2 identity using existing both-node SHA receipt
+
+Cross-node hashes are identical:
+- launch-node.sh `de90f4955623330b8de7274e75fa5ff8ede17edec535accc63ca9ed4d9eb9e68`
+- weight_utils.py `a29544c271c230a07090a24849d6359bdb0bfd08ca1b9f9dc56f8c89c57ff55b`
+- gguf_stream_cache.py `deb7b8af94a76cffca8778d5b93d5c4956e9d7a5d0addba8dc85b18996297ef6`
+
+Controller now targets this release with attempt `transfer-ds4-native-001-l2-m1-cache1`. Before switch: native OFF/NONE, DS4 READY HTTP200, K2 OFF. Evidence: `runtime/ds41/results/transfer-ds4-native-001-l2-cache1-preflight.{json,md}` plus `runtime/ds41/transfer-ds4-native-001/l2/cpu-gate-node0{1,2}-cache1.*`.
+
 ## Active job
 
-None. DS4 is the resident qualified fallback. The progressive-cache code is model-free work only; no model-bearing process may start until its release preflight is complete.
+None. DS4 is the resident qualified fallback. No model request has been sent in L2.
 
 ## Persistence
 
-PLAN needs the startup-negative002/progressive-cache update before the next switch.
-Git mapper fix/evidence is pushed at `2ba0b7534e2e4fa328925bc1243f162148aadd41`; progressive-cache helper/generator/test/report are pending scoped commit/push.
+PLAN is updated through startup-negative002/progressive-cache intent; update cache1 preflight before switch.
+Git cache-residency fix/evidence pushed at `d5a8964`; cache1 controller/preflight/raw delta pending scoped commit/push.
 Four inherited mode-bit changes and unrelated untracked L0 artifacts remain untouched.

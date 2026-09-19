@@ -1,0 +1,83 @@
+{
+  "hash_contract": {
+    "compressed_vocab_size": 99092,
+    "encoding": "e4m3_e8m0_32_row264",
+    "layers": [
+      1,
+      14
+    ],
+    "pad_id": 2,
+    "rows": [
+      384006168,
+      384016682
+    ],
+    "status": "PASS",
+    "token_map_entries": 129280
+  },
+  "header": {
+    "encoding": "e4m3_e8m0_32_row264",
+    "layers": [
+      1,
+      14
+    ],
+    "rows": [
+      384006168,
+      384016682
+    ],
+    "token_map_entries": 129280
+  },
+  "progressive_cache_drop": {
+    "aligned_length": 8192,
+    "aligned_start": 4096,
+    "global_cache_operation": false,
+    "page_size": 4096,
+    "status": "PASS"
+  },
+  "row_decode": [
+    {
+      "bit_exact_bf16_reference": true,
+      "layer": 1,
+      "rows": [
+        0,
+        128002056
+      ],
+      "scale_unique": 2
+    },
+    {
+      "bit_exact_bf16_reference": true,
+      "layer": 14,
+      "rows": [
+        0,
+        128005560
+      ],
+      "scale_unique": 2
+    }
+  ],
+  "schema": "ds41-transfer-l2-cpu-gate-v1",
+  "status": "PASS",
+  "streaming_name_map": {
+    "cases": {
+      "embed.weight": "language_model.model.embed_tokens.weight",
+      "embed.weight_type": "language_model.model.embed_tokens.weight_type",
+      "head.weight": "language_model.lm_head.weight",
+      "head.weight_type": "language_model.lm_head.weight_type",
+      "layers.0.attn.wq_a.weight": "language_model.model.layers.0.attn.wq_a.weight",
+      "layers.0.attn.wq_a.weight_type": "language_model.model.layers.0.attn.wq_a.weight_type",
+      "norm.weight": "language_model.model.norm.weight",
+      "norm.weight_type": "language_model.model.norm.weight_type"
+    },
+    "status": "PASS"
+  },
+  "target_mapping": {
+    "mapped": 1038,
+    "native_engram_special": 8,
+    "total": 1046
+  },
+  "target_tensor_residency": {
+    "largest_bytes": 1486356480,
+    "largest_gib": 1.38427734375,
+    "largest_name": "blk.0.ffn_down_exps.weight",
+    "native_engram_tables_skipped_by_target_iterator": true,
+    "ordinary_tensor_count": 1038
+  }
+}

@@ -2,10 +2,10 @@
 
 updated_at: 2026-09-19T03:20+02:00
 phase: L0 COMPLETE / L1 FAIL / L2 M1 CACHE1 PREFLIGHT PASS — BEFORE SWITCH
-next_action: commit/push cache1 controller + preflight evidence, then exactly one owner-controlled DS4 OFF -> cache1 Antirez M1 startup. Do not dispatch quality until rank0/rank1/paired HTTP200 and live release/env identity PASS.
+next_action: exactly one owner-controlled DS4 OFF -> cache1 Antirez M1 startup. Do not dispatch quality until rank0/rank1/paired HTTP200 and live release/env identity PASS.
 repo_worktree: /home/funboy/worktrees/ds41-transfer-ds4-native-001
 repo_branch: exp/ds41-transfer-ds4-native-001
-repo_head: d5a8964 (pushed cache-residency fix; cache1 preflight/controller delta pending)
+repo_head: c00e9d3 (pushed cache1 preflight/controller checkpoint)
 
 ## Live resident runtime at this checkpoint
 
@@ -256,6 +256,6 @@ None. DS4 is the resident qualified fallback. No model request has been sent in 
 
 ## Persistence
 
-PLAN is updated through startup-negative002/progressive-cache intent; update cache1 preflight before switch.
-Git cache-residency fix/evidence pushed at `d5a8964`; cache1 controller/preflight/raw delta pending scoped commit/push.
+PLAN is updated through cache1 preflight; lifecycle switch is the next exact action.
+Git cache-residency fix/evidence is `d5a8964`; cache1 controller/preflight/raw checkpoint is pushed at `c00e9d3`.
 Four inherited mode-bit changes and unrelated untracked L0 artifacts remain untouched.

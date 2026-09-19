@@ -1,11 +1,11 @@
 # TRANSFER DS4 → NATIVE 001 — handoff
 
-updated_at: 2026-09-19T03:46+02:00
-phase: L0 COMPLETE / L1 FAIL / L2 M1 ANON1 PREFLIGHT PASS — BEFORE FINAL STARTUP RETRY
-next_action: exactly one owner-controlled DS4 OFF -> anon1 M1 startup. No quality request before rank0/rank1/paired HTTP200 and exact live release/attempt identity.
+updated_at: 2026-09-19T03:48+02:00
+phase: L0 COMPLETE / L1 FAIL / L2 M1 ANON1 FINAL STARTUP RETRY IN_FLIGHT — ZERO REQUESTS
+next_action: reconcile only epoch `1789782496195400259`; do not restart and do not dispatch quality until rank0/rank1/paired HTTP200 plus exact anon1 release/attempt identity. Any terminal memory-contract failure closes L2 native target and restores DS4.
 repo_worktree: /home/funboy/worktrees/ds41-transfer-ds4-native-001
 repo_branch: exp/ds41-transfer-ds4-native-001
-repo_head: 55cf9db (pushed anon1 preflight/controller checkpoint)
+repo_head: 6e48dde (pushed pre-switch checkpoint)
 
 ## Live resident runtime at this checkpoint
 
@@ -303,12 +303,22 @@ Before switch: native OFF/NONE, qualified DS4 READY HTTP200, K2 OFF. Evidence: `
 
 This is the final startup retry admitted for the localized mmap/SVM contract. If anon1 cannot reach READY, close L2 native target as memory-contract blocked and keep DS4 rather than modifying driver/BIOS/infra.
 
-## Active job
+## Active job — anon1 final M1 startup retry
 
-None. Qualified DS4 is resident READY; no L2 quality request has ever been sent.
+- state: IN_FLIGHT / STARTING; L2 requests sent `0/6`
+- owner: `DS41`, state `RUNNING`
+- epoch: `1789782496195400259`
+- release: `/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-anon1`
+- attempt: `transfer-ds4-native-001-l2-m1-anon1`
+- rank0 InvocationID: `d8cad43f1ecb408eb7738eae608d9003`
+- rank1 InvocationID: `f9ac3bc8cf3f4ac0a2f3a497cd046fb6`
+- first health: rank0 `000`, rank1 `000`, paired `503`
+- DS4 OFF only for this authorized window; K2 `RESEARCH_BUSY` only because DS41 owns the pair
+
+Do not restart this load if the client/chat disappears. Reconcile these exact units/InvocationIDs and epoch first.
 
 ## Persistence
 
-PLAN updated through anon1 preflight/final-retry policy; next exact act is the single startup retry.
-Git negative003 checkpoint `f18a038`; staging loader `c8e93a2`; anon1 preflight/controller/raw `55cf9db`, all pushed.
+PLAN updated through anon1 startup identity. Git pre-switch checkpoint `6e48dde`; startup-ID handoff update pending scoped commit/push.
+Git negative003 `f18a038`; staging loader `c8e93a2`; anon1 preflight/controller/raw `55cf9db`, all pushed.
 Four inherited mode-bit changes and unrelated untracked L0 artifacts remain untouched.

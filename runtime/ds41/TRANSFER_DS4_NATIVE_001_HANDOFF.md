@@ -1,11 +1,11 @@
 # TRANSFER DS4 → NATIVE 001 — handoff
 
-updated_at: 2026-09-19T03:39+02:00
-phase: L0 COMPLETE / L1 FAIL / L2 M1 NEGATIVE003 / ANON-STAGING MODEL-FREE PASS
-next_action: commit/push the anonymous-staging loader delta, build a NEW isolated anon1 release from the verified L1 base, and require the same full CPU/identity gates on both nodes before any lifecycle switch.
+updated_at: 2026-09-19T03:46+02:00
+phase: L0 COMPLETE / L1 FAIL / L2 M1 ANON1 PREFLIGHT PASS — BEFORE FINAL STARTUP RETRY
+next_action: commit/push anon1 controller + both-node preflight raw, then exactly one owner-controlled DS4 OFF -> anon1 M1 startup. No quality request before rank0/rank1/paired HTTP200 and exact live release/attempt identity.
 repo_worktree: /home/funboy/worktrees/ds41-transfer-ds4-native-001
 repo_branch: exp/ds41-transfer-ds4-native-001
-repo_head: f18a038 (pushed negative003 checkpoint; staging code pending)
+repo_head: c8e93a2 (pushed anonymous-staging loader; anon1 preflight/controller delta pending)
 
 ## Live resident runtime at this checkpoint
 
@@ -290,12 +290,25 @@ Generated-tree CPU gate PASS:
 
 No GPU/model load was used for this gate. DS4 stays READY.
 
+## L2 anon1 release preflight — PASS on both nodes
+
+Release: `/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-anon1`, source `c8e93a2`, attempt `transfer-ds4-native-001-l2-m1-anon1`.
+
+Both NODE01/NODE02 PASS full CPU gate and Antirez identity. Cross-node hashes match:
+- launch-node.sh `507e1782a9cf6664520e36b48979cb47c8584e735e9173ad656fb70df4e99bc4`
+- weight_utils.py `5c991c5055bc1615745d4c644f93ce6d6ec69e4e22cb4c0d89f488e1ed727742`
+- gguf_stream_cache.py `6f28c0bb5d9794ed2051f6c1f35406820d4dd13617490d2012ed436cb82a3962`
+
+Before switch: native OFF/NONE, qualified DS4 READY HTTP200, K2 OFF. Evidence: `runtime/ds41/results/transfer-ds4-native-001-l2-anon1-preflight.{json,md}` plus `runtime/ds41/transfer-ds4-native-001/l2/*anon1*`.
+
+This is the final startup retry admitted for the localized mmap/SVM contract. If anon1 cannot reach READY, close L2 native target as memory-contract blocked and keep DS4 rather than modifying driver/BIOS/infra.
+
 ## Active job
 
 None. Qualified DS4 is resident READY; no L2 quality request has ever been sent.
 
 ## Persistence
 
-PLAN to be updated through negative003/anonymous-staging NEXT before any new lifecycle switch.
-Git last pushed checkpoint: `1a75b3b`; negative003 raw/report + handoff are pending scoped commit/push.
+PLAN updated through anon1 preflight/final-retry policy; controller/preflight raw pending scoped commit/push.
+Git negative003 checkpoint `f18a038`; staging loader `c8e93a2` pushed.
 Four inherited mode-bit changes and unrelated untracked L0 artifacts remain untouched.

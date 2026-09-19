@@ -2,10 +2,10 @@
 
 updated_at: 2026-09-19T03:46+02:00
 phase: L0 COMPLETE / L1 FAIL / L2 M1 ANON1 PREFLIGHT PASS — BEFORE FINAL STARTUP RETRY
-next_action: commit/push anon1 controller + both-node preflight raw, then exactly one owner-controlled DS4 OFF -> anon1 M1 startup. No quality request before rank0/rank1/paired HTTP200 and exact live release/attempt identity.
+next_action: exactly one owner-controlled DS4 OFF -> anon1 M1 startup. No quality request before rank0/rank1/paired HTTP200 and exact live release/attempt identity.
 repo_worktree: /home/funboy/worktrees/ds41-transfer-ds4-native-001
 repo_branch: exp/ds41-transfer-ds4-native-001
-repo_head: c8e93a2 (pushed anonymous-staging loader; anon1 preflight/controller delta pending)
+repo_head: 55cf9db (pushed anon1 preflight/controller checkpoint)
 
 ## Live resident runtime at this checkpoint
 
@@ -309,6 +309,6 @@ None. Qualified DS4 is resident READY; no L2 quality request has ever been sent.
 
 ## Persistence
 
-PLAN updated through anon1 preflight/final-retry policy; controller/preflight raw pending scoped commit/push.
-Git negative003 checkpoint `f18a038`; staging loader `c8e93a2` pushed.
+PLAN updated through anon1 preflight/final-retry policy; next exact act is the single startup retry.
+Git negative003 checkpoint `f18a038`; staging loader `c8e93a2`; anon1 preflight/controller/raw `55cf9db`, all pushed.
 Four inherited mode-bit changes and unrelated untracked L0 artifacts remain untouched.

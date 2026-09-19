@@ -6,6 +6,7 @@ next_action: none under ATTENTION PARITY 002. Preserve p2-m1 and p2-m1-fix1 term
 worktree: /home/funboy/worktrees/ds41-v41-attention-parity-002
 branch: exp/ds41-v41-attention-parity-002
 base_head: 3b4c2df5d2dda490dae1bccaec75be389e41e1d1
+campaign_code_commit: dac986ff865fa9df5c2982956f6f45a24edf7c51
 base_release: /home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-woa1
 candidate_release: /home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-attnparity002-m1-fix1
 served_model: DeepSeek-V4.1-Flash-Q2-AttnParity002-M1-Fix1

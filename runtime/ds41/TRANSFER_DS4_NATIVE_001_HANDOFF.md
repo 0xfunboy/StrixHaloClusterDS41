@@ -1,11 +1,11 @@
 # TRANSFER DS4 → NATIVE 001 — handoff
 
-updated_at: 2026-09-19T03:22+02:00
-phase: L0 COMPLETE / L1 FAIL / L2 M1 CACHE1 STARTING — ZERO REQUESTS
-next_action: reconcile only epoch `1789780947338481919`; do not restart and do not dispatch quality until rank0/rank1/paired HTTP200 and live release/env identity PASS.
+updated_at: 2026-09-19T03:39+02:00
+phase: L0 COMPLETE / L1 FAIL / L2 M1 STARTUP NEGATIVE 003 / ANON-STAGING FIX PREP
+next_action: implement and model-free qualify an Antirez-only bounded anonymous CPU staging path before GPU upload; keep DS4 READY. Only after a new isolated release passes both-node preflight may one localized startup retry occur.
 repo_worktree: /home/funboy/worktrees/ds41-transfer-ds4-native-001
 repo_branch: exp/ds41-transfer-ds4-native-001
-repo_head: c00e9d3 (pushed cache1 preflight/controller checkpoint)
+repo_head: 1a75b3b (pushed startup-ID checkpoint; negative003/staging delta pending)
 
 ## Live resident runtime at this checkpoint
 
@@ -250,22 +250,36 @@ Cross-node hashes are identical:
 
 Controller now targets this release with attempt `transfer-ds4-native-001-l2-m1-cache1`. Before switch: native OFF/NONE, DS4 READY HTTP200, K2 OFF. Evidence: `runtime/ds41/results/transfer-ds4-native-001-l2-cache1-preflight.{json,md}` plus `runtime/ds41/transfer-ds4-native-001/l2/cpu-gate-node0{1,2}-cache1.*`.
 
-## Active job — cache1 M1 startup
+## L2 M1 startup negative 003 — AMD SVM RESIDENT LIMIT STALL, ZERO REQUESTS
 
-- state: IN_FLIGHT / STARTING; L2 requests sent `0/6`
-- owner: `DS41`, state `RUNNING`
-- epoch: `1789780947338481919`
-- release: `/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-cache1`
-- attempt: `transfer-ds4-native-001-l2-m1-cache1`
-- rank0 InvocationID: `d56b8c975dce4322832e0f79e2911ef3`
-- rank1 InvocationID: `b3607ceea15b4650a63925859c3f5217`
-- first health: rank0 `000`, rank1 `000`, paired `503`
-- DS4 OFF only for this authorized window; K2 `RESEARCH_BUSY` only because DS41 owns the pair
+Cache1 startup did not reach READY:
+- epoch `1789780947338481919`
+- rank0 InvocationID `d56b8c975dce4322832e0f79e2911ef3`
+- rank1 InvocationID `b3607ceea15b4650a63925859c3f5217`
+- requests sent `0/6`
+- previous `head.weight_type` failure did not recur
+- Antirez identity + native Engram runtime hash contract PASS; both ranks entered GGUF `load_weights`
 
-Do not restart this load if the client/chat disappears. Reconcile these exact units/InvocationIDs and epoch first.
+NODE02 emitted 543 captured kernel lines at 03:26:30–03:26:31:
+`amdgpu: SVM mapping failed, exceeds resident system memory limit`.
+ROCm logged a 744488960-byte allocation failure. Rank1 then remained in D state (`lock_mm_and_find_vma` / `folio_wait_bit_common`) with effectively stalled CPU/read progress for several minutes while rank0 remained active. Linux still showed ~58 GiB MemAvailable and GTT about 67.24/128.85 GB, demonstrating this is the AMD SVM resident-system-memory contract rather than ordinary Linux reclaimable-RAM exhaustion.
+
+The per-tensor MADV/FADV cache1 fix kept page-cache growth bounded but does not prevent the GPU copy from seeing an mmap-backed CPU tensor. Local driver state has `amdgpu.no_system_mem_limit=N`; driver/BIOS parameters remain untouched. The next localized L2a fix is Antirez-only bounded **anonymous CPU staging** for each ordinary target tensor before the GPU consumer, followed by source mmap page discard. Largest ordinary tensor is 1.384 GiB; native Engram tables remain outside the iterator.
+
+Whole pair was stopped through lifecycle: `DS41_OFF_VERIFIED`. Qualified DS4 DOCUMENT PROFILE002 is restored READY/HTTP200; K2 OFF. DS4 restore InvocationIDs: coordinator `92e5b2744c5d49e993ef596eb7dcbc61`, worker `131e990401c54bb792f706732495d336`.
+
+Evidence:
+- `runtime/ds41/results/transfer-ds4-native-001-l2-startup-negative-003.{json,md}`
+- `runtime/ds41/transfer-ds4-native-001/l2/cache1-node02-svm-kernel.log`
+- `runtime/ds41/transfer-ds4-native-001/l2/cache1-svm-stall-snapshot.txt`
+- `runtime/ds41/transfer-ds4-native-001/l2/cache1-owner-before-stop.json`
+
+## Active job
+
+None. Qualified DS4 is resident READY; no L2 quality request has ever been sent.
 
 ## Persistence
 
-PLAN updated through cache1 startup identity. Git pre-switch checkpoint is `bb8c1e9`; startup-ID handoff update pending commit/push.
-Git cache-residency fix/evidence is `d5a8964`; cache1 controller/preflight/raw checkpoint is `c00e9d3`.
+PLAN to be updated through negative003/anonymous-staging NEXT before any new lifecycle switch.
+Git last pushed checkpoint: `1a75b3b`; negative003 raw/report + handoff are pending scoped commit/push.
 Four inherited mode-bit changes and unrelated untracked L0 artifacts remain untouched.

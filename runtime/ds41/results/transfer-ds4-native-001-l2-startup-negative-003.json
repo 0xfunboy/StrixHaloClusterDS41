@@ -1,0 +1,76 @@
+{
+  "schema": "ds41-transfer-native-l2-startup-negative-003-v1",
+  "campaign": "TRANSFER_DS4_NATIVE_001",
+  "phase": "L2_M1",
+  "status": "SETUP_SVM_RESIDENT_LIMIT_STALL_RESTORED_DS4",
+  "observed_at": "2026-09-19T03:39:21+02:00",
+  "release": "/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001-cache1",
+  "attempt": "transfer-ds4-native-001-l2-m1-cache1",
+  "owner_epoch": "1789780947338481919",
+  "rank0_invocation_id": "d56b8c975dce4322832e0f79e2911ef3",
+  "rank1_invocation_id": "b3607ceea15b4650a63925859c3f5217",
+  "requests_sent": 0,
+  "previous_faults": {
+    "weight_type_recurred": false,
+    "immediate_torch_oom_exception_recurred": false
+  },
+  "pre_failure_gates": {
+    "both_node_cache1_preflight": "PASS",
+    "antirez_identity": "PASS",
+    "native_engram_hash_contract": "PASS",
+    "progressive_file_cache_gate": "PASS",
+    "load_weights_entered": true
+  },
+  "failure": {
+    "node": "02-EVO-X3",
+    "first_kernel_at": "2026-09-19T03:26:30+02:00",
+    "kernel_message": "amdgpu: SVM mapping failed, exceeds resident system memory limit",
+    "captured_kernel_lines": 543,
+    "rocm_warning": "memory allocation failed with OOM on device 0 while trying to allocate 744488960 bytes",
+    "progress_stall": {
+      "rank1_state": "D",
+      "observed_wchan": [
+        "lock_mm_and_find_vma",
+        "folio_wait_bit_common"
+      ],
+      "rank1_cpu_time_at_capture": "00:01:59",
+      "rank1_read_bytes_at_capture": 65560363008,
+      "rank1_rss_kib": 59583320
+    },
+    "memory_snapshot": {
+      "rank1_mem_available_kib": 58272504,
+      "rank1_cached_kib": 58936484,
+      "rank1_gtt_total_bytes": 128849018880,
+      "rank1_gtt_used_bytes": 67243618304,
+      "amdgpu_no_system_mem_limit": "N",
+      "ttm_pages_limit": 31457280,
+      "ttm_page_pool_size_node02": 16016101
+    },
+    "interpretation": "The per-consumed-tensor MADV/FADV policy kept Linux MemAvailable high and prevented file-cache growth with bytes read, but the mmap-backed tensor upload still entered AMD SVM/HMM and hit the driver's resident-system-memory limit. Rank1 then made no meaningful forward progress for several minutes while rank0 remained active. This is a localized mmap-to-GPU staging defect, not a quality result."
+  },
+  "raw_evidence": [
+    "runtime/ds41/transfer-ds4-native-001/l2/cache1-node02-svm-kernel.log",
+    "runtime/ds41/transfer-ds4-native-001/l2/cache1-svm-stall-snapshot.txt",
+    "runtime/ds41/transfer-ds4-native-001/l2/cache1-owner-before-stop.json",
+    "runtime/ds41/transfer-ds4-native-001/l2/cache1-svm-stall-observed-at.txt"
+  ],
+  "recovery": {
+    "ds41_pair_stop": "DS41_OFF_VERIFIED",
+    "ds4_state": "READY",
+    "ds4_api_http": "200",
+    "k2_state": "OFF",
+    "ds4_coordinator_invocation": "92e5b2744c5d49e993ef596eb7dcbc61",
+    "ds4_worker_invocation": "131e990401c54bb792f706732495d336"
+  },
+  "next_intervention": {
+    "scope": "GGUF loader staging only",
+    "action": "For L2 Antirez only, stage each ordinary target tensor into bounded anonymous CPU memory before the GPU/ROCm consumer sees it, retain per-tensor clean-page discard after the source copy, and never expose the mmap-backed tensor to the GPU copy path.",
+    "new_download": false,
+    "requantization": false,
+    "driver_change": false,
+    "bios_change": false,
+    "global_cache_drop": false,
+    "retry_admitted": true,
+    "rationale": "Kernel evidence proves the mmap/SVM boundary is the failing contract and no model request has been sent."
+  }
+}

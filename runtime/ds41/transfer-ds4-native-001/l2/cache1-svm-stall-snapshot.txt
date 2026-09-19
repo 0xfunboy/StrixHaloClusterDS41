@@ -1,0 +1,26 @@
+NODE01
+    PID     ELAPSED     TIME %CPU %MEM   RSS    VSZ STAT WCHAN                            COMMAND
+2405842       13:19 00:11:15 84.4 44.6 57267252 1150418056 Rl -                           VLLM::EngineCor
+rchar: 370714398
+syscr: 45009
+read_bytes: 64219066368
+MemFree:         1539632 kB
+MemAvailable:   58402368 kB
+Cached:         58058748 kB
+SwapCached:        13112 kB
+SwapFree:        1724264 kB
+/sys/class/drm/card0/device/mem_info_gtt_total=128849018880
+/sys/class/drm/card0/device/mem_info_gtt_used=67247812608
+NODE02
+    PID     ELAPSED     TIME %CPU %MEM   RSS    VSZ STAT WCHAN                            COMMAND
+ 987297       13:27 00:01:59 14.7 46.5 59583320 1150416572 Dl folio_wait_bit_common       VLLM::EngineCor
+rchar: 480507071
+syscr: 73173
+read_bytes: 65560363008
+MemFree:          905936 kB
+MemAvailable:   58272504 kB
+Cached:         58936484 kB
+SwapCached:       948752 kB
+SwapFree:        4492392 kB
+/sys/class/drm/card1/device/mem_info_gtt_total=128849018880
+/sys/class/drm/card1/device/mem_info_gtt_used=67243618304

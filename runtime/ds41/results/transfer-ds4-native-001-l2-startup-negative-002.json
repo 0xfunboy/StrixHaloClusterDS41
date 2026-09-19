@@ -1,0 +1,68 @@
+{
+  "schema": "ds41-transfer-native-l2-startup-negative-002-v1",
+  "campaign": "TRANSFER_DS4_NATIVE_001",
+  "phase": "L2_M1",
+  "status": "SETUP_FAIL_BEFORE_REQUESTS_RESTORED_DS4",
+  "observed_at": "2026-09-19T03:16:23+02:00",
+  "source_commit": "2ba0b7534e2e4fa328925bc1243f162148aadd41",
+  "release": "/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001",
+  "attempt": "transfer-ds4-native-001-l2-m1",
+  "owner_epoch": "1789761988271104620",
+  "rank0_invocation_id": "2d6a594ff8124a84aa029b18ef6cfbbd",
+  "rank1_invocation_id": "dd4432be158e45ddb491d355786de6a1",
+  "requests_sent": 0,
+  "previous_weight_type_fault_recurred": false,
+  "pre_failure_gates": {
+    "antirez_identity": "PASS",
+    "native_engram_hash_contract": "PASS",
+    "streaming_weight_metadata_fix": "PASS"
+  },
+  "failure": {
+    "node": "02-EVO-X3",
+    "stage": "GGUF load_weights / MoE parameter materialization",
+    "exception": "torch.OutOfMemoryError",
+    "attempted_allocation_mib": 710,
+    "gpu_capacity_gib": 120,
+    "gpu_free_mib": 4.28,
+    "pytorch_allocated_gib": 62.13,
+    "pytorch_reserved_unallocated_mib": 76.1,
+    "interpretation": "The single 365713686528-byte GGUF is streamed as one shard while DS41_DROP_SHARD_CACHE only evicts clean mmap pages after the entire shard is consumed. The observed non-PyTorch UMA occupancy is consistent with already-consumed file-backed pages remaining resident. This is a localized loader/residency defect; the progressive-drop retry is the causal confirmation.",
+    "evidence_log": "/home/funboy/.local/share/haloclu-ds41/releases/native-antirez-m1-transfer001/reports/DS41-Q2-001/transfer-ds4-native-001-l2-m1/rank1.log"
+  },
+  "tensor_residency_evidence": {
+    "native_engram_tables_gib": [
+      {
+        "name": "blk.14.engram_embd.weight",
+        "gib": 94.418,
+        "normal_target_iterator": false
+      },
+      {
+        "name": "blk.1.engram_embd.weight",
+        "gib": 94.415,
+        "normal_target_iterator": false
+      }
+    ],
+    "largest_ordinary_target_tensor": {
+      "name": "blk.9.ffn_down_exps.weight",
+      "gib": 1.384
+    },
+    "conclusion": "Per-consumed-tensor clean-page eviction is sufficiently fine grained for ordinary target tensors; no checkpoint reformatting or re-quantization is required for this gate."
+  },
+  "recovery": {
+    "ds41_pair_stop": "DS41_OFF_VERIFIED",
+    "ds4_state": "READY",
+    "ds4_api_http": "200",
+    "k2_state": "OFF",
+    "fallback_qualification": "DS4_DOCUMENT_PROFILE_002 remains the qualified fallback"
+  },
+  "next_intervention": {
+    "scope": "loader-only",
+    "action": "Enable opt-in progressive MADV_DONTNEED + POSIX_FADV_DONTNEED for clean pages of each GGUF tensor only after its synchronous consumer resumes the iterator.",
+    "global_drop_caches": false,
+    "swap_change": false,
+    "weight_change": false,
+    "requantization": false,
+    "retry_admitted": true,
+    "rationale": "No model request was sent and the failure is a localized startup integration defect."
+  }
+}

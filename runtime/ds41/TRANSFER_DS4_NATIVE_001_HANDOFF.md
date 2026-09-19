@@ -1,11 +1,11 @@
 # TRANSFER DS4 → NATIVE 001 — handoff
 
-updated_at: 2026-09-18T22:00+02:00
-phase: L0 COMPLETE / L1 FAIL / L2 M1 STARTUP NEGATIVE 001 LOCALIZED / FIX CPU PASS / DS4 READY
-next_action: commit/push the localized streaming weight_type mapper fix and both-node gates, align offline release provenance, then one retry of the SAME L2 target-only M1 startup. No document request until rank0/rank1/paired are READY and live release/env identity passes.
+updated_at: 2026-09-19T03:16+02:00
+phase: L0 COMPLETE / L1 FAIL / L2 M1 STARTUP NEGATIVE 002 / PROGRESSIVE CACHE FIX PREP
+next_action: finish model-free gate for progressive per-consumed-tensor GGUF cache eviction, freeze a NEW isolated L2 release, then allow one same-configuration startup retry. Do not dispatch quality until rank0/rank1/paired HTTP200 and live release/env identity PASS.
 repo_worktree: /home/funboy/worktrees/ds41-transfer-ds4-native-001
 repo_branch: exp/ds41-transfer-ds4-native-001
-repo_head: d5fd830f0cf911d4f6aec37b1daa3b02e1032f81 (pushed; fix delta pending commit)
+repo_head: 2ba0b7534e2e4fa328925bc1243f162148aadd41 (pushed; progressive-cache delta pending)
 
 ## Live resident runtime at this checkpoint
 
@@ -126,7 +126,7 @@ MMQ compatibility:
 - existing DS4 MMQ admission contract explicitly requires weight_type=16 and weight_type2=10
 - therefore existing MMQ path is format-compatible for admitted pure target prefill; fallback remains declared elsewhere
 
-## L2 software — base frozen/pushed; localized startup fix pending commit
+## L2 software — mapper fix pushed; progressive-cache startup fix pending freeze
 
 - `runtime/ds41/native_antirez_engram.py`
   - bounded LRU over mmap-backed native GGUF rows
@@ -136,6 +136,9 @@ MMQ compatibility:
 - `runtime/ds41/antirez_artifact_identity.py`
   - read-only fast identity gate using the already-frozen both-node SHA receipt + live size/header contract
   - no full rehash
+- `runtime/ds41/gguf_stream_cache.py`
+  - opt-in page-aligned `MADV_DONTNEED` + `POSIX_FADV_DONTNEED` for one already-consumed tensor
+  - never unmaps or mutates checkpoint bytes; no global cache operation
 - `runtime/ds41/transfer-ds4-native-001/l2/deepseek_v41_antirez_adapter.py`
   - fail-closed 1046-tensor accounting
 - `scripts/patch-ds41-transfer-native-l2.py`
@@ -210,8 +213,27 @@ Cause is localized: packed top-level GGUF tensors emit `*.weight_type` companion
 
 Both-node post-fix CPU gates PASS 8/8 name-map cases, 1038+8=1046 tensor accounting and the existing real-row native Engram decode. Result: `runtime/ds41/results/transfer-ds4-native-001-l2-startup-negative-001.{json,md}`. One retry of the same M1 configuration is admitted because this is a model-free localized integration fault and no request was sent.
 
+## L2 M1 startup negative 002 — LOCALIZED UMA/FILE-CACHE PRESSURE, ZERO REQUESTS
+
+The same-config retry passed the `weight_type` boundary and advanced into MoE parameter materialization. NODE02 then terminalized with `torch.OutOfMemoryError` while requesting 710 MiB:
+- epoch: `1789761988271104620`
+- rank0 InvocationID: `2d6a594ff8124a84aa029b18ef6cfbbd`
+- rank1 InvocationID: `dd4432be158e45ddb491d355786de6a1`
+- reported device/UMA capacity: 120 GiB; free 4.28 MiB
+- PyTorch allocated: 62.13 GiB; reserved but unallocated: 76.10 MiB
+- requests sent: `0/6`
+- Antirez identity PASS; native Engram runtime hash contract PASS; prior `head.weight_type` failure did not recur
+
+The single Antirez GGUF is 365713686528 bytes and the existing loader only drops its clean mmap pages at whole-shard completion. Header-only sizing shows the two ~94.4 GiB native Engram tables are excluded from the ordinary target iterator, while the largest ordinary target tensor is ~1.384 GiB. The next causal fix is therefore progressive clean-page eviction immediately after each yielded target tensor has been synchronously consumed. No re-quantization, checkpoint split, global `drop_caches`, swap manipulation or weight change.
+
+After NODE02 failed, rank0 remained active under the same owner receipt. The whole-pair lifecycle stopped it and returned `DS41_OFF_VERIFIED`; qualified DS4 DOCUMENT PROFILE 002 is restored READY/HTTP200 and K2 remains OFF. Evidence: `runtime/ds41/results/transfer-ds4-native-001-l2-startup-negative-002.{json,md}`.
+
+## Active job
+
+None. DS4 is the resident qualified fallback. The progressive-cache code is model-free work only; no model-bearing process may start until its release preflight is complete.
+
 ## Persistence
 
-PLAN updated on server through the first L2 startup; §2/§17 require one further localized-negative/fix update before retry.
-Git L2 preflight commit/push: d5fd830f0cf911d4f6aec37b1daa3b02e1032f81 on origin/exp/ds41-transfer-ds4-native-001.
-Pending tracked fix delta: patch generator + CPU mapper regression + startup-negative report + both-node fix gates + this handoff. Four inherited mode-bit changes and unrelated untracked L0 artifacts remain untouched.
+PLAN needs the startup-negative002/progressive-cache update before the next switch.
+Git mapper fix/evidence is pushed at `2ba0b7534e2e4fa328925bc1243f162148aadd41`; progressive-cache helper/generator/test/report are pending scoped commit/push.
+Four inherited mode-bit changes and unrelated untracked L0 artifacts remain untouched.

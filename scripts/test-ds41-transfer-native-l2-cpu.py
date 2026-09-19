@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import json
 import math
+import mmap
 import os
 import struct
 import sys
+import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -25,6 +27,10 @@ import numpy as np
 from transformers import AutoTokenizer
 import torch
 
+from runtime.ds41.gguf_stream_cache import (
+    aligned_mmap_span,
+    drop_consumed_tensor_cache,
+)
 from runtime.ds41.native_antirez_engram import (
     decode_rows264,
     inspect_native_engram,
@@ -134,10 +140,59 @@ def main() -> None:
         mapped_cases[source_name] = mapped_name
     result["streaming_name_map"] = {"status": "PASS", "cases": mapped_cases}
 
+    # Progressive cache eviction is a file-cache policy only: verify its
+    # page-aligned range math and real Linux MADV/FADV calls on a temporary
+    # mmap without touching model files or global caches.
+    page = mmap.PAGESIZE
+    with tempfile.NamedTemporaryFile() as tmp:
+        file_size = page * 4 + 123
+        tmp.truncate(file_size)
+        tmp.flush()
+        fd = os.open(tmp.name, os.O_RDONLY)
+        mm = mmap.mmap(fd, file_size, access=mmap.ACCESS_READ)
+        try:
+            start, length = aligned_mmap_span(
+                data_offset=123,
+                tensor_offset=page - 100,
+                n_bytes=page + 321,
+                file_size=file_size,
+            )
+            if start % page != 0 or length <= 0 or start + length > file_size:
+                raise AssertionError((start, length, file_size, page))
+            dropped = drop_consumed_tensor_cache(
+                mm,
+                fd,
+                data_offset=123,
+                tensor_offset=page - 100,
+                n_bytes=page + 321,
+                file_size=file_size,
+            )
+            if dropped != (start, length):
+                raise AssertionError((dropped, start, length))
+        finally:
+            mm.close()
+            os.close(fd)
+    result["progressive_cache_drop"] = {
+        "status": "PASS",
+        "page_size": page,
+        "aligned_start": start,
+        "aligned_length": length,
+        "global_cache_operation": False,
+    }
+
     import gguf
 
     reader = gguf.GGUFReader(str(Q2))
     tensors = {tensor.name: tensor for tensor in reader.tensors}
+    ordinary = [tensor for tensor in reader.tensors if tensor.name in mapping]
+    largest = max(ordinary, key=lambda tensor: int(tensor.n_bytes))
+    result["target_tensor_residency"] = {
+        "ordinary_tensor_count": len(ordinary),
+        "largest_name": largest.name,
+        "largest_bytes": int(largest.n_bytes),
+        "largest_gib": int(largest.n_bytes) / (1024 ** 3),
+        "native_engram_tables_skipped_by_target_iterator": True,
+    }
     row_checks = []
     for layer in (1, 14):
         table = tensors[f"blk.{layer}.engram_embd.weight"].data

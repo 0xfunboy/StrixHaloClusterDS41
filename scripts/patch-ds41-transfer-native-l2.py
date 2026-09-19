@@ -28,6 +28,7 @@ def main() -> None:
     for rel in (
         "runtime/ds41/native_antirez_engram.py",
         "runtime/ds41/antirez_artifact_identity.py",
+        "runtime/ds41/gguf_stream_cache.py",
         "runtime/ds41/results/ds4-document-profile-002-preregister.json",
         "scripts/test-ds41-transfer-native-l2-cpu.py",
     ):
@@ -162,7 +163,76 @@ def main() -> None:
 """,
     )
 
+    weight_utils = target / ".vendor/gguf-plugin/vllm_gguf_plugin/weight_utils.py"
+    replace_once(
+        weight_utils,
+        "logger = init_logger(__name__)\n",
+        """logger = init_logger(__name__)
+
+from runtime.ds41.gguf_stream_cache import drop_consumed_tensor_cache
+""",
+    )
+    replace_once(
+        weight_utils,
+        """    drop_shard_cache = os.environ.get("DS41_DROP_SHARD_CACHE", "0") == "1"
+    phase_log = os.environ.get("DS41_LOAD_PHASE_LOG", "0") == "1"
+
+    for gguf_file in gguf_files:
+""",
+        """    drop_shard_cache = os.environ.get("DS41_DROP_SHARD_CACHE", "0") == "1"
+    drop_tensor_cache = os.environ.get("DS41_DROP_TENSOR_CACHE", "0") == "1"
+    phase_log = os.environ.get("DS41_LOAD_PHASE_LOG", "0") == "1"
+
+    for gguf_file in gguf_files:
+""",
+    )
+    replace_once(
+        weight_utils,
+        """        reader = gguf.GGUFReader(gguf_file)
+        try:
+            for tensor in reader.tensors:
+""",
+        """        reader = gguf.GGUFReader(gguf_file)
+        drop_fd = None
+        tensor_mm = None
+        if drop_tensor_cache:
+            tensor_mm = getattr(reader.data, "_mmap", None)
+            if tensor_mm is None:
+                raise RuntimeError("progressive GGUF cache drop requires mmap-backed reader")
+            drop_fd = os.open(gguf_file, os.O_RDONLY)
+        try:
+            for tensor in reader.tensors:
+""",
+    )
+    replace_once(
+        weight_utils,
+        """                yield name, param
+        finally:
+""",
+        """                yield name, param
+                if drop_tensor_cache:
+                    if tensor_mm is None or drop_fd is None:
+                        raise RuntimeError("progressive GGUF cache-drop state is unavailable")
+                    drop_consumed_tensor_cache(
+                        tensor_mm,
+                        drop_fd,
+                        data_offset=int(reader.data_offset),
+                        tensor_offset=int(tensor.data_offset),
+                        n_bytes=int(tensor.n_bytes),
+                        file_size=int(reader.data.size),
+                    )
+        finally:
+            if drop_fd is not None:
+                os.close(drop_fd)
+""",
+    )
+
     launcher = target / "runtime/ds41/launch-node.sh"
+    replace_once(
+        launcher,
+        "export DS41_LOAD_PHASE_LOG=1 DS41_DROP_SHARD_CACHE=1 DS41_STREAM_TEXT_WEIGHTS=1 DS41_MOE_C_LEGACY_TEXT_ABI=1 DS41_DECOMPOSED_QKV_INSERT=1",
+        "export DS41_LOAD_PHASE_LOG=1 DS41_DROP_SHARD_CACHE=1 DS41_DROP_TENSOR_CACHE=1 DS41_STREAM_TEXT_WEIGHTS=1 DS41_MOE_C_LEGACY_TEXT_ABI=1 DS41_DECOMPOSED_QKV_INSERT=1",
+    )
     replace_once(
         launcher,
         """ARTIFACT_CONFIG="$ROOT/runtime/ds41/artifact.json"

@@ -1,11 +1,11 @@
 # TRANSFER DS4 → NATIVE 001 — handoff
 
 updated_at: 2026-09-19T03:39+02:00
-phase: L0 COMPLETE / L1 FAIL / L2 M1 STARTUP NEGATIVE 003 / ANON-STAGING FIX PREP
-next_action: implement and model-free qualify an Antirez-only bounded anonymous CPU staging path before GPU upload; keep DS4 READY. Only after a new isolated release passes both-node preflight may one localized startup retry occur.
+phase: L0 COMPLETE / L1 FAIL / L2 M1 NEGATIVE003 / ANON-STAGING MODEL-FREE PASS
+next_action: commit/push the anonymous-staging loader delta, build a NEW isolated anon1 release from the verified L1 base, and require the same full CPU/identity gates on both nodes before any lifecycle switch.
 repo_worktree: /home/funboy/worktrees/ds41-transfer-ds4-native-001
 repo_branch: exp/ds41-transfer-ds4-native-001
-repo_head: 1a75b3b (pushed startup-ID checkpoint; negative003/staging delta pending)
+repo_head: f18a038 (pushed negative003 checkpoint; staging code pending)
 
 ## Live resident runtime at this checkpoint
 
@@ -273,6 +273,22 @@ Evidence:
 - `runtime/ds41/transfer-ds4-native-001/l2/cache1-node02-svm-kernel.log`
 - `runtime/ds41/transfer-ds4-native-001/l2/cache1-svm-stall-snapshot.txt`
 - `runtime/ds41/transfer-ds4-native-001/l2/cache1-owner-before-stop.json`
+
+## L2 anonymous staging model-free gate — PASS
+
+Antirez-only loader opt-in `DS41_GGUF_ANON_STAGE=1` now stages each ordinary target tensor into a writable C-contiguous anonymous NumPy buffer before the PyTorch/ROCm consumer sees it. The source mmap range is discarded immediately after the copy. Default behavior is unchanged when the opt-in is off.
+
+Generated-tree CPU gate PASS:
+- anonymous buffer shares no source memory and is byte-exact before mutation
+- staged mutation does not change the mmap source
+- real Antirez quantized 1 MiB sample byte-exact / no sharing
+- largest possible ordinary stage = 1486356480 B / 1.38427734375 GiB
+- progressive MADV/FADV gate PASS
+- streaming name map PASS
+- 1038 ordinary + 8 native Engram = 1046/1046
+- native hash contract + row264 real-row decode PASS
+
+No GPU/model load was used for this gate. DS4 stays READY.
 
 ## Active job
 

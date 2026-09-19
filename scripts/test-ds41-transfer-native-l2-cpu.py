@@ -30,6 +30,7 @@ import torch
 from runtime.ds41.gguf_stream_cache import (
     aligned_mmap_span,
     drop_consumed_tensor_cache,
+    stage_anonymous_copy,
 )
 from runtime.ds41.native_antirez_engram import (
     decode_rows264,
@@ -159,6 +160,16 @@ def main() -> None:
             )
             if start % page != 0 or length <= 0 or start + length > file_size:
                 raise AssertionError((start, length, file_size, page))
+            source = np.frombuffer(mm, dtype=np.uint8, count=page + 321, offset=page)
+            source_before = source.copy()
+            staged = stage_anonymous_copy(source)
+            if np.shares_memory(staged, source):
+                raise AssertionError("anonymous stage shares mmap source")
+            if not np.array_equal(staged, source_before):
+                raise AssertionError("anonymous stage changed bytes")
+            staged[0] ^= 0xFF
+            if source[0] != source_before[0]:
+                raise AssertionError("staged mutation reached mmap source")
             dropped = drop_consumed_tensor_cache(
                 mm,
                 fd,
@@ -169,6 +180,7 @@ def main() -> None:
             )
             if dropped != (start, length):
                 raise AssertionError((dropped, start, length))
+            del source
         finally:
             mm.close()
             os.close(fd)
@@ -179,6 +191,14 @@ def main() -> None:
         "aligned_length": length,
         "global_cache_operation": False,
     }
+    result["anonymous_staging"] = {
+        "status": "PASS",
+        "shares_source_memory": False,
+        "byte_exact_before_mutation": True,
+        "source_unchanged_after_staged_mutation": True,
+        "writable": bool(staged.flags.writeable),
+        "c_contiguous": bool(staged.flags.c_contiguous),
+    }
 
     import gguf
 
@@ -186,12 +206,21 @@ def main() -> None:
     tensors = {tensor.name: tensor for tensor in reader.tensors}
     ordinary = [tensor for tensor in reader.tensors if tensor.name in mapping]
     largest = max(ordinary, key=lambda tensor: int(tensor.n_bytes))
+    # Verify the staging helper against a real quantized Antirez target slice.
+    real_source = np.asarray(largest.data).reshape(-1)[: 1 << 20]
+    real_stage = stage_anonymous_copy(real_source)
+    if np.shares_memory(real_stage, real_source) or not np.array_equal(real_stage, real_source):
+        raise AssertionError("real Antirez staging is not byte-exact/independent")
     result["target_tensor_residency"] = {
         "ordinary_tensor_count": len(ordinary),
         "largest_name": largest.name,
         "largest_bytes": int(largest.n_bytes),
         "largest_gib": int(largest.n_bytes) / (1024 ** 3),
+        "largest_anonymous_stage_bytes": int(largest.n_bytes),
         "native_engram_tables_skipped_by_target_iterator": True,
+        "real_quantized_sample_stage_bytes": int(real_stage.nbytes),
+        "real_quantized_sample_stage_byte_exact": True,
+        "real_quantized_sample_shares_source": False,
     }
     row_checks = []
     for layer in (1, 14):

@@ -169,7 +169,7 @@ def main() -> None:
         "logger = init_logger(__name__)\n",
         """logger = init_logger(__name__)
 
-from runtime.ds41.gguf_stream_cache import drop_consumed_tensor_cache
+from runtime.ds41.gguf_stream_cache import drop_consumed_tensor_cache, stage_anonymous_copy
 """,
     )
     replace_once(
@@ -181,6 +181,7 @@ from runtime.ds41.gguf_stream_cache import drop_consumed_tensor_cache
 """,
         """    drop_shard_cache = os.environ.get("DS41_DROP_SHARD_CACHE", "0") == "1"
     drop_tensor_cache = os.environ.get("DS41_DROP_TENSOR_CACHE", "0") == "1"
+    anonymous_stage = os.environ.get("DS41_GGUF_ANON_STAGE", "0") == "1"
     phase_log = os.environ.get("DS41_LOAD_PHASE_LOG", "0") == "1"
 
     for gguf_file in gguf_files:
@@ -206,11 +207,35 @@ from runtime.ds41.gguf_stream_cache import drop_consumed_tensor_cache
     )
     replace_once(
         weight_utils,
+        """                weight = tensor.data
+                if weight_type.name == "BF16" and weight.dtype == np.uint8:
+""",
+        """                weight = tensor.data
+                if anonymous_stage:
+                    weight = stage_anonymous_copy(weight)
+                    if drop_tensor_cache:
+                        if tensor_mm is None or drop_fd is None:
+                            raise RuntimeError(
+                                "progressive GGUF cache-drop state is unavailable"
+                            )
+                        drop_consumed_tensor_cache(
+                            tensor_mm,
+                            drop_fd,
+                            data_offset=int(reader.data_offset),
+                            tensor_offset=int(tensor.data_offset),
+                            n_bytes=int(tensor.n_bytes),
+                            file_size=int(reader.data.size),
+                        )
+                if weight_type.name == "BF16" and weight.dtype == np.uint8:
+""",
+    )
+    replace_once(
+        weight_utils,
         """                yield name, param
         finally:
 """,
         """                yield name, param
-                if drop_tensor_cache:
+                if drop_tensor_cache and not anonymous_stage:
                     if tensor_mm is None or drop_fd is None:
                         raise RuntimeError("progressive GGUF cache-drop state is unavailable")
                     drop_consumed_tensor_cache(
@@ -231,7 +256,7 @@ from runtime.ds41.gguf_stream_cache import drop_consumed_tensor_cache
     replace_once(
         launcher,
         "export DS41_LOAD_PHASE_LOG=1 DS41_DROP_SHARD_CACHE=1 DS41_STREAM_TEXT_WEIGHTS=1 DS41_MOE_C_LEGACY_TEXT_ABI=1 DS41_DECOMPOSED_QKV_INSERT=1",
-        "export DS41_LOAD_PHASE_LOG=1 DS41_DROP_SHARD_CACHE=1 DS41_DROP_TENSOR_CACHE=1 DS41_STREAM_TEXT_WEIGHTS=1 DS41_MOE_C_LEGACY_TEXT_ABI=1 DS41_DECOMPOSED_QKV_INSERT=1",
+        "export DS41_LOAD_PHASE_LOG=1 DS41_DROP_SHARD_CACHE=1 DS41_DROP_TENSOR_CACHE=1 DS41_GGUF_ANON_STAGE=1 DS41_STREAM_TEXT_WEIGHTS=1 DS41_MOE_C_LEGACY_TEXT_ABI=1 DS41_DECOMPOSED_QKV_INSERT=1",
     )
     replace_once(
         launcher,
@@ -300,6 +325,7 @@ fi''',
         "prompt_profile": "ds4-low-v1",
         "mmq_prefill": True,
         "canonical_prefill": True,
+        "target_tensor_staging": "anonymous-cpu-one-tensor-v1",
     }
     (target / "runtime/ds41/transfer-ds4-native-001-l2-release.json").write_text(
         json.dumps(marker, indent=2, sort_keys=True) + "\n"

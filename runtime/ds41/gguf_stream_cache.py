@@ -12,6 +12,25 @@ from __future__ import annotations
 import mmap
 import os
 
+import numpy as np
+
+
+def stage_anonymous_copy(array: np.ndarray) -> np.ndarray:
+    """Return a writable C-contiguous copy that shares no mmap storage.
+
+    L2 Antirez uses this only for ordinary target tensors before the tensor is
+    exposed to the ROCm consumer.  The copy is bounded by one GGUF tensor and
+    prevents HMM/SVM from pinning the file-backed mapping during GPU upload.
+    """
+    if not isinstance(array, np.ndarray):
+        raise TypeError("GGUF anonymous staging requires a NumPy array")
+    staged = np.array(array, copy=True, order="C")
+    if not staged.flags.c_contiguous or not staged.flags.writeable:
+        raise RuntimeError("anonymous GGUF staging did not produce writable C storage")
+    if np.shares_memory(staged, array):
+        raise RuntimeError("anonymous GGUF staging still shares source storage")
+    return staged
+
 
 def aligned_mmap_span(
     *,

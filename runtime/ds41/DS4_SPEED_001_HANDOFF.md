@@ -7,6 +7,7 @@ current: /home/funboy/STRIX_CLUSTER_DOCS/CURRENT.md
 qualified_base: 7d0454b4e32ef1e90235f2b001d6643b5934438c
 e1_source_commit: a8f44737ecc6bbd406d796d1e402b312f00d1564
 e2_terminal_commit: f3def40caaf16eb30091c90e6bf7d748a9870c91
+product_commit: dbc801fb3a88582e67a50ea87338045740071a77
 model: /home/funboy/models/ds41/ds4-v41-q2/DeepSeek-V4.1-Flash-Q2.gguf
 fallback: DS4 DOCUMENT PROFILE 002
 

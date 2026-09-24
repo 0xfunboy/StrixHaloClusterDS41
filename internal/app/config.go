@@ -20,35 +20,38 @@ type Profile struct {
 	MaxRepairs    int    `json:"max_repairs"`
 }
 type Config struct {
-	Listen             string             `json:"listen"`
-	Backend            string             `json:"backend"`
-	Model              string             `json:"model"`
-	StateDir           string             `json:"state_dir"`
-	WorkspaceRoots     []string           `json:"workspace_roots"`
-	PairLock           string             `json:"pair_lock"`
-	DefaultProfile     string             `json:"default_profile"`
-	Profiles           map[string]Profile `json:"profiles"`
-	ProfileStatus      string             `json:"profile_status"`
-	ContextFormat      string             `json:"context_format"`
-	MaxContextTokens   int                `json:"max_context_tokens"`
-	MaxFiles           int                `json:"max_files"`
-	MaxFileBytes       int                `json:"max_file_bytes"`
-	MaxRepoBytes       int                `json:"max_repo_bytes"`
-	ModelTimeout       int                `json:"model_timeout"`
-	SandboxTimeout     int                `json:"sandbox_timeout"`
-	SandboxMemoryBytes int64              `json:"sandbox_memory_bytes"`
-	SandboxTasks       int                `json:"sandbox_tasks"`
-	RemoteSSH          string             `json:"remote_ssh"`
-	TokenizerEndpoint  string             `json:"tokenizer_endpoint,omitempty"`
-	ChatContextTokens  int                `json:"chat_context_tokens,omitempty"`
-	ChatDefaultOutput  int                `json:"chat_default_output_tokens,omitempty"`
-	ChatMaxOutput      int                `json:"chat_max_output_tokens,omitempty"`
-	ThinkingBudget     bool               `json:"thinking_budget_supported,omitempty"`
-	ToolCalls          bool               `json:"tool_calls_supported,omitempty"`
-	ReasoningModes     []string           `json:"reasoning_modes,omitempty"`
-	LifecycleCommand   string             `json:"lifecycle_command,omitempty"`
-	LifecyclePreset    string             `json:"lifecycle_preset,omitempty"`
-	ClusterConfigPath  string             `json:"cluster_config_path,omitempty"`
+	Listen                string             `json:"listen"`
+	Backend               string             `json:"backend"`
+	Model                 string             `json:"model"`
+	StateDir              string             `json:"state_dir"`
+	WorkspaceRoots        []string           `json:"workspace_roots"`
+	PairLock              string             `json:"pair_lock"`
+	DefaultProfile        string             `json:"default_profile"`
+	Profiles              map[string]Profile `json:"profiles"`
+	ProfileStatus         string             `json:"profile_status"`
+	ContextFormat         string             `json:"context_format"`
+	MaxContextTokens      int                `json:"max_context_tokens"`
+	MaxFiles              int                `json:"max_files"`
+	MaxFileBytes          int                `json:"max_file_bytes"`
+	MaxRepoBytes          int                `json:"max_repo_bytes"`
+	ModelTimeout          int                `json:"model_timeout"`
+	SandboxTimeout        int                `json:"sandbox_timeout"`
+	SandboxMemoryBytes    int64              `json:"sandbox_memory_bytes"`
+	SandboxTasks          int                `json:"sandbox_tasks"`
+	RemoteSSH             string             `json:"remote_ssh"`
+	TokenizerEndpoint     string             `json:"tokenizer_endpoint,omitempty"`
+	ChatContextTokens     int                `json:"chat_context_tokens,omitempty"`
+	ChatDefaultOutput     int                `json:"chat_default_output_tokens,omitempty"`
+	ChatMaxOutput         int                `json:"chat_max_output_tokens,omitempty"`
+	ThinkingBudget        bool               `json:"thinking_budget_supported,omitempty"`
+	ToolCalls             bool               `json:"tool_calls_supported,omitempty"`
+	ReasoningModes        []string           `json:"reasoning_modes,omitempty"`
+	LifecycleCommand      string             `json:"lifecycle_command,omitempty"`
+	LifecyclePreset       string             `json:"lifecycle_preset,omitempty"`
+	ClusterConfigPath     string             `json:"cluster_config_path,omitempty"`
+	ClusterSharedStateDir string             `json:"cluster_shared_state_dir,omitempty"`
+	LifecycleDrainSeconds int                `json:"lifecycle_drain_seconds,omitempty"`
+	InferenceEnabled      *bool              `json:"inference_enabled,omitempty"`
 }
 
 func loadConfig(path string) (Config, error) {
@@ -79,7 +82,7 @@ func loadConfig(path string) (Config, error) {
 	if len(c.ReasoningModes) > 0 {
 		seen := map[string]bool{}
 		for _, mode := range c.ReasoningModes {
-			if mode != "none" && mode != "low" && mode != "high" && mode != "max" {
+			if mode != "none" && mode != "low" && mode != "medium" && mode != "high" && mode != "xhigh" && mode != "max" {
 				return c, errors.New("reasoning_modes contains unsupported value")
 			}
 			if seen[mode] {
@@ -93,6 +96,21 @@ func loadConfig(path string) (Config, error) {
 	}
 	if c.LifecycleCommand != "" && c.LifecyclePreset == "" {
 		return c, errors.New("lifecycle_preset required with lifecycle_command")
+	}
+	// Native pair management and an external owner-bound controller are separate drivers.
+	if c.ClusterConfigPath != "" && c.LifecycleCommand == "" {
+		if !filepath.IsAbs(c.ClusterConfigPath) || filepath.Clean(c.ClusterConfigPath) != c.ClusterConfigPath {
+			return c, errors.New("cluster_config_path must be an absolute clean path")
+		}
+		if c.ClusterSharedStateDir == "" || !filepath.IsAbs(c.ClusterSharedStateDir) || filepath.Clean(c.ClusterSharedStateDir) != c.ClusterSharedStateDir {
+			return c, errors.New("cluster_shared_state_dir must be an absolute clean path")
+		}
+		if c.LifecycleDrainSeconds == 0 {
+			c.LifecycleDrainSeconds = 30
+		}
+		if c.LifecycleDrainSeconds < 5 || c.LifecycleDrainSeconds > 120 {
+			return c, errors.New("lifecycle_drain_seconds must be 5..120")
+		}
 	}
 	return c, nil
 }

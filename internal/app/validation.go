@@ -118,7 +118,7 @@ func validateChatWithReasoning(p map[string]any, toolsEnabled bool, reasoningOK 
 		}
 	}
 	if r, ok := p["reasoning_effort"]; ok && !reasoningOK(stringValue(r)) {
-		return errors.New("reasoning_effort must be low/high/max")
+		return errors.New("reasoning_effort is not advertised by this model profile")
 	}
 	if p["stream_options"] != nil && object(p["stream_options"]) == nil {
 		return errors.New("stream_options must be object")

@@ -1,0 +1,66 @@
+{
+  "listen": "127.0.0.1:18093",
+  "backend": "http://127.0.0.1:18094",
+  "tokenizer_endpoint": "http://10.55.0.1:18110/tokenize",
+  "chat_context_tokens": 65536,
+  "chat_default_output_tokens": 16384,
+  "chat_max_output_tokens": 32768,
+  "thinking_budget_supported": true,
+  "tool_calls_supported": true,
+  "model": "GLM5.3-Flash-CIRU-STRIX-IU4",
+  "state_dir": "/home/funboy/StrixHaloClusterGLM/state",
+  "workspace_roots": [
+    "/home/funboy/StrixHaloClusterGLM"
+  ],
+  "pair_lock": "/home/funboy/StrixHaloClusterGLM/.engine/state/pair.lock",
+  "default_profile": "low",
+  "profiles": {
+    "low": {
+      "reasoning": "low",
+      "context_tokens": 4096,
+      "max_tokens": 16384,
+      "max_repairs": 2
+    },
+    "high": {
+      "reasoning": "high",
+      "context_tokens": 4096,
+      "max_tokens": 16384,
+      "max_repairs": 2
+    },
+    "max": {
+      "reasoning": "max",
+      "context_tokens": 4096,
+      "max_tokens": 16384,
+      "max_repairs": 2
+    },
+    "fast": {
+      "reasoning": "low",
+      "context_tokens": 4096,
+      "max_tokens": 4096,
+      "max_repairs": 2
+    },
+    "balanced": {
+      "reasoning": "low",
+      "context_tokens": 4096,
+      "max_tokens": 4096,
+      "max_repairs": 2
+    },
+    "quality": {
+      "reasoning": "low",
+      "context_tokens": 4096,
+      "max_tokens": 4096,
+      "max_repairs": 2
+    }
+  },
+  "profile_status": "EXPLICIT_LOW_HIGH_MAX; LEGACY_FAST_BALANCED_QUALITY_ARE_DEPRECATED_LOW_4096_ALIASES; COMPACT_CXX_QUALIFIED; NO_LONG_CONTEXT_QUALIFICATION",
+  "context_format": "json",
+  "max_context_tokens": 65536,
+  "max_files": 300,
+  "max_file_bytes": 262144,
+  "max_repo_bytes": 33554432,
+  "model_timeout": 600,
+  "sandbox_timeout": 90,
+  "sandbox_memory_bytes": 1073741824,
+  "sandbox_tasks": 64,
+  "remote_ssh": "02-evo-x3-tb"
+}

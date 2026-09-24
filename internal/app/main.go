@@ -40,6 +40,7 @@ type App struct {
 	preferred       atomic.Value
 	closing         atomic.Bool
 	attachmentMu    sync.Mutex
+	lifecycle       *modelLifecycle
 	lifecycleMu     sync.Mutex
 	lifecycleAction string
 	lifecycleError  string
@@ -67,6 +68,11 @@ func newApp(c Config) (*App, error) {
 	}
 	a := &App{cfg: c, client: &http.Client{Transport: &http.Transport{MaxIdleConnsPerHost: 4, IdleConnTimeout: 30 * time.Second}}, tasks: map[string]*Task{}, admission: make(chan struct{}, 1), token: strings.TrimSpace(string(b)), journal: Journal{Path: filepath.Join(c.StateDir, "events.jsonl")}}
 	a.publicURL = publicURL
+	lifecycle, e := newModelLifecycle(c)
+	if e != nil {
+		return nil, fmt.Errorf("model lifecycle: %w", e)
+	}
+	a.lifecycle = lifecycle
 	a.preferred.Store(c.DefaultProfile)
 	if e := a.loadAPISettings(); e != nil {
 		return nil, e
@@ -151,7 +157,7 @@ func (a *App) routes() http.Handler {
 	a.registerConversationRoutes(mux)
 	mux.Handle("/", publicWebHandler(a.publicURL))
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-		if a.cfg.LifecycleCommand != "" {
+		if a.cfg.LifecycleCommand != "" || a.lifecycle != nil {
 			l := a.lifecycleStatus(r.Context())
 			jsonReply(w, 200, map[string]any{"status": "ok", "gateway": "ok", "model_lifecycle": l})
 			return

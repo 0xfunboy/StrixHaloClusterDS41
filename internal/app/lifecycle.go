@@ -11,6 +11,13 @@ import (
 )
 
 func (a *App) lifecycleStatus(ctx context.Context) map[string]any {
+	if a.lifecycle != nil {
+		data, _ := json.Marshal(a.lifecycle.Snapshot(ctx))
+		v := map[string]any{}
+		_ = json.Unmarshal(data, &v)
+		v["managed"] = true
+		return v
+	}
 	if a.cfg.LifecycleCommand == "" {
 		return map[string]any{"managed": false, "state": "UNMANAGED"}
 	}
@@ -47,6 +54,15 @@ func (a *App) lifecycleStatus(ctx context.Context) map[string]any {
 }
 
 func (a *App) requireModelReady(ctx context.Context) error {
+	if a.cfg.InferenceEnabled != nil && !*a.cfg.InferenceEnabled {
+		return errors.New("inference is disabled for this unqualified profile")
+	}
+	if a.lifecycle != nil {
+		if a.lifecycle.ready() {
+			return nil
+		}
+		return errors.New("model is not READY; use the authenticated lifecycle control")
+	}
 	if a.cfg.LifecycleCommand == "" {
 		return nil
 	}
@@ -56,17 +72,32 @@ func (a *App) requireModelReady(ctx context.Context) error {
 		return nil
 	}
 	if state == "RESEARCH_BUSY" {
-		return errors.New("DS41 pair is occupied by the research run; K2 serving is unavailable")
+		return errors.New("model resources are occupied by a research run")
 	}
 	if msg, _ := s["error"].(string); msg != "" {
 		return errors.New(msg)
 	}
-	return fmt.Errorf("DS41 model is %s; explicit authenticated ON is required", state)
+	return fmt.Errorf("model is %s; explicit authenticated ON is required", state)
 }
 
 func (a *App) startLifecycleAction(action string) error {
 	if action != "on" && action != "off" {
 		return errors.New("unsupported lifecycle action")
+	}
+	if a.cfg.InferenceEnabled != nil && !*a.cfg.InferenceEnabled {
+		return errors.New("inference is disabled for this unqualified profile")
+	}
+	if a.lifecycle != nil {
+		var accepted bool
+		if action == "on" {
+			accepted = a.lifecycle.StartAsync()
+		} else {
+			accepted = a.lifecycle.StopAsync()
+		}
+		if !accepted {
+			return errors.New("lifecycle transition already in progress")
+		}
+		return nil
 	}
 	if a.cfg.LifecycleCommand == "" {
 		return errors.New("model lifecycle is not configured")
@@ -95,12 +126,14 @@ func (a *App) startLifecycleAction(action string) error {
 }
 
 func (a *App) registerLifecycleRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("GET /v1/lifecycle", func(w http.ResponseWriter, r *http.Request) {
+	status := func(w http.ResponseWriter, r *http.Request) {
 		if !a.authorized(w, r) {
 			return
 		}
 		jsonReply(w, 200, a.lifecycleStatus(r.Context()))
-	})
+	}
+	mux.HandleFunc("GET /v1/lifecycle", status)
+	mux.HandleFunc("GET /v1/model/lifecycle", status)
 	do := func(action string) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			if !a.authorized(w, r) {
@@ -122,4 +155,6 @@ func (a *App) registerLifecycleRoutes(mux *http.ServeMux) {
 	}
 	mux.HandleFunc("POST /v1/lifecycle/on", do("on"))
 	mux.HandleFunc("POST /v1/lifecycle/off", do("off"))
+	mux.HandleFunc("POST /v1/model/lifecycle/on", do("on"))
+	mux.HandleFunc("POST /v1/model/lifecycle/off", do("off"))
 }

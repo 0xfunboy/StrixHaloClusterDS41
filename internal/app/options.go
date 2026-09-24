@@ -74,7 +74,7 @@ func (a *App) registerOptionsRoutes(mux *http.ServeMux) {
 			"context_semantics":          "Input plus output admission window; does not resize the engine KV cache or restart ranks.",
 			"output_semantics":           "Maximum total output includes reasoning and final answer. Auto fits the remaining window; EOS may end sooner.",
 			"quality_note":               "Compact C++ fixtures qualified. Largest passing context integration:2575 actual prompt tokens. Longer context is available, not quality-qualified.",
-			"thinking_note":              "low/high/max are template controls, not quality guarantees. Hiding reasoning does not disable computation. medium/none are not independent supported modes.",
+			"thinking_note":              "Advertised modes are profile-specific template controls, not quality guarantees. Hiding reasoning does not disable computation. Only this deployment's explicit modes are accepted.",
 			"tools_supported":            a.cfg.ToolCalls, "client_note": note,
 			"attachment_max_bytes": attachmentMaxFile, "attachment_kinds": []string{"text", "pdf-text", "docx-text", "archive-listing", "binary-inspection"},
 		})

@@ -27,3 +27,8 @@ hosts.yml
 .cache/
 __pycache__/
 *.pyc
+
+# Local release identity and private frozen evaluation inputs.
+/.source-commit
+/runtime/ds41/long-context-baseline-001/
+*.tmp

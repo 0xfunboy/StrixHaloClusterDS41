@@ -1,0 +1,45 @@
+{
+  "schema": "ds41-blockm-shared-reference-cause-v1",
+  "fixture": "rank0-call20 chunk0/layer20 token0",
+  "worst_coordinate": 2455,
+  "m4_value": 17152.0,
+  "m8_value": 17152.0,
+  "historical_independent_value": 17280.0,
+  "high_precision_reference_fp32": 17336.107421875,
+  "bf16_spacing": {
+    "next_after_17152": 17280.0,
+    "ulp_up_from_17152": 128.0,
+    "prev_before_17280": 17152.0,
+    "ulp_down_from_17280": 128.0,
+    "final_difference_ulps": 1.0
+  },
+  "weighting_check": {
+    "old_vs_runtime_cast_max_abs": 16.0,
+    "m4_vs_runtime_cast_max_abs": 128.0,
+    "conclusion": "BF16 route-weight rounding is not sufficient cause of max_abs128"
+  },
+  "first_divergent_boundary": {
+    "gate_up_runtime_vs_explicit_dequant": {
+      "gate_max_abs": 0.125,
+      "gate_rel_l2": 0.0058918083334745875,
+      "up_max_abs": 0.125,
+      "up_rel_l2": 0.005988089753112156
+    },
+    "activation": {
+      "max_abs": 2.5,
+      "rel_l2": 0.009305039259634705
+    },
+    "down": {
+      "max_abs": 64.0,
+      "rel_l2": 0.010549987232555689,
+      "coordinate2455_runtime": 11968.0,
+      "coordinate2455_reference": 12032.0
+    },
+    "route": {
+      "gid": 180,
+      "weight": 1.4369423389434814
+    }
+  },
+  "kernel_contract_difference": "Triton IQ2_XXS/Q2_K fused path dequantizes quant tiles to activation dtype BF16 before product/accumulation; independent gguf-py reference dequantizes weights to FP32 and performs explicit FP32 matmul before BF16 boundaries.",
+  "interpretation": "max_abs128 is a shared M4/M8 baseline-vs-reference discrepancy amplified from small gate/up differences; it is one BF16 ULP at the final ~17k scale. This explains the observed absolute maximum without classifying M8 as a regression. It does not by itself certify all fused-kernel numerical error."
+}

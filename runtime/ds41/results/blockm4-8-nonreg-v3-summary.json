@@ -1,0 +1,59 @@
+{
+  "schema": "ds41-blockm4-8-nonreg-v3-summary",
+  "status": "PASS_8_OF_8_BIT_EXACT",
+  "fixture_count": 8,
+  "finite_all": true,
+  "bit_exact_all": true,
+  "paired_critical": [
+    {
+      "call": "00",
+      "m4_critical_ms": 1222.123291015625,
+      "m8_critical_ms": 1019.811767578125,
+      "gain_pct": 19.838124041062464
+    },
+    {
+      "call": "20",
+      "m4_critical_ms": 1108.393798828125,
+      "m8_critical_ms": 924.8029174804688,
+      "gain_pct": 19.851892535961156
+    },
+    {
+      "call": "40",
+      "m4_critical_ms": 770.6536254882812,
+      "m8_critical_ms": 638.29638671875,
+      "gain_pct": 20.73601566976304
+    },
+    {
+      "call": "60",
+      "m4_critical_ms": 696.7278442382812,
+      "m8_critical_ms": 602.5506591796875,
+      "gain_pct": 15.629753884396468
+    }
+  ],
+  "aggregate": {
+    "sum_m4_critical_ms": 3797.8985595703125,
+    "sum_m8_critical_ms": 3185.4617309570312,
+    "ratio_of_sums_gain_pct": 19.225998625614714,
+    "mean_fixture_gain_pct": 19.681363887502055,
+    "min_fixture_gain_pct": 15.629753884396468,
+    "max_fixture_gain_pct": 24.320894007455117,
+    "peak_delta_m4_max": 112154624,
+    "peak_delta_m8_max": 112163840
+  },
+  "independent_fidelity": {
+    "historical_abs_gate_failures": [
+      "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank0-call20.json"
+    ],
+    "m8_never_worse_than_m4_on_sampled_independent_metrics": true
+  },
+  "files": [
+    "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank0-call00.json",
+    "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank0-call20.json",
+    "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank0-call40.json",
+    "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank0-call60.json",
+    "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank1-call00.json",
+    "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank1-call20.json",
+    "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank1-call40.json",
+    "reports/DS41-Q2-001/blockm4-8-nonreg-v3-clean/rank1-call60.json"
+  ]
+}

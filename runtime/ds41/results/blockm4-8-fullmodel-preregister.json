@@ -1,0 +1,11 @@
+{
+  "schema":"ds41-blockm4-8-fullmodel-diagnostic-preregister-v1",
+  "status":"FROZEN_BEFORE_MODEL_LOAD",
+  "source":"bc41a355e827fbb193e65069cf867584cc9bb72f",
+  "release":"/home/funboy/.local/share/haloclu-ds41/releases/k2-blockm-bc41a35",
+  "A":{"DS41_MOE_PREFILL_BLOCK_M":"4"},
+  "B":{"DS41_MOE_PREFILL_BLOCK_M":"8"},
+  "common":{"preset":"dspark-k2-gfx1151","K":2,"DS41_EP_SKIP_REMOTE":1,"prompt":"reports/DS41-Q2-001/daily-k2-panel/corpora/code-2k.txt","prompt_sha256":"c162e1102363a8d7dea3891bacac73d18948cde6af8014b92d867cf7e4271993","reasoning":"none","max_tokens":128,"context_tokens":65536,"temperature":0,"seed":1,"prefix_cache":false,"capture":false,"detailed_profiler":false},
+  "order":"A then B; one clean request per arm; cold model load excluded",
+  "decision":"diagnostic only; require both arms HTTP200/stop, same prompt/computed/cache, record output/token/finish/stop and paired health. No serving promotion even if faster while independent fidelity remains a separate issue."
+}
